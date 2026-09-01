@@ -1,0 +1,24 @@
+html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:var(--font-sans);font-size:14px;-webkit-font-smoothing:antialiased}
+*,*::before,*::after{box-sizing:border-box}
+.docs{display:grid;grid-template-columns:240px minmax(0,1fr);min-height:100vh}
+.side{position:sticky;top:0;height:100vh;overflow:auto;background:var(--bg-surface);border-inline-end:1px solid var(--border-subtle);padding:20px 14px}
+.brand{display:flex;align-items:baseline;gap:8px;padding-inline:8px;margin-block-end:14px}
+.brand b{font-size:16px;letter-spacing:-.02em}
+.brand span{font-family:var(--font-mono);font-size:11px;color:var(--fg-subtle)}
+.navgroup h4{margin:14px 8px 6px;font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-subtle)}
+.navitem{display:block;width:100%;text-align:start;padding:7px 10px;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--fg-muted);border-radius:var(--r-sm);cursor:pointer}
+.navitem:hover{background:var(--bg-muted);color:var(--fg-default)}
+.navitem[aria-current="true"]{background:color-mix(in srgb,var(--accent-primary) 10%,transparent);color:var(--accent-primary);font-weight:600}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:16px;padding:12px 34px;background:color-mix(in srgb,var(--bg-app) 88%,transparent);backdrop-filter:blur(12px);border-block-end:1px solid var(--border-subtle)}
+.page{padding:34px 34px 90px;max-width:1000px}
+.page h1{margin:0 0 8px;font-size:30px;letter-spacing:-.025em}
+.page .blurb{margin:0 0 26px;font-size:15.5px;line-height:1.6;color:var(--fg-muted);max-width:70ch}
+.page h2{margin:36px 0 12px;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-subtle)}
+.card{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-lg);padding:26px;max-width:440px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.cell{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:18px}
+.cell__tag{display:block;font-family:var(--font-mono);font-size:10.5px;color:var(--fg-subtle);margin-block-end:12px}
+.doc-table{width:100%;border-collapse:collapse;font-size:13px}
+.doc-table th{text-align:start;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-subtle);padding:8px 12px;border-block-end:1px solid var(--border-default)}
+.doc-table td{padding:10px 12px;border-block-end:1px solid var(--border-subtle);color:var(--fg-muted)}
+.doc-table td:first-child{font-family:var(--font-mono);font-size:12px;color:var(--fg-default)}
