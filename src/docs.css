@@ -53,16 +53,33 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 }
 
 /* Demo beside its prop editors — the thing that was missing entirely. */
+/* Geometry copied from .live / .live__stage / .live__inner / .live__panel in the
+   gallery. Three details matter and were all wrong here before:
+   - overflow stays visible, or a control that floats a panel (ApexPassword's meter
+     and checklist, any popover) gets clipped by the stage;
+   - the demo sits in a fixed 420px inner column, so a field is a realistic form
+     width instead of stretching to whatever the stage happens to be;
+   - the rail is not a scrollbox. Capping it hid a control's own props above the
+     fold and left only the shared ones visible. */
 .stage {
   display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 0;
   border: 1px solid var(--border-subtle); border-radius: 12px;
-  margin-top: 1rem; overflow: hidden;
+  margin-top: 1rem; overflow: visible; background: var(--bg-surface);
 }
-.stage__demo { padding: 2.5rem; display: flex; align-items: flex-start; justify-content: center; }
+.stage__demo {
+  padding: 34px 30px; min-height: 180px;
+  display: grid; justify-items: center; align-items: start; align-content: start;
+  background: repeating-linear-gradient(45deg, transparent, transparent 9px,
+    color-mix(in srgb, var(--fg-subtle) 4%, transparent) 9px,
+    color-mix(in srgb, var(--fg-subtle) 4%, transparent) 10px);
+  border-start-start-radius: 12px; border-end-start-radius: 12px;
+}
+.stage__inner { width: 100%; max-width: 420px; min-width: 0; }
 .stage__rail {
   border-inline-start: 1px solid var(--border-subtle);
-  padding: 1rem; max-height: 560px; overflow-y: auto;
-  background: var(--bg-elevated);
+  padding: 18px; max-height: none; overflow: visible;
+  background: var(--bg-subtle);
+  border-start-end-radius: 12px; border-end-end-radius: 12px;
 }
 .rail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
 .rail-head h3 {
@@ -77,12 +94,12 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .rail-label { display: block; font-size: 0.75rem; opacity: 0.7; margin-bottom: 0.2rem; }
 .rail-row input[type='text'], .rail-row input[type='number'], .rail-row select {
   width: 100%; padding: 0.35rem 0.5rem; font: inherit; font-size: 0.8125rem;
-  color: var(--fg-default); background: var(--bg-subtle);
-  border: 1px solid var(--border-subtle); border-radius: 6px;
+  color: var(--fg-default); background: var(--bg-surface);
+  border: 1px solid var(--border-default); border-radius: 6px;
 }
 /* Chromium paints the native option popup with the select's own background.
    A translucent one lands white-on-white in dark mode, so both are explicit. */
-.rail-row select option { background: var(--bg-elevated); color: var(--fg-default); }
+.rail-row select option { background: var(--bg-surface); color: var(--fg-default); }
 .rail-check { display: flex; align-items: center; gap: 0.45rem; font-size: 0.8125rem; cursor: pointer; }
 
 .usage { position: relative; }

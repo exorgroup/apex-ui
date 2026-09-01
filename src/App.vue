@@ -293,7 +293,9 @@ async function copyUsage() {
         <!-- Demo on the left, live prop editors on the right. -->
         <div class="stage">
           <div class="stage__demo">
-            <component :is="entry.name" v-model="model[entry.id]" v-bind="live" />
+            <div class="stage__inner">
+              <component :is="entry.name" v-model="model[entry.id]" v-bind="live" />
+            </div>
           </div>
 
           <div class="stage__rail">
