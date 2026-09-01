@@ -230,14 +230,20 @@ function measureFrozen() {
   let acc = 0;
   for (let g = 0; g < leading.value; g++) acc += cells[g]?.offsetWidth ?? 46;
   cols.value.forEach((col, i) => {
-    const w = cells[i + leading.value]?.offsetWidth ?? parseFloat(col.width || col.minWidth || '160') || 160;
+    // Parenthesised deliberately: `a ?? b || c` is a syntax error in JavaScript, and the
+    // intent is "measured width, else the declared width, else 160" — so `|| 160` belongs to
+    // the parseFloat as its NaN guard, not to the ?? chain.
+    const w = cells[i + leading.value]?.offsetWidth ?? (parseFloat(col.width || col.minWidth || '160') || 160);
     if (col.frozen && col.alignFrozen !== 'right') { startMap[i] = acc + 'px'; acc += w; }
   });
 
   let tail = 0;
   for (let i = cols.value.length - 1; i >= 0; i--) {
     const col = cols.value[i];
-    const w = cells[i + leading.value]?.offsetWidth ?? parseFloat(col.width || col.minWidth || '160') || 160;
+    // Parenthesised deliberately: `a ?? b || c` is a syntax error in JavaScript, and the
+    // intent is "measured width, else the declared width, else 160" — so `|| 160` belongs to
+    // the parseFloat as its NaN guard, not to the ?? chain.
+    const w = cells[i + leading.value]?.offsetWidth ?? (parseFloat(col.width || col.minWidth || '160') || 160);
     if (col.frozen && col.alignFrozen === 'right') { endMap[i] = tail + 'px'; tail += w; }
   }
   frozenStart.value = startMap;
