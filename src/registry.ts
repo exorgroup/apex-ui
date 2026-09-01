@@ -61,6 +61,91 @@ export const STATE_CASES = [
   { label: 'statusIcon = false', bind: { statusIcon: false, error: 'Something is wrong.' } },
 ];
 
+/* ------------------------------------------------------------------ *
+ * ApexInput-only sections.
+ *
+ * The gallery hand-authors these four in its template rather than
+ * driving them from its registry, so they are transcribed here as data
+ * — same demos, same labels, same values. CITIES is copied from
+ * apex-ui-docs.js; the key-filter seeds from apex-ui-shell.js.
+ * ------------------------------------------------------------------ */
+
+/** One demo cell: a tag, a starting value and the props to bind. */
+export interface DocCase {
+  tag: string;
+  value: unknown;
+  bind: Record<string, unknown>;
+}
+
+/** The suggestion list `acSearch` filters against. */
+export const CITIES = [
+  { value: 'Valletta', label: 'Valletta', help: 'Malta' },
+  { value: 'Sliema', label: 'Sliema', help: 'Malta' },
+  { value: 'St Julian’s', label: 'St Julian’s', help: 'Malta' },
+  { value: 'Mosta', label: 'Mosta', help: 'Malta' },
+  { value: 'Birkirkara', label: 'Birkirkara', help: 'Malta' },
+  { value: 'Victoria', label: 'Victoria', help: 'Gozo' },
+  { value: 'Marsaxlokk', label: 'Marsaxlokk', help: 'Malta' },
+  { value: 'Mdina', label: 'Mdina', help: 'Malta' },
+];
+
+export const AUTOCOMPLETE_SNIPPET = `<ApexInput v-model="city" label="City"
+  :suggestions="hits" :loading="busy" dropdown clearable
+  @complete="search" @item-select="pick" />
+
+async function search({ query }) {
+  busy.value = true;
+  hits.value = await api.cities(query);
+  busy.value = false;
+}`;
+
+export const ICON_SLOT_CASES: DocCase[] = [
+  { tag: 'leadingIcon', value: 'ada.lovelace', bind: { label: 'Username', leadingIcon: 'person' } },
+  { tag: 'trailingIcon', value: 'EUR', bind: { label: 'Currency', trailingIcon: 'euro' } },
+  { tag: 'labelIcon', value: 'lobby-north', bind: { label: 'Screen', labelIcon: 'tv' } },
+  {
+    tag: 'trailingAction', value: 'tok_9F2K1AZQ',
+    bind: { label: 'API token', mono: true, trailingAction: { icon: 'refresh', label: 'Regenerate token' } },
+  },
+  { tag: 'clearable', value: 'north entrance', bind: { label: 'Search', leadingIcon: 'search', clearable: true } },
+  { tag: 'loading', value: 'checking…', bind: { label: 'Domain', suffix: '.apexpando.com', loading: true } },
+  { tag: 'type="password"', value: 'correct-horse', bind: { label: 'Password', type: 'password' } },
+  {
+    tag: 'status icon on error', value: 'ada@',
+    bind: { label: 'Email', type: 'email', error: 'Enter a valid email address.' },
+  },
+];
+
+export const AFFIX_CASES: DocCase[] = [
+  { tag: 'prefix', value: 'exorgroup', bind: { label: 'Handle', prefix: '@' } },
+  { tag: 'suffix', value: 'demo', bind: { label: 'Workspace', suffix: '.apexpando.com' } },
+  {
+    tag: 'type="slug"', value: 'north-lobby-totem',
+    bind: { label: 'Slug', type: 'slug', help: 'Typing is slugified live.' },
+  },
+  { tag: 'mono', value: '0F14-1C2A-88B0', bind: { label: 'Device ID', mono: true } },
+];
+
+/** Two-way bound, so typing a rejected key visibly does nothing. */
+export const KEY_FILTER_CASES: Array<{ key: string; tag: string; seed: string; bind: Record<string, unknown> }> = [
+  { key: 'integer', tag: 'keyFilter="integer"', seed: '24', bind: { label: 'Display count', keyFilter: 'integer', mono: true } },
+  { key: 'number', tag: 'keyFilter="number"', seed: '1.5', bind: { label: 'Scale factor', keyFilter: 'number', mono: true } },
+  { key: 'money', tag: 'keyFilter="money"', seed: '89.50', bind: { label: 'Monthly fee', keyFilter: 'money', prefix: '€', mono: true } },
+  { key: 'hex', tag: 'keyFilter="hex"', seed: '0B5FFF', bind: { label: 'Brand colour', keyFilter: 'hex', prefix: '#', mono: true } },
+  { key: 'alphabetic', tag: 'keyFilter="alphabetic"', seed: 'Ada Lovelace', bind: { label: 'Contact name', keyFilter: 'alphabetic' } },
+  {
+    key: 'alphanumeric', tag: 'keyFilter="alphanumeric"', seed: 'MT01',
+    bind: { label: 'Site code', keyFilter: 'alphanumeric', transform: 'upper', mono: true },
+  },
+  {
+    key: 'custom', tag: ':key-filter="/^[A-Z]{0,3}-?\\d{0,4}$/"', seed: 'APX-0142',
+    bind: {
+      label: 'Asset tag', keyFilter: '^[A-Z]{0,3}-?\\d{0,4}$', mono: true,
+      help: 'Custom pattern: up to 3 capitals, a dash, up to 4 digits.',
+    },
+  },
+];
+
 export const ENTRIES: DocEntry[] = [
   {
     id: 'input', name: 'ApexInput', group: 'Text',

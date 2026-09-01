@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
-import { ENTRIES, LABEL_PLACEMENTS, SIZES, STATE_CASES, TONE_CASES } from './registry';
+import {
+  AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, ENTRIES, ICON_SLOT_CASES,
+  KEY_FILTER_CASES, LABEL_PLACEMENTS, SIZES, STATE_CASES, TONE_CASES,
+} from './registry';
 import type { DocEntry } from './registry';
 
 const current = ref('input');
@@ -77,6 +80,35 @@ const usage = computed(() => {
 
   return `<${entry.value.name} v-model="value"\n${lines.join('\n')}\n/>`;
 });
+
+/* --- ApexInput-only sections ------------------------------------- */
+
+/** Autocomplete demo state — both cells share one value, as the gallery has it. */
+const acValue = ref('');
+const acHits = ref<unknown[]>([]);
+const acBusy = ref(false);
+let acTimer: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * Stands in for a server call: the control debounces the keystrokes, this
+ * resolves the query. The delay is deliberate — without it the loading state
+ * never has time to show and the demo misrepresents what a real fetch looks like.
+ */
+function acSearch(e: { query?: string }) {
+  acBusy.value = true;
+  const q = (e.query || '').toLowerCase();
+
+  clearTimeout(acTimer);
+  acTimer = setTimeout(() => {
+    acHits.value = CITIES.filter((c) => c.label.toLowerCase().includes(q));
+    acBusy.value = false;
+  }, 240);
+}
+
+/** Key-filter demos are two-way bound, so a rejected keystroke visibly does nothing. */
+const kf = reactive<Record<string, string>>(
+  Object.fromEntries(KEY_FILTER_CASES.map((c) => [c.key, c.seed])),
+);
 
 async function copyUsage() {
   try {
@@ -273,6 +305,81 @@ async function copyUsage() {
             <component :is="entry.name" :model-value="entry.model" v-bind="baseline(c.bind)" />
           </div>
         </div>
+
+        <!-- ApexInput carries four sections no other control has. The gallery
+             hand-authors them in its template; here they are driven from the
+             registry, but the demos are the same ones. -->
+        <template v-if="entry.id === 'input'">
+          <h2>Autocomplete</h2>
+          <p class="note">
+            Two-way bound value, a suggestion list you own, and a <code>@complete</code> handler
+            that queries. The control debounces (<code>delay</code>), enforces
+            <code>minLength</code>, and drives keyboard selection — ↓ ↑ move, Enter picks, Esc closes.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">:suggestions + @complete</span>
+              <ApexInput
+                v-model="acValue"
+                label="City"
+                leading-icon="location_on"
+                placeholder="Start typing…"
+                :suggestions="acHits"
+                :loading="acBusy"
+                :size="size"
+                clearable
+                dropdown
+                @complete="acSearch"
+              />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">forceSelection + completeOnFocus</span>
+              <ApexInput
+                v-model="acValue"
+                label="City (must match)"
+                leading-icon="location_on"
+                :suggestions="acHits"
+                :loading="acBusy"
+                :min-length="0"
+                :size="size"
+                force-selection
+                complete-on-focus
+                help="Blurring with an unmatched value clears it."
+                @complete="acSearch"
+              />
+            </div>
+          </div>
+
+          <div class="usage"><pre><code>{{ AUTOCOMPLETE_SNIPPET }}</code></pre></div>
+
+          <h2>Icon slots</h2>
+          <div class="grid grid--2">
+            <div v-for="c in ICON_SLOT_CASES" :key="c.tag" class="cell">
+              <span class="cell__tag">{{ c.tag }}</span>
+              <ApexInput :model-value="c.value" v-bind="c.bind" :size="size" />
+            </div>
+          </div>
+
+          <h2>Affixes and transforms</h2>
+          <div class="grid grid--2">
+            <div v-for="c in AFFIX_CASES" :key="c.tag" class="cell">
+              <span class="cell__tag">{{ c.tag }}</span>
+              <ApexInput :model-value="c.value" v-bind="c.bind" :size="size" />
+            </div>
+          </div>
+
+          <h2>Key filter</h2>
+          <p class="note">
+            Rejected keystrokes never reach the value — paste and drop are filtered the same way.
+            Try typing letters into any of these.
+          </p>
+          <div class="grid grid--2">
+            <div v-for="c in KEY_FILTER_CASES" :key="c.key" class="cell">
+              <span class="cell__tag">{{ c.tag }}</span>
+              <ApexInput v-model="kf[c.key]" v-bind="c.bind" :size="size" />
+            </div>
+          </div>
+        </template>
       </div>
     </main>
   </div>

@@ -103,3 +103,16 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
   .stage { grid-template-columns: 1fr; }
   .stage__rail { border-inline-start: none; border-block-start: 1px solid var(--apex-border, rgb(255 255 255 / 0.1)); }
 }
+
+/* --- ApexInput-only sections ------------------------------------- */
+
+/* The four bespoke sections pair demos two-up rather than auto-filling,
+   so the cells stay wide enough for a suggestion list to open inside one. */
+.grid--2 { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+
+.note { font-size: 0.845rem; line-height: 1.65; color: var(--fg-subtle, rgb(255 255 255 / 0.6)); max-width: 70ch; }
+.note code {
+  font-family: ui-monospace, 'IBM Plex Mono', monospace; font-size: 0.9em;
+  padding: 0.1em 0.35em; border-radius: 4px;
+  background: var(--apex-surface, rgb(255 255 255 / 0.08));
+}
