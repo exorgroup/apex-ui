@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import {
-  AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, ENTRIES, FORMATTING_RULE, ICON_SLOT_CASES,
-  KEY_FILTER_CASES, LABEL_PLACEMENTS, SIZES, STATE_CASES, TONE_CASES,
+  AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, COMMON_CONTROLS, ENTRIES, FORMATTING_RULE,
+  ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
+  PAGES, QUANTITY_RULES, ROLE_OPTIONS, SHARED_FIELD_PROPS, SIZES, STATE_CASES,
+  SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES,
 } from './registry';
-import type { DocEntry } from './registry';
+import type { DocEntry, DocPage } from './registry';
 
 const current = ref('input');
 const theme = ref<'light' | 'dark'>('dark');
@@ -23,12 +25,19 @@ const model = reactive<Record<string, unknown>>({});
  */
 const overrides = reactive<Record<string, Record<string, unknown>>>({});
 
-const entry = computed<DocEntry>(() => ENTRIES.find((e) => e.id === current.value)!);
+/* Falls back to the first control so the control-page computeds stay defined while a
+   Foundations page is open; the control markup is v-if'd out either way. */
+const entry = computed<DocEntry>(() => ENTRIES.find((e) => e.id === current.value) ?? ENTRIES[0]);
+
+/** The Foundations page currently open, or undefined on a control page. */
+const page = computed<DocPage | undefined>(() => PAGES.find((p) => p.id === current.value));
+const isDoc = computed(() => !!page.value);
 
 const groups = computed(() => {
   const q = search.value.trim().toLowerCase();
-  const matched = q ? ENTRIES.filter((e) => e.name.toLowerCase().includes(q)) : ENTRIES;
-  const out: Array<{ name: string; items: DocEntry[] }> = [];
+  const all = [...ENTRIES, ...PAGES];
+  const matched = q ? all.filter((e) => e.name.toLowerCase().includes(q)) : all;
+  const out: Array<{ name: string; items: Array<DocEntry | DocPage> }> = [];
 
   matched.forEach((e) => {
     let g = out.find((x) => x.name === e.group);
@@ -39,12 +48,36 @@ const groups = computed(() => {
   return out;
 });
 
+/**
+ * A control's own props, minus anything the common group already covers — the
+ * entries list `label`, `required` and friends, and showing them twice would let
+ * the two copies disagree.
+ */
+const ownControls = computed(
+  () => entry.value.controls.filter((c) => !COMMON_CONTROLS.some((x) => x.key === c.key)),
+);
+
+const startingProps = (e: DocEntry) => ({ ...PLAYGROUND_DEFAULTS, ...(e.base ?? {}) });
+
+/** The rail: what this control adds, then the field props everything shares. */
+const railGroups = computed(() => [
+  { title: null as string | null, items: ownControls.value },
+  { title: 'Label & state', items: COMMON_CONTROLS },
+]);
+
 watch(current, (id) => {
-  const e = ENTRIES.find((x) => x.id === id)!;
+  const e = ENTRIES.find((x) => x.id === id);
+  if (!e) { copied.value = false; return; }
   if (!(id in model)) model[id] = JSON.parse(JSON.stringify(e.model ?? null));
-  if (!(id in overrides)) overrides[id] = { ...(e.base ?? {}) };
+  if (!(id in overrides)) overrides[id] = startingProps(e);
   copied.value = false;
 }, { immediate: true });
+
+/* The top bar's Size drives the section grids; keep the rail's copy in step so the
+   two never show different answers for the same control. */
+watch(size, (v) => {
+  if (overrides[current.value]) overrides[current.value].size = v;
+});
 
 watch(theme, (v) => {
   document.documentElement.classList.toggle('dark', v === 'dark');
@@ -53,8 +86,8 @@ watch(theme, (v) => {
 
 watch(dir, (v) => document.documentElement.setAttribute('dir', v), { immediate: true });
 
-/** What the live demo is bound to: the playground's current state. */
-const live = computed(() => ({ ...overrides[current.value], size: size.value }));
+/** What the live demo is bound to: the playground's current state, nothing else. */
+const live = computed(() => ({ ...overrides[current.value] }));
 
 /** Baseline for the section grids — the rail must not move them around. */
 const baseline = (extra: Record<string, unknown> = {}) => ({
@@ -62,7 +95,7 @@ const baseline = (extra: Record<string, unknown> = {}) => ({
 });
 
 function reset() {
-  overrides[current.value] = { ...(entry.value.base ?? {}) };
+  overrides[current.value] = startingProps(entry.value);
   model[current.value] = JSON.parse(JSON.stringify(entry.value.model ?? null));
 }
 
@@ -71,6 +104,8 @@ const usage = computed(() => {
   const bind = overrides[current.value] ?? {};
   const lines = Object.entries(bind)
     .filter(([, v]) => v !== '' && v !== null && v !== undefined && v !== false)
+    // A snippet that spells out the defaults is noise you would delete by hand.
+    .filter(([k, v]) => PLAYGROUND_DEFAULTS[k] !== v)
     .map(([k, v]) => {
       if (v === true) return `  ${k}`;
       if (typeof v === 'number') return `  :${k}="${v}"`;
@@ -93,8 +128,12 @@ const usage = computed(() => {
 const fmt = reactive<Record<string, unknown>>({});
 
 watch(current, (id) => {
-  if (!(id in fmt)) fmt[id] = Array.isArray(ENTRIES.find((e) => e.id === id)!.model) ? [] : '';
+  const e = ENTRIES.find((x) => x.id === id);
+  if (e && !(id in fmt)) fmt[id] = Array.isArray(e.model) ? [] : '';
 }, { immediate: true });
+
+/** Conditional formatting page: type 3, then 50 or more, to move through both rules. */
+const rulesQty = ref(3);
 
 /* --- ApexInput-only sections ------------------------------------- */
 
@@ -163,7 +202,7 @@ async function copyUsage() {
 
       <!-- Said out loud rather than left to be discovered: this harness covers the
            five controls under review, not the whole library. -->
-      <p class="side-note">Five of 84 controls. The rest arrive as each is reviewed.</p>
+      <p class="side-note">Five of 84 controls, plus the Foundations pages. The rest arrive as each is reviewed.</p>
     </aside>
 
     <main>
@@ -186,7 +225,68 @@ async function copyUsage() {
         </div>
       </div>
 
-      <div class="page">
+      <!-- Foundations: prose, with a live demo where one earns its place. -->
+      <div v-if="isDoc" class="page">
+        <h1>{{ page!.name }}</h1>
+
+        <!-- Static, authored copy from the library's own docs — never user input. -->
+        <div class="doc-body" v-html="page!.body"></div>
+
+        <div v-if="page!.id === 'theming'" class="swatches">
+          <div v-for="v in TOKEN_SWATCHES" :key="v" class="sw">
+            <i :style="{ background: `var(${v})` }"></i><span>{{ v }}</span>
+          </div>
+        </div>
+
+        <template v-if="page!.id === 'formatting'">
+          <h2>Live</h2>
+          <div class="cell cell--solo">
+            <ApexNumber
+              v-model="rulesQty"
+              label="Quantity"
+              :min="0"
+              :max="200"
+              help="Try 3, then 50 or more."
+              :rules="QUANTITY_RULES"
+            />
+          </div>
+        </template>
+
+        <template v-if="page!.id === 'validation'">
+          <h2>Summary + inline</h2>
+          <div class="cell val-stack">
+            <ApexErrorSummary :errors="SUMMARY_ERRORS" />
+            <ApexInput
+              model-value="ada@"
+              label="Email address"
+              type="email"
+              leading-icon="mail"
+              error="Enter a valid email address."
+            />
+            <ApexMultiselect
+              :model-value="[]"
+              label="Roles"
+              :options="ROLE_OPTIONS"
+              placeholder="Assign roles"
+              error="Assign at least one role."
+            />
+            <ApexInput
+              model-value="lobby-north"
+              label="Slug"
+              prefix="pando.app/"
+              success="Checked and available."
+            />
+            <ApexInput
+              model-value="2600"
+              label="Rotation seconds"
+              mono
+              warning="Longer than the recommended maximum, but allowed."
+            />
+          </div>
+        </template>
+      </div>
+
+      <div v-else class="page">
         <h1>{{ entry.name }}</h1>
         <p class="blurb">{{ entry.blurb }}</p>
 
@@ -202,7 +302,10 @@ async function copyUsage() {
               <button class="rail-reset" @click="reset">Reset</button>
             </div>
 
-            <div v-for="c in entry.controls" :key="c.key" class="rail-row">
+            <template v-for="g in railGroups" :key="g.title ?? 'own'">
+            <h4 v-if="g.title" class="rail-sep">{{ g.title }}</h4>
+
+            <div v-for="c in g.items" :key="c.key" class="rail-row">
               <template v-if="c.type === 'bool'">
                 <label class="rail-check">
                   <input
@@ -235,6 +338,7 @@ async function copyUsage() {
                 />
               </template>
             </div>
+            </template>
           </div>
         </div>
 
@@ -256,6 +360,12 @@ async function copyUsage() {
             </tr>
           </tbody>
         </table>
+
+        <p class="note">
+          Plus every shared field prop —
+          <template v-for="(p, i) in SHARED_FIELD_PROPS" :key="p"><code>{{ p }}</code><span
+            v-if="i < SHARED_FIELD_PROPS.length - 1">, </span></template>.
+        </p>
 
         <h2>Events</h2>
         <table class="doc-table">

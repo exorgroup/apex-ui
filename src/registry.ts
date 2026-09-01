@@ -46,6 +46,40 @@ export const LABEL_PLACEMENTS = [
 
 export const SIZES = ['sm', 'md', 'lg'] as const;
 
+/**
+ * Field props every control accepts, shown in the rail under their own separator.
+ *
+ * Copied from COMMON_CONTROLS in web/apex-ui-shell.js. Without these the rail only
+ * exposes what a control adds on top of the field shell, which makes the thinner
+ * controls — ApexTextarea has eight of its own — look like they do far less than
+ * they do.
+ */
+export const COMMON_CONTROLS: DocControl[] = [
+  { key: 'labelPlacement', type: 'select', options: [...LABEL_PLACEMENTS] },
+  { key: 'labelIcon', type: 'text' },
+  { key: 'labelWidth', type: 'text' },
+  { key: 'size', type: 'select', options: [...SIZES] },
+  { key: 'tone', type: 'select', options: ['default', 'danger', 'warning', 'success'] },
+  { key: 'help', type: 'text' },
+  { key: 'error', type: 'text' },
+  { key: 'warning', type: 'text' },
+  { key: 'success', type: 'text' },
+  { key: 'statusIcon', type: 'bool' },
+  { key: 'required', type: 'bool' },
+  { key: 'disabled', type: 'bool' },
+  { key: 'readonly', type: 'bool' },
+];
+
+/** What the playground opens with, matching the gallery's DEFAULTS. */
+export const PLAYGROUND_DEFAULTS: Record<string, unknown> = { size: 'md', labelPlacement: 'top' };
+
+/** Named under the props table, since none of them appear in a control's own rows. */
+export const SHARED_FIELD_PROPS = [
+  'label', 'labelIcon', 'labelPlacement', 'labelWidth', 'help', 'error', 'warning',
+  'success', 'tone', 'rules', 'context', 'required', 'disabled', 'readonly', 'size',
+  'statusIcon', 'name',
+];
+
 export const TONE_CASES = [
   { label: 'Default', bind: {} },
   { label: 'With help', bind: { help: 'Shown when nothing is wrong.' } },
@@ -152,6 +186,135 @@ export const KEY_FILTER_CASES: Array<{ key: string; tag: string; seed: string; b
       label: 'Asset tag', keyFilter: '^[A-Z]{0,3}-?\\d{0,4}$', mono: true,
       help: 'Custom pattern: up to 3 capitals, a dash, up to 4 digits.',
     },
+  },
+];
+
+/* ------------------------------------------------------------------ *
+ * Foundations — prose pages, not control pages.
+ *
+ * Bodies are copied from the DOCS blob in web/apex-ui-shell.js. Two of
+ * them carry a live demo below the prose, defined in App.vue.
+ * ------------------------------------------------------------------ */
+
+export interface DocPage {
+  id: string;
+  name: string;
+  group: string;
+  body: string;
+}
+
+export const ROLE_OPTIONS = [
+  { value: 'admin', label: 'Super Admin', icon: 'shield_person', help: 'Full access, including billing' },
+  { value: 'editor', label: 'Content Editor', icon: 'edit_document', help: 'Create and publish adverts' },
+  { value: 'scheduler', label: 'Scheduler', icon: 'calendar_month', help: 'Book slots and rotations' },
+  { value: 'viewer', label: 'Viewer', icon: 'visibility', help: 'Read-only across the workspace' },
+  { value: 'billing', label: 'Billing Contact', icon: 'receipt_long', help: 'Invoices and payment methods' },
+];
+
+/** Swatches rendered under the Theming page, straight from the live stylesheet. */
+export const TOKEN_SWATCHES = [
+  '--bg-app', '--bg-surface', '--bg-muted', '--border-default', '--fg-default',
+  '--fg-muted', '--accent-primary', '--accent-success', '--accent-warning', '--accent-danger',
+];
+
+/** The rules the Conditional formatting page demonstrates live. */
+export const QUANTITY_RULES = [
+  { when: { eq: 3 }, tone: 'danger', message: 'Three is not a valid quantity' },
+  { when: { gte: 50 }, tone: 'warning', message: 'Large order — needs approval' },
+];
+
+export const SUMMARY_ERRORS = {
+  email: 'Enter a valid email address.',
+  roles: 'Assign at least one role.',
+};
+
+export const PAGES: DocPage[] = [
+  {
+    id: 'theming', name: 'Theming & tokens', group: 'Foundations',
+    body: `
+      <h2>Tokens</h2>
+      <p>Everything reads CSS custom properties from <code>tokens.css</code>. Override any of
+      them in your own stylesheet — no build configuration, no preprocessor.</p>
+      <h2>Dark mode</h2>
+      <p>Both <code>prefers-color-scheme</code> and a <code>.dark</code> /
+      <code>[data-theme="dark"]</code> class are supported; the class wins, so a user
+      preference always beats the OS. <code>@apexUiTheme</code> writes the class before
+      first paint. Toggle it in the top bar to check any example.</p>
+      <h2>Density and RTL</h2>
+      <p>Three sizes — <code>sm</code>, <code>md</code>, <code>lg</code> — set as a prop or as a
+      plugin-wide default. All spacing uses logical properties, so <code>dir="rtl"</code>
+      mirrors the whole library with no overrides. The RTL switch in the top bar flips this
+      page.</p>`,
+  },
+  {
+    id: 'anatomy', name: 'Field anatomy', group: 'Foundations',
+    body: `
+      <h2>Parts</h2>
+      <p>Every control renders one <code>ApexField</code>: a label, the control shell, and one
+      message line. The message is a single slot with a precedence order, so a control never
+      shows two competing lines.</p>
+      <table class="doc-table"><thead><tr><th>Precedence</th><th>Source</th><th>Tone</th></tr></thead><tbody>
+        <tr><td>1</td><td><code>error</code></td><td>danger</td></tr>
+        <tr><td>2</td><td><code>warning</code></td><td>warning</td></tr>
+        <tr><td>3</td><td><code>success</code></td><td>success</td></tr>
+        <tr><td>4</td><td>matching <code>rules</code> entry</td><td>the rule's tone</td></tr>
+        <tr><td>5</td><td><code>help</code></td><td>default</td></tr>
+      </tbody></table>
+      <h2>Using it directly</h2>
+      <pre class="doc-pre">&lt;ApexField label="Port" :value="port" v-slot="{ id, describedBy, invalid }"&gt;
+  &lt;input :id="id" v-model="port" :aria-describedby="describedBy" :aria-invalid="invalid" /&gt;
+&lt;/ApexField&gt;</pre>
+      <h2>Accessibility</h2>
+      <ul class="doc-list">
+        <li>Label is always associated by <code>for</code>/<code>id</code>; <code>labelPlacement="hidden"</code> keeps it in the accessibility tree via <code>aria-label</code>.</li>
+        <li><code>aria-describedby</code> points at the message line whenever one is shown.</li>
+        <li><code>aria-invalid</code> tracks the danger tone.</li>
+        <li>Segmented uses roving tabindex; the multiselect is a <code>combobox</code> with a listbox popover.</li>
+        <li>Focus rings are visible on every interactive element and survive dark mode.</li>
+      </ul>`,
+  },
+  {
+    id: 'formatting', name: 'Conditional formatting', group: 'Foundations',
+    body: `
+      <h2>rules</h2>
+      <p>Value-driven formatting, separate from validation. Rules never block a submit — they
+      colour the field and swap the message. They are evaluated top to bottom on every change;
+      the last match wins.</p>
+      <pre class="doc-pre">&lt;ApexNumber v-model="qty" label="Quantity"
+  :rules="[
+    { when: { eq: 3 },   tone: 'danger',  message: 'Three is not a valid quantity' },
+    { when: { gte: 50 }, tone: 'warning', message: 'Large order — needs approval' },
+  ]" /&gt;</pre>
+      <h2>Condition grammar</h2>
+      <p>The same grammar apex-form uses. <code>field</code> defaults to <code>value</code>, so
+      <code>{ eq: 3 }</code> reads this control. Name any other key to read from
+      <code>context</code>.</p>
+      <table class="doc-table"><thead><tr><th>Operator</th><th>Meaning</th></tr></thead><tbody>
+        <tr><td><code>eq</code> <code>ne</code></td><td>strict equality</td></tr>
+        <tr><td><code>gt</code> <code>gte</code> <code>lt</code> <code>lte</code></td><td>numeric compare</td></tr>
+        <tr><td><code>in</code> <code>nin</code></td><td>membership of a list</td></tr>
+        <tr><td><code>includes</code></td><td>array value contains</td></tr>
+        <tr><td><code>truthy</code> <code>falsy</code> <code>empty</code></td><td>presence</td></tr>
+        <tr><td><code>matches</code></td><td>regular expression</td></tr>
+        <tr><td><code>all</code> <code>any</code> <code>not</code></td><td>composition</td></tr>
+      </tbody></table>`,
+  },
+  {
+    id: 'validation', name: 'Validation & errors', group: 'Foundations',
+    body: `
+      <h2>The controls own nothing</h2>
+      <p>No control validates. Bind <code>:error</code> yourself, or register an adapter and let
+      a parent form drive it.</p>
+      <pre class="doc-pre">import { zodAdapter, precognitionAdapter } from '@exorgroup/apex-ui';
+
+app.use(ApexUI, { adapter: zodAdapter(UserSchema) });
+
+// or, server-side truth:
+const form = useForm('post', '/users', { name: '' });
+app.use(ApexUI, { adapter: precognitionAdapter(form) });</pre>
+      <h2>Presentations</h2>
+      <p>Inline message, tinted border, status icon in the field, and a summary list at the top
+      of the form — plus non-blocking warning and success tones.</p>`,
   },
 ];
 

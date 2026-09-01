@@ -28,8 +28,8 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .side-search { padding: 0 1rem 0.75rem; }
 .side-search input {
   width: 100%; padding: 0.4rem 0.6rem; font: inherit; font-size: 0.8125rem;
-  color: inherit; background: var(--apex-surface-2, rgb(255 255 255 / 0.04));
-  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.12)); border-radius: 6px;
+  color: inherit; background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle); border-radius: 6px;
 }
 .navempty, .side-note { padding: 0 1rem; font-size: 0.75rem; opacity: 0.5; line-height: 1.4; }
 .side-note { margin-top: auto; padding-block: 1rem; }
@@ -40,7 +40,7 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 }
 .topbar__label:first-child { margin-inline-start: 0; }
 .seg {
-  display: inline-flex; border: 1px solid var(--apex-border, rgb(255 255 255 / 0.12));
+  display: inline-flex; border: 1px solid var(--border-subtle);
   border-radius: 8px; overflow: hidden;
 }
 .seg button {
@@ -48,21 +48,21 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
   background: none; border: none; color: inherit; opacity: 0.65;
 }
 .seg button[aria-pressed='true'] {
-  background: var(--apex-accent-soft, rgb(96 165 250 / 0.16));
-  color: var(--apex-accent, #60a5fa); opacity: 1; font-weight: 600;
+  background: var(--bg-muted);
+  color: var(--accent-primary); opacity: 1; font-weight: 600;
 }
 
 /* Demo beside its prop editors — the thing that was missing entirely. */
 .stage {
   display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 0;
-  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.1)); border-radius: 12px;
+  border: 1px solid var(--border-subtle); border-radius: 12px;
   margin-top: 1rem; overflow: hidden;
 }
 .stage__demo { padding: 2.5rem; display: flex; align-items: flex-start; justify-content: center; }
 .stage__rail {
-  border-inline-start: 1px solid var(--apex-border, rgb(255 255 255 / 0.1));
+  border-inline-start: 1px solid var(--border-subtle);
   padding: 1rem; max-height: 560px; overflow-y: auto;
-  background: var(--apex-surface-2, rgb(255 255 255 / 0.02));
+  background: var(--bg-elevated);
 }
 .rail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
 .rail-head h3 {
@@ -71,37 +71,40 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 }
 .rail-reset {
   background: none; border: none; cursor: pointer; font: inherit; font-size: 0.75rem;
-  color: var(--apex-accent, #60a5fa); padding: 0;
+  color: var(--accent-primary); padding: 0;
 }
 .rail-row { margin-bottom: 0.6rem; }
 .rail-label { display: block; font-size: 0.75rem; opacity: 0.7; margin-bottom: 0.2rem; }
 .rail-row input[type='text'], .rail-row input[type='number'], .rail-row select {
-  width: 100%; padding: 0.35rem 0.5rem; font: inherit; font-size: 0.8125rem; color: inherit;
-  background: var(--apex-surface, rgb(255 255 255 / 0.05));
-  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.14)); border-radius: 6px;
+  width: 100%; padding: 0.35rem 0.5rem; font: inherit; font-size: 0.8125rem;
+  color: var(--fg-default); background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle); border-radius: 6px;
 }
+/* Chromium paints the native option popup with the select's own background.
+   A translucent one lands white-on-white in dark mode, so both are explicit. */
+.rail-row select option { background: var(--bg-elevated); color: var(--fg-default); }
 .rail-check { display: flex; align-items: center; gap: 0.45rem; font-size: 0.8125rem; cursor: pointer; }
 
 .usage { position: relative; }
 .usage pre {
-  background: var(--apex-surface-2, rgb(0 0 0 / 0.25)); padding: 1rem 1.25rem;
+  background: var(--bg-elevated); padding: 1rem 1.25rem;
   border-radius: 10px; overflow-x: auto; font-size: 0.8125rem; line-height: 1.6;
-  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.08));
+  border: 1px solid var(--border-subtle);
 }
 .usage__copy {
   position: absolute; inset-block-start: 0.6rem; inset-inline-end: 0.6rem;
   padding: 0.25rem 0.7rem; font: inherit; font-size: 0.75rem; cursor: pointer;
-  color: inherit; background: var(--apex-surface, rgb(255 255 255 / 0.08));
-  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.14)); border-radius: 6px;
+  color: inherit; background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle); border-radius: 6px;
 }
 
 .doc-table td.mono, .doc-table th { vertical-align: top; }
 .doc-table td.mono { font-family: ui-monospace, 'IBM Plex Mono', monospace; font-size: 0.8125rem; }
-.doc-table td.t { color: var(--apex-accent, #60a5fa); }
+.doc-table td.t { color: var(--accent-primary); }
 
 @media (max-width: 1100px) {
   .stage { grid-template-columns: 1fr; }
-  .stage__rail { border-inline-start: none; border-block-start: 1px solid var(--apex-border, rgb(255 255 255 / 0.1)); }
+  .stage__rail { border-inline-start: none; border-block-start: 1px solid var(--border-subtle); }
 }
 
 /* --- ApexInput-only sections ------------------------------------- */
@@ -114,9 +117,42 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .note code {
   font-family: ui-monospace, 'IBM Plex Mono', monospace; font-size: 0.9em;
   padding: 0.1em 0.35em; border-radius: 4px;
-  background: var(--apex-surface, rgb(255 255 255 / 0.08));
+  background: var(--bg-subtle);
 }
 
 /* Conditional formatting is a single demo, not a grid — capped so the field
    keeps a realistic form width rather than stretching the full page. */
 .cell--solo { max-width: 420px; }
+
+/* Separates the control's own props from the field props every control shares. */
+.rail-sep {
+  margin: 1.1rem 0 0.55rem; padding-block-start: 0.9rem;
+  border-block-start: 1px solid var(--border-subtle);
+  font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--fg-subtle);
+}
+
+/* --- Foundations pages -------------------------------------------- */
+
+.doc-body p { max-width: 74ch; line-height: 1.7; }
+.doc-body code {
+  font-family: ui-monospace, 'IBM Plex Mono', monospace; font-size: 0.9em;
+  padding: 0.1em 0.35em; border-radius: 4px; background: var(--bg-muted);
+}
+.doc-pre {
+  background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+  border-radius: 10px; padding: 1rem 1.25rem; overflow-x: auto;
+  font-size: 0.8125rem; line-height: 1.6;
+}
+.doc-list { max-width: 74ch; line-height: 1.7; padding-inline-start: 1.2rem; }
+.doc-list li { margin-block-end: 0.4rem; }
+
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.sw { display: flex; align-items: center; gap: 0.6rem; font-size: 0.75rem; font-family: var(--font-mono); }
+/* A border, because --bg-app in either theme is near-invisible against the page. */
+.sw i {
+  inline-size: 34px; block-size: 22px; border-radius: 5px;
+  border: 1px solid var(--border-default); flex: none;
+}
+
+.val-stack { display: flex; flex-direction: column; gap: 18px; max-width: 520px; }
