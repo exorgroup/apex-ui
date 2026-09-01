@@ -22,3 +22,84 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .doc-table th{text-align:start;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-subtle);padding:8px 12px;border-block-end:1px solid var(--border-default)}
 .doc-table td{padding:10px 12px;border-block-end:1px solid var(--border-subtle);color:var(--fg-muted)}
 .doc-table td:first-child{font-family:var(--font-mono);font-size:12px;color:var(--fg-default)}
+
+/* ── Playfield additions ──────────────────────────────────────────────────── */
+
+.side-search { padding: 0 1rem 0.75rem; }
+.side-search input {
+  width: 100%; padding: 0.4rem 0.6rem; font: inherit; font-size: 0.8125rem;
+  color: inherit; background: var(--apex-surface-2, rgb(255 255 255 / 0.04));
+  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.12)); border-radius: 6px;
+}
+.navempty, .side-note { padding: 0 1rem; font-size: 0.75rem; opacity: 0.5; line-height: 1.4; }
+.side-note { margin-top: auto; padding-block: 1rem; }
+
+.topbar__label {
+  font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.06em;
+  opacity: 0.55; margin-inline-start: 0.75rem;
+}
+.topbar__label:first-child { margin-inline-start: 0; }
+.seg {
+  display: inline-flex; border: 1px solid var(--apex-border, rgb(255 255 255 / 0.12));
+  border-radius: 8px; overflow: hidden;
+}
+.seg button {
+  padding: 0.3rem 0.7rem; font: inherit; font-size: 0.8125rem; cursor: pointer;
+  background: none; border: none; color: inherit; opacity: 0.65;
+}
+.seg button[aria-pressed='true'] {
+  background: var(--apex-accent-soft, rgb(96 165 250 / 0.16));
+  color: var(--apex-accent, #60a5fa); opacity: 1; font-weight: 600;
+}
+
+/* Demo beside its prop editors — the thing that was missing entirely. */
+.stage {
+  display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 0;
+  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.1)); border-radius: 12px;
+  margin-top: 1rem; overflow: hidden;
+}
+.stage__demo { padding: 2.5rem; display: flex; align-items: flex-start; justify-content: center; }
+.stage__rail {
+  border-inline-start: 1px solid var(--apex-border, rgb(255 255 255 / 0.1));
+  padding: 1rem; max-height: 560px; overflow-y: auto;
+  background: var(--apex-surface-2, rgb(255 255 255 / 0.02));
+}
+.rail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.rail-head h3 {
+  margin: 0; font-size: 0.6875rem; text-transform: uppercase;
+  letter-spacing: 0.08em; opacity: 0.6; font-weight: 700;
+}
+.rail-reset {
+  background: none; border: none; cursor: pointer; font: inherit; font-size: 0.75rem;
+  color: var(--apex-accent, #60a5fa); padding: 0;
+}
+.rail-row { margin-bottom: 0.6rem; }
+.rail-label { display: block; font-size: 0.75rem; opacity: 0.7; margin-bottom: 0.2rem; }
+.rail-row input[type='text'], .rail-row input[type='number'], .rail-row select {
+  width: 100%; padding: 0.35rem 0.5rem; font: inherit; font-size: 0.8125rem; color: inherit;
+  background: var(--apex-surface, rgb(255 255 255 / 0.05));
+  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.14)); border-radius: 6px;
+}
+.rail-check { display: flex; align-items: center; gap: 0.45rem; font-size: 0.8125rem; cursor: pointer; }
+
+.usage { position: relative; }
+.usage pre {
+  background: var(--apex-surface-2, rgb(0 0 0 / 0.25)); padding: 1rem 1.25rem;
+  border-radius: 10px; overflow-x: auto; font-size: 0.8125rem; line-height: 1.6;
+  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.08));
+}
+.usage__copy {
+  position: absolute; inset-block-start: 0.6rem; inset-inline-end: 0.6rem;
+  padding: 0.25rem 0.7rem; font: inherit; font-size: 0.75rem; cursor: pointer;
+  color: inherit; background: var(--apex-surface, rgb(255 255 255 / 0.08));
+  border: 1px solid var(--apex-border, rgb(255 255 255 / 0.14)); border-radius: 6px;
+}
+
+.doc-table td.mono, .doc-table th { vertical-align: top; }
+.doc-table td.mono { font-family: ui-monospace, 'IBM Plex Mono', monospace; font-size: 0.8125rem; }
+.doc-table td.t { color: var(--apex-accent, #60a5fa); }
+
+@media (max-width: 1100px) {
+  .stage { grid-template-columns: 1fr; }
+  .stage__rail { border-inline-start: none; border-block-start: 1px solid var(--apex-border, rgb(255 255 255 / 0.1)); }
+}

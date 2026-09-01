@@ -1,27 +1,49 @@
 /**
- * Docs registry. The static review mirror at /web/apex-ui-docs.js carries the same data
- * in plain JS; keep the two in step when a control's props change.
+ * Docs registry for the five controls under review.
+ *
+ * Entries are copied verbatim from the gallery's own registry at
+ * /web/apex-ui-docs.js — the shape and the demo data are the author's, not
+ * re-derived. Hand-writing them from the components' props produced a page that
+ * looked plausible but rendered different demos, which is worse than useless
+ * when the point is comparing the two side by side.
+ *
+ * Only ApexInput, ApexTextarea, ApexPassword, ApexOtp and ApexTags are here.
+ * The gallery carries 84; the rest come across as each is reviewed.
  */
+
+/** One editable control in the playground rail. */
+export interface DocControl {
+  key: string;
+  type: 'text' | 'number' | 'bool' | 'select';
+  options?: string[];
+}
+
 export interface DocEntry {
   id: string;
   name: string;
   group: string;
   blurb: string;
   model?: unknown;
+  /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
+  controls: DocControl[];
+  /** [prop, type, default, notes] */
   props: string[][];
   events: string[][];
-  noField?: boolean;
+  slots?: string[][];
 }
 
-export const ROLE_OPTIONS = [
-  { value: 'admin', label: 'Super Admin' },
-  { value: 'editor', label: 'Content Editor' },
-  { value: 'scheduler', label: 'Scheduler' },
-  { value: 'viewer', label: 'Viewer' },
-];
+/**
+ * All the placements the type union allows. The earlier list had seven and
+ * collapsed the three float variants into one 'floating', which under-reported
+ * what ApexField can do — see ApexLabelPlacement in apex-ui/src/types.ts.
+ */
+export const LABEL_PLACEMENTS = [
+  'top', 'before', 'after', 'under',
+  'float-over', 'float-on', 'float-in',
+  'inline', 'hidden',
+] as const;
 
-export const LABEL_PLACEMENTS = ['top', 'before', 'after', 'under', 'floating', 'inline', 'hidden'] as const;
 export const SIZES = ['sm', 'md', 'lg'] as const;
 
 export const TONE_CASES = [
@@ -33,126 +55,151 @@ export const TONE_CASES = [
   { label: 'Required, empty', bind: { required: true, error: 'This field is required.' }, empty: true },
 ];
 
+export const STATE_CASES = [
+  { label: 'disabled', bind: { disabled: true } },
+  { label: 'readonly', bind: { readonly: true } },
+  { label: 'statusIcon = false', bind: { statusIcon: false, error: 'Something is wrong.' } },
+];
+
 export const ENTRIES: DocEntry[] = [
   {
     id: 'input', name: 'ApexInput', group: 'Text',
-    blurb: 'Text, email, tel, url, search, password and slug in one control.',
+    blurb: 'Text, email, tel, url, search, password and slug in one control. Affixes, both icon slots, a clickable trailing action, clear button, loading state and password reveal.',
     model: 'ada.lovelace@exorgroup.com',
-    base: { label: 'Email address', type: 'email', leadingIcon: 'mail', placeholder: 'name@company.com' },
-    props: [['modelValue', 'string | number'], ['type', "'text' | 'email' | … | 'slug'"], ['prefix / suffix', 'string'], ['clearable', 'boolean'], ['loading', 'boolean']],
-    events: [['update:modelValue', 'string'], ['clear', '—'], ['action', '—']],
+    base: { label: 'Email address', placeholder: 'name@company.com', type: 'email', leadingIcon: 'mail' },
+    controls: [
+      { key: 'type', type: 'select', options: ['text', 'email', 'tel', 'url', 'search', 'password', 'slug'] },
+      { key: 'label', type: 'text' },
+      { key: 'placeholder', type: 'text' },
+      { key: 'help', type: 'text' },
+      { key: 'prefix', type: 'text' }, { key: 'suffix', type: 'text' },
+      { key: 'leadingIcon', type: 'text' }, { key: 'trailingIcon', type: 'text' },
+      { key: 'keyFilter', type: 'select', options: ['', 'integer', 'number', 'money', 'hex', 'alphabetic', 'alphanumeric'] },
+      { key: 'clearable', type: 'bool' }, { key: 'loading', type: 'bool' }, { key: 'mono', type: 'bool' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' }, { key: 'readonly', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'string | number', '—', 'v-model'],
+      ['type', "'text' | 'email' | 'tel' | 'url' | 'search' | 'password' | 'slug'", "'text'", 'slug applies the slug transform automatically'],
+      ['prefix / suffix', 'string', '—', 'Static affix text inside the box'],
+      ['leadingIcon / trailingIcon', 'string', '—', 'Material Symbols name'],
+      ['trailingAction', '{ icon, label, disabled? }', '—', 'Clickable trailing button; emits @action'],
+      ['clearable', 'boolean', 'false', 'Shows × when filled; emits @clear'],
+      ['loading', 'boolean', 'false', 'Spinner in the trailing slot'],
+      ['transform', "'lower' | 'upper' | 'slug' | 'trim'", '—', 'Applied live as the user types'],
+      ['keyFilter', "'integer' | 'number' | 'money' | 'hex' | 'alphabetic' | 'alphanumeric' | RegExp | string", '—', 'Blocks rejected keystrokes and strips paste'],
+      ['suggestions', 'ApexOption[] | string[]', '—', 'Presence turns the control into a typeahead; you own the list'],
+      ['minLength', 'number', '1', 'Characters before @complete fires'],
+      ['delay', 'number', '300', 'Debounce in ms'],
+      ['completeOnFocus', 'boolean', 'false', 'Query again when the field gains focus'],
+      ['dropdown', 'boolean', 'false', 'Chevron button that queries with an empty string'],
+      ['forceSelection', 'boolean', 'false', 'Clear on blur unless the value matches a suggestion'],
+      ['emptyMessage', 'string', "'No matches'", 'Shown when a query returns nothing'],
+      ['mono', 'boolean', 'false', 'Monospace value — tokens, IDs, keys'],
+    ],
+    events: [
+      ['update:modelValue', 'string'], ['change', 'string'], ['focus / blur', '—'],
+      ['clear', '—'], ['action', '—'],
+      ['complete', '{ query: string } — fetch and assign suggestions'], ['item-select', 'ApexOption'],
+    ],
+    slots: [
+      ['leading', 'Replaces the leading icon'],
+      ['trailing', 'Appended after the built-in trailing affordances'],
+      ['option', 'Custom suggestion row; receives { option }'],
+    ],
   },
   {
     id: 'textarea', name: 'ApexTextarea', group: 'Text',
     blurb: 'Multi-line text with an optional character counter.',
-    model: 'Lobby screen, north entrance.',
-    base: { label: 'Description', rows: 4, counter: true, maxlength: 240 },
-    props: [['modelValue', 'string'], ['rows', 'number'], ['counter', 'boolean']],
-    events: [['update:modelValue', 'string']],
+    model: 'Lobby screen, north entrance. Rotates every 30 seconds during business hours.',
+    base: { label: 'Description', rows: 4, placeholder: 'What is this for?', counter: true, maxlength: 240 },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'rows', type: 'number' },
+      { key: 'counter', type: 'bool' }, { key: 'maxlength', type: 'number' },
+      { key: 'keyFilter', type: 'select', options: ['', 'integer', 'number', 'money', 'hex', 'alphabetic', 'alphanumeric'] },
+      { key: 'mono', type: 'bool' }, { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'string', '—', 'v-model'],
+      ['rows', 'number', '4', 'Initial height'],
+      ['keyFilter', 'preset | RegExp | string', '—', 'Restrict keystrokes; see ApexInput'],
+      ['counter', 'boolean', 'false', 'Character count under the box'],
+      ['maxlength', 'number', '—', 'Hard cap, shown in the counter'],
+      ['autogrow', 'boolean', 'false', 'Grow to fit content'],
+    ],
+    events: [['update:modelValue', 'string'], ['focus / blur', '—']],
   },
   {
     id: 'password', name: 'ApexPassword', group: 'Text',
-    blurb: 'Password with a reveal toggle, strength meter and a live requirements checklist.',
+    blurb: 'ApexInput for password entry, with a mask toggle, a strength meter and a live requirements checklist — under the field, or in a popover that opens on focus.',
     model: 'Apex-2026',
     base: { label: 'New password', placeholder: 'Choose a strong password', leadingIcon: 'lock', meter: true, checklist: true },
-    props: [
-      ['modelValue', 'string | null'], ['toggleMask', 'boolean'], ['meter', 'boolean'],
-      ['checklist', 'boolean'], ['popover', 'boolean'], ['requirements', 'PasswordRule[]'],
-      ['minLength', 'number'], ['strengthLabels', '[string, string, string, string]'],
-      ['leadingIcon', 'string'], ['autocomplete', 'string'],
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'placeholder', type: 'text' },
+      { key: 'leadingIcon', type: 'text' }, { key: 'toggleMask', type: 'bool' },
+      { key: 'meter', type: 'bool' }, { key: 'checklist', type: 'bool' },
+      { key: 'popover', type: 'bool' }, { key: 'minLength', type: 'number' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
     ],
-    events: [['update:modelValue', 'string'], ['strength', 'number'], ['focus', 'FocusEvent'], ['blur', 'FocusEvent']],
+    props: [
+      ['modelValue', 'string', '—', 'v-model'],
+      ['toggleMask', 'boolean', 'true', 'Eye button to show or hide the value'],
+      ['meter', 'boolean', 'true', 'Four-band strength bar with a label'],
+      ['checklist', 'boolean', 'true', 'Requirements list, ticked live as you type'],
+      ['popover', 'boolean', 'false', 'Float the meter and checklist while the field has focus'],
+      ['requirements', 'PasswordRule[]', '5 defaults', '{ label, test: RegExp | (v) => boolean, advisory? } — not to be confused with the shared `rules` formatting prop'],
+      ['minLength', 'number', '8', 'Used by the default length rule'],
+      ['strengthLabels', '[string, string, string, string]', "'Too weak' … 'Strong'", 'Band labels'],
+    ],
+    events: [['update:modelValue', 'string'], ['strength', '{ score: 0-4, label }'], ['focus / blur', '—']],
   },
   {
     id: 'otp', name: 'ApexOtp', group: 'Text',
-    blurb: 'One box per character for confirmation codes. Handles paste, backspace and arrow keys across the boxes.',
-    // Deliberately partial, as the gallery has it: shows the empty boxes alongside the filled.
+    blurb: 'One-time-password entry. Controlled with v-model as one string; paste fills every box, arrows and backspace move between them.',
+    // Deliberately partial, as the gallery has it: shows filled and empty boxes together.
     model: '482',
     base: { label: 'Verification code', length: 6, integerOnly: true, help: 'Enter the 6-digit code sent to your email.' },
-    props: [
-      ['modelValue', 'string | null'], ['length', 'number'], ['mask', 'boolean'],
-      ['integerOnly', 'boolean'], ['variant', "'outlined' | 'filled'"], ['autofocus', 'boolean'],
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'length', type: 'number' },
+      { key: 'mask', type: 'bool' }, { key: 'integerOnly', type: 'bool' },
+      { key: 'variant', type: 'select', options: ['outlined', 'filled'] },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
     ],
-    events: [['update:modelValue', 'string'], ['complete', 'string'], ['focus', 'FocusEvent'], ['blur', 'FocusEvent']],
+    props: [
+      ['modelValue', 'string', '—', 'v-model — the whole code as one string'],
+      ['length', 'number', '6', 'Number of boxes'],
+      ['mask', 'boolean', 'false', 'Hide the characters'],
+      ['integerOnly', 'boolean', 'false', 'Digits only, numeric keypad on mobile'],
+      ['variant', "'outlined' | 'filled'", "'outlined'", 'Filled carries higher visual emphasis'],
+    ],
+    events: [['update:modelValue', 'string'], ['complete', 'string — every box filled'], ['focus / blur', '—']],
   },
   {
     id: 'tags', name: 'ApexTags', group: 'Text',
-    blurb: 'Free-text chips, added on Enter or a delimiter and removed with Backspace or the chip cross.',
+    blurb: 'Multiple tag entry. Enter adds, Backspace removes the last one, a delimiter adds as you type, and typeahead offers suggestions from a list.',
     model: ['lobby', 'north-wing'],
     base: {
       label: 'Tags', placeholder: 'Add a tag', delimiter: ',', clearable: true,
       options: ['lobby', 'north-wing', 'south-wing', 'reception', 'canteen', 'meeting-room', 'totem'],
       help: 'Enter or comma to add. Backspace removes the last.',
     },
-    props: [
-      ['modelValue', 'string[]'], ['delimiter', 'string'], ['allowDuplicate', 'boolean'],
-      ['max', 'number'], ['options', 'ApexOptionsInput'], ['restrict', 'boolean'],
-      ['trim', 'boolean'], ['clearable', 'boolean'], ['addOnBlur', 'boolean'],
-      ['leadingIcon', 'string'],
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'placeholder', type: 'text' },
+      { key: 'delimiter', type: 'text' }, { key: 'allowDuplicate', type: 'bool' },
+      { key: 'max', type: 'number' }, { key: 'restrict', type: 'bool' },
+      { key: 'clearable', type: 'bool' }, { key: 'addOnBlur', type: 'bool' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
     ],
-    events: [['update:modelValue', 'string[]'], ['add', 'string'], ['remove', 'string'], ['focus', 'FocusEvent'], ['blur', 'FocusEvent']],
-  },
-  {
-    id: 'number', name: 'ApexNumber', group: 'Numbers',
-    blurb: 'Numeric entry with a unit suffix or currency prefix.',
-    model: 24,
-    base: { label: 'Rotation interval', unit: 'sec', min: 5, max: 600 },
-    props: [['modelValue', 'number | null'], ['unit / currency', 'string'], ['min / max / step', 'number']],
-    events: [['update:modelValue', 'number | null']],
-  },
-  {
-    id: 'stepper', name: 'ApexStepper', group: 'Numbers',
-    blurb: 'Small integer entry; buttons disable at the bounds.',
-    model: 3,
-    base: { label: 'Displays included', min: 0, max: 20 },
-    props: [['modelValue', 'number'], ['min / max / step', 'number']],
-    events: [['update:modelValue', 'number']],
-  },
-  {
-    id: 'select', name: 'ApexSelect', group: 'Choosers',
-    blurb: 'Native select in the APEX shell.',
-    model: 'split',
-    base: { label: 'Zone layout', options: [{ value: 'full', label: 'Full area' }, { value: 'split', label: 'Split — 2 up' }], clearable: true },
-    props: [['modelValue', 'string | number | null'], ['options', 'ApexOption[] | string[]'], ['clearable', 'boolean']],
-    events: [['update:modelValue', 'value'], ['change', '—']],
-  },
-  {
-    id: 'multiselect', name: 'ApexMultiselect', group: 'Choosers',
-    blurb: 'Chips plus a searchable popover listbox.',
-    model: ['admin'],
-    base: { label: 'Roles', options: ROLE_OPTIONS, placeholder: 'Assign roles' },
-    props: [['modelValue', 'unknown[]'], ['options', 'ApexOption[]'], ['searchable', 'boolean'], ['max', 'number']],
-    events: [['update:modelValue', 'unknown[]']],
-  },
-  {
-    id: 'switch', name: 'ApexSwitch', group: 'Choice',
-    blurb: 'Boolean toggle with role="switch".',
-    model: true,
-    base: { label: 'Proof of play reporting' },
-    props: [['modelValue', 'boolean'], ['labelPlacement', "defaults to 'after'"]],
-    events: [['update:modelValue', 'boolean']],
-  },
-  {
-    id: 'segmented', name: 'ApexSegmented', group: 'Choice',
-    blurb: 'Exclusive options in one bar, roving tabindex.',
-    model: 'totem',
-    base: { label: 'Display kind', options: [{ value: 'room', label: 'Room' }, { value: 'totem', label: 'Totem' }, { value: 'wall', label: 'Video wall' }] },
-    props: [['modelValue', 'unknown'], ['options', 'ApexOption[]'], ['block', 'boolean']],
-    events: [['update:modelValue', 'unknown']],
-  },
-  {
-    id: 'radiogroup', name: 'ApexRadioGroup', group: 'Choice',
-    blurb: 'Stacked, inline, or bordered choice cards.',
-    model: 'studio',
-    base: { label: 'Plan', card: true, options: [{ value: 'free', label: 'Free', help: '1 display' }, { value: 'studio', label: 'Studio', help: '10 displays' }] },
-    props: [['modelValue', 'unknown'], ['options', 'ApexOption[]'], ['card', 'boolean'], ['inline', 'boolean']],
-    events: [['update:modelValue', 'unknown']],
-  },
-  {
-    id: 'button', name: 'ApexButton', group: 'Actions', noField: true,
-    blurb: 'Five variants, three sizes, icons, loading state.',
-    base: { variant: 'primary', icon: 'check' },
-    props: [['variant', "'primary' | 'secondary' | 'ghost' | 'danger' | 'outline-danger'"], ['loading', 'boolean'], ['href', 'string']],
-    events: [['click', 'MouseEvent']],
+    props: [
+      ['modelValue', 'string[]', '[]', 'v-model'],
+      ['delimiter', 'string', '—', "Extra commit key, e.g. ','. Enter always works"],
+      ['allowDuplicate', 'boolean', 'false', 'Let the same tag be added twice'],
+      ['max', 'number', '—', 'Cap the number of tags; shows a n/max counter'],
+      ['options', 'ApexOption[] | string[]', '—', 'Presence turns typeahead on'],
+      ['restrict', 'boolean', 'false', 'Only allow values from options'],
+      ['addOnBlur', 'boolean', 'true', 'Commit whatever is typed when the field loses focus'],
+      ['trim', 'boolean', 'true', 'Trim whitespace and drop empty entries'],
+    ],
+    events: [['update:modelValue', 'string[]'], ['add', 'string'], ['remove', 'string'], ['focus / blur', '—']],
   },
 ];
