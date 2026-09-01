@@ -51,6 +51,48 @@ export const ENTRIES: DocEntry[] = [
     events: [['update:modelValue', 'string']],
   },
   {
+    id: 'password', name: 'ApexPassword', group: 'Text',
+    blurb: 'Password with a reveal toggle, strength meter and a live requirements checklist.',
+    model: 'Apex-2026',
+    base: { label: 'New password', placeholder: 'Choose a strong password', leadingIcon: 'lock', meter: true, checklist: true },
+    props: [
+      ['modelValue', 'string | null'], ['toggleMask', 'boolean'], ['meter', 'boolean'],
+      ['checklist', 'boolean'], ['popover', 'boolean'], ['requirements', 'PasswordRule[]'],
+      ['minLength', 'number'], ['strengthLabels', '[string, string, string, string]'],
+      ['leadingIcon', 'string'], ['autocomplete', 'string'],
+    ],
+    events: [['update:modelValue', 'string'], ['strength', 'number'], ['focus', 'FocusEvent'], ['blur', 'FocusEvent']],
+  },
+  {
+    id: 'otp', name: 'ApexOtp', group: 'Text',
+    blurb: 'One box per character for confirmation codes. Handles paste, backspace and arrow keys across the boxes.',
+    // Deliberately partial, as the gallery has it: shows the empty boxes alongside the filled.
+    model: '482',
+    base: { label: 'Verification code', length: 6, integerOnly: true, help: 'Enter the 6-digit code sent to your email.' },
+    props: [
+      ['modelValue', 'string | null'], ['length', 'number'], ['mask', 'boolean'],
+      ['integerOnly', 'boolean'], ['variant', "'outlined' | 'filled'"], ['autofocus', 'boolean'],
+    ],
+    events: [['update:modelValue', 'string'], ['complete', 'string'], ['focus', 'FocusEvent'], ['blur', 'FocusEvent']],
+  },
+  {
+    id: 'tags', name: 'ApexTags', group: 'Text',
+    blurb: 'Free-text chips, added on Enter or a delimiter and removed with Backspace or the chip cross.',
+    model: ['lobby', 'north-wing'],
+    base: {
+      label: 'Tags', placeholder: 'Add a tag', delimiter: ',', clearable: true,
+      options: ['lobby', 'north-wing', 'south-wing', 'reception', 'canteen', 'meeting-room', 'totem'],
+      help: 'Enter or comma to add. Backspace removes the last.',
+    },
+    props: [
+      ['modelValue', 'string[]'], ['delimiter', 'string'], ['allowDuplicate', 'boolean'],
+      ['max', 'number'], ['options', 'ApexOptionsInput'], ['restrict', 'boolean'],
+      ['trim', 'boolean'], ['clearable', 'boolean'], ['addOnBlur', 'boolean'],
+      ['leadingIcon', 'string'],
+    ],
+    events: [['update:modelValue', 'string[]'], ['add', 'string'], ['remove', 'string'], ['focus', 'FocusEvent'], ['blur', 'FocusEvent']],
+  },
+  {
     id: 'number', name: 'ApexNumber', group: 'Numbers',
     blurb: 'Numeric entry with a unit suffix or currency prefix.',
     model: 24,
