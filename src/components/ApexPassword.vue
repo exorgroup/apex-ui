@@ -7,7 +7,7 @@
 import { computed, ref } from 'vue';
 import ApexInput from './ApexInput.vue';
 import ApexIcon from './ApexIcon.vue';
-import { useApexI18n } from '../core/i18n';
+import { pickFieldProps } from '../core/utils';
 import type { ApexFieldProps } from '../types';
 
 export interface PasswordRule {
@@ -50,7 +50,6 @@ const emit = defineEmits<{
   (e: 'strength', payload: { score: number; label: string }): void;
 }>();
 
-const t = useApexI18n();
 const focused = ref(false);
 const value = computed(() => String(props.modelValue ?? ''));
 
@@ -82,6 +81,31 @@ const bands = computed(() => props.strengthLabels || ['Too weak', 'Weak', 'Good'
 const strengthLabel = computed(() => (value.value ? bands.value[Math.max(0, score.value - 1)] : ''));
 const showPanel = computed(() => (props.meter || props.checklist) && (!props.popover || focused.value));
 
+/**
+ * What ApexInput receives — an allow-list, never the whole prop object.
+ *
+ * ApexInput does not declare this component's own props, so spreading them all
+ * sends them straight through to the DOM as attributes. `popover` is the one
+ * that does real damage: `popover="false"` is not a valid value for the native
+ * Popover API attribute, and the spec maps any invalid value to the `auto`
+ * state. The UA stylesheet then applies
+ * `position: fixed; inset: 0; margin: auto; border: solid` to the field, so
+ * every password field on a page detaches from the layout and stacks in the
+ * middle of the viewport, bordered, no matter where it was written.
+ *
+ * `minLength` is quieter and just as wrong: ApexInput has its own `minLength`
+ * (characters typed before `@complete` fires), so the password length rule
+ * would silently retune the autocomplete threshold.
+ *
+ * Same allow-list the JS mirror uses — see inputProps in apex-ui-mirror.js.
+ */
+const inputProps = computed(() => ({
+  ...pickFieldProps(props as unknown as Record<string, unknown>),
+  placeholder: props.placeholder,
+  leadingIcon: props.leadingIcon,
+  autocomplete: props.autocomplete,
+}));
+
 function onInput(v: string) {
   emit('update:modelValue', v);
   emit('strength', { score: score.value, label: strengthLabel.value });
@@ -90,8 +114,8 @@ function onInput(v: string) {
 
 <template>
   <div class="apex-pw" :data-popover="popover ? 'true' : 'false'">
-    <ApexInput v-bind="props" type="password" :model-value="modelValue" :autocomplete="autocomplete"
-               :trailing-action="undefined" :help="help"
+    <ApexInput v-bind="inputProps" type="password" :model-value="modelValue"
+               :trailing-action="undefined"
                @update:model-value="onInput" @focus="focused = true; emit('focus')"
                @blur="focused = false; emit('blur')">
       <template v-if="!toggleMask" #trailing><span></span></template>
