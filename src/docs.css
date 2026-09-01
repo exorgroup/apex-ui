@@ -116,3 +116,7 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
   padding: 0.1em 0.35em; border-radius: 4px;
   background: var(--apex-surface, rgb(255 255 255 / 0.08));
 }
+
+/* Conditional formatting is a single demo, not a grid — capped so the field
+   keeps a realistic form width rather than stretching the full page. */
+.cell--solo { max-width: 420px; }

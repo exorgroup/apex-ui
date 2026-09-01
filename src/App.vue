@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import {
-  AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, ENTRIES, ICON_SLOT_CASES,
+  AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, ENTRIES, FORMATTING_RULE, ICON_SLOT_CASES,
   KEY_FILTER_CASES, LABEL_PLACEMENTS, SIZES, STATE_CASES, TONE_CASES,
 } from './registry';
 import type { DocEntry } from './registry';
@@ -80,6 +80,21 @@ const usage = computed(() => {
 
   return `<${entry.value.name} v-model="value"\n${lines.join('\n')}\n/>`;
 });
+
+/**
+ * Conditional formatting demo, one value per control so switching away and back
+ * keeps what you typed.
+ *
+ * The gallery binds this one-way, which pins it to the matched state. Binding it
+ * two-way costs nothing at rest — it still opens showing the warning — and it
+ * demonstrates the part that matters: rules re-evaluate on every change, so
+ * typing clears the warning and clearing the field brings it back.
+ */
+const fmt = reactive<Record<string, unknown>>({});
+
+watch(current, (id) => {
+  if (!(id in fmt)) fmt[id] = Array.isArray(ENTRIES.find((e) => e.id === id)!.model) ? [] : '';
+}, { immediate: true });
 
 /* --- ApexInput-only sections ------------------------------------- */
 
@@ -288,6 +303,17 @@ async function copyUsage() {
               v-bind="baseline(c.bind)"
             />
           </div>
+        </div>
+
+        <h2>Conditional formatting</h2>
+        <div class="cell cell--solo">
+          <span class="cell__tag">:rules="[{ when: { empty: true }, tone: 'warning', message: … }]"</span>
+          <component
+            :is="entry.name"
+            v-model="fmt[entry.id]"
+            v-bind="baseline()"
+            :rules="FORMATTING_RULE"
+          />
         </div>
 
         <h2>Sizes</h2>

@@ -55,6 +55,15 @@ export const TONE_CASES = [
   { label: 'Required, empty', bind: { required: true, error: 'This field is required.' }, empty: true },
 ];
 
+/**
+ * The rule the Conditional formatting section demonstrates. `empty` is a real
+ * ApexCondition operator (see ApexCondition in apex-ui/src/types.ts), evaluated
+ * on every change — so clearing the field brings the warning back.
+ */
+export const FORMATTING_RULE = [
+  { when: { empty: true }, tone: 'warning', message: 'Nothing selected yet.' },
+];
+
 export const STATE_CASES = [
   { label: 'disabled', bind: { disabled: true } },
   { label: 'readonly', bind: { readonly: true } },
