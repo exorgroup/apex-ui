@@ -1,0 +1,26 @@
+{
+  "name": "exorgroup/apex-ui",
+  "description": "APEX Pando UI — Vue 3 form controls for Laravel. Ships the built assets, a Blade directive, and an install command.",
+  "type": "library",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.2",
+    "illuminate/support": "^11.0|^12.0"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^9.0",
+    "phpunit/phpunit": "^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Exorgroup\\ApexUi\\": "src/Laravel/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": ["Exorgroup\\ApexUi\\ApexUiServiceProvider"]
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
