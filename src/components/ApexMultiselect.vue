@@ -140,7 +140,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
       </div>
 
       <div v-if="open" class="apex-pop" :id="listId" role="listbox" aria-multiselectable="true">
-        <div v-if="showFilter" class="apex-pop__filter">
+        <div v-if="showFilter" class="apex-pop__filter" :class="ui?.filter">
           <ApexIcon name="search" />
           <input ref="filterEl" type="text" :value="query" :placeholder="filterPlaceholder || t('apexui.search')"
                  :aria-label="t('apexui.search')" autocomplete="off"
@@ -150,7 +150,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
             <ApexIcon name="close" :size="16" />
           </button>
         </div>
-        <button v-if="toggleAll && !query" type="button" class="apex-pop__all" @click="toggleEverything">
+        <button v-if="toggleAll && !query" type="button" class="apex-pop__all" :class="ui?.selectAll" @click="toggleEverything">
           {{ allSelected ? t('apexui.clear') : t('apexui.select') }}
           <span>{{ selected.length }} / {{ allOpts.length }}</span>
         </button>
@@ -159,7 +159,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
                 :data-active="i === active ? 'true' : 'false'"
                 :disabled="o.disabled || (atMax && !selected.includes(o.value))"
                 @mouseenter="active = i" @click="toggle(o)">
-          <span class="apex-pop__box" :data-on="selected.includes(o.value)" aria-hidden="true">
+          <span class="apex-pop__box" :class="ui?.checkbox" :data-on="selected.includes(o.value)" aria-hidden="true">
             <ApexIcon v-if="selected.includes(o.value)" name="check" :size="15" />
           </span>
           <img v-if="o.image" class="apex-pop__img" :src="o.image" alt="" />

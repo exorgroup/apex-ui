@@ -125,7 +125,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
         <img v-if="selected && selected.image" class="apex-ctl__img" :src="selected.image" alt="" />
         <ApexIcon v-else-if="selected && selected.icon" :name="selected.icon" class="apex-ctl__icon" />
         <ApexIcon v-else-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" />
-        <span v-if="selected" class="apex-ctl__value">{{ selected.label }}</span>
+        <span v-if="selected" class="apex-ctl__value" :class="ui?.value">{{ selected.label }}</span>
         <span v-else class="apex-ctl__ph">{{ placeholder || t('apexui.select') }}</span>
         <ApexIcon v-if="loading" name="progress_activity" spin class="apex-ctl__icon" />
         <button v-if="clearable && filled && !disabled" type="button" class="apex-ctl__btn"
@@ -137,7 +137,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
       </div>
       <div v-if="open" class="apex-pop" :id="listId" role="listbox"
            :aria-activedescendant="active >= 0 ? listId + '-' + active : undefined">
-        <div v-if="showFilter" class="apex-pop__filter">
+        <div v-if="showFilter" class="apex-pop__filter" :class="ui?.filter">
           <ApexIcon name="search" />
           <input ref="filterEl" type="text" :value="query" :placeholder="filterPlaceholder || t('apexui.search')"
                  :aria-label="t('apexui.search')" autocomplete="off"
@@ -157,7 +157,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
             {{ o.label }}
             <span v-if="o.help" class="apex-pop__help">{{ o.help }}</span>
           </span>
-          <ApexIcon v-if="o.value === modelValue" name="check" class="apex-pop__tick" />
+          <ApexIcon v-if="o.value === modelValue" name="check" class="apex-pop__tick" :class="ui?.tick" />
         </button>
         <p v-if="!opts.length" class="apex-pop__empty">{{ t('apexui.noResults') }}</p>
       </div>

@@ -90,7 +90,7 @@ defineExpose({ focus: () => focusBox(0) });
              v-slot="{ id, describedBy, invalid, size }">
     <div class="apex-otp" :data-size="size" :data-variant="variant" :data-disabled="disabled ? 'true' : 'false'"
          role="group" :aria-label="label || 'One-time password'" :aria-describedby="describedBy">
-      <input v-for="(c, i) in chars" :key="i" ref="boxes" class="apex-otp__box"
+      <input v-for="(c, i) in chars" :key="i" ref="boxes" class="apex-otp__box" :class="ui?.box"
              :id="i === 0 ? id : undefined" :name="name ? `${name}-${i + 1}` : undefined"
              :type="mask ? 'password' : 'text'"
              :inputmode="integerOnly ? 'numeric' : 'text'" :pattern="integerOnly ? '[0-9]*' : undefined"

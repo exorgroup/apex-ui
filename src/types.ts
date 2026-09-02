@@ -88,6 +88,22 @@ export interface ApexFieldClasses {
   popover?: string;
   /** A row inside that overlay. */
   option?: string;
+
+  /* Parts only some controls render. Ignored by the controls that do not. */
+  /** ApexOtp — one digit box. */
+  box?: string;
+  /** ApexStepper and ApexSelect — the displayed value. */
+  value?: string;
+  /** ApexStepper — the unit tag. */
+  unit?: string;
+  /** ApexSelect — the tick beside the selected row. */
+  tick?: string;
+  /** ApexSelect and ApexMultiselect — the search box in the overlay. */
+  filter?: string;
+  /** ApexMultiselect — the select-all row. */
+  selectAll?: string;
+  /** ApexMultiselect — the checkbox on a row. */
+  checkbox?: string;
 }
 
 export interface ApexFieldProps {

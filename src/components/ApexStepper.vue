@@ -42,14 +42,14 @@ function bump(d: number) {
       <button type="button" :aria-label="t('apexui.decrement')" :disabled="disabled || atMin" @click="bump(-1)">
         <ApexIcon name="remove" :size="18" />
       </button>
-      <span class="apex-stepper__val" :data-align="align" :data-unit="unit ? 'true' : 'false'">
+      <span class="apex-stepper__val" :class="ui?.value" :data-align="align" :data-unit="unit ? 'true' : 'false'">
         <input :id="id" :name="name || id" type="number" :value="modelValue ?? 0"
                :min="min" :max="max" :step="step" :disabled="disabled" :readonly="readonly"
                :aria-describedby="describedBy" :aria-invalid="invalid || undefined"
                :aria-label="labelPlacement === 'hidden' ? label : undefined"
                @input="emit('update:modelValue', Number(($event.target as HTMLInputElement).value))"
                @focus="focused = true" @blur="focused = false" />
-        <span v-if="unit" class="apex-stepper__unit">{{ unit }}</span>
+        <span v-if="unit" class="apex-stepper__unit" :class="ui?.unit">{{ unit }}</span>
       </span>
       <button type="button" :aria-label="t('apexui.increment')" :disabled="disabled || atMax" @click="bump(1)">
         <ApexIcon name="add" :size="18" />
