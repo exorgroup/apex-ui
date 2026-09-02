@@ -639,6 +639,32 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['valueArc', '.apex-knob__value', '--apex-knob-value; thickness from strokeWidth'],
     ['text', '.apex-knob__text', '--apex-knob-text, --apex-knob-text-size'],
   ],
+  button: [
+    ['root', '.apex-btn', 'the four colour variables plus --apex-btn-h / -fs / -pad / -radius'],
+    ['label', '.apex-btn__txt', 'inherits the button font size'],
+    ['badge', '.apex-btn__badge', 'redefines the colour pair for itself'],
+  ],
+  splitbutton: [
+    ['root', '.apex-split', 'the wrapper; colours cascade to both halves'],
+    ['action', '.apex-split__action', 'an .apex-btn — same four colours'],
+    ['toggle', '.apex-split__toggle', 'an .apex-btn — same four colours'],
+  ],
+  speeddial: [
+    ['root', '.apex-dial', ''],
+    ['trigger', '.apex-dial__trigger', 'an .apex-btn — same four colours'],
+    ['items', '.apex-dial__items', 'the fan'],
+    ['item', '.apex-dial__item', 'one action'],
+    ['mask', '.apex-dial__mask', 'maskColor and maskOpacity props'],
+    ['tooltip', '.apex-dial__tip', ''],
+  ],
+  buttongroup: [
+    ['root', '.apex-btngroup', 'the unframed group'],
+    ['frame', '.apex-btngroup', 'the framed variant, when `label` is set'],
+    ['help', '.apex-btngroup__help', '--apex-btngroup-help-fg, --apex-btngroup-help-fs'],
+  ],
+  icon: [
+    ['root', '.apex-icon', '--apex-icon-size, --apex-icon-wght, --apex-icon-fill'],
+  ],
   slider: [
     ['track', '.apex-slider__track', '--apex-slider-track, --apex-slider-size'],
     ['fill', '.apex-slider__fill', '--apex-slider-color'],
@@ -713,6 +739,50 @@ export const SNIP_OWN: Record<string, string> = {
 /* The value bubble was pinned to the sidebar surface with no way out. */
 .s-track.apex-slider__track  { --apex-slider-track: #EADFD6; }
 .s-handle.apex-slider__handle { box-shadow: 0 2px 8px rgb(196 74 6 / 0.4); }`,
+
+  button: `<!-- A severity is four variables. Set them and every variant follows:
+     solid uses color for the background, outlined and text use it for the
+     foreground, and all three use tintColor for the hover wash. -->
+<ApexButton
+  color="#6F2A03" hover-color="#8F3A08"
+  label-color="#FFF8F2" tint-color="rgb(111 42 3 / 0.12)"
+>Cocoa</ApexButton>
+
+<ApexButton variant="outlined" color="#6F2A03" tint-color="rgb(111 42 3 / 0.12)">Cocoa</ApexButton>
+
+/* Or as a reusable class, which is closer to a real severity. */
+.sev-cocoa.apex-btn {
+  --apex-btn-color: #6F2A03;
+  --apex-btn-hover: #8F3A08;
+  --apex-btn-label: #FFF8F2;
+  --apex-btn-tint:  rgb(111 42 3 / 0.12);
+}`,
+
+  splitbutton: `<!-- Both halves are .apex-btn, so one set of colours covers them. -->
+<ApexSplitButton label="Save" :model="items"
+  color="#6F2A03" hover-color="#8F3A08" label-color="#fff"
+  :ui="{ action: 'sb-action', toggle: 'sb-toggle' }" />`,
+
+  speeddial: `<ApexSpeedDial :items="items" color="#6F2A03" mask mask-color="#2A1206"
+  :ui="{ trigger: 'dial-trigger', item: 'dial-item', tooltip: 'dial-tip' }" />
+
+/* radius on this control is the arc radius in pixels, not a corner radius —
+   it predates the shared appearance props, which stand aside here. */`,
+
+  buttongroup: `<ApexButtonGroup label="View mode" help="Applies to every display."
+  :ui="{ frame: 'vm-frame', help: 'vm-help' }" />
+
+/* The help line has its own class. It used to be .apex-field__msg, so a
+   field-message override restyled it by accident. */
+.vm-help.apex-btngroup__help { --apex-btngroup-help-fg: #6F2A03; }`,
+
+  icon: `<!-- All three are already variables, set from the props. -->
+<ApexIcon name="star" :size="30" :weight="600" fill :ui="{ root: 'gold' }" />
+
+.gold.apex-icon { color: #C9971B; }
+
+/* An icon paints in currentColor, so most of the time the containing
+   element's colour is the only thing you need to set. */`,
 
   tags: `<ApexTags v-model="tags" label="Tags" :ui="{ chip: 'brand-chip' }" />
 
