@@ -627,6 +627,24 @@ export const OWN_PARTS: Record<string, string[][]> = {
   tags: [
     ['chip', '.apex-chip', '--apex-chip-bg, --apex-chip-fg, --apex-chip-border, --apex-chip-radius'],
   ],
+  stepper: [
+    ['control', '.apex-stepper', 'the shared --apex-ctl-* set — the box behaves like any field box'],
+    ['decrement', '.apex-stepper__btn (first)', '--apex-stepper-btn-w, -bg, -fg, -hover-bg, -hover-fg'],
+    ['increment', '.apex-stepper__btn (last)', 'the same variables — both buttons share them'],
+    ['value', '.apex-stepper__val', 'inherits --apex-ctl-fg and --apex-ctl-fs'],
+    ['unit', '.apex-stepper__unit', ''],
+  ],
+  knob: [
+    ['range', '.apex-knob__range', '--apex-knob-range; thickness from railWidth'],
+    ['arc', '.apex-knob__value', '--apex-knob-value; thickness from strokeWidth'],
+    ['text', '.apex-knob__text', '--apex-knob-text, --apex-knob-text-size'],
+  ],
+  slider: [
+    ['track', '.apex-slider__track', '--apex-slider-track, --apex-slider-size'],
+    ['fill', '.apex-slider__fill', '--apex-slider-color'],
+    ['handle', '.apex-slider__handle', '--apex-slider-handle, --apex-slider-handle-size'],
+    ['tooltip', '.apex-slider__tip', '--apex-slider-tip-bg, --apex-slider-tip-fg'],
+  ],
 };
 
 export const SNIP_OWN: Record<string, string> = {
@@ -658,6 +676,36 @@ export const SNIP_OWN: Record<string, string> = {
   --apex-otp-border-focus: #0B5FFF;
   --apex-otp-radius: 10px;
 }`,
+
+  stepper: `<!-- The box is a field box, so the shared props work here exactly
+     as they do on an ApexInput. -->
+<ApexStepper v-model="qty" label="Displays" unit="screens"
+  background="#101820" border-color="#C24A06" radius="12px"
+  :ui="{ decrement: 'step-btn', increment: 'step-btn' }" />
+
+.step-btn.apex-stepper__btn {
+  --apex-stepper-btn-w: 34px;
+  --apex-stepper-btn-fg: #C24A06;
+  --apex-stepper-btn-hover-bg: #FFF1E5;
+}`,
+
+  knob: `<ApexKnob v-model="volume" label="Volume"
+  value-color="#C24A06" :rail-width="6" :text-size="24"
+  :ui="{ range: 'k-rail', text: 'k-text' }" />
+
+/* railWidth is new: the unfilled arc used to be forced to strokeWidth,
+   so a thin rail behind a thick value arc was not expressible. */
+.k-rail.apex-knob__range { --apex-knob-range: #EADFD6; }
+.k-text.apex-knob__text  { font-weight: 700; }`,
+
+  slider: `<ApexSlider v-model="brightness" label="Brightness" show-tooltip
+  color="#C24A06" :handle-size="24"
+  tooltip-background="#C24A06" tooltip-color="#fff"
+  :ui="{ track: 's-track', handle: 's-handle' }" />
+
+/* The value bubble was pinned to the sidebar surface with no way out. */
+.s-track.apex-slider__track  { --apex-slider-track: #EADFD6; }
+.s-handle.apex-slider__handle { box-shadow: 0 2px 8px rgb(196 74 6 / 0.4); }`,
 
   tags: `<ApexTags v-model="tags" label="Tags" :ui="{ chip: 'brand-chip' }" />
 

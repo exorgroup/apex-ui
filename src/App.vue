@@ -1144,6 +1144,20 @@ async function copyUsage() {
           <div class="usage"><pre><code>{{ SNIP_OWN[entry.id] }}</code></pre></div>
         </template>
 
+        <!-- ApexNumber, like ApexInput, renders only shared parts. -->
+        <template v-if="entry.id === 'number'">
+          <h2>Customising</h2>
+          <p class="note">
+            ApexNumber adds no parts of its own — the box, the value, the status glyph and
+            the <code>unit</code> / <code>currency</code> affixes are all shared, so the whole
+            surface is documented on
+            <button class="linkish" @click="current = 'field'">ApexField</button> and works here
+            unchanged. The affixes take <code>affixColor</code>, and
+            <code>ui.affix</code> reaches both of them.
+          </p>
+          <div class="usage"><pre><code>{{ SNIP_UI }}</code></pre></div>
+        </template>
+
         <!-- ApexInput's customising story is short by design: everything it
              renders is shared, so the reference lives on ApexField. -->
         <template v-if="entry.id === 'input'">
