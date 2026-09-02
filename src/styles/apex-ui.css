@@ -10,16 +10,16 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 @keyframes apex-spin{to{transform:rotate(360deg)}}
 
 /* ─── field shell ──────────────────────────────────────── */
-.apex-field{--apex-ctl-h:42px;--apex-ctl-fs:14.5px;--apex-ctl-pad:12px;--apex-label-fs:13px;display:flex;flex-direction:column;gap:6px;min-width:0;font-family:var(--font-sans);color:var(--fg-default)}
+.apex-field{--apex-field-danger:var(--accent-danger);--apex-field-warning:var(--accent-warning);--apex-field-success:var(--accent-success);--apex-field-required:var(--accent-danger);--apex-ctl-h:42px;--apex-ctl-fs:14.5px;--apex-ctl-pad:12px;--apex-label-fs:13px;display:flex;flex-direction:column;gap:6px;min-width:0;font-family:var(--font-sans);color:var(--fg-default)}
 .apex-field[data-size="sm"]{--apex-ctl-h:34px;--apex-ctl-fs:13px;--apex-ctl-pad:10px;--apex-label-fs:12px;--apex-icon-size:18px}
 .apex-field[data-size="lg"]{--apex-ctl-h:50px;--apex-ctl-fs:16px;--apex-ctl-pad:14px;--apex-label-fs:14px;--apex-icon-size:22px}
 .apex-field__body{display:flex;flex-direction:column;gap:5px;min-width:0}
 .apex-field__label{font-size:var(--apex-label-fs);font-weight:600;letter-spacing:-.003em;color:var(--fg-default);display:inline-flex;align-items:center;gap:6px;min-width:0}
-.apex-field__req{color:var(--accent-danger);font-weight:700}
+.apex-field__req{color:var(--apex-field-required);font-weight:700}
 .apex-field__msg{margin:0;font-size:12.5px;line-height:1.45;color:var(--fg-subtle);display:flex;align-items:flex-start;gap:5px}
-.apex-field__msg[data-tone="danger"]{color:var(--apex-red-600)}
-.apex-field__msg[data-tone="warning"]{color:var(--accent-warning)}
-.apex-field__msg[data-tone="success"]{color:var(--accent-success)}
+.apex-field__msg[data-tone="danger"]{color:var(--apex-field-danger)}
+.apex-field__msg[data-tone="warning"]{color:var(--apex-field-warning)}
+.apex-field__msg[data-tone="success"]{color:var(--apex-field-success)}
 .apex-field__msg .apex-icon{--apex-icon-size:15px;margin-block-start:1px}
 .apex-field[data-disabled="true"]{opacity:.62}
 .apex-field[data-disabled="true"] .apex-field__label{color:var(--fg-muted)}
@@ -47,7 +47,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-field[data-lp="float-over"][data-float="true"] .apex-field__label{inset-block-start:-7px;transform:translateY(-100%);font-size:12.5px;font-weight:600;color:var(--fg-muted);inset-inline-start:1px}
 .apex-field[data-lp="float-in"][data-float="true"] .apex-field__label{inset-block-start:9px;transform:none;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
 .apex-field[data-lp^="float"][data-float="true"][data-focused="true"] .apex-field__label,.apex-field[data-lp="floating"][data-float="true"][data-focused="true"] .apex-field__label{color:var(--accent-primary)}
-.apex-field[data-lp^="float"][data-tone="danger"] .apex-field__label{color:var(--accent-danger)}
+.apex-field[data-lp^="float"][data-tone="danger"] .apex-field__label{color:var(--apex-field-danger)}
 /* static in-box label */
 .apex-field[data-lp="inline"]{--apex-ctl-h:58px}
 .apex-field[data-lp="inline"] .apex-field__label{position:absolute;inset-inline-start:var(--apex-ctl-pad);inset-block-start:9px;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-subtle);pointer-events:none;z-index:2}
@@ -79,14 +79,14 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-ctl--textarea .apex-ctl__input{height:auto;resize:vertical;line-height:1.6;min-height:calc(var(--apex-ctl-h) * 2)}
 
 /* tones */
-.apex-field[data-tone="danger"] .apex-ctl{border-color:var(--accent-danger);background:color-mix(in srgb,var(--accent-danger) 5%,var(--bg-surface))}
-.apex-field[data-tone="danger"] .apex-ctl[data-focused="true"]{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-danger) 18%,transparent)}
-.apex-field[data-tone="warning"] .apex-ctl{border-color:var(--accent-warning);background:color-mix(in srgb,var(--accent-warning) 5%,var(--bg-surface))}
-.apex-field[data-tone="success"] .apex-ctl{border-color:var(--accent-success)}
+.apex-field[data-tone="danger"] .apex-ctl{border-color:var(--apex-field-danger);background:color-mix(in srgb,var(--apex-field-danger) 5%,var(--bg-surface))}
+.apex-field[data-tone="danger"] .apex-ctl[data-focused="true"]{box-shadow:0 0 0 3px color-mix(in srgb,var(--apex-field-danger) 18%,transparent)}
+.apex-field[data-tone="warning"] .apex-ctl{border-color:var(--apex-field-warning);background:color-mix(in srgb,var(--apex-field-warning) 5%,var(--bg-surface))}
+.apex-field[data-tone="success"] .apex-ctl{border-color:var(--apex-field-success)}
 .apex-ctl__status{flex:0 0 auto;display:grid;place-items:center}
-.apex-field[data-tone="danger"] .apex-ctl__status{color:var(--accent-danger)}
-.apex-field[data-tone="warning"] .apex-ctl__status{color:var(--accent-warning)}
-.apex-field[data-tone="success"] .apex-ctl__status{color:var(--accent-success)}
+.apex-field[data-tone="danger"] .apex-ctl__status{color:var(--apex-field-danger)}
+.apex-field[data-tone="warning"] .apex-ctl__status{color:var(--apex-field-warning)}
+.apex-field[data-tone="success"] .apex-ctl__status{color:var(--apex-field-success)}
 
 /* number alignment */
 .apex-ctl--num[data-align="start"] .apex-ctl__input{text-align:start}
@@ -230,7 +230,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-otp[data-variant="filled"] .apex-otp__box{background:var(--bg-muted);border-color:transparent;font-size:24px}
 .apex-otp[data-variant="filled"] .apex-otp__box[data-filled="true"]{background:color-mix(in srgb,var(--accent-primary) 10%,var(--bg-surface));border-color:color-mix(in srgb,var(--accent-primary) 35%,transparent);color:var(--accent-primary)}
 .apex-otp[data-variant="filled"] .apex-otp__box:focus{background:var(--bg-surface);border-color:var(--accent-primary)}
-.apex-field[data-tone="danger"] .apex-otp__box{border-color:var(--accent-danger)}
+.apex-field[data-tone="danger"] .apex-otp__box{border-color:var(--apex-field-danger)}
 
 /* ─── password ─────────────────────────────────────────── */
 .apex-pw{position:relative}
@@ -276,7 +276,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-listbox__opt[data-selected="true"]{background:color-mix(in srgb,var(--accent-primary) 10%,transparent);color:var(--accent-primary);font-weight:600}
 .apex-listbox__opt[data-disabled="true"]{opacity:.45;cursor:not-allowed}
 .apex-listbox__txt{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
-.apex-field[data-tone="danger"] .apex-listbox{border-color:var(--accent-danger)}
+.apex-field[data-tone="danger"] .apex-listbox{border-color:var(--apex-field-danger)}
 
 /* ─── rating ───────────────────────────────────────────── */
 .apex-rating{--rating-size:26px;display:inline-flex;align-items:center;gap:3px;outline:none;border-radius:var(--r-sm);padding:2px}
@@ -297,7 +297,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-rating__cancel{display:grid;place-items:center;border:0;background:transparent;color:var(--fg-subtle);cursor:pointer;padding:3px;margin-inline-end:4px;border-radius:var(--r-sm)}
 .apex-rating__cancel:hover{color:var(--accent-danger);background:var(--bg-muted)}
 .apex-rating__value{margin-inline-start:8px;font-size:13px;font-weight:600;color:var(--fg-muted);font-family:var(--font-mono)}
-.apex-field[data-tone="danger"] .apex-rating__bg{color:var(--accent-danger)}
+.apex-field[data-tone="danger"] .apex-rating__bg{color:var(--apex-field-danger)}
 
 /* ─── tree select ──────────────────────────────────────── */
 .apex-tree{padding:5px}
@@ -348,7 +348,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-sb__txt{display:flex;flex-direction:column;align-items:center;gap:1px}
 .apex-sb__help{font-size:11px;font-weight:500;opacity:.75}
 .apex-sb__img{inline-size:18px;block-size:18px;border-radius:3px;object-fit:cover}
-.apex-field[data-tone="danger"] .apex-sb{border-color:var(--accent-danger)}
+.apex-field[data-tone="danger"] .apex-sb{border-color:var(--apex-field-danger)}
 
 /* ─── slider ───────────────────────────────────────────── */
 .apex-slider{--sl-size:6px;display:block;padding-block:10px}
@@ -375,7 +375,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-slider__tip{position:absolute;inset-block-end:calc(100% + 9px);inset-inline-start:50%;transform:translateX(-50%);background:var(--bg-sidebar);color:var(--fg-on-dark);font-family:var(--font-mono);font-size:11.5px;font-style:normal;font-weight:600;padding:3px 7px;border-radius:var(--r-sm);white-space:nowrap;opacity:0;transition:opacity var(--dur-fast);pointer-events:none}
 .apex-slider__handle:hover .apex-slider__tip,.apex-slider__handle:focus-visible .apex-slider__tip,.apex-slider__tip[data-open="true"]{opacity:1}
 .apex-slider[data-orientation="vertical"] .apex-slider__tip{inset-block-end:auto;inset-block-start:50%;inset-inline-start:calc(100% + 9px);transform:translateY(-50%)}
-.apex-field[data-tone="danger"] .apex-slider__handle{border-color:var(--accent-danger)}
+.apex-field[data-tone="danger"] .apex-slider__handle{border-color:var(--apex-field-danger)}
 
 /* ─── toggle button ────────────────────────────────────── */
 .apex-tb{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-block-size:var(--apex-ctl-h);padding-inline:18px;border:1px solid var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);font:inherit;font-size:calc(var(--apex-ctl-fs) - .5px);font-weight:600;color:var(--fg-muted);cursor:pointer;white-space:nowrap;transition:background var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast),box-shadow var(--dur-fast)}
@@ -390,7 +390,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-tb[data-variant="outline"][data-on="true"]{background:transparent;color:var(--tb-on,var(--accent-primary));box-shadow:inset 0 0 0 1px var(--tb-on,var(--accent-primary))}
 .apex-tb:disabled{opacity:.5;cursor:not-allowed}
 .apex-tb:focus-visible{outline:none;box-shadow:var(--focus-ring)}
-.apex-field[data-tone="danger"] .apex-tb{border-color:var(--accent-danger)}
+.apex-field[data-tone="danger"] .apex-tb{border-color:var(--apex-field-danger)}
 
 /* ─── switch ───────────────────────────────────────────── */
 .apex-switch{position:relative;inline-size:44px;block-size:25px;border:0;border-radius:var(--r-full);background:var(--border-strong);cursor:pointer;flex:0 0 auto;transition:background var(--dur-mid) var(--ease-out);padding:0}
@@ -2099,7 +2099,7 @@ border:0;background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;paddi
 .apex-stepper button:last-child{border-inline-start:1px solid var(--border-subtle)}
 .apex-stepper button:hover:not(:disabled){background:var(--bg-muted);color:var(--fg-default)}
 .apex-stepper button:disabled{opacity:.4;cursor:not-allowed}
-.apex-field[data-tone="danger"] .apex-stepper{border-color:var(--accent-danger)}
+.apex-field[data-tone="danger"] .apex-stepper{border-color:var(--apex-field-danger)}
 
 /* ─── button ───────────────────────────────────────────── */
 /* Each severity supplies --b (base), --bh (hover), --bt (text on solid), --bs (soft tint). */
@@ -2953,7 +2953,7 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
 .apex-order__row:active .apex-order__grip{cursor:grabbing}
 .apex-order__txt{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
 .apex-order__num{font-family:var(--font-mono);font-size:11px;font-weight:600;color:var(--fg-subtle);flex:0 0 auto;min-inline-size:18px;text-align:end}
-.apex-field[data-tone="danger"] .apex-order__panel{border-color:var(--accent-danger)}
+.apex-field[data-tone="danger"] .apex-order__panel{border-color:var(--apex-field-danger)}
 
 /* ─── split button + overlay menu ──────────────────────── */
 .apex-split{position:relative;display:inline-flex}
