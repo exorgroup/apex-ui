@@ -121,14 +121,14 @@ function onInput(v: string) {
       <template v-if="!toggleMask" #trailing><span></span></template>
     </ApexInput>
 
-    <div v-if="showPanel" class="apex-pw__panel" :data-floating="popover ? 'true' : 'false'">
-      <div v-if="meter" class="apex-pw__meter" :data-score="score"
+    <div v-if="showPanel" class="apex-pw__panel" :class="ui?.panel" :data-floating="popover ? 'true' : 'false'">
+      <div v-if="meter" class="apex-pw__meter" :class="ui?.meter" :data-score="score"
            role="progressbar" :aria-valuemin="0" :aria-valuemax="4" :aria-valuenow="score"
            :aria-label="'Password strength: ' + (strengthLabel || 'empty')">
         <span v-for="i in 4" :key="i" :data-on="i <= score"></span>
       </div>
-      <p v-if="meter && strengthLabel" class="apex-pw__label" :data-score="score">{{ strengthLabel }}</p>
-      <ul v-if="checklist" class="apex-pw__rules">
+      <p v-if="meter && strengthLabel" class="apex-pw__label" :class="ui?.strength" :data-score="score">{{ strengthLabel }}</p>
+      <ul v-if="checklist" class="apex-pw__rules" :class="ui?.rules">
         <li v-for="r in results" :key="r.label" :data-ok="r.ok">
           <ApexIcon :name="r.ok ? 'check_circle' : 'radio_button_unchecked'" :size="16" />
           <span>{{ r.label }}</span>

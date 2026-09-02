@@ -104,6 +104,18 @@ export interface ApexFieldClasses {
   selectAll?: string;
   /** ApexMultiselect — the checkbox on a row. */
   checkbox?: string;
+  /** ApexTextarea — the character counter. */
+  counter?: string;
+  /** ApexPassword — the meter and checklist panel. */
+  panel?: string;
+  /** ApexPassword — the four-band strength bar. */
+  meter?: string;
+  /** ApexPassword — the strength label under the bar. */
+  strength?: string;
+  /** ApexPassword — the requirements list. */
+  rules?: string;
+  /** ApexTags — one tag chip. */
+  chip?: string;
 }
 
 export interface ApexFieldProps {

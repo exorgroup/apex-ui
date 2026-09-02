@@ -59,7 +59,7 @@ function onPaste(e: ClipboardEvent) {
                 @focus="focused = true; emit('focus')" @blur="focused = false; emit('blur')"></textarea>
       <ApexIcon v-if="statusGlyph" :name="statusGlyph" class="apex-ctl__status" :size="18" />
     </div>
-    <p v-if="counter" class="apex-field__msg" style="justify-content:flex-end">
+    <p v-if="counter" class="apex-field__msg apex-ctl__counter" :class="ui?.counter">
       {{ count }}<template v-if="maxlength"> / {{ maxlength }}</template>
     </p>
   </ApexField>

@@ -129,7 +129,7 @@ onBeforeUnmount(() => {
       <div class="apex-ctl apex-ctl--multi" :data-focused="focused ? 'true' : 'false'"
            :data-disabled="disabled ? 'true' : 'false'" @click="inputEl?.focus()">
         <ApexIcon v-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" />
-        <span v-for="(tag, i) in tags" :key="tag + i" class="apex-chip">
+        <span v-for="(tag, i) in tags" :key="tag + i" class="apex-chip" :class="ui?.chip">
           {{ tag }}
           <button type="button" :aria-label="`${t('apexui.remove')} ${tag}`" :disabled="disabled"
                   @click.stop="removeAt(i)">

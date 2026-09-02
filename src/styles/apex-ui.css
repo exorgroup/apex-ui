@@ -111,7 +111,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 
 /* ─── multiselect ──────────────────────────────────────── */
 .apex-ctl--multi{flex-wrap:wrap;gap:6px;padding-block:7px;min-height:var(--apex-ctl-h)}
-.apex-chip{display:inline-flex;align-items:center;gap:5px;padding-block:4px;padding-inline:10px 6px;background:var(--bg-subtle);border:1px solid var(--border-default);border-radius:var(--r-full);font-size:12.5px;font-weight:500;white-space:nowrap;color:var(--fg-default)}
+.apex-chip{display:inline-flex;align-items:center;gap:5px;padding-block:4px;padding-inline:10px 6px;background:var(--apex-chip-bg,var(--bg-subtle));border:1px solid var(--apex-chip-border,var(--border-default));border-radius:var(--apex-chip-radius,var(--r-full));font-size:12.5px;font-weight:500;white-space:nowrap;color:var(--apex-chip-fg,var(--fg-default))}
 .apex-chip button{display:grid;place-items:center;border:0;background:transparent;color:var(--fg-subtle);cursor:pointer;padding:0;border-radius:var(--r-full);--apex-icon-size:15px}
 .apex-chip button:hover{color:var(--accent-danger)}
 .apex-ctl__ph{color:var(--fg-subtle);font-size:var(--apex-ctl-fs);flex:1 1 auto}
@@ -220,11 +220,11 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 
 /* ─── otp ──────────────────────────────────────────────── */
 .apex-otp{display:flex;gap:9px;flex-wrap:wrap}
-.apex-otp__box{inline-size:48px;block-size:56px;text-align:center;font-family:var(--font-mono);font-size:22px;font-weight:600;color:var(--fg-default);background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--r-md);outline:none;padding:0;transition:border-color var(--dur-fast),box-shadow var(--dur-fast),background var(--dur-fast);caret-color:var(--accent-primary)}
+.apex-otp__box{inline-size:48px;block-size:56px;text-align:center;font-family:var(--font-mono);font-size:22px;font-weight:600;color:var(--apex-otp-fg,var(--fg-default));background:var(--apex-otp-bg,var(--bg-surface));border:1px solid var(--apex-otp-border,var(--border-default));border-radius:var(--apex-otp-radius,var(--r-md));outline:none;padding:0;transition:border-color var(--dur-fast),box-shadow var(--dur-fast),background var(--dur-fast);caret-color:var(--accent-primary)}
 .apex-otp[data-size="sm"] .apex-otp__box{inline-size:38px;block-size:44px;font-size:18px}
 .apex-otp[data-size="lg"] .apex-otp__box{inline-size:56px;block-size:64px;font-size:26px}
 .apex-otp__box:hover:not(:disabled){border-color:var(--border-strong)}
-.apex-otp__box:focus{border-color:var(--accent-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-primary) 15%,transparent)}
+.apex-otp__box:focus{border-color:var(--apex-otp-border-focus,var(--accent-primary));box-shadow:0 0 0 3px var(--apex-otp-ring,color-mix(in srgb,var(--accent-primary) 15%,transparent))}
 .apex-otp__box[data-filled="true"]{border-color:var(--border-strong)}
 .apex-otp__box:disabled{background:var(--bg-muted);color:var(--fg-muted);cursor:not-allowed}
 .apex-otp[data-variant="filled"] .apex-otp__box{background:var(--bg-muted);border-color:transparent;font-size:24px}
@@ -235,22 +235,22 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 /* ─── password ─────────────────────────────────────────── */
 .apex-pw{position:relative}
 .apex-pw__panel{display:flex;flex-direction:column;gap:8px;margin-block-start:9px}
-.apex-pw__panel[data-floating="true"]{position:absolute;z-index:40;inset-inline:0;inset-block-start:calc(100% + 6px);margin:0;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--r-md);box-shadow:var(--shadow-md);padding:13px 15px}
+.apex-pw__panel[data-floating="true"]{position:absolute;z-index:40;inset-inline:0;inset-block-start:calc(100% + 6px);margin:0;background:var(--apex-pw-panel-bg,var(--bg-elevated));border:1px solid var(--apex-pw-panel-border,var(--border-default));border-radius:var(--apex-pw-panel-radius,var(--r-md));box-shadow:var(--shadow-md);padding:13px 15px}
 .apex-pw__meter{display:flex;gap:5px}
-.apex-pw__meter span{flex:1 1 0;block-size:5px;border-radius:var(--r-full);background:var(--bg-muted);transition:background var(--dur-mid) var(--ease-out)}
-.apex-pw__meter[data-score="1"] span[data-on="true"]{background:var(--accent-danger)}
-.apex-pw__meter[data-score="2"] span[data-on="true"]{background:var(--accent-warning)}
-.apex-pw__meter[data-score="3"] span[data-on="true"]{background:var(--apex-blue-400)}
-.apex-pw__meter[data-score="4"] span[data-on="true"]{background:var(--accent-success)}
+.apex-pw__meter span{flex:1 1 0;block-size:var(--apex-pw-meter-h,5px);border-radius:var(--r-full);background:var(--apex-pw-meter-track,var(--bg-muted));transition:background var(--dur-mid) var(--ease-out)}
+.apex-pw__meter[data-score="1"] span[data-on="true"]{background:var(--apex-pw-band-1,var(--accent-danger))}
+.apex-pw__meter[data-score="2"] span[data-on="true"]{background:var(--apex-pw-band-2,var(--accent-warning))}
+.apex-pw__meter[data-score="3"] span[data-on="true"]{background:var(--apex-pw-band-3,var(--apex-blue-400))}
+.apex-pw__meter[data-score="4"] span[data-on="true"]{background:var(--apex-pw-band-4,var(--accent-success))}
 .apex-pw__label{margin:0;font-size:12px;font-weight:600;color:var(--fg-muted)}
 .apex-pw__label[data-score="1"]{color:var(--accent-danger)}
 .apex-pw__label[data-score="2"]{color:var(--accent-warning)}
 .apex-pw__label[data-score="4"]{color:var(--accent-success)}
 .apex-pw__rules{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
 .apex-pw__rules li{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--fg-subtle);transition:color var(--dur-fast)}
-.apex-pw__rules li .apex-icon{color:var(--border-strong)}
+.apex-pw__rules li .apex-icon{color:var(--apex-pw-rule-off,var(--border-strong))}
 .apex-pw__rules li[data-ok="true"]{color:var(--fg-default)}
-.apex-pw__rules li[data-ok="true"] .apex-icon{color:var(--accent-success)}
+.apex-pw__rules li[data-ok="true"] .apex-icon{color:var(--apex-pw-rule-on,var(--accent-success))}
 
 /* ─── knob ─────────────────────────────────────────────── */
 .apex-knob{display:inline-flex}
@@ -3027,3 +3027,4 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 .apex-summary h3{margin:0 0 6px;font-size:13.5px;font-weight:700;color:var(--apex-red-600)}
 .apex-summary ul{margin:0;padding-inline-start:18px;font-size:13px;color:var(--fg-muted);display:flex;flex-direction:column;gap:3px}
 .apex-summary a{color:var(--apex-red-600);text-decoration:underline;text-underline-offset:2px}
+.apex-ctl__counter{justify-content:flex-end;color:var(--apex-counter-fg,var(--fg-subtle))}
