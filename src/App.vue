@@ -5,7 +5,8 @@ import {
   ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
   PAGES, PG_COLORS, QUANTITY_RULES, ROLE_OPTIONS, SHARED_FIELD_PROPS, SIZES, STATE_CASES,
   DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
-  SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_PROPS, SNIP_TONE, SNIP_UI, SPLIT_MODEL,
+  OWN_PARTS, SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_OWN, SNIP_PROPS, SNIP_TONE,
+  SNIP_UI, SPLIT_MODEL,
   SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
 import type { DocEntry, DocPage } from './registry';
@@ -1119,6 +1120,28 @@ async function copyUsage() {
               <ApexButton severity="secondary" variant="outlined" icon="map">Map</ApexButton>
             </ApexButtonGroup>
           </div>
+        </template>
+
+
+        <!-- Every field control gets a Customising section. The shared surface is
+             documented once on ApexField; this covers only what this control adds. -->
+        <template v-if="OWN_PARTS[entry.id]">
+          <h2>Customising</h2>
+          <p class="note">
+            The shared surface — the box, the label, the message line, the appearance
+            props and the class hooks — is documented once on
+            <button class="linkish" @click="current = 'field'">ApexField</button> and applies
+            here unchanged. Below is what {{ entry.name }} adds on top.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>ui key</th><th>Part</th><th>Responds to</th></tr></thead>
+            <tbody>
+              <tr v-for="r in OWN_PARTS[entry.id]" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td class="mono t">{{ r[1] }}</td><td class="mono">{{ r[2] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="usage"><pre><code>{{ SNIP_OWN[entry.id] }}</code></pre></div>
         </template>
 
         <!-- ApexInput's customising story is short by design: everything it

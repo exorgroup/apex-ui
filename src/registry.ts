@@ -609,6 +609,66 @@ export const SNIP_TONE = `/* One variable per tone, and it reaches every control
 <ApexInput :ui="{ root: 'pink-errors' }" />
 .pink-errors { --apex-field-danger: #B4004E; }`;
 
+
+/** Per-control customisation: [ui key, part, variables it responds to]. */
+export const OWN_PARTS: Record<string, string[][]> = {
+  textarea: [
+    ['counter', '.apex-ctl__counter', '--apex-counter-fg'],
+  ],
+  password: [
+    ['panel', '.apex-pw__panel', '--apex-pw-panel-bg, --apex-pw-panel-border, --apex-pw-panel-radius'],
+    ['meter', '.apex-pw__meter', '--apex-pw-meter-h, --apex-pw-meter-track, --apex-pw-band-1…4'],
+    ['strength', '.apex-pw__label', 'inherits the band colour for the current score'],
+    ['rules', '.apex-pw__rules', '--apex-pw-rule-on, --apex-pw-rule-off'],
+  ],
+  otp: [
+    ['box', '.apex-otp__box', '--apex-otp-bg, --apex-otp-fg, --apex-otp-border, --apex-otp-border-focus, --apex-otp-ring, --apex-otp-radius'],
+  ],
+  tags: [
+    ['chip', '.apex-chip', '--apex-chip-bg, --apex-chip-fg, --apex-chip-border, --apex-chip-radius'],
+  ],
+};
+
+export const SNIP_OWN: Record<string, string> = {
+  textarea: `<ApexTextarea v-model="notes" label="Description" counter :maxlength="240"
+  :ui="{ counter: 'my-counter' }" />
+
+.my-counter.apex-ctl__counter { font-variant-numeric: tabular-nums; font-weight: 600; }`,
+
+  password: `<ApexPassword v-model="pw" label="New password"
+  :ui="{ panel: 'pw-panel', meter: 'pw-meter', rules: 'pw-rules' }" />
+
+/* The four bands are where a house palette usually diverges —
+   the default runs danger, warning, blue, success. */
+.pw-meter.apex-pw__meter {
+  --apex-pw-meter-h: 7px;
+  --apex-pw-band-1: #C41E1E;
+  --apex-pw-band-2: #C24A06;
+  --apex-pw-band-3: #7C3AED;
+  --apex-pw-band-4: #137C4A;
+}
+.pw-rules.apex-pw__rules { --apex-pw-rule-on: #137C4A; }`,
+
+  otp: `<ApexOtp v-model="code" label="Verification code" :length="6"
+  :ui="{ box: 'code-box' }" />
+
+.code-box.apex-otp__box {
+  --apex-otp-bg: #0B0E13;
+  --apex-otp-border: #2A3240;
+  --apex-otp-border-focus: #0B5FFF;
+  --apex-otp-radius: 10px;
+}`,
+
+  tags: `<ApexTags v-model="tags" label="Tags" :ui="{ chip: 'brand-chip' }" />
+
+.brand-chip.apex-chip {
+  --apex-chip-bg: #FFF1E5;
+  --apex-chip-fg: #6F2A03;
+  --apex-chip-border: #C24A06;
+  --apex-chip-radius: 6px;
+}`,
+};
+
 export const ENTRIES: DocEntry[] = [
   {
     id: 'icon', name: 'ApexIcon', group: 'Foundations',
