@@ -169,6 +169,9 @@ watch(current, (id) => {
 /** Conditional formatting page: type 3, then 50 or more, to move through both rules. */
 const rulesQty = ref(3);
 
+/** One value per arc so the three knobs move independently. */
+const arcDemo = reactive<Record<number, number>>({ 180: 30, 270: 55, 360: 80 });
+
 /** ApexField demos: the bare shell, and the two restyled inputs. */
 const fieldValue = ref('8080');
 const styledByProps = ref('ada.lovelace@exorgroup.com');
@@ -1142,6 +1145,22 @@ async function copyUsage() {
             </tbody>
           </table>
           <div class="usage"><pre><code>{{ SNIP_OWN[entry.id] }}</code></pre></div>
+        </template>
+
+        <!-- The arc is the one knob property you have to see to judge. -->
+        <template v-if="entry.id === 'knob'">
+          <h2>Arc</h2>
+          <p class="note">
+            <code>arc</code> is the sweep in degrees. The gap stays centred at the bottom, so
+            the dial is always symmetrical about the vertical. Drag any of these — the
+            angle-to-value mapping follows the arc, so the full range is reachable on each.
+          </p>
+          <div class="grid grid--3">
+            <div v-for="a in [180, 270, 360]" :key="a" class="cell dial-cell">
+              <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
+              <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
+            </div>
+          </div>
         </template>
 
         <!-- ApexNumber, like ApexInput, renders only shared parts. -->

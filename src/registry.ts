@@ -636,7 +636,7 @@ export const OWN_PARTS: Record<string, string[][]> = {
   ],
   knob: [
     ['range', '.apex-knob__range', '--apex-knob-range; thickness from railWidth'],
-    ['arc', '.apex-knob__value', '--apex-knob-value; thickness from strokeWidth'],
+    ['valueArc', '.apex-knob__value', '--apex-knob-value; thickness from strokeWidth'],
     ['text', '.apex-knob__text', '--apex-knob-text, --apex-knob-text-size'],
   ],
   slider: [
@@ -679,6 +679,10 @@ export const SNIP_OWN: Record<string, string> = {
 
   stepper: `<!-- The box is a field box, so the shared props work here exactly
      as they do on an ApexInput. -->
+<!-- Either a Material Symbols name, or a literal character. -->
+<ApexStepper v-model="qty" decrement-icon="expand_more" increment-icon="expand_less" />
+<ApexStepper v-model="qty" decrement-text="−" increment-text="+" />
+
 <ApexStepper v-model="qty" label="Displays" unit="screens"
   background="#101820" border-color="#C24A06" radius="12px"
   :ui="{ decrement: 'step-btn', increment: 'step-btn' }" />
@@ -689,7 +693,10 @@ export const SNIP_OWN: Record<string, string> = {
   --apex-stepper-btn-hover-bg: #FFF1E5;
 }`,
 
-  knob: `<ApexKnob v-model="volume" label="Volume"
+  knob: `<!-- arc is the sweep in degrees; the gap stays centred at the bottom -->
+<ApexKnob v-model="volume" label="Volume" :arc="180" />
+
+<ApexKnob v-model="volume" label="Volume"
   value-color="#C24A06" :rail-width="6" :text-size="24"
   :ui="{ range: 'k-rail', text: 'k-text' }" />
 
@@ -931,13 +938,18 @@ export const ENTRIES: DocEntry[] = [
     controls: [
       { key: 'label', type: 'text' }, { key: 'unit', type: 'text' },
       { key: 'align', type: 'select', options: ['start', 'center', 'end'] }, { key: 'min', type: 'number' },
-      { key: 'max', type: 'number' }, { key: 'step', type: 'number' }, { key: 'disabled', type: 'bool' },
+      { key: 'max', type: 'number' }, { key: 'step', type: 'number' },
+      { key: 'decrementIcon', type: 'text' }, { key: 'incrementIcon', type: 'text' },
+      { key: 'decrementText', type: 'text' }, { key: 'incrementText', type: 'text' },
+      { key: 'disabled', type: 'bool' },
     ],
     props: [
       ['modelValue', 'number', '0', 'v-model'],
       ['min / max', 'number', '—', 'Buttons disable at the bound'],
       ['step', 'number', '1', 'Increment'],
       ['unit', 'string', '—', 'Suffix tag inside the box, as on ApexNumber'],
+      ['decrementIcon / incrementIcon', 'string', "'remove' / 'add'", 'Material Symbols name on each button'],
+      ['decrementText / incrementText', 'string', '—', 'A literal character instead of the icon; wins when both are set'],
       ['align', "'start' | 'center' | 'end'", "'center'", 'Where the value sits between the buttons'],
     ],
     events: [['update:modelValue', 'number']],
@@ -949,7 +961,9 @@ export const ENTRIES: DocEntry[] = [
     base: { label: 'Volume', min: 0, max: 100, step: 1, diameter: 120, strokeWidth: 14 },
     controls: [
       { key: 'label', type: 'text' }, { key: 'min', type: 'number' }, { key: 'max', type: 'number' },
-      { key: 'step', type: 'number' }, { key: 'diameter', type: 'number' }, { key: 'strokeWidth', type: 'number' },
+      { key: 'step', type: 'number' }, { key: 'arc', type: 'number' },
+      { key: 'diameter', type: 'number' }, { key: 'strokeWidth', type: 'number' },
+      { key: 'railWidth', type: 'number' }, { key: 'textSize', type: 'number' },
       { key: 'valueColor', type: 'text' }, { key: 'rangeColor', type: 'text' }, { key: 'textColor', type: 'text' },
       { key: 'hideValue', type: 'bool' }, { key: 'disabled', type: 'bool' },
     ],
@@ -957,8 +971,11 @@ export const ENTRIES: DocEntry[] = [
       ['modelValue', 'number', 'min', 'v-model'],
       ['min / max', 'number', '0 / 100', 'Boundaries'],
       ['step', 'number', '1', 'Size of each movement'],
+      ['arc', 'number', '270', 'Sweep in degrees. 180 is a half dial, 360 a closed ring; the gap stays centred at the bottom. Clamped to 20–360'],
       ['diameter', 'number', '110', 'Diameter in pixels'],
-      ['strokeWidth', 'number', '14', 'Arc thickness in pixels'],
+      ['strokeWidth', 'number', '14', 'Value arc thickness in pixels'],
+      ['railWidth', 'number', 'strokeWidth', 'Unfilled arc thickness, when it should differ'],
+      ['textSize', 'number', '19', 'Centre text size in pixels'],
       ['valueColor / rangeColor / textColor', 'string', 'tokens', 'Any CSS colour'],
       ['hideValue', 'boolean', 'false', 'Hide the centre number'],
       ['valueTemplate', '(v: number) => string', '—', "Format the centre text, e.g. v => v + '%'"],
