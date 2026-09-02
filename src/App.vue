@@ -4,7 +4,8 @@ import {
   AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, COMMON_CONTROLS, ENTRIES, FORMATTING_RULE,
   ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
   PAGES, PG_COLORS, QUANTITY_RULES, ROLE_OPTIONS, SHARED_FIELD_PROPS, SIZES, STATE_CASES,
-  SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES, ZONE_OPTIONS,
+  ICON_RESOLVER_SNIPPET, ICON_SETS, SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES,
+  ZONE_OPTIONS,
 } from './registry';
 import type { DocEntry, DocPage } from './registry';
 
@@ -165,6 +166,24 @@ watch(current, (id) => {
 
 /** Conditional formatting page: type 3, then 50 or more, to move through both rules. */
 const rulesQty = ref(3);
+
+/** Name of the icon just copied, so the cell can confirm it. */
+const copiedIcon = ref('');
+let copiedIconTimer: ReturnType<typeof setTimeout> | undefined;
+
+/**
+ * Copy a glyph name. An unfocused document, a denied permission or a
+ * non-secure context all reject, so the confirmation is driven by the click
+ * rather than by the promise — the name is on screen either way.
+ */
+function copyIcon(name: string) {
+  navigator.clipboard?.writeText(name).catch(() => {});
+  copiedIcon.value = name;
+  clearTimeout(copiedIconTimer);
+  copiedIconTimer = setTimeout(() => {
+    if (copiedIcon.value === name) copiedIcon.value = '';
+  }, 1400);
+}
 
 /* --- ApexSlider demos --------------------------------------------- */
 
@@ -565,6 +584,46 @@ async function copyUsage() {
               <ApexButton severity="secondary" variant="outlined" icon="download">Export</ApexButton>
               <ApexButton severity="danger" variant="text" icon="delete" icon-only label="Delete" />
               <ApexButton icon="refresh" loading>Syncing</ApexButton>
+            </div>
+          </div>
+
+          <h2>Accessibility</h2>
+          <p class="note">
+            Without a <code>label</code> an icon is <code>aria-hidden</code>, which is correct for
+            decoration beside text. Give it a <code>label</code> when the icon carries the meaning
+            on its own — it then renders as <code>role="img"</code>.
+          </p>
+          <div class="card iconstrip">
+            <span class="icon-inline">
+              <ApexIcon name="schedule" :size="18" /> Decorative — hidden from assistive tech
+            </span>
+            <ApexIcon name="lock" :size="22" label="Locked" />
+          </div>
+
+          <h2>Swapping the icon set</h2>
+          <p class="note">
+            One plugin option remaps every name in the library, so a different icon set is a
+            single change rather than a rewrite of every control.
+          </p>
+          <div class="usage"><pre><code>{{ ICON_RESOLVER_SNIPPET }}</code></pre></div>
+
+          <h2>Reference</h2>
+          <p class="note">A working set, by role. Click any glyph to copy its name.</p>
+          <div v-for="set in ICON_SETS" :key="set.label" class="iconset">
+            <span class="cell__tag">{{ set.label }}</span>
+            <div class="icongrid">
+              <button
+                v-for="n in set.names"
+                :key="n"
+                type="button"
+                class="iconcell"
+                :data-copied="copiedIcon === n"
+                :title="n"
+                @click="copyIcon(n)"
+              >
+                <ApexIcon :name="n" :size="24" />
+                <em>{{ copiedIcon === n ? 'copied' : n }}</em>
+              </button>
             </div>
           </div>
         </template>

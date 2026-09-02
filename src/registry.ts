@@ -216,6 +216,34 @@ export const ROLE_OPTIONS = [
   { value: 'billing', label: 'Billing Contact', icon: 'receipt_long', help: 'Invoices and payment methods' },
 ];
 
+/** The Reference grid on the ApexIcon page — a working set, grouped by role. */
+export const ICON_SETS = [
+  {
+    label: 'Navigation',
+    names: ['home', 'dashboard', 'menu', 'close', 'arrow_back', 'arrow_forward',
+      'chevron_left', 'chevron_right', 'expand_more', 'expand_less', 'more_vert', 'search'],
+  },
+  {
+    label: 'Actions',
+    names: ['add', 'remove', 'edit', 'delete', 'save', 'content_copy',
+      'download', 'upload', 'refresh', 'check', 'undo', 'share'],
+  },
+  {
+    label: 'Status',
+    names: ['check_circle', 'error', 'warning', 'info', 'help',
+      'schedule', 'visibility', 'visibility_off', 'lock', 'lock_open', 'star', 'favorite'],
+  },
+  {
+    label: 'Domain',
+    names: ['tv', 'smartphone', 'playlist_play', 'campaign', 'storefront',
+      'inventory_2', 'assessment', 'group', 'public', 'calendar_month', 'payments', 'handyman'],
+  },
+];
+
+export const ICON_RESOLVER_SNIPPET = `app.use(ApexUI, {
+  iconResolver: (name) => MY_MAP[name] ?? name,
+});`;
+
 /** Used by the ApexSelect in ApexIcon's "In context" section. */
 export const ZONE_OPTIONS = [
   { value: 'full', label: 'Full area', icon: 'crop_free', help: 'One advert, whole screen' },

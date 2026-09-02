@@ -197,3 +197,27 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .pair-row { display: grid; grid-template-columns: 1fr 120px; gap: 16px; align-items: center; }
 /* Vertical sliders hang from a common baseline so the tracks line up. */
 .vert-row { display: flex; gap: 34px; align-items: flex-end; }
+
+/* --- ApexIcon reference grid --------------------------------------- */
+
+.iconset { margin-block-start: 16px; }
+.icongrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 8px; margin-block-start: 8px;
+}
+.iconcell {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; border: 1px solid var(--border-subtle); border-radius: var(--r-md);
+  background: var(--bg-surface); color: var(--fg-default); cursor: pointer; font: inherit;
+}
+.iconcell:hover { border-color: var(--accent-primary); color: var(--accent-primary); }
+.iconcell em {
+  font-style: normal; font-family: var(--font-mono); font-size: 10.5px;
+  color: var(--fg-subtle); overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.iconcell:hover em { color: var(--accent-primary); }
+.iconcell[data-copied="true"] { border-color: var(--accent-success); color: var(--accent-success); }
+.iconcell[data-copied="true"] em { color: var(--accent-success); font-weight: 700; }
+
+/* Icon sitting inline with its explanatory text. */
+.icon-inline { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; }
