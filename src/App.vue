@@ -3,8 +3,8 @@ import { computed, reactive, ref, watch } from 'vue';
 import {
   AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, COMMON_CONTROLS, ENTRIES, FORMATTING_RULE,
   ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
-  PAGES, QUANTITY_RULES, ROLE_OPTIONS, SHARED_FIELD_PROPS, SIZES, STATE_CASES,
-  SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES,
+  PAGES, PG_COLORS, QUANTITY_RULES, ROLE_OPTIONS, SHARED_FIELD_PROPS, SIZES, STATE_CASES,
+  SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES, ZONE_OPTIONS,
 } from './registry';
 import type { DocEntry, DocPage } from './registry';
 
@@ -35,7 +35,7 @@ const isDoc = computed(() => !!page.value);
 
 const groups = computed(() => {
   const q = search.value.trim().toLowerCase();
-  const all = [...ENTRIES, ...PAGES];
+  const all = [...PAGES, ...ENTRIES];
   const matched = q ? all.filter((e) => e.name.toLowerCase().includes(q)) : all;
   const out: Array<{ name: string; items: Array<DocEntry | DocPage> }> = [];
 
@@ -57,12 +57,31 @@ const ownControls = computed(
   () => entry.value.controls.filter((c) => !COMMON_CONTROLS.some((x) => x.key === c.key)),
 );
 
-const startingProps = (e: DocEntry) => ({ ...PLAYGROUND_DEFAULTS, ...(e.base ?? {}) });
+/**
+ * The shared field props, or nothing for a control with no field shell.
+ *
+ * ApexIcon is not a field: it has no label, tone or message line, so offering
+ * those editors would be offering props it ignores. The gallery keeps `size`
+ * for noField entries that honour it, but skips even that when the entry
+ * declares its own — which ApexIcon does, as a pixel number rather than a
+ * t-shirt size.
+ */
+const commonControls = computed(() => {
+  if (!entry.value.noField) return COMMON_CONTROLS;
+  const own = entry.value.controls;
+  return COMMON_CONTROLS.filter((c) => c.key === 'size' && !own.some((x) => x.key === c.key));
+});
+
+const startingProps = (e: DocEntry) => (e.noField
+  ? { ...(e.base ?? {}) }
+  : { ...PLAYGROUND_DEFAULTS, ...(e.base ?? {}) });
 
 /** The rail: what this control adds, then the field props everything shares. */
 const railGroups = computed(() => [
   { title: null as string | null, items: ownControls.value },
-  { title: 'Label & state', items: COMMON_CONTROLS },
+  ...(commonControls.value.length
+    ? [{ title: 'Label & state' as string | null, items: commonControls.value }]
+    : []),
 ]);
 
 watch(current, (id) => {
@@ -76,6 +95,9 @@ watch(current, (id) => {
 /* The top bar's Size drives the section grids; keep the rail's copy in step so the
    two never show different answers for the same control. */
 watch(size, (v) => {
+  // ApexIcon's size is a pixel number of its own; writing 'md' into it would
+  // hand the component a value it cannot use.
+  if (entry.value.noField) return;
   if (overrides[current.value]) overrides[current.value].size = v;
 });
 
@@ -134,6 +156,16 @@ watch(current, (id) => {
 
 /** Conditional formatting page: type 3, then 50 or more, to move through both rules. */
 const rulesQty = ref(3);
+
+/* --- ApexSlider demos --------------------------------------------- */
+
+/** One ref behind both the slider and the number — the point of the section. */
+const pairedValue = ref(45);
+const rangeValue = ref([8, 18]);
+const rangeValue2 = ref([9, 17]);
+const vert1 = ref(60);
+const vert2 = ref(40);
+const vert3 = ref(75);
 
 /* --- ApexInput-only sections ------------------------------------- */
 
@@ -294,7 +326,8 @@ async function copyUsage() {
         <div class="stage">
           <div class="stage__demo">
             <div class="stage__inner">
-              <component :is="entry.name" v-model="model[entry.id]" v-bind="live" />
+              <component v-if="entry.noField" :is="entry.name" v-bind="live" />
+              <component v-else :is="entry.name" v-model="model[entry.id]" v-bind="live" />
             </div>
           </div>
 
@@ -330,6 +363,26 @@ async function copyUsage() {
                   <option v-for="o in c.options" :key="o" :value="o">{{ o || '—' }}</option>
                 </select>
 
+                <div v-else-if="c.type === 'color'" class="pg-colors">
+                  <button
+                    v-for="sw in PG_COLORS"
+                    :key="sw"
+                    type="button"
+                    class="pg-sw"
+                    :style="{ background: sw }"
+                    :aria-label="sw"
+                    :data-on="overrides[entry.id][c.key] === sw"
+                    @click="overrides[entry.id][c.key] = sw"
+                  ></button>
+                  <button
+                    type="button"
+                    class="pg-sw pg-sw--none"
+                    aria-label="Default"
+                    :data-on="!overrides[entry.id][c.key]"
+                    @click="overrides[entry.id][c.key] = undefined"
+                  >—</button>
+                </div>
+
                 <input
                   v-else
                   :type="c.type === 'number' ? 'number' : 'text'"
@@ -363,7 +416,7 @@ async function copyUsage() {
           </tbody>
         </table>
 
-        <p class="note">
+        <p v-if="!entry.noField" class="note">
           Plus every shared field prop —
           <template v-for="(p, i) in SHARED_FIELD_PROPS" :key="p"><code>{{ p }}</code><span
             v-if="i < SHARED_FIELD_PROPS.length - 1">, </span></template>.
@@ -391,6 +444,7 @@ async function copyUsage() {
           </table>
         </template>
 
+        <template v-if="!entry.noField">
         <h2>Label placement</h2>
         <div class="grid">
           <div v-for="p in LABEL_PLACEMENTS" :key="p" class="cell">
@@ -443,6 +497,108 @@ async function copyUsage() {
             <component :is="entry.name" :model-value="entry.model" v-bind="baseline(c.bind)" />
           </div>
         </div>
+        </template>
+
+        <!-- ApexIcon: no field shell, so its sections are all about the glyph. -->
+        <template v-if="entry.id === 'icon'">
+          <h2>Sizes</h2>
+          <div class="card iconstrip">
+            <ApexIcon v-for="n in [16, 18, 20, 24, 32, 44, 64]" :key="n" name="campaign" :size="n" />
+          </div>
+
+          <h2>Weight and fill</h2>
+          <p class="note">
+            Weight follows the surrounding text unless you pin it. <code>fill</code> switches to
+            the solid glyph — the same axis the rating control uses for its outline and filled
+            variants.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">weight 200 → 700, outlined</span>
+              <div class="iconstrip">
+                <ApexIcon v-for="w in [200, 300, 400, 500, 600, 700]" :key="w" name="star" :size="30" :weight="w" />
+              </div>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">same weights, fill</span>
+              <div class="iconstrip">
+                <ApexIcon v-for="w in [200, 300, 400, 500, 600, 700]" :key="w" name="star" :size="30" :weight="w" fill />
+              </div>
+            </div>
+          </div>
+
+          <h2>Colour and spin</h2>
+          <p class="note">
+            An icon paints in <code>currentColor</code>, so it inherits from whatever contains
+            it — no colour prop needed.
+          </p>
+          <div class="card iconstrip">
+            <ApexIcon name="check_circle" :size="30" fill style="color: var(--accent-success)" />
+            <ApexIcon name="warning" :size="30" fill style="color: var(--accent-warning)" />
+            <ApexIcon name="error" :size="30" fill style="color: var(--accent-danger)" />
+            <ApexIcon name="info" :size="30" fill style="color: var(--accent-primary)" />
+            <ApexIcon name="progress_activity" :size="30" spin style="color: var(--accent-primary)" />
+            <span class="note">spin, for progress_activity</span>
+          </div>
+
+          <h2>In context</h2>
+          <p class="note">
+            Every control takes icon names rather than icon markup, and renders them through
+            this component.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell val-stack">
+              <ApexInput model-value="north entrance" label="Search" label-icon="search" leading-icon="search" clearable />
+              <ApexSelect model-value="split" label="Zone layout" leading-icon="grid_view" :options="ZONE_OPTIONS" />
+            </div>
+            <div class="cell iconstrip">
+              <ApexButton icon="check">Save</ApexButton>
+              <ApexButton severity="secondary" variant="outlined" icon="download">Export</ApexButton>
+              <ApexButton severity="danger" variant="text" icon="delete" icon-only label="Delete" />
+              <ApexButton icon="refresh" loading>Syncing</ApexButton>
+            </div>
+          </div>
+        </template>
+
+        <!-- ApexSlider: pairing, range mode and the vertical orientation. -->
+        <template v-if="entry.id === 'slider'">
+          <h2>Paired with ApexNumber</h2>
+          <p class="note">Both bind the same ref — no glue code.</p>
+          <div class="cell cell--solo">
+            <span class="cell__tag">v-model="lead" on both</span>
+            <div class="pair-row">
+              <ApexSlider v-model="pairedValue" label="Lead time" :min="0" :max="120" :step="5" show-tooltip />
+              <ApexNumber v-model="pairedValue" label="Minutes" unit="min" :min="0" :max="120" />
+            </div>
+          </div>
+
+          <h2>Range</h2>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">range</span>
+              <ApexSlider v-model="rangeValue" label="Operating hours" :min="0" :max="24" show-tooltip range />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">range + minStepsBetweenHandles="4"</span>
+              <ApexSlider
+                v-model="rangeValue2"
+                label="Booking window"
+                :min="0"
+                :max="24"
+                :min-steps-between-handles="4"
+                show-tooltip
+                range
+              />
+            </div>
+          </div>
+
+          <h2>Vertical</h2>
+          <div class="card vert-row">
+            <ApexSlider v-model="vert1" label="Bass" orientation="vertical" show-tooltip />
+            <ApexSlider v-model="vert2" label="Mid" orientation="vertical" show-tooltip color="#137C4A" />
+            <ApexSlider v-model="vert3" label="Treble" orientation="vertical" show-tooltip color="#C24A06" />
+          </div>
+        </template>
 
         <!-- ApexInput carries four sections no other control has. The gallery
              hand-authors them in its template; here they are driven from the

@@ -173,3 +173,27 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 }
 
 .val-stack { display: flex; flex-direction: column; gap: 18px; max-width: 520px; }
+
+/* --- Swatch control, and the icon / slider section furniture ------- */
+
+.pg-colors { display: flex; flex-wrap: wrap; gap: 5px; }
+.pg-sw {
+  inline-size: 22px; block-size: 22px; border-radius: var(--r-full);
+  border: 1px solid var(--border-default); cursor: pointer; padding: 0;
+}
+.pg-sw[data-on="true"] { box-shadow: 0 0 0 2px var(--bg-subtle), 0 0 0 4px var(--accent-primary); }
+.pg-sw--none {
+  background: transparent; color: var(--fg-subtle); font-size: 11px;
+  display: grid; place-items: center;
+}
+
+.card {
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  border-radius: var(--r-lg); padding: 26px;
+}
+.iconstrip { display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-end; }
+
+/* Slider and number side by side, both bound to one ref. */
+.pair-row { display: grid; grid-template-columns: 1fr 120px; gap: 16px; align-items: center; }
+/* Vertical sliders hang from a common baseline so the tracks line up. */
+.vert-row { display: flex; gap: 34px; align-items: flex-end; }

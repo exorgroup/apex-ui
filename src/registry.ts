@@ -14,7 +14,7 @@
 /** One editable control in the playground rail. */
 export interface DocControl {
   key: string;
-  type: 'text' | 'number' | 'bool' | 'select';
+  type: 'text' | 'number' | 'bool' | 'select' | 'color';
   options?: string[];
 }
 
@@ -23,6 +23,8 @@ export interface DocEntry {
   name: string;
   group: string;
   blurb: string;
+  /** No ApexField shell, so the label/tone/state sections do not apply. */
+  noField?: boolean;
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -45,6 +47,9 @@ export const LABEL_PLACEMENTS = [
 ] as const;
 
 export const SIZES = ['sm', 'md', 'lg'] as const;
+
+/** Swatches offered by a `color` control. Copied from PG_COLORS in apex-ui-shell.js. */
+export const PG_COLORS = ['#0B5FFF', '#137C4A', '#C24A06', '#C41E1E', '#7C3AED', '#0F141C', '#8794A6'];
 
 /**
  * Field props every control accepts, shown in the rail under their own separator.
@@ -211,6 +216,16 @@ export const ROLE_OPTIONS = [
   { value: 'billing', label: 'Billing Contact', icon: 'receipt_long', help: 'Invoices and payment methods' },
 ];
 
+/** Used by the ApexSelect in ApexIcon's "In context" section. */
+export const ZONE_OPTIONS = [
+  { value: 'full', label: 'Full area', icon: 'crop_free', help: 'One advert, whole screen' },
+  { value: 'split', label: 'Split — 2 up', icon: 'vertical_split', help: 'Two zones side by side' },
+  { value: 'ticker', label: 'Ticker strip', icon: 'view_stream', help: 'Bottom strip, scrolling' },
+  { value: 'sidebar', label: 'Sidebar panel', icon: 'view_sidebar', help: 'Narrow rail plus main' },
+  { value: 'quad', label: 'Quad grid', icon: 'grid_view', help: 'Four equal zones' },
+  { value: 'hero', label: 'Hero + rail', icon: 'featured_video', help: 'Large primary, small secondary' },
+];
+
 /** Swatches rendered under the Theming page, straight from the live stylesheet. */
 export const TOKEN_SWATCHES = [
   '--bg-app', '--bg-surface', '--bg-muted', '--border-default', '--fg-default',
@@ -319,6 +334,26 @@ app.use(ApexUI, { adapter: precognitionAdapter(form) });</pre>
 ];
 
 export const ENTRIES: DocEntry[] = [
+  {
+    id: 'icon', name: 'ApexIcon', group: 'Foundations',
+    blurb: 'Material Symbols rendered as a ligature span. Size, weight, fill and a spin state are props; weight follows the surrounding text unless you pin it. Every other control renders icons through this one, so swapping icon sets is a single plugin option.',
+    noField: true,
+    base: { name: 'settings', size: 28 },
+    controls: [
+      { key: 'name', type: 'text' }, { key: 'size', type: 'number' },
+      { key: 'weight', type: 'number' }, { key: 'fill', type: 'bool' },
+      { key: 'spin', type: 'bool' }, { key: 'label', type: 'text' },
+    ],
+    props: [
+      ['name', 'string', '—', 'Material Symbols glyph name, e.g. calendar_month'],
+      ['size', 'number | string', 'inherited', 'Pixels, or any CSS length as a string'],
+      ['weight', 'number', 'inherited', 'Weight axis, 200–700. Unset, it follows the surrounding text'],
+      ['fill', 'boolean', 'false', 'Solid rather than outlined'],
+      ['spin', 'boolean', 'false', 'Rotates continuously — for progress_activity'],
+      ['label', 'string', '—', 'Accessible name. Without it the icon is aria-hidden, which is right for decoration'],
+    ],
+    events: [],
+  },
   {
     id: 'input', name: 'ApexInput', group: 'Text',
     blurb: 'Text, email, tel, url, search, password and slug in one control. Affixes, both icon slots, a clickable trailing action, clear button, loading state and password reveal.',
@@ -458,5 +493,98 @@ export const ENTRIES: DocEntry[] = [
       ['trim', 'boolean', 'true', 'Trim whitespace and drop empty entries'],
     ],
     events: [['update:modelValue', 'string[]'], ['add', 'string'], ['remove', 'string'], ['focus / blur', '—']],
+  },,
+  {
+    id: 'number', name: 'ApexNumber', group: 'Numbers',
+    blurb: 'Numeric entry with a currency prefix or unit suffix. Clamps to min/max on blur.',
+    model: 24,
+    base: { label: 'Rotation interval', unit: 'sec', min: 5, max: 600, align: 'center', help: 'Between 5 and 600 seconds.' },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'unit', type: 'text' }, { key: 'currency', type: 'text' },
+      { key: 'align', type: 'select', options: ['start', 'center', 'end'] },
+      { key: 'min', type: 'number' }, { key: 'max', type: 'number' }, { key: 'step', type: 'number' },
+      { key: 'clamp', type: 'bool' }, { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'number | null', '—', 'v-model'],
+      ['unit', 'string', '—', 'Suffix tag — sec, %, days'],
+      ['currency', 'string', '—', 'Prefix tag — €, $'],
+      ['min / max / step', 'number', '—', 'Native constraints'],
+      ['precision', 'number', '—', 'Decimals to round to on blur'],
+      ['clamp', 'boolean', 'true', 'Pull out-of-range values back on blur'],
+      ['align', "'start' | 'center' | 'end'", "'center'", 'Where the value sits between the affixes'],
+    ],
+    events: [['update:modelValue', 'number | null'], ['focus / blur', '—']],
+  },
+  {
+    id: 'stepper', name: 'ApexStepper', group: 'Numbers',
+    blurb: 'Small integer entry. Buttons disable at the bounds.',
+    model: 3,
+    base: { label: 'Displays included', min: 0, max: 20, step: 1, unit: 'screens', align: 'center' },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'unit', type: 'text' },
+      { key: 'align', type: 'select', options: ['start', 'center', 'end'] }, { key: 'min', type: 'number' },
+      { key: 'max', type: 'number' }, { key: 'step', type: 'number' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'number', '0', 'v-model'],
+      ['min / max', 'number', '—', 'Buttons disable at the bound'],
+      ['step', 'number', '1', 'Increment'],
+      ['unit', 'string', '—', 'Suffix tag inside the box, as on ApexNumber'],
+      ['align', "'start' | 'center' | 'end'", "'center'", 'Where the value sits between the buttons'],
+    ],
+    events: [['update:modelValue', 'number']],
+  },
+  {
+    id: 'knob', name: 'ApexKnob', group: 'Numbers',
+    blurb: 'A dial for number entry. Drag around it, scroll while focused, or use the arrow keys. Boundaries, step, diameter, stroke width and colours are all configurable.',
+    model: 42,
+    base: { label: 'Volume', min: 0, max: 100, step: 1, diameter: 120, strokeWidth: 14 },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'min', type: 'number' }, { key: 'max', type: 'number' },
+      { key: 'step', type: 'number' }, { key: 'diameter', type: 'number' }, { key: 'strokeWidth', type: 'number' },
+      { key: 'valueColor', type: 'text' }, { key: 'rangeColor', type: 'text' }, { key: 'textColor', type: 'text' },
+      { key: 'hideValue', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'number', 'min', 'v-model'],
+      ['min / max', 'number', '0 / 100', 'Boundaries'],
+      ['step', 'number', '1', 'Size of each movement'],
+      ['diameter', 'number', '110', 'Diameter in pixels'],
+      ['strokeWidth', 'number', '14', 'Arc thickness in pixels'],
+      ['valueColor / rangeColor / textColor', 'string', 'tokens', 'Any CSS colour'],
+      ['hideValue', 'boolean', 'false', 'Hide the centre number'],
+      ['valueTemplate', '(v: number) => string', '—', "Format the centre text, e.g. v => v + '%'"],
+    ],
+    events: [['update:modelValue', 'number'], ['change', 'number']],
+  },
+  {
+    id: 'slider', name: 'ApexSlider', group: 'Numbers',
+    blurb: 'Drag a handle along a track. Single value or a two-handle range, horizontal or vertical, with a configurable step and a minimum gap between handles.',
+    model: 42,
+    base: { label: 'Brightness', min: 0, max: 100, step: 1, showTooltip: true },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'min', type: 'number' }, { key: 'max', type: 'number' },
+      { key: 'step', type: 'number' }, { key: 'range', type: 'bool' },
+      { key: 'minStepsBetweenHandles', type: 'number' },
+      { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'length', type: 'number' }, { key: 'trackSize', type: 'number' },
+      { key: 'showTooltip', type: 'bool' },
+      { key: 'color', type: 'color' }, { key: 'trackColor', type: 'color' }, { key: 'handleColor', type: 'color' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'number | number[]', 'min', 'v-model; an array in range mode'],
+      ['min / max', 'number', '0 / 100', 'Boundaries'],
+      ['step', 'number', '1', 'Size of each movement'],
+      ['range', 'boolean', 'false', 'Two handles; the value becomes an array'],
+      ['minStepsBetweenHandles', 'number', '0', 'Minimum steps the handles keep apart'],
+      ['orientation', "'horizontal' | 'vertical'", "'horizontal'", ''],
+      ['length', 'number', '180', 'Track length in vertical mode, in pixels'],
+      ['trackSize', 'number', '6', 'Track thickness in pixels'],
+      ['showTooltip', 'boolean', 'false', 'Value bubble on hover, focus and drag'],
+      ['color / trackColor / handleColor', 'string', 'tokens', 'Any CSS colour'],
+    ],
+    events: [['update:modelValue', 'number | number[]'], ['change', 'fired during the drag'], ['slideend', 'fired once the drag completes']],
   },
 ];
