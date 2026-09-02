@@ -25,6 +25,11 @@ export interface DocEntry {
   blurb: string;
   /** No ApexField shell, so the label/tone/state sections do not apply. */
   noField?: boolean;
+  /**
+   * How the live stage renders this one. Omitted means the default: the
+   * component with v-model and the playground props.
+   */
+  demo?: 'icon' | 'button' | 'split' | 'dial' | 'group';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -47,6 +52,49 @@ export const LABEL_PLACEMENTS = [
 ] as const;
 
 export const SIZES = ['sm', 'md', 'lg'] as const;
+
+/** The eight colour roles ApexButton and friends share. */
+export const SEVERITIES = [
+  'primary', 'secondary', 'success', 'info', 'warning', 'help', 'danger', 'contrast',
+] as const;
+
+/** Menu for the ApexSplitButton demos — headers, hints, a separator, nested submenus. */
+export const SPLIT_MODEL = [
+  { header: 'Save' },
+  { label: 'Save and publish', icon: 'publish', hint: 'Cmd+Enter' },
+  { label: 'Save as draft', icon: 'draft', hint: 'Cmd+S' },
+  { label: 'Save a copy', icon: 'content_copy' },
+  { separator: true },
+  {
+    label: 'Export',
+    icon: 'download',
+    items: [
+      { label: 'PDF report', icon: 'picture_as_pdf' },
+      { label: 'CSV data', icon: 'table_view' },
+      { separator: true },
+      {
+        label: 'Proof of play',
+        icon: 'fact_check',
+        items: [
+          { label: 'Last 7 days' },
+          { label: 'Last 30 days' },
+          { label: 'Custom range' },
+        ],
+      },
+    ],
+  },
+  { label: 'Schedule', icon: 'schedule' },
+  { separator: true },
+  { label: 'Discard changes', icon: 'delete', disabled: true },
+];
+
+export const DIAL_ITEMS = [
+  { icon: 'add', label: 'New playlist', tooltip: 'New playlist' },
+  { icon: 'upload', label: 'Upload media', tooltip: 'Upload media' },
+  { icon: 'edit', label: 'Edit zone', tooltip: 'Edit zone' },
+  { icon: 'refresh', label: 'Sync displays', tooltip: 'Sync displays' },
+  { icon: 'delete', label: 'Remove', tooltip: 'Remove' },
+];
 
 /** Swatches offered by a `color` control. Copied from PG_COLORS in apex-ui-shell.js. */
 export const PG_COLORS = ['#0B5FFF', '#137C4A', '#C24A06', '#C41E1E', '#7C3AED', '#0F141C', '#8794A6'];
@@ -364,6 +412,7 @@ app.use(ApexUI, { adapter: precognitionAdapter(form) });</pre>
 export const ENTRIES: DocEntry[] = [
   {
     id: 'icon', name: 'ApexIcon', group: 'Foundations',
+    demo: 'icon',
     blurb: 'Material Symbols rendered as a ligature span. Size, weight, fill and a spin state are props; weight follows the surrounding text unless you pin it. Every other control renders icons through this one, so swapping icon sets is a single plugin option.',
     noField: true,
     base: { name: 'settings', size: 28 },
@@ -614,5 +663,121 @@ export const ENTRIES: DocEntry[] = [
       ['color / trackColor / handleColor', 'string', 'tokens', 'Any CSS colour'],
     ],
     events: [['update:modelValue', 'number | number[]'], ['change', 'fired during the drag'], ['slideend', 'fired once the drag completes']],
+  },
+  {
+    id: 'button', name: 'ApexButton', group: 'Actions',
+    blurb: 'Eight severities \u00d7 four variants, three sizes, four icon positions, raised elevation, pill and circular shapes, a corner badge and a loading state. Renders an <a> when given href.',
+    noField: true, demo: 'button',
+    base: { severity: 'primary', variant: 'solid', icon: 'check', label: 'Save changes' },
+    controls: [
+      { key: 'severity', type: 'select', options: [...SEVERITIES] },
+      { key: 'variant', type: 'select', options: ['solid', 'outlined', 'text', 'link'] },
+      { key: 'label', type: 'text' }, { key: 'icon', type: 'text' }, { key: 'trailingIcon', type: 'text' },
+      { key: 'iconPos', type: 'select', options: ['left', 'right', 'top', 'bottom'] },
+      { key: 'badge', type: 'text' },
+      { key: 'badgeSeverity', type: 'select', options: ['contrast', ...SEVERITIES.filter((x) => x !== 'contrast')] },
+      { key: 'raised', type: 'bool' }, { key: 'rounded', type: 'bool' }, { key: 'iconOnly', type: 'bool' },
+      { key: 'loading', type: 'bool' }, { key: 'disabled', type: 'bool' }, { key: 'block', type: 'bool' },
+    ],
+    props: [
+      ['severity', "'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'help' | 'danger' | 'contrast'", "'primary'", 'Colour role'],
+      ['variant', "'solid' | 'outlined' | 'text' | 'link'", "'solid'", 'Legacy values (ghost, outline-danger\u2026) still resolve'],
+      ['size', "'sm' | 'md' | 'lg'", "'md'", ''],
+      ['icon / trailingIcon', 'string', '\u2014', 'Material Symbols name'],
+      ['iconPos', "'left' | 'right' | 'top' | 'bottom'", "'left'", 'Top and bottom stack the icon over the label'],
+      ['raised', 'boolean', 'false', 'Elevation shadow; lifts text and outlined onto a surface'],
+      ['rounded', 'boolean', 'false', 'Circular border radius'],
+      ['iconOnly', 'boolean', 'false', 'Square, or circular with rounded \u2014 needs `label` for the accessible name'],
+      ['label', 'string', '\u2014', 'Accessible name, and the fallback for the default slot'],
+      ['badge / badgeSeverity', 'string | number / severity', '\u2014 / contrast', 'Corner badge'],
+      ['loading', 'boolean', 'false', 'Spinner replaces the icon; disables the button'],
+      ['block', 'boolean', 'false', 'Full width'],
+      ['href / target', 'string', '\u2014', 'Renders an anchor instead of a button'],
+    ],
+    events: [['click', 'MouseEvent']],
+    slots: [['default', 'Button content; falls back to `label`']],
+  },
+  {
+    id: 'splitbutton', name: 'ApexSplitButton', group: 'Actions',
+    blurb: 'A default action plus an overlay of related commands. Icons, separators, section headers and nested submenus, with the full button vocabulary \u2014 severity, variant, raised, rounded, sizes.',
+    noField: true, demo: 'split',
+    base: { label: 'Save', icon: 'check', model: SPLIT_MODEL },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'icon', type: 'text' },
+      { key: 'severity', type: 'select', options: [...SEVERITIES] },
+      { key: 'variant', type: 'select', options: ['solid', 'outlined', 'text', 'link'] },
+      { key: 'raised', type: 'bool' }, { key: 'rounded', type: 'bool' },
+      { key: 'menuAlign', type: 'select', options: ['end', 'start'] },
+      { key: 'menuIcon', type: 'text' },
+      { key: 'loading', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['label / icon', 'string', '\u2014', 'The default action'],
+      ['model', 'MenuItem[]', '[]', '{ label, icon?, hint?, disabled?, href?, items? }, { separator: true }, { header }'],
+      ['severity', 'ApexSeverity', "'primary'", 'Same eight roles as ApexButton'],
+      ['variant', "'solid' | 'outlined' | 'text' | 'link'", "'solid'", ''],
+      ['raised / rounded', 'boolean', 'false', 'Elevation, circular radius'],
+      ['size', "'sm' | 'md' | 'lg'", "'md'", ''],
+      ['menuAlign', "'start' | 'end'", "'end'", 'Which edge the overlay opens to'],
+      ['menuIcon / menuLabel', 'string', "'keyboard_arrow_down' / 'More options'", 'Chevron glyph and its accessible name'],
+      ['loading / disabled', 'boolean', 'false', ''],
+    ],
+    events: [['click', 'MouseEvent \u2014 the default action'], ['item-click', '{ item, event }'], ['show / hide', '\u2014']],
+    slots: [['default', 'Action label; falls back to `label`']],
+  },
+  {
+    id: 'speeddial', name: 'ApexSpeedDial', group: 'Actions',
+    blurb: 'A floating trigger that fans related actions out around it. Linear, circle, semi-circle or quarter-circle, with a staggered entrance and an optional page mask.',
+    noField: true, demo: 'dial',
+    base: { items: DIAL_ITEMS, type: 'linear', direction: 'up', tooltip: true },
+    controls: [
+      { key: 'type', type: 'select', options: ['linear', 'circle', 'semi-circle', 'quarter-circle'] },
+      { key: 'direction', type: 'select', options: ['up', 'down', 'left', 'right', 'up-left', 'up-right', 'down-left', 'down-right'] },
+      { key: 'radius', type: 'number' }, { key: 'gap', type: 'number' },
+      { key: 'transitionDelay', type: 'number' },
+      { key: 'icon', type: 'text' }, { key: 'activeIcon', type: 'text' },
+      { key: 'severity', type: 'select', options: [...SEVERITIES] },
+      { key: 'tooltip', type: 'bool' }, { key: 'hover', type: 'bool' },
+      { key: 'mask', type: 'bool' },
+      { key: 'maskColor', type: 'color' }, { key: 'maskOpacity', type: 'number' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['items', 'SpeedDialItem[]', '[]', '{ icon?, label?, tooltip?, disabled?, href?, target? } \u2014 plus anything else, returned on @item-click'],
+      ['type', "'linear' | 'circle' | 'semi-circle' | 'quarter-circle'", "'linear'", 'Item layout'],
+      ['direction', "'up' | 'down' | 'left' | 'right' | four diagonals", "'up'", 'Diagonals apply to linear and quarter-circle'],
+      ['radius', 'number', '92', 'Arc radius in pixels \u2014 circle, semi-circle, quarter-circle'],
+      ['gap', 'number', '48', 'Spacing between linear items, in pixels'],
+      ['transitionDelay', 'number', '30', "Delay between each item's appearance, in ms \u2014 reversed on close"],
+      ['icon / activeIcon', 'string', "'add' / 'close'", 'Trigger glyph while closed and open'],
+      ['severity', 'ApexSeverity', "'primary'", 'Trigger colour role'],
+      ['mask', 'boolean', 'false', 'Dim the page behind the open items'],
+      ['maskColor / maskOpacity', 'string / number', "'#0F141C' / 0.4", 'Mask colour and opacity'],
+      ['tooltip', 'boolean', 'false', 'Show each label on hover and focus'],
+      ['hover', 'boolean', 'false', 'Open on hover instead of click'],
+      ['position', "'inline' | four corners", "'inline'", 'Pin to a viewport corner'],
+    ],
+    events: [['item-click', '{ item, index, event }'], ['update:open', 'boolean'], ['show / hide', '\u2014']],
+  },
+  {
+    id: 'buttongroup', name: 'ApexButtonGroup', group: 'Actions',
+    blurb: 'Wraps ApexButtons into one seamless bar \u2014 inner radii drop and shared borders collapse. Horizontal or vertical.',
+    noField: true, demo: 'group',
+    base: {},
+    controls: [
+      { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'block', type: 'bool' }, { key: 'label', type: 'text' },
+      { key: 'hideLabel', type: 'bool' }, { key: 'help', type: 'text' },
+    ],
+    props: [
+      ['orientation', "'horizontal' | 'vertical'", "'horizontal'", ''],
+      ['block', 'boolean', 'false', 'Full width, equal-width buttons'],
+      ['size', "'sm' | 'md' | 'lg'", '\u2014', "Sizes every button in the group, overriding each button's own size"],
+      ['label', 'string', '\u2014', 'Frames the group and sits on the border, like a fieldset legend'],
+      ['hideLabel', 'boolean', 'false', 'Keep `label` as the accessible name without drawing the frame'],
+      ['help', 'string', '\u2014', 'Help text under the frame'],
+    ],
+    events: [],
+    slots: [['default', 'The ApexButtons']],
   },
 ];

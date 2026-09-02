@@ -221,3 +221,24 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 
 /* Icon sitting inline with its explanatory text. */
 .icon-inline { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; }
+
+/* --- Actions: button, split button, speed dial, button group -------- */
+
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.stack--start { align-items: flex-start; gap: 14px; }
+.stack--wide { gap: 20px; }
+
+/* One severity row per variant, with a fixed-width tag so the rows align. */
+.sev-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.sev-row__tag { margin: 0; inline-size: 64px; flex: 0 0 auto; }
+
+.framed-row { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+
+/* The dial fans its items outwards, so each cell needs room or they overflow. */
+.dial-stage { display: grid; place-items: center; min-block-size: 280px; }
+.dial-cell { position: relative; display: grid; place-items: center; min-block-size: 230px; }
+.dial-cell__tag {
+  position: absolute; inset-block-start: 14px; inset-inline-start: 14px; margin: 0;
+}
+
+.stage__log { margin-block-start: 0.75rem; }
