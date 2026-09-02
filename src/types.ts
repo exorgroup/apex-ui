@@ -180,6 +180,14 @@ export interface ApexButtonClasses {
   frame?: string;
   legend?: string;
   help?: string;
+  /** ApexSplitButton — the overlay and its rows, headers, hints and rules. */
+  menu?: string;
+  menuItem?: string;
+  menuHeader?: string;
+  menuHint?: string;
+  menuSeparator?: string;
+  /** ApexSpeedDial — one action button, inside its positioner. */
+  action?: string;
 }
 
 export interface ApexFieldProps {

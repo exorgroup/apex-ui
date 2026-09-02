@@ -2969,26 +2969,26 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
 .apex-split__toggle .apex-icon[data-open="true"]{transform:rotate(180deg)}
 .apex-split__action:hover:not(:disabled),.apex-split__toggle:hover:not(:disabled){z-index:1}
 
-.apex-menu{--amn-bg:var(--bg-elevated);--amn-border:var(--border-default);--amn-fg:var(--fg-default);
---amn-hover-bg:var(--bg-muted);--amn-hover-fg:var(--amn-fg);--amn-icon:currentColor;
---amn-header-fg:var(--fg-subtle);--amn-hint-fg:var(--fg-subtle);--amn-radius:var(--r-sm);
---amn-sep:var(--amn-border);
-position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;margin:0;padding:5px;min-inline-size:190px;background:var(--amn-bg);border:1px solid var(--amn-border);border-radius:var(--r-md);box-shadow:var(--shadow-md);color:var(--amn-fg)}
+.apex-menu{--apex-menu-bg:var(--bg-elevated);--apex-menu-border:var(--border-default);--apex-menu-fg:var(--fg-default);
+--apex-menu-hover-bg:var(--bg-muted);--apex-menu-hover-fg:var(--apex-menu-fg);--apex-menu-icon:currentColor;
+--apex-menu-header-fg:var(--fg-subtle);--apex-menu-hint-fg:var(--fg-subtle);--apex-menu-radius:var(--r-sm);
+--apex-menu-sep:var(--apex-menu-border);
+position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;margin:0;padding:5px;min-inline-size:190px;background:var(--apex-menu-bg);border:1px solid var(--apex-menu-border);border-radius:var(--r-md);box-shadow:var(--shadow-md);color:var(--apex-menu-fg)}
 .apex-menu[data-align="end"]{inset-inline-end:0}
 .apex-menu[data-align="start"]{inset-inline-start:0}
 .apex-menu__item{position:relative}
-.apex-menu__row{display:flex;align-items:center;gap:9px;inline-size:100%;text-align:start;padding-block:8px;padding-inline:10px;border:0;background:transparent;font-family:var(--font-sans);font-size:14px;color:var(--amn-fg);border-radius:var(--amn-radius);cursor:pointer;text-decoration:none;white-space:nowrap}
-.apex-menu__row:hover:not([data-disabled="true"]){background:var(--amn-hover-bg);color:var(--amn-hover-fg)}
-.apex-menu__row .apex-icon{color:var(--amn-icon)}
+.apex-menu__row{display:flex;align-items:center;gap:9px;inline-size:100%;text-align:start;padding-block:8px;padding-inline:10px;border:0;background:transparent;font-family:var(--font-sans);font-size:14px;color:var(--apex-menu-fg);border-radius:var(--apex-menu-radius);cursor:pointer;text-decoration:none;white-space:nowrap}
+.apex-menu__row:hover:not([data-disabled="true"]){background:var(--apex-menu-hover-bg);color:var(--apex-menu-hover-fg)}
+.apex-menu__row .apex-icon{color:var(--apex-menu-icon)}
 .apex-menu__row:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-menu__row[data-disabled="true"]{opacity:.45;cursor:not-allowed}
 .apex-menu__gap{inline-size:0}
 .apex-menu__label{flex:1 1 auto}
-.apex-menu__hint{font-family:var(--font-mono);font-size:11.5px;color:var(--amn-hint-fg);margin-inline-start:14px}
+.apex-menu__hint{font-family:var(--font-mono);font-size:11.5px;color:var(--apex-menu-hint-fg);margin-inline-start:14px}
 .apex-menu__chev{margin-inline-start:6px;color:var(--fg-subtle)}
-.apex-menu__sep{block-size:1px;background:var(--amn-sep);margin-block:5px;margin-inline:-5px}
-.apex-menu__header{padding:9px 10px 5px;font-family:var(--font-sans);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amn-header-fg)}
-.apex-menu__sub{position:absolute;z-index:51;inset-block-start:-5px;inset-inline-start:100%;list-style:none;margin:0;margin-inline-start:3px;padding:5px;min-inline-size:180px;background:var(--amn-bg);border:1px solid var(--amn-border);border-radius:var(--r-md);box-shadow:var(--shadow-md);display:none}
+.apex-menu__sep{block-size:1px;background:var(--apex-menu-sep);margin-block:5px;margin-inline:-5px}
+.apex-menu__header{padding:9px 10px 5px;font-family:var(--font-sans);font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--apex-menu-header-fg)}
+.apex-menu__sub{position:absolute;z-index:51;inset-block-start:-5px;inset-inline-start:100%;list-style:none;margin:0;margin-inline-start:3px;padding:5px;min-inline-size:180px;background:var(--apex-menu-bg);border:1px solid var(--apex-menu-border);border-radius:var(--r-md);box-shadow:var(--shadow-md);display:none}
 .apex-menu__sub[data-open="true"]{display:block}
 /* flipped to the start side when the end side would leave the viewport */
 .apex-menu__sub[data-side="start"]{inset-inline-start:auto;inset-inline-end:100%;margin-inline:0 3px}
@@ -2998,9 +2998,9 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 .apex-ctxmenu{position:fixed;inset-block-start:0;inset-inline-start:0;min-inline-size:200px;box-shadow:var(--shadow-lg)}
 
 /* ─── speed dial ───────────────────────────────────────── */
-.apex-dial{--dial-btn:42px;position:relative;display:inline-flex;inline-size:var(--dial-btn);block-size:var(--dial-btn)}
-.apex-dial[data-size="sm"]{--dial-btn:34px}
-.apex-dial[data-size="lg"]{--dial-btn:50px}
+.apex-dial{--apex-dial-btn:42px;position:relative;display:inline-flex;inline-size:var(--apex-dial-btn);block-size:var(--apex-dial-btn)}
+.apex-dial[data-size="sm"]{--apex-dial-btn:34px}
+.apex-dial[data-size="lg"]{--apex-dial-btn:50px}
 .apex-dial[data-position="top-left"]{position:fixed;inset-block-start:24px;inset-inline-start:24px;z-index:60}
 .apex-dial[data-position="top-right"]{position:fixed;inset-block-start:24px;inset-inline-end:24px;z-index:60}
 .apex-dial[data-position="bottom-left"]{position:fixed;inset-block-end:24px;inset-inline-start:24px;z-index:60}
@@ -3008,10 +3008,10 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 .apex-dial__trigger{position:relative;z-index:2}
 .apex-dial__mask{position:fixed;inset:0;z-index:1;transition:opacity var(--dur-mid) var(--ease-out);pointer-events:none}
 .apex-dial__mask[data-on="true"]{pointer-events:auto}
-.apex-dial__items{list-style:none;margin:0;padding:0;position:absolute;inset-block-start:0;inset-inline-start:0;inline-size:var(--dial-btn);block-size:var(--dial-btn);z-index:2}
+.apex-dial__items{list-style:none;margin:0;padding:0;position:absolute;inset-block-start:0;inset-inline-start:0;inline-size:var(--apex-dial-btn);block-size:var(--apex-dial-btn);z-index:2}
 .apex-dial__item{position:absolute;inset:0;display:grid;place-items:center;transition:transform var(--dur-mid) var(--ease-spring),opacity var(--dur-fast) linear}
-.apex-dial__btn{inline-size:calc(var(--dial-btn) - 6px);block-size:calc(var(--dial-btn) - 6px);display:grid;place-items:center;border:1px solid var(--border-default);border-radius:var(--r-full);background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;box-shadow:var(--shadow-sm);padding:0;text-decoration:none;transition:background var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast),box-shadow var(--dur-fast)}
-.apex-dial__btn:hover:not(:disabled){color:var(--accent-primary);border-color:var(--accent-primary);box-shadow:var(--shadow-md)}
+.apex-dial__btn{inline-size:calc(var(--apex-dial-btn) - 6px);block-size:calc(var(--apex-dial-btn) - 6px);display:grid;place-items:center;border:1px solid var(--apex-dial-action-border,var(--border-default));border-radius:var(--apex-dial-action-radius,var(--r-full));background:var(--apex-dial-action-bg,var(--bg-surface));color:var(--apex-dial-action-fg,var(--fg-muted));cursor:pointer;box-shadow:var(--shadow-sm);padding:0;text-decoration:none;transition:background var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast),box-shadow var(--dur-fast)}
+.apex-dial__btn:hover:not(:disabled){color:var(--apex-dial-action-hover-fg,var(--accent-primary));border-color:var(--apex-dial-action-hover-border,var(--accent-primary));box-shadow:var(--shadow-md)}
 .apex-dial__btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-dial__btn:disabled{opacity:.45;cursor:not-allowed}
 .apex-dial__item:hover .apex-dial__tip,.apex-dial__btn:focus-visible + .apex-dial__tip{opacity:1}

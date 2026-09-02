@@ -47,6 +47,19 @@ const props = withDefaults(defineProps<Omit<ApexButtonAppearance, 'radius'> & {
   label?: string;
   /** Pin to a viewport corner instead of flowing inline. */
   position?: 'inline' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+
+  /* The fanned action buttons. The trigger takes the shared button props
+     above; these are the small round ones it opens. */
+  /** Action background, text/icon colour, border and corner. */
+  actionBackground?: string;
+  actionColor?: string;
+  actionBorderColor?: string;
+  actionRadius?: string;
+  /** The action under the pointer. */
+  actionHoverColor?: string;
+  actionHoverBorderColor?: string;
+  /** Diameter of the trigger and, less six pixels, of each action. */
+  actionSize?: string;
 }>(), {
   type: 'linear', direction: 'up', radius: 92, gap: 48, transitionDelay: 30,
   icon: 'add', activeIcon: 'close', severity: 'primary', size: 'md',
@@ -67,6 +80,13 @@ const btnStyle = computed(() => {
     [props.height, '--apex-btn-h'],
     [props.fontSize, '--apex-btn-fs'],
     [props.paddingInline, '--apex-btn-pad'],
+    [props.actionBackground, '--apex-dial-action-bg'],
+    [props.actionColor, '--apex-dial-action-fg'],
+    [props.actionBorderColor, '--apex-dial-action-border'],
+    [props.actionRadius, '--apex-dial-action-radius'],
+    [props.actionHoverColor, '--apex-dial-action-hover-fg'],
+    [props.actionHoverBorderColor, '--apex-dial-action-hover-border'],
+    [props.actionSize, '--apex-dial-btn'],
   ];
   map.forEach(([v, name]) => { if (v) out[name] = v; });
   return out;
@@ -140,7 +160,7 @@ defineExpose({ open, setOpen });
 
     <ul class="apex-dial__items" :class="ui?.items" :data-open="open ? 'true' : 'false'" role="menu" :aria-hidden="!open">
       <li v-for="(item, i) in list" :key="i" class="apex-dial__item" :class="ui?.item" :style="styleFor(i)" role="none">
-        <component :is="item.href ? 'a' : 'button'" class="apex-dial__btn" role="menuitem"
+        <component :is="item.href ? 'a' : 'button'" class="apex-dial__btn" :class="ui?.action" role="menuitem"
                    :href="item.href" :target="item.target" :type="item.href ? undefined : 'button'"
                    :disabled="item.href ? undefined : item.disabled" :tabindex="open ? 0 : -1"
                    :aria-label="item.label || item.tooltip"

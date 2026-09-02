@@ -37,6 +37,22 @@ const props = withDefaults(defineProps<ApexButtonAppearance & {
   menuAlign?: 'start' | 'end';
   /** Accessible name for the chevron. */
   menuLabel?: string;
+
+  /* The overlay. It inherits from the root, so these ride along with the
+     button's own appearance props rather than needing a second mechanism. */
+  /** Overlay background, border and corner. */
+  menuBackground?: string;
+  menuBorderColor?: string;
+  menuRadius?: string;
+  /** Row text, and the row under the pointer. */
+  menuColor?: string;
+  menuHoverBackground?: string;
+  menuHoverColor?: string;
+  /** A row's leading icon, a section header, a trailing hint, a separator. */
+  menuIconColor?: string;
+  menuHeaderColor?: string;
+  menuHintColor?: string;
+  menuSeparatorColor?: string;
 }>(), {
   severity: 'primary', variant: 'solid', size: 'md',
   menuIcon: 'keyboard_arrow_down', menuAlign: 'end', menuLabel: 'More options',
@@ -57,6 +73,16 @@ const btnStyle = computed(() => {
     [props.fontSize, '--apex-btn-fs'],
     [props.paddingInline, '--apex-btn-pad'],
     [props.radius, '--apex-btn-radius'],
+    [props.menuBackground, '--apex-menu-bg'],
+    [props.menuBorderColor, '--apex-menu-border'],
+    [props.menuRadius, '--apex-menu-radius'],
+    [props.menuColor, '--apex-menu-fg'],
+    [props.menuHoverBackground, '--apex-menu-hover-bg'],
+    [props.menuHoverColor, '--apex-menu-hover-fg'],
+    [props.menuIconColor, '--apex-menu-icon'],
+    [props.menuHeaderColor, '--apex-menu-header-fg'],
+    [props.menuHintColor, '--apex-menu-hint-fg'],
+    [props.menuSeparatorColor, '--apex-menu-sep'],
   ];
   map.forEach(([v, name]) => { if (v) out[name] = v; });
   return out;
@@ -123,8 +149,8 @@ onBeforeUnmount(() => {
       <ApexIcon :name="menuIcon" :data-open="open" />
     </button>
 
-    <ul v-if="open" class="apex-menu" role="menu" :data-align="menuAlign">
-      <ApexMenuItem v-for="(item, i) in items" :key="i" :item="item" @pick="pick" />
+    <ul v-if="open" class="apex-menu" :class="ui?.menu" role="menu" :data-align="menuAlign">
+      <ApexMenuItem v-for="(item, i) in items" :key="i" :item="item" :ui="ui" @pick="pick" />
     </ul>
   </div>
 </template>

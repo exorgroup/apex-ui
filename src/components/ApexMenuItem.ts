@@ -1,4 +1,5 @@
 import { defineComponent, h, nextTick, ref, type PropType } from 'vue';
+import type { ApexButtonClasses } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
 export interface MenuItem {
@@ -31,6 +32,8 @@ const ApexMenuItem = defineComponent({
      * custom template never has to reimplement the menu behaviour.
      */
     itemRender: { type: Function as PropType<(ctx: { item: MenuItem; depth: number; branch: boolean }) => unknown>, default: undefined },
+    /** Your own classes on the row, header, hint and separator. */
+    ui: { type: Object as PropType<ApexButtonClasses>, default: undefined },
   },
   emits: ['pick'],
   setup(props, { emit }) {
@@ -60,15 +63,15 @@ const ApexMenuItem = defineComponent({
 
     return () => {
       const it = props.item;
-      if (it.separator) return h('li', { class: 'apex-menu__sep', role: 'separator' });
-      if (it.header) return h('li', { class: 'apex-menu__header', role: 'presentation' }, it.header);
+      if (it.separator) return h('li', { class: ['apex-menu__sep', props.ui?.menuSeparator], role: 'separator' });
+      if (it.header) return h('li', { class: ['apex-menu__header', props.ui?.menuHeader], role: 'presentation' }, it.header);
 
       const branch = !!(it.items && it.items.length);
       const tag = it.href && !branch ? 'a' : 'button';
 
       const rowNode = h(tag, {
         ref: row,
-        class: 'apex-menu__row',
+        class: ['apex-menu__row', props.ui?.menuItem],
         role: 'menuitem',
         href: it.href,
         target: it.target,
@@ -87,7 +90,7 @@ const ApexMenuItem = defineComponent({
         : [
           it.icon ? h(ApexIcon, { name: it.icon, size: 18 }) : h('span', { class: 'apex-menu__gap' }),
           h('span', { class: 'apex-menu__label' }, it.label),
-          it.hint ? h('span', { class: 'apex-menu__hint' }, it.hint) : null,
+          it.hint ? h('span', { class: ['apex-menu__hint', props.ui?.menuHint] }, it.hint) : null,
           branch ? h(ApexIcon, { name: 'chevron_right', size: 18, class: 'apex-menu__chev' }) : null,
         ]);
 
@@ -101,7 +104,7 @@ const ApexMenuItem = defineComponent({
           style: lift.value ? { marginBlockStart: -lift.value + 'px' } : undefined,
         },
           (it.items || []).map((child, i) => h(ApexMenuItem, {
-            key: i, item: child, depth: props.depth + 1, itemRender: props.itemRender,
+            key: i, item: child, depth: props.depth + 1, itemRender: props.itemRender, ui: props.ui,
             onPick: (x: MenuItem, e: MouseEvent) => emit('pick', x, e),
           })))
         : null;
