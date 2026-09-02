@@ -13,11 +13,11 @@
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import { itemOffset, tooltipSide, type SpeedDialDirection, type SpeedDialItem, type SpeedDialType } from '../core/speedDial';
-import type { ApexSize } from '../types';
+import type { ApexSize, ApexButtonAppearance } from '../types';
 
 export type { SpeedDialItem };
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<Omit<ApexButtonAppearance, 'radius'> & {
   items?: SpeedDialItem[];
   type?: SpeedDialType;
   direction?: SpeedDialDirection;
@@ -52,6 +52,26 @@ const props = withDefaults(defineProps<{
   icon: 'add', activeIcon: 'close', severity: 'primary', size: 'md',
   maskColor: '#0F141C', maskOpacity: 0.4, position: 'inline',
 });
+
+/**
+ * Appearance prop -> CSS variable. Only what is set, so an untouched button
+ * carries no style attribute at all.
+ */
+const btnStyle = computed(() => {
+  const out: Record<string, string> = {};
+  const map: Array<[string | undefined, string]> = [
+    [props.color, '--apex-btn-color'],
+    [props.hoverColor, '--apex-btn-hover'],
+    [props.labelColor, '--apex-btn-label'],
+    [props.tintColor, '--apex-btn-tint'],
+    [props.height, '--apex-btn-h'],
+    [props.fontSize, '--apex-btn-fs'],
+    [props.paddingInline, '--apex-btn-pad'],
+  ];
+  map.forEach(([v, name]) => { if (v) out[name] = v; });
+  return out;
+});
+
 
 const emit = defineEmits<{
   (e: 'update:open', v: boolean): void;
@@ -112,14 +132,14 @@ defineExpose({ open, setOpen });
 </script>
 
 <template>
-  <div ref="root" class="apex-dial" :data-type="type" :data-direction="direction"
+  <div ref="root" class="apex-dial" :class="ui?.root" :style="btnStyle" :data-type="type" :data-direction="direction"
        :data-position="position" :data-open="open ? 'true' : 'false'" :data-size="size"
        @mouseenter="hover && setOpen(true)" @mouseleave="hover && setOpen(false)">
-    <div v-if="mask" class="apex-dial__mask" :data-on="open ? 'true' : 'false'"
+    <div v-if="mask" class="apex-dial__mask" :class="ui?.mask" :data-on="open ? 'true' : 'false'"
          :style="{ background: maskColor, opacity: open ? maskOpacity : 0 }" @click="setOpen(false)"></div>
 
-    <ul class="apex-dial__items" :data-open="open ? 'true' : 'false'" role="menu" :aria-hidden="!open">
-      <li v-for="(item, i) in list" :key="i" class="apex-dial__item" :style="styleFor(i)" role="none">
+    <ul class="apex-dial__items" :class="ui?.items" :data-open="open ? 'true' : 'false'" role="menu" :aria-hidden="!open">
+      <li v-for="(item, i) in list" :key="i" class="apex-dial__item" :class="ui?.item" :style="styleFor(i)" role="none">
         <component :is="item.href ? 'a' : 'button'" class="apex-dial__btn" role="menuitem"
                    :href="item.href" :target="item.target" :type="item.href ? undefined : 'button'"
                    :disabled="item.href ? undefined : item.disabled" :tabindex="open ? 0 : -1"
@@ -127,13 +147,13 @@ defineExpose({ open, setOpen });
                    @click="activate(item, i, $event)">
           <ApexIcon v-if="item.icon" :name="item.icon" />
         </component>
-        <span v-if="tooltip && (item.tooltip || item.label)" class="apex-dial__tip" :data-side="side">
+        <span v-if="tooltip && (item.tooltip || item.label)" class="apex-dial__tip" :class="ui?.tooltip" :data-side="side">
           {{ item.tooltip || item.label }}
         </span>
       </li>
     </ul>
 
-    <button type="button" class="apex-btn apex-dial__trigger" :data-severity="severity"
+    <button type="button" class="apex-btn apex-dial__trigger" :class="ui?.trigger" :data-severity="severity"
             data-variant="solid" :data-size="size" data-icon-only="true" data-rounded="true"
             :disabled="disabled" :aria-expanded="open" aria-haspopup="menu"
             :aria-label="label || 'Actions'" @click="toggle">

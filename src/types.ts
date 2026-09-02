@@ -130,6 +130,58 @@ export interface ApexFieldClasses {
   tooltip?: string;
 }
 
+/**
+ * Appearance shared by every control built on .apex-btn — ApexButton,
+ * ApexSplitButton, ApexSpeedDial's trigger and ApexButtonGroup.
+ *
+ * The four colours are the whole severity system, not a subset of it. A
+ * severity is nothing more than these four values, and all four variants
+ * (solid, outlined, text, link) are written against them — so setting them is
+ * how you define a severity the library does not ship, and it works across
+ * every variant without further help.
+ */
+export interface ApexButtonAppearance {
+  /** Base colour: solid background, outlined and text foreground. */
+  color?: string;
+  /** Hover colour. */
+  hoverColor?: string;
+  /** Text colour on a solid button. */
+  labelColor?: string;
+  /** The soft tint behind an outlined or text button on hover, and the focus ring. */
+  tintColor?: string;
+
+  /** Sizing, beyond the three `size` presets. Any CSS length. */
+  height?: string;
+  fontSize?: string;
+  paddingInline?: string;
+  radius?: string;
+
+  /** Your own class on any part. */
+  ui?: ApexButtonClasses;
+}
+
+/** Your own classes, per part of a button-family control. */
+export interface ApexButtonClasses {
+  /** The button element itself, or the root of a composite. */
+  root?: string;
+  /** ApexButton — the label span and the corner badge. */
+  label?: string;
+  badge?: string;
+  /** ApexSplitButton — the default action and the chevron half. */
+  action?: string;
+  toggle?: string;
+  /** ApexSpeedDial — the trigger, the fan, one action, the page mask, a tooltip. */
+  trigger?: string;
+  items?: string;
+  item?: string;
+  mask?: string;
+  tooltip?: string;
+  /** ApexButtonGroup — the frame, its legend and the help line. */
+  frame?: string;
+  legend?: string;
+  help?: string;
+}
+
 export interface ApexFieldProps {
   label?: string;
   labelIcon?: string;

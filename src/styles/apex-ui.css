@@ -2103,42 +2103,42 @@ border:0;background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;paddi
 
 /* ─── button ───────────────────────────────────────────── */
 /* Each severity supplies --b (base), --bh (hover), --bt (text on solid), --bs (soft tint). */
-.apex-btn{--b:var(--accent-primary);--bh:var(--accent-primary-hover);--bt:#fff;--bs:color-mix(in srgb,var(--accent-primary) 10%,transparent);
+.apex-btn{--apex-btn-color:var(--accent-primary);--apex-btn-hover:var(--accent-primary-hover);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--accent-primary) 10%,transparent);
 display:inline-flex;align-items:center;justify-content:center;gap:7px;position:relative;font-family:var(--font-sans);font-size:14px;font-weight:600;letter-spacing:-.005em;border-radius:var(--r-md);border:1px solid transparent;padding-block:0;padding-inline:16px;block-size:42px;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast),box-shadow var(--dur-fast),transform var(--dur-fast)}
-.apex-btn[data-size="sm"]{block-size:34px;font-size:13px;padding-inline:12px;--apex-icon-size:17px}
-.apex-btn[data-size="lg"]{block-size:50px;font-size:15px;padding-inline:22px;--apex-icon-size:21px}
+.apex-btn[data-size="sm"]{--apex-btn-h:34px;--apex-btn-fs:13px;--apex-btn-pad:12px;--apex-icon-size:17px}
+.apex-btn[data-size="lg"]{--apex-btn-h:50px;--apex-btn-fs:15px;--apex-btn-pad:22px;--apex-icon-size:21px}
 .apex-btn[data-block="true"]{display:flex;inline-size:100%}
 .apex-btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-btn:disabled,.apex-btn[data-loading="true"]{opacity:.6;cursor:not-allowed}
 .apex-btn__txt{display:block}
 
 /* severities */
-.apex-btn[data-severity="primary"]{--b:var(--accent-primary);--bh:var(--accent-primary-hover);--bt:#fff;--bs:color-mix(in srgb,var(--accent-primary) 10%,transparent)}
-.apex-btn[data-severity="secondary"]{--b:var(--fg-muted);--bh:var(--fg-default);--bt:#fff;--bs:var(--bg-muted)}
-.apex-btn[data-severity="success"]{--b:var(--accent-success);--bh:var(--apex-green-600);--bt:#fff;--bs:color-mix(in srgb,var(--accent-success) 12%,transparent)}
-.apex-btn[data-severity="info"]{--b:var(--apex-blue-400);--bh:var(--apex-blue-500);--bt:#fff;--bs:color-mix(in srgb,var(--apex-blue-400) 12%,transparent)}
-.apex-btn[data-severity="warning"]{--b:var(--accent-warning);--bh:var(--apex-orange-600);--bt:#fff;--bs:color-mix(in srgb,var(--accent-warning) 12%,transparent)}
-.apex-btn[data-severity="help"]{--b:var(--accent-help);--bh:var(--accent-help-hover);--bt:#fff;--bs:color-mix(in srgb,var(--accent-help) 12%,transparent)}
-.apex-btn[data-severity="danger"]{--b:var(--accent-danger);--bh:var(--apex-red-600);--bt:#fff;--bs:color-mix(in srgb,var(--accent-danger) 10%,transparent)}
-.apex-btn[data-severity="contrast"]{--b:var(--fg-default);--bh:var(--fg-muted);--bt:var(--bg-surface);--bs:var(--bg-muted)}
+.apex-btn[data-severity="primary"]{--apex-btn-color:var(--accent-primary);--apex-btn-hover:var(--accent-primary-hover);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--accent-primary) 10%,transparent)}
+.apex-btn[data-severity="secondary"]{--apex-btn-color:var(--fg-muted);--apex-btn-hover:var(--fg-default);--apex-btn-label:#fff;--apex-btn-tint:var(--bg-muted)}
+.apex-btn[data-severity="success"]{--apex-btn-color:var(--accent-success);--apex-btn-hover:var(--apex-green-600);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--accent-success) 12%,transparent)}
+.apex-btn[data-severity="info"]{--apex-btn-color:var(--apex-blue-400);--apex-btn-hover:var(--apex-blue-500);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--apex-blue-400) 12%,transparent)}
+.apex-btn[data-severity="warning"]{--apex-btn-color:var(--accent-warning);--apex-btn-hover:var(--apex-orange-600);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--accent-warning) 12%,transparent)}
+.apex-btn[data-severity="help"]{--apex-btn-color:var(--accent-help);--apex-btn-hover:var(--accent-help-hover);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--accent-help) 12%,transparent)}
+.apex-btn[data-severity="danger"]{--apex-btn-color:var(--accent-danger);--apex-btn-hover:var(--apex-red-600);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--accent-danger) 10%,transparent)}
+.apex-btn[data-severity="contrast"]{--apex-btn-color:var(--fg-default);--apex-btn-hover:var(--fg-muted);--apex-btn-label:var(--bg-surface);--apex-btn-tint:var(--bg-muted)}
 
 /* variants */
-.apex-btn[data-variant="solid"]{background:var(--b);color:var(--bt);border-color:var(--b)}
-.apex-btn[data-variant="solid"]:hover:not(:disabled){background:var(--bh);border-color:var(--bh)}
-.apex-btn[data-variant="outlined"]{background:transparent;color:var(--b);border-color:color-mix(in srgb,var(--b) 45%,transparent)}
-.apex-btn[data-variant="outlined"]:hover:not(:disabled){background:var(--bs);border-color:var(--b)}
-.apex-btn[data-variant="text"]{background:transparent;color:var(--b);border-color:transparent}
-.apex-btn[data-variant="text"]:hover:not(:disabled){background:var(--bs)}
-.apex-btn[data-variant="link"]{background:transparent;color:var(--b);border-color:transparent;padding-inline:4px;text-decoration:none}
-.apex-btn[data-variant="link"]:hover:not(:disabled){color:var(--bh)}
+.apex-btn[data-variant="solid"]{background:var(--apex-btn-color);color:var(--apex-btn-label);border-color:var(--apex-btn-color)}
+.apex-btn[data-variant="solid"]:hover:not(:disabled){background:var(--apex-btn-hover);border-color:var(--apex-btn-hover)}
+.apex-btn[data-variant="outlined"]{background:transparent;color:var(--apex-btn-color);border-color:color-mix(in srgb,var(--apex-btn-color) 45%,transparent)}
+.apex-btn[data-variant="outlined"]:hover:not(:disabled){background:var(--apex-btn-tint);border-color:var(--apex-btn-color)}
+.apex-btn[data-variant="text"]{background:transparent;color:var(--apex-btn-color);border-color:transparent}
+.apex-btn[data-variant="text"]:hover:not(:disabled){background:var(--apex-btn-tint)}
+.apex-btn[data-variant="link"]{background:transparent;color:var(--apex-btn-color);border-color:transparent;padding-inline:4px;text-decoration:none}
+.apex-btn[data-variant="link"]:hover:not(:disabled){color:var(--apex-btn-hover)}
 /* secondary outlined keeps the neutral chrome the rest of the library uses */
 .apex-btn[data-severity="secondary"][data-variant="outlined"]{background:var(--bg-surface);color:var(--fg-default);border-color:var(--border-default)}
 .apex-btn[data-severity="secondary"][data-variant="outlined"]:hover:not(:disabled){border-color:var(--border-strong);background:var(--bg-subtle)}
 
 /* raised, rounded, icon-only */
-.apex-btn[data-raised="true"]{box-shadow:0 2px 0 0 color-mix(in srgb,var(--b) 55%,#000),0 3px 8px -2px color-mix(in srgb,var(--b) 45%,transparent)}
-.apex-btn[data-raised="true"]:hover:not(:disabled){box-shadow:0 3px 0 0 color-mix(in srgb,var(--b) 55%,#000),0 5px 12px -2px color-mix(in srgb,var(--b) 50%,transparent);transform:translateY(-1px)}
-.apex-btn[data-raised="true"]:active:not(:disabled){box-shadow:0 1px 0 0 color-mix(in srgb,var(--b) 55%,#000);transform:translateY(1px)}
+.apex-btn[data-raised="true"]{box-shadow:0 2px 0 0 color-mix(in srgb,var(--apex-btn-color) 55%,#000),0 3px 8px -2px color-mix(in srgb,var(--apex-btn-color) 45%,transparent)}
+.apex-btn[data-raised="true"]:hover:not(:disabled){box-shadow:0 3px 0 0 color-mix(in srgb,var(--apex-btn-color) 55%,#000),0 5px 12px -2px color-mix(in srgb,var(--apex-btn-color) 50%,transparent);transform:translateY(-1px)}
+.apex-btn[data-raised="true"]:active:not(:disabled){box-shadow:0 1px 0 0 color-mix(in srgb,var(--apex-btn-color) 55%,#000);transform:translateY(1px)}
 /* text and outlined lift on the neutral chrome instead of their own hue */
 .apex-btn[data-raised="true"][data-variant="text"],.apex-btn[data-raised="true"][data-variant="outlined"]{box-shadow:0 2px 0 0 var(--border-default),0 3px 8px -3px rgba(15,20,28,.18)}
 .apex-btn[data-raised="true"][data-variant="text"]:hover:not(:disabled),.apex-btn[data-raised="true"][data-variant="outlined"]:hover:not(:disabled){box-shadow:0 3px 0 0 var(--border-strong),0 5px 12px -3px rgba(15,20,28,.22)}
@@ -2153,15 +2153,15 @@ display:inline-flex;align-items:center;justify-content:center;gap:7px;position:r
 .apex-btn[data-icon-pos="top"][data-size="lg"],.apex-btn[data-icon-pos="bottom"][data-size="lg"]{padding-block:14px}
 
 /* badge */
-.apex-btn__badge{--b:var(--fg-default);--bt:var(--bg-surface);position:absolute;inset-block-start:-6px;inset-inline-end:-6px;min-inline-size:19px;block-size:19px;padding-inline:5px;display:grid;place-items:center;border-radius:var(--r-full);background:var(--b);color:var(--bt);font-family:var(--font-sans);font-size:11px;font-weight:700;line-height:1;box-shadow:0 0 0 2px var(--bg-surface)}
-.apex-btn__badge[data-severity="primary"]{--b:var(--accent-primary);--bt:#fff}
-.apex-btn__badge[data-severity="secondary"]{--b:var(--fg-muted);--bt:#fff}
-.apex-btn__badge[data-severity="success"]{--b:var(--accent-success);--bt:#fff}
-.apex-btn__badge[data-severity="info"]{--b:var(--apex-blue-400);--bt:#fff}
-.apex-btn__badge[data-severity="warning"]{--b:var(--accent-warning);--bt:#fff}
-.apex-btn__badge[data-severity="help"]{--b:var(--accent-help);--bt:#fff}
-.apex-btn__badge[data-severity="danger"]{--b:var(--accent-danger);--bt:#fff}
-.apex-btn__badge[data-severity="contrast"]{--b:var(--fg-default);--bt:var(--bg-surface)}
+.apex-btn__badge{--apex-btn-color:var(--fg-default);--apex-btn-label:var(--bg-surface);position:absolute;inset-block-start:-6px;inset-inline-end:-6px;min-inline-size:19px;block-size:19px;padding-inline:5px;display:grid;place-items:center;border-radius:var(--r-full);background:var(--apex-btn-color);color:var(--apex-btn-label);font-family:var(--font-sans);font-size:11px;font-weight:700;line-height:1;box-shadow:0 0 0 2px var(--bg-surface)}
+.apex-btn__badge[data-severity="primary"]{--apex-btn-color:var(--accent-primary);--apex-btn-label:#fff}
+.apex-btn__badge[data-severity="secondary"]{--apex-btn-color:var(--fg-muted);--apex-btn-label:#fff}
+.apex-btn__badge[data-severity="success"]{--apex-btn-color:var(--accent-success);--apex-btn-label:#fff}
+.apex-btn__badge[data-severity="info"]{--apex-btn-color:var(--apex-blue-400);--apex-btn-label:#fff}
+.apex-btn__badge[data-severity="warning"]{--apex-btn-color:var(--accent-warning);--apex-btn-label:#fff}
+.apex-btn__badge[data-severity="help"]{--apex-btn-color:var(--accent-help);--apex-btn-label:#fff}
+.apex-btn__badge[data-severity="danger"]{--apex-btn-color:var(--accent-danger);--apex-btn-label:#fff}
+.apex-btn__badge[data-severity="contrast"]{--apex-btn-color:var(--fg-default);--apex-btn-label:var(--bg-surface)}
 
 /* button group */
 .apex-btnframe{display:inline-block;margin:0;padding:14px 14px 12px;border:1px solid var(--border-default);border-radius:var(--r-md);background:transparent;min-inline-size:0}
@@ -2180,7 +2180,7 @@ display:inline-flex;align-items:center;justify-content:center;gap:7px;position:r
 /* a group-level size wins over each button's own, so a group is always uniform */
 .apex-btngroup[data-size="sm"] > .apex-btn{block-size:34px;font-size:13px;padding-inline:12px;--apex-icon-size:17px}
 .apex-btngroup[data-size="sm"] > .apex-btn[data-icon-only="true"]{inline-size:34px;padding-inline:0}
-.apex-btngroup[data-size="md"] > .apex-btn{block-size:42px;font-size:14px;padding-inline:16px;--apex-icon-size:20px}
+.apex-btngroup[data-size="md"] > .apex-btn{--apex-btn-h:42px;--apex-btn-fs:14px;--apex-btn-pad:16px;--apex-icon-size:20px;block-size:var(--apex-btn-h);font-size:var(--apex-btn-fs);padding-inline:var(--apex-btn-pad);border-radius:var(--apex-btn-radius,var(--r-md))}
 .apex-btngroup[data-size="md"] > .apex-btn[data-icon-only="true"]{inline-size:42px;padding-inline:0}
 .apex-btngroup[data-size="lg"] > .apex-btn{block-size:50px;font-size:15px;padding-inline:22px;--apex-icon-size:21px}
 .apex-btngroup[data-size="lg"] > .apex-btn[data-icon-only="true"]{inline-size:50px;padding-inline:0}
@@ -2964,7 +2964,7 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
 .apex-split[data-size="lg"] .apex-split__toggle[data-icon-only="true"]{inline-size:40px}
 /* the seam, in the text colour so it reads on every variant. A logical border, not a
    box-shadow, so it stays on the shared edge under RTL. */
-.apex-split .apex-split__toggle[data-variant="solid"]{border-inline-start:1px solid color-mix(in srgb,var(--bt) 30%,transparent)}
+.apex-split .apex-split__toggle[data-variant="solid"]{border-inline-start:1px solid color-mix(in srgb,var(--apex-btn-label) 30%,transparent)}
 .apex-split__toggle .apex-icon{transition:transform var(--dur-fast) var(--ease-out)}
 .apex-split__toggle .apex-icon[data-open="true"]{transform:rotate(180deg)}
 .apex-split__action:hover:not(:disabled),.apex-split__toggle:hover:not(:disabled){z-index:1}
@@ -3030,3 +3030,5 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 .apex-ctl__counter{justify-content:flex-end;color:var(--apex-counter-fg,var(--fg-subtle))}
 /* A literal character on a stepper button, sized to sit like the icon it replaces. */
 .apex-stepper__glyph{font-size:var(--apex-stepper-glyph-fs,17px);font-weight:600;line-height:1}
+/* Button group help. Was .apex-field__msg, which coupled it to a component it has nothing to do with. */
+.apex-btngroup__help{margin:0;font-size:var(--apex-btngroup-help-fs,12.5px);line-height:1.45;color:var(--apex-btngroup-help-fg,var(--fg-subtle))}

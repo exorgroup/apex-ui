@@ -13,11 +13,11 @@ import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexMenuItem, { type MenuItem } from './ApexMenuItem';
 import type { ApexSeverity, ApexButtonVariant } from './ApexButton.vue';
-import type { ApexSize } from '../types';
+import type { ApexSize, ApexButtonAppearance } from '../types';
 
 export type { MenuItem };
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexButtonAppearance & {
   /** Default action label. */
   label?: string;
   /** Default action icon. */
@@ -41,6 +41,27 @@ const props = withDefaults(defineProps<{
   severity: 'primary', variant: 'solid', size: 'md',
   menuIcon: 'keyboard_arrow_down', menuAlign: 'end', menuLabel: 'More options',
 });
+
+/**
+ * Appearance prop -> CSS variable. Only what is set, so an untouched button
+ * carries no style attribute at all.
+ */
+const btnStyle = computed(() => {
+  const out: Record<string, string> = {};
+  const map: Array<[string | undefined, string]> = [
+    [props.color, '--apex-btn-color'],
+    [props.hoverColor, '--apex-btn-hover'],
+    [props.labelColor, '--apex-btn-label'],
+    [props.tintColor, '--apex-btn-tint'],
+    [props.height, '--apex-btn-h'],
+    [props.fontSize, '--apex-btn-fs'],
+    [props.paddingInline, '--apex-btn-pad'],
+    [props.radius, '--apex-btn-radius'],
+  ];
+  map.forEach(([v, name]) => { if (v) out[name] = v; });
+  return out;
+});
+
 
 const emit = defineEmits<{
   (e: 'click', event: MouseEvent): void;
@@ -84,8 +105,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="root" class="apex-split" :data-size="size">
-    <button type="button" class="apex-btn apex-split__action" :data-severity="severity"
+  <div ref="root" class="apex-split" :class="ui?.root" :style="btnStyle" :data-size="size">
+    <button type="button" class="apex-btn apex-split__action" :class="ui?.action" :data-severity="severity"
             :data-variant="variant" :data-size="size" :data-raised="raised ? 'true' : 'false'"
             :data-rounded="rounded ? 'true' : 'false'" :data-loading="loading ? 'true' : 'false'"
             :disabled="disabled || loading" :aria-busy="loading || undefined" @click="emit('click', $event)">
@@ -94,7 +115,7 @@ onBeforeUnmount(() => {
       <span class="apex-btn__txt"><slot>{{ label }}</slot></span>
     </button>
 
-    <button type="button" class="apex-btn apex-split__toggle" :data-severity="severity"
+    <button type="button" class="apex-btn apex-split__toggle" :class="ui?.toggle" :data-severity="severity"
             :data-variant="variant" :data-size="size" :data-raised="raised ? 'true' : 'false'"
             :data-rounded="rounded ? 'true' : 'false'" data-icon-only="true"
             :disabled="disabled" :aria-expanded="open" aria-haspopup="menu" :aria-label="menuLabel"
