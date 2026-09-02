@@ -2130,7 +2130,7 @@ display:inline-flex;align-items:center;justify-content:center;gap:7px;position:r
 .apex-btn[data-variant="text"]{background:transparent;color:var(--b);border-color:transparent}
 .apex-btn[data-variant="text"]:hover:not(:disabled){background:var(--bs)}
 .apex-btn[data-variant="link"]{background:transparent;color:var(--b);border-color:transparent;padding-inline:4px;text-decoration:none}
-.apex-btn[data-variant="link"]:hover:not(:disabled){color:var(--bh);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px}
+.apex-btn[data-variant="link"]:hover:not(:disabled){color:var(--bh)}
 /* secondary outlined keeps the neutral chrome the rest of the library uses */
 .apex-btn[data-severity="secondary"][data-variant="outlined"]{background:var(--bg-surface);color:var(--fg-default);border-color:var(--border-default)}
 .apex-btn[data-severity="secondary"][data-variant="outlined"]:hover:not(:disabled){border-color:var(--border-strong);background:var(--bg-subtle)}
@@ -2957,7 +2957,7 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
 
 /* ─── split button + overlay menu ──────────────────────── */
 .apex-split{position:relative;display:inline-flex}
-.apex-split__action{border-start-end-radius:0;border-end-end-radius:0}
+.apex-split .apex-split__action[data-rounded]{border-start-end-radius:0;border-end-end-radius:0}
 /* widths need the same specificity as .apex-btn[data-icon-only="true"], which they'd otherwise lose to */
 .apex-split .apex-split__toggle[data-icon-only="true"]{border-start-start-radius:0;border-end-start-radius:0;margin-inline-start:-1px;inline-size:34px}
 .apex-split[data-size="sm"] .apex-split__toggle[data-icon-only="true"]{inline-size:28px}
