@@ -29,7 +29,7 @@ export interface DocEntry {
    * How the live stage renders this one. Omitted means the default: the
    * component with v-model and the playground props.
    */
-  demo?: 'icon' | 'button' | 'split' | 'dial' | 'group';
+  demo?: 'icon' | 'button' | 'split' | 'dial' | 'group' | 'field';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -409,6 +409,206 @@ app.use(ApexUI, { adapter: precognitionAdapter(form) });</pre>
   },
 ];
 
+
+/* ------------------------------------------------------------------ *
+ * Customisation reference, shown on the ApexField page.
+ *
+ * Values here are read off apex-ui/src/styles/apex-ui.css and
+ * ApexField.vue rather than written from memory — a documented default
+ * that does not match the stylesheet is worse than no default at all.
+ * ------------------------------------------------------------------ */
+
+/** [class, what it is, which control renders it] */
+export const FIELD_PARTS: string[][] = [
+  ['.apex-field', 'The root. Carries data-size, data-lp, data-tone, data-disabled, data-focused, and every CSS variable below.', 'every field'],
+  ['.apex-field__label', 'The label, with its optional icon.', 'every field'],
+  ['.apex-field__req', 'The required asterisk.', 'every field'],
+  ['.apex-field__body', 'Wraps the control and its message line.', 'every field'],
+  ['.apex-field__msg', 'The one message line. Carries data-tone.', 'every field'],
+  ['.apex-ctl', 'The control box — border, background, radius, height, padding.', 'Input, Textarea, Number, Select, Multiselect, Tags'],
+  ['.apex-ctl__input', 'The input element itself.', 'Input, Textarea, Number'],
+  ['.apex-ctl__icon', 'Leading and trailing icons.', 'Input, Select, Multiselect, Tags'],
+  ['.apex-ctl__affix', 'Static prefix and suffix text.', 'Input, Number'],
+  ['.apex-ctl__btn', 'Clear, reveal, trailing action, dropdown chevron.', 'Input, Select, Multiselect, Tags'],
+  ['.apex-ctl__status', 'The tone glyph inside the box.', 'most fields'],
+  ['.apex-pop', 'The typeahead overlay.', 'Input, Select, Multiselect, Tags'],
+  ['.apex-pop__opt', 'A row in the overlay. Carries data-active and aria-selected.', 'Input, Select, Multiselect, Tags'],
+  ['.apex-otp__box', 'One digit box.', 'Otp'],
+  ['.apex-stepper__val', 'The displayed number.', 'Stepper'],
+];
+
+/** [variable, default, what it sets] */
+export const FIELD_VARS: string[][] = [
+  ['--apex-ctl-bg', 'var(--bg-surface)', 'Box background'],
+  ['--apex-ctl-border', 'var(--border-default)', 'Box border colour'],
+  ['--apex-ctl-border-w', '1px', 'Box border width'],
+  ['--apex-ctl-radius', 'var(--r-md)', 'Box corner radius'],
+  ['--apex-ctl-border-hover', 'var(--border-strong)', 'Border on hover'],
+  ['--apex-ctl-border-focus', 'var(--accent-primary)', 'Border on focus'],
+  ['--apex-ctl-ring', 'color-mix(… 15%)', 'The focus ring'],
+  ['--apex-ctl-bg-disabled', 'var(--bg-muted)', 'Box background when disabled'],
+  ['--apex-ctl-fg', 'var(--fg-default)', 'Value text'],
+  ['--apex-ctl-placeholder', 'var(--fg-subtle)', 'Placeholder text'],
+  ['--apex-ctl-fg-disabled', 'var(--fg-muted)', 'Value text when disabled'],
+  ['--apex-ctl-h', '42px', 'Box height. 34 / 50 at sm / lg'],
+  ['--apex-ctl-fs', '14.5px', 'Value font size'],
+  ['--apex-ctl-pad', '12px', 'Box inline padding'],
+  ['--apex-icon-size', '20px', 'Icon size inside the box'],
+  ['--apex-ctl-icon', 'var(--fg-subtle)', 'Icon colour'],
+  ['--apex-ctl-affix', 'var(--fg-subtle)', 'Prefix and suffix colour'],
+  ['--apex-ctl-btn', 'var(--fg-subtle)', 'Button colour'],
+  ['--apex-ctl-btn-hover', 'var(--fg-default)', 'Button colour on hover'],
+  ['--apex-ctl-btn-hover-bg', 'var(--bg-muted)', 'Button background on hover'],
+  ['--apex-label-fg', 'var(--fg-default)', 'Label colour'],
+  ['--apex-label-fs', '13px', 'Label font size'],
+  ['--apex-label-w', '160px', 'Label column width for before / after'],
+  ['--apex-msg-fg', 'var(--fg-subtle)', 'Message colour at the default tone'],
+  ['--apex-msg-fs', '12.5px', 'Message font size'],
+  ['--apex-field-danger', 'var(--accent-danger)', 'The whole danger tone'],
+  ['--apex-field-warning', 'var(--accent-warning)', 'The whole warning tone'],
+  ['--apex-field-success', 'var(--accent-success)', 'The whole success tone'],
+  ['--apex-field-required', 'var(--accent-danger)', 'The required asterisk'],
+  ['--apex-pop-bg', 'var(--bg-elevated)', 'Overlay background'],
+  ['--apex-pop-border', 'var(--border-default)', 'Overlay border'],
+  ['--apex-pop-radius', 'var(--r-md)', 'Overlay radius'],
+  ['--apex-opt-fg', 'var(--fg-default)', 'Row text'],
+  ['--apex-opt-hover-bg', 'var(--bg-muted)', 'Row background when active'],
+  ['--apex-opt-selected-fg', 'var(--accent-primary)', 'Row text when selected'],
+];
+
+/** [group, prop, variable it sets] */
+export const FIELD_STYLE_PROPS: string[][] = [
+  ['Box', 'background', '--apex-ctl-bg'],
+  ['Box', 'borderColor', '--apex-ctl-border'],
+  ['Box', 'borderWidth', '--apex-ctl-border-w'],
+  ['Box', 'radius', '--apex-ctl-radius'],
+  ['Box', 'hoverBorderColor', '--apex-ctl-border-hover'],
+  ['Box', 'focusBorderColor', '--apex-ctl-border-focus'],
+  ['Box', 'focusRing', '--apex-ctl-ring'],
+  ['Box', 'disabledBackground', '--apex-ctl-bg-disabled'],
+  ['Text', 'textColor', '--apex-ctl-fg'],
+  ['Text', 'placeholderColor', '--apex-ctl-placeholder'],
+  ['Size', 'controlHeight', '--apex-ctl-h'],
+  ['Size', 'fontSize', '--apex-ctl-fs'],
+  ['Size', 'paddingInline', '--apex-ctl-pad'],
+  ['Size', 'iconSize', '--apex-icon-size'],
+  ['Parts', 'iconColor', '--apex-ctl-icon'],
+  ['Parts', 'affixColor', '--apex-ctl-affix'],
+  ['Parts', 'buttonColor', '--apex-ctl-btn'],
+  ['Shell', 'labelColor', '--apex-label-fg'],
+  ['Shell', 'labelFontSize', '--apex-label-fs'],
+  ['Shell', 'labelWidth', '--apex-label-w'],
+  ['Shell', 'messageColor', '--apex-msg-fg'],
+  ['Shell', 'messageFontSize', '--apex-msg-fs'],
+  ['Shell', 'requiredColor', '--apex-field-required'],
+  ['Overlay', 'popoverBackground', '--apex-pop-bg'],
+  ['Overlay', 'popoverBorderColor', '--apex-pop-border'],
+  ['Overlay', 'optionHoverBackground', '--apex-opt-hover-bg'],
+];
+
+/** [key, part it lands on, which controls honour it] */
+export const UI_KEYS: string[][] = [
+  ['root', '.apex-field', 'every field'],
+  ['label', '.apex-field__label', 'every field'],
+  ['body', '.apex-field__body', 'every field'],
+  ['message', '.apex-field__msg', 'every field'],
+  ['control', '.apex-ctl', 'Input, Textarea, Number, Select, Multiselect, Tags'],
+  ['input', '.apex-ctl__input', 'Input, Textarea, Number'],
+  ['icon', '.apex-ctl__icon', 'Input, Select, Multiselect, Tags'],
+  ['affix', '.apex-ctl__affix', 'Input, Number'],
+  ['button', '.apex-ctl__btn', 'Input, Select, Multiselect, Tags'],
+  ['popover', '.apex-pop', 'Input, Select, Multiselect, Tags'],
+  ['option', '.apex-pop__opt', 'Input, Select, Multiselect, Tags'],
+  ['box', '.apex-otp__box', 'Otp'],
+  ['value', '.apex-stepper__val / .apex-ctl__value', 'Stepper, Select'],
+  ['unit', '.apex-stepper__unit', 'Stepper'],
+  ['tick', '.apex-pop__tick', 'Select'],
+  ['filter', '.apex-pop__filter', 'Select, Multiselect'],
+  ['selectAll', '.apex-pop__all', 'Multiselect'],
+  ['checkbox', '.apex-pop__box', 'Multiselect'],
+];
+
+export const SNIP_PROPS = `<ApexInput
+  v-model="email"
+  label="Email address"
+  background="#101820"
+  border-color="#C24A06"
+  focus-border-color="#E4863F"
+  radius="14px"
+  text-color="#F5E9DF"
+  label-color="#C24A06"
+  control-height="52px"
+/>`;
+
+export const SNIP_UI = `<ApexInput v-model="email" label="Email address"
+  :ui="{ control: 'brand-box', input: 'brand-text', label: 'brand-label' }" />`;
+
+/** Every property .apex-ctl responds to, as it ships. */
+export const SNIP_CTL = `/* .apex-ctl as the library defines it. Override any line —
+   or set the variable instead and leave the rule alone. */
+.apex-ctl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--apex-ctl-h);         /* 42px, 34 / 50 at sm / lg */
+  padding-inline: var(--apex-ctl-pad);   /* 12px */
+  border: var(--apex-ctl-border-w)       /* 1px */
+         solid var(--apex-ctl-border);   /* var(--border-default) */
+  border-radius: var(--apex-ctl-radius); /* var(--r-md) */
+  background: var(--apex-ctl-bg);        /* var(--bg-surface) */
+  transition: border-color var(--dur-fast),
+              box-shadow var(--dur-fast),
+              background var(--dur-fast);
+  position: relative;
+}
+
+.apex-ctl:hover:not([data-disabled="true"]) {
+  border-color: var(--apex-ctl-border-hover);
+}
+
+.apex-ctl[data-focused="true"] {
+  border-color: var(--apex-ctl-border-focus);
+  box-shadow: 0 0 0 3px var(--apex-ctl-ring);
+}
+
+.apex-ctl[data-disabled="true"] {
+  background: var(--apex-ctl-bg-disabled);
+  cursor: not-allowed;
+}`;
+
+export const SNIP_CLASS = `/* Your stylesheet. The .apex-ctl on the same element raises
+   specificity above the library rule, so no !important. */
+.brand-box.apex-ctl {
+  background: #FFF8F2;
+  border-color: #C24A06;
+  border-radius: 14px;
+}
+.brand-box.apex-ctl[data-focused="true"] {
+  border-color: #E4863F;
+  box-shadow: 0 0 0 3px rgb(196 74 6 / 0.18);
+}
+.brand-label.apex-field__label { color: #C24A06; letter-spacing: .02em; }
+.brand-text.apex-ctl__input   { font-family: var(--font-mono); }`;
+
+export const SNIP_DARK = `/* One class, both themes. The library puts .dark on the root,
+   so the two definitions sit next to each other. */
+.brand-box.apex-ctl {
+  background: #FFF8F2;
+  border-color: #C24A06;
+}
+.dark .brand-box.apex-ctl {
+  background: #1A1210;
+  border-color: #E4863F;
+}`;
+
+export const SNIP_TONE = `/* One variable per tone, and it reaches every control —
+   the border, the label, the status glyph and the message. */
+.apex-field { --apex-field-danger: #B4004E; }
+
+/* Or on one field only */
+<ApexInput :ui="{ root: 'pink-errors' }" />
+.pink-errors { --apex-field-danger: #B4004E; }`;
+
 export const ENTRIES: DocEntry[] = [
   {
     id: 'icon', name: 'ApexIcon', group: 'Foundations',
@@ -430,6 +630,28 @@ export const ENTRIES: DocEntry[] = [
       ['label', 'string', '—', 'Accessible name. Without it the icon is aria-hidden, which is right for decoration'],
     ],
     events: [],
+  },
+  {
+    id: 'field', name: 'ApexField', group: 'Text',
+    blurb: 'The shell every other field is built on \u2014 label, control, one message line. Not usually used directly, but it is where the shared props, the CSS variables and the class hooks live, so it is the page to read when you want a field to look like something else.',
+    demo: 'field',
+    base: { label: 'Port', help: 'Between 1 and 65535.' },
+    controls: [],
+    props: [
+      ['label / labelIcon', 'string', '\u2014', 'The label and an optional glyph beside it'],
+      ['labelPlacement', 'ApexLabelPlacement', "'top'", 'Nine placements \u2014 see the section below'],
+      ['labelWidth', 'string', "'160px'", 'Label column width for before and after'],
+      ['help / error / warning / success', 'string', '\u2014', 'The message line, in precedence order'],
+      ['tone', "'default' | 'danger' | 'warning' | 'success'", "'default'", 'Forces a tone; otherwise derived from the messages'],
+      ['rules', 'ApexRule[]', '\u2014', 'Value-driven formatting \u2014 see Conditional formatting'],
+      ['required / disabled / readonly', 'boolean', 'false', ''],
+      ['size', "'sm' | 'md' | 'lg'", "'md'", 'Sets the height, font size, padding and icon size'],
+      ['statusIcon', 'boolean', 'true', 'The tone glyph inside the box'],
+      ['value', 'unknown', '\u2014', 'What the rules evaluate, and what marks the field filled'],
+      ['ui', 'ApexFieldClasses', '\u2014', 'Your own class on any part \u2014 see Class hooks'],
+    ],
+    events: [],
+    slots: [['default', 'The control. Receives { id, describedBy, invalid, tone, size, disabled, statusGlyph, ui }']],
   },
   {
     id: 'input', name: 'ApexInput', group: 'Text',

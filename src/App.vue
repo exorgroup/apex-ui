@@ -4,8 +4,9 @@ import {
   AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, COMMON_CONTROLS, ENTRIES, FORMATTING_RULE,
   ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
   PAGES, PG_COLORS, QUANTITY_RULES, ROLE_OPTIONS, SHARED_FIELD_PROPS, SIZES, STATE_CASES,
-  DIAL_ITEMS, ICON_RESOLVER_SNIPPET, ICON_SETS, SEVERITIES, SPLIT_MODEL, SUMMARY_ERRORS,
-  TOKEN_SWATCHES, TONE_CASES, ZONE_OPTIONS,
+  DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
+  SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_PROPS, SNIP_TONE, SNIP_UI, SPLIT_MODEL,
+  SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
 import type { DocEntry, DocPage } from './registry';
 
@@ -166,6 +167,11 @@ watch(current, (id) => {
 
 /** Conditional formatting page: type 3, then 50 or more, to move through both rules. */
 const rulesQty = ref(3);
+
+/** ApexField demos: the bare shell, and the two restyled inputs. */
+const fieldValue = ref('8080');
+const styledByProps = ref('ada.lovelace@exorgroup.com');
+const styledByClass = ref('ada.lovelace@exorgroup.com');
 
 /** Sentence-case a severity or position name for a demo label. */
 const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
@@ -393,6 +399,27 @@ async function copyUsage() {
                 <ApexButton severity="secondary" variant="outlined" icon="format_align_right" icon-only label="Align right" />
               </ApexButtonGroup>
 
+              <!-- ApexField renders nothing on its own: it is a shell around a
+                   control you supply. Wrapping a plain input is how the anatomy
+                   page shows it, and it keeps the demo honest about the API. -->
+              <ApexField
+                v-else-if="entry.demo === 'field'"
+                v-bind="live"
+                :value="fieldValue"
+                v-slot="{ id, describedBy, invalid, ui }"
+              >
+                <div class="apex-ctl" :class="ui.control">
+                  <input
+                    :id="id"
+                    v-model="fieldValue"
+                    class="apex-ctl__input"
+                    :class="ui.input"
+                    :aria-describedby="describedBy"
+                    :aria-invalid="invalid || undefined"
+                  />
+                </div>
+              </ApexField>
+
               <component v-else :is="entry.name" v-model="model[entry.id]" v-bind="live" />
             </div>
 
@@ -567,6 +594,150 @@ async function copyUsage() {
             <component :is="entry.name" :model-value="entry.model" v-bind="baseline(c.bind)" />
           </div>
         </div>
+        </template>
+
+
+        <!-- ApexField: the shared reference for every field control. -->
+        <template v-if="entry.id === 'field'">
+          <h2>Anatomy</h2>
+          <p class="note">
+            Every field is a label, a control and one message line. The message is a single
+            slot with a precedence order — error, then warning, then success, then a matching
+            <code>rules</code> entry, then <code>help</code> — so a field never shows two
+            competing lines. Each part below is a stable class you can write CSS against.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>Class</th><th>What it is</th><th>Rendered by</th></tr></thead>
+            <tbody>
+              <tr v-for="r in FIELD_PARTS" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td>{{ r[1] }}</td><td class="t">{{ r[2] }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2>Customising</h2>
+          <p class="note">
+            Three ways in, smallest blast radius last. <strong>Tokens</strong> repaint the
+            whole app — see Theming &amp; tokens. <strong>Props</strong> restyle one field
+            without leaving your template. <strong>Classes</strong> do everything props do
+            plus states, media queries and pseudo-elements. Props and classes target the same
+            CSS variables, so the two cannot disagree about what they control.
+          </p>
+
+          <h2>Appearance props</h2>
+          <p class="note">
+            All optional, all on <code>ApexFieldProps</code> — so every control built on the
+            field shell takes them, not just ApexInput. Each sets one variable on the field
+            root.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>Group</th><th>Prop</th><th>Sets</th></tr></thead>
+            <tbody>
+              <tr v-for="r in FIELD_STYLE_PROPS" :key="r[1]">
+                <td>{{ r[0] }}</td><td class="mono">{{ r[1] }}</td><td class="mono t">{{ r[2] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="usage"><pre><code>{{ SNIP_PROPS }}</code></pre></div>
+
+          <div class="cell cell--solo">
+            <span class="cell__tag">the props above, live</span>
+            <ApexInput
+              v-model="styledByProps"
+              label="Email address"
+              leading-icon="mail"
+              background="#101820"
+              border-color="#C24A06"
+              focus-border-color="#E4863F"
+              radius="14px"
+              text-color="#F5E9DF"
+              label-color="#C24A06"
+              icon-color="#C24A06"
+              control-height="52px"
+            />
+          </div>
+
+          <h2>CSS variables</h2>
+          <p class="note">
+            Declared on <code>.apex-field</code>, each defaulting to a design token. Set one
+            anywhere it cascades — a prop, an inline style, your own class, or globally on
+            <code>.apex-field</code> itself.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>Variable</th><th>Default</th><th>Sets</th></tr></thead>
+            <tbody>
+              <tr v-for="r in FIELD_VARS" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td class="mono t">{{ r[1] }}</td><td>{{ r[2] }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h2>Class hooks</h2>
+          <p class="note">
+            The part classes have always been writable against. What they could not do is
+            <em>scope</em> — styling one field meant a selector that hit every field on the
+            page. <code>ui</code> puts your class on this instance only.
+          </p>
+          <div class="usage"><pre><code>{{ SNIP_UI }}</code></pre></div>
+          <table class="doc-table">
+            <thead><tr><th>Key</th><th>Lands on</th><th>Honoured by</th></tr></thead>
+            <tbody>
+              <tr v-for="r in UI_KEYS" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td class="mono t">{{ r[1] }}</td><td>{{ r[2] }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 class="sub">What .apex-ctl responds to</h3>
+          <p class="note">
+            The control box in full, as the library defines it. Override any line, or set the
+            variable and leave the rule alone.
+          </p>
+          <div class="usage"><pre><code>{{ SNIP_CTL }}</code></pre></div>
+
+          <h3 class="sub">Writing your own</h3>
+          <p class="note">
+            Put the part class beside yours — <code>.brand-box.apex-ctl</code> — and your rule
+            outranks the library's without <code>!important</code>.
+          </p>
+          <div class="usage"><pre><code>{{ SNIP_CLASS }}</code></pre></div>
+
+          <div class="cell cell--solo">
+            <span class="cell__tag">the classes above, live — try the Light / Dark switch</span>
+            <ApexInput
+              v-model="styledByClass"
+              label="Email address"
+              leading-icon="mail"
+              :ui="{ control: 'brand-box', input: 'brand-text', label: 'brand-label' }"
+            />
+          </div>
+
+          <h2>Dark mode</h2>
+          <p class="note">
+            There is no light/dark key in the map, on purpose. The library already puts
+            <code>.dark</code> on the root element, so one class covers both themes and the
+            two definitions sit next to each other in your stylesheet. The demo above uses
+            exactly this.
+          </p>
+          <div class="usage"><pre><code>{{ SNIP_DARK }}</code></pre></div>
+
+          <h2>Tones</h2>
+          <p class="note">
+            One variable per tone, and it reaches the border, the label, the status glyph and
+            the message together — plus the error state of every other control, from the
+            slider handle to the stepper.
+          </p>
+          <div class="usage"><pre><code>{{ SNIP_TONE }}</code></pre></div>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">default danger</span>
+              <ApexInput model-value="ada@" label="Email" error="Enter a valid email address." />
+            </div>
+            <div class="cell pink-errors">
+              <span class="cell__tag">--apex-field-danger: #B4004E</span>
+              <ApexInput model-value="ada@" label="Email" error="Enter a valid email address." />
+            </div>
+          </div>
         </template>
 
         <!-- ApexIcon: no field shell, so its sections are all about the glyph. -->
@@ -948,6 +1119,27 @@ async function copyUsage() {
               <ApexButton severity="secondary" variant="outlined" icon="map">Map</ApexButton>
             </ApexButtonGroup>
           </div>
+        </template>
+
+        <!-- ApexInput's customising story is short by design: everything it
+             renders is shared, so the reference lives on ApexField. -->
+        <template v-if="entry.id === 'input'">
+          <h2>Customising</h2>
+          <p class="note">
+            ApexInput adds no appearance props or class hooks of its own — every part it
+            renders is shared with Select, Multiselect, Tags, Number and Textarea, so the
+            whole surface is documented once on
+            <button class="linkish" @click="current = 'field'">ApexField</button>: the
+            appearance props, the CSS variables, the class hooks and the dark-mode note.
+          </p>
+          <p class="note">
+            The keys that reach an ApexInput are <code>root</code>, <code>label</code>,
+            <code>body</code>, <code>message</code>, <code>control</code>, <code>input</code>,
+            <code>icon</code>, <code>affix</code>, <code>button</code>, <code>popover</code>
+            and <code>option</code> — eleven of the eighteen. The other seven belong to
+            controls with parts ApexInput does not render, and are ignored here.
+          </p>
+          <div class="usage"><pre><code>{{ SNIP_UI }}</code></pre></div>
         </template>
 
         <!-- ApexInput carries four sections no other control has. The gallery

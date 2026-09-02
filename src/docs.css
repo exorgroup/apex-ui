@@ -242,3 +242,26 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 }
 
 .stage__log { margin-block-start: 0.75rem; }
+
+/* --- ApexField customisation demos --------------------------------- */
+
+/* The worked example from the Class hooks section, kept identical to the
+   snippet on the page so what you read is what renders. */
+.brand-box.apex-ctl { background: #FFF8F2; border-color: #C24A06; border-radius: 14px; }
+.brand-box.apex-ctl[data-focused="true"] {
+  border-color: #E4863F; box-shadow: 0 0 0 3px rgb(196 74 6 / 0.18);
+}
+.dark .brand-box.apex-ctl { background: #1A1210; border-color: #E4863F; }
+.brand-label.apex-field__label { color: #C24A06; letter-spacing: .02em; }
+.brand-text.apex-ctl__input { font-family: var(--font-mono); }
+
+/* The tone example. One variable, every part of the field. */
+.pink-errors { --apex-field-danger: #B4004E; }
+
+.sub { font-size: 0.9375rem; margin-block: 1.5rem 0.5rem; }
+
+/* An inline cross-reference that navigates rather than leaving the page. */
+.linkish {
+  border: 0; background: none; padding: 0; font: inherit; cursor: pointer;
+  color: var(--accent-primary); text-decoration: underline; text-underline-offset: 2px;
+}
