@@ -185,15 +185,15 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
 
 <template>
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="filled || (isFloat && !!placeholder)" :focused="focused"
-             v-slot="{ id, describedBy, invalid, statusGlyph }">
+             v-slot="{ id, describedBy, invalid, statusGlyph, ui }">
     <div ref="root" :style="typeahead ? 'position:relative' : undefined">
-      <div class="apex-ctl" :class="{ 'apex-ctl--mono': mono }"
+      <div class="apex-ctl" :class="[{ 'apex-ctl--mono': mono }, ui.control]"
            :data-focused="focused ? 'true' : 'false'" :data-disabled="disabled ? 'true' : 'false'">
         <slot name="leading">
-          <ApexIcon v-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" />
+          <ApexIcon v-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" :class="ui.icon" />
         </slot>
-        <span v-if="prefix" class="apex-ctl__affix">{{ prefix }}</span>
-        <input ref="el" class="apex-ctl__input" :id="id" :name="name || id" :type="inputType"
+        <span v-if="prefix" class="apex-ctl__affix" :class="ui.affix">{{ prefix }}</span>
+        <input ref="el" class="apex-ctl__input" :class="ui.input" :id="id" :name="name || id" :type="inputType"
                :value="modelValue ?? ''" :placeholder="isFloat ? undefined : placeholder"
                :disabled="disabled" :readonly="readonly" :required="required" :maxlength="maxlength"
                :autocomplete="typeahead ? 'off' : autocomplete" :aria-describedby="describedBy"
@@ -204,32 +204,33 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
                :aria-activedescendant="typeahead && active >= 0 ? listId + '-' + active : undefined"
                @input="onInput" @change="emit('change', ($event.target as HTMLInputElement).value)"
                @keydown="onKey" @paste="onPaste" @drop.prevent @focus="onFocus" @blur="onBlur" />
-        <span v-if="suffix" class="apex-ctl__affix">{{ suffix }}</span>
-        <ApexIcon v-if="loading" name="progress_activity" spin class="apex-ctl__icon" :label="t('apexui.loading')" />
-        <button v-if="showClear" type="button" class="apex-ctl__btn" :aria-label="t('apexui.clear')" @click="clear">
+        <span v-if="suffix" class="apex-ctl__affix" :class="ui.affix">{{ suffix }}</span>
+        <ApexIcon v-if="loading" name="progress_activity" spin class="apex-ctl__icon" :class="ui.icon" :label="t('apexui.loading')" />
+        <button v-if="showClear" type="button" class="apex-ctl__btn" :class="ui.button" :aria-label="t('apexui.clear')" @click="clear">
           <ApexIcon name="close" :size="17" />
         </button>
-        <button v-if="isPassword" type="button" class="apex-ctl__btn" :disabled="disabled"
+        <button v-if="isPassword" type="button" class="apex-ctl__btn" :class="ui.button" :disabled="disabled"
                 :aria-label="reveal ? t('apexui.hidePassword') : t('apexui.showPassword')"
                 :aria-pressed="reveal" @click="reveal = !reveal">
           <ApexIcon :name="reveal ? 'visibility_off' : 'visibility'" :size="18" />
         </button>
-        <button v-if="trailingAction" type="button" class="apex-ctl__btn" :disabled="disabled || trailingAction.disabled"
+        <button v-if="trailingAction" type="button" class="apex-ctl__btn" :class="ui.button"
+                :disabled="disabled || trailingAction.disabled"
                 :aria-label="trailingAction.label" @click="emit('action')">
           <ApexIcon :name="trailingAction.icon" :size="18" />
         </button>
-        <ApexIcon v-else-if="trailingIcon" :name="trailingIcon" class="apex-ctl__icon" />
+        <ApexIcon v-else-if="trailingIcon" :name="trailingIcon" class="apex-ctl__icon" :class="ui.icon" />
         <ApexIcon v-if="statusGlyph" :name="statusGlyph" class="apex-ctl__status" :size="18" />
-        <button v-if="typeahead && dropdown" type="button" class="apex-ctl__btn" :disabled="disabled"
+        <button v-if="typeahead && dropdown" type="button" class="apex-ctl__btn" :class="ui.button" :disabled="disabled"
                 :aria-label="t('apexui.select')" @click="toggleDropdown">
           <ApexIcon name="keyboard_arrow_down" :size="19" />
         </button>
         <slot name="trailing" />
       </div>
 
-      <div v-if="typeahead && open && (items.length || !loading)" class="apex-pop" :id="listId" role="listbox">
+      <div v-if="typeahead && open && (items.length || !loading)" class="apex-pop" :class="ui.popover" :id="listId" role="listbox">
         <button v-for="(o, i) in items" :key="String(o.value)" :id="listId + '-' + i" type="button"
-                class="apex-pop__opt" role="option" :aria-selected="String(o.value) === String(modelValue)"
+                class="apex-pop__opt" :class="ui.option" role="option" :aria-selected="String(o.value) === String(modelValue)"
                 :data-active="i === active ? 'true' : 'false'" :disabled="o.disabled"
                 @mouseenter="active = i" @mousedown.prevent @click="select(o)">
           <ApexIcon v-if="o.icon" :name="o.icon" :size="18" />

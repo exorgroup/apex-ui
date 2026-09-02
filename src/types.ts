@@ -60,6 +60,36 @@ export interface ApexTrailingAction {
 }
 
 /** Props every control accepts, forwarded to ApexField. */
+/**
+ * Your own classes, per part of a field.
+ *
+ * Dark mode is not a key here on purpose: the library already puts `.dark` on
+ * the root, so one class plus `.dark .my-class { ... }` in your own stylesheet
+ * covers both themes and keeps the two definitions next to each other.
+ */
+export interface ApexFieldClasses {
+  /** The .apex-field root — wraps label, control and message. */
+  root?: string;
+  label?: string;
+  /** The wrapper around the control and its message line. */
+  body?: string;
+  message?: string;
+  /** The control box, .apex-ctl. */
+  control?: string;
+  /** The <input> or equivalent inside the box. */
+  input?: string;
+  /** Leading and trailing icons. */
+  icon?: string;
+  /** Static prefix and suffix text. */
+  affix?: string;
+  /** Clear, reveal, trailing action and dropdown buttons. */
+  button?: string;
+  /** The typeahead overlay, where the control has one. */
+  popover?: string;
+  /** A row inside that overlay. */
+  option?: string;
+}
+
 export interface ApexFieldProps {
   label?: string;
   labelIcon?: string;
@@ -125,6 +155,9 @@ export interface ApexFieldProps {
   popoverBackground?: string;
   popoverBorderColor?: string;
   optionHoverBackground?: string;
+
+  /** Your own class on any part. See ApexFieldClasses. */
+  ui?: ApexFieldClasses;
 }
 
 /** Resolved display state, provided to controls by ApexField. */

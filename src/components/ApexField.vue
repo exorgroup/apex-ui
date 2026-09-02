@@ -12,7 +12,7 @@ import { computed, toRef } from 'vue';
 import { useFieldState } from '../core/useFieldState';
 import { TONE_ICON } from '../core/utils';
 import ApexIcon from './ApexIcon.vue';
-import type { ApexFieldProps } from '../types';
+import type { ApexFieldClasses, ApexFieldProps } from '../types';
 
 const props = withDefaults(defineProps<ApexFieldProps & {
   /** Current value — only used to evaluate `rules`. */
@@ -60,6 +60,13 @@ const STYLE_VARS: Array<[keyof ApexFieldProps, string]> = [
   ['optionHoverBackground', '--apex-opt-hover-bg'],
 ];
 
+/**
+ * The class map, always an object so a control can read `ui.control` without
+ * guarding. Passed down through the slot as well, since the parts inside the
+ * box are rendered by the control, not by ApexField.
+ */
+const ui = computed<ApexFieldClasses>(() => props.ui ?? {});
+
 const rootStyle = computed(() => {
   const out: Record<string, string> = {};
 
@@ -77,16 +84,16 @@ defineExpose({ state: st });
 </script>
 
 <template>
-  <div class="apex-field" :class="st.ruleClass.value" :style="rootStyle"
+  <div class="apex-field" :class="[st.ruleClass.value, ui.root]" :style="rootStyle"
        :data-size="st.size.value" :data-lp="st.labelPlacement.value" :data-tone="st.tone.value"
        :data-disabled="disabled ? 'true' : 'false'" :data-float="float ? 'true' : 'false'"
        :data-focused="focused ? 'true' : 'false'">
-    <label v-if="label" class="apex-field__label" :for="st.id.value">
+    <label v-if="label" class="apex-field__label" :class="ui.label" :for="st.id.value">
       <ApexIcon v-if="labelIcon" :name="labelIcon" :size="16" />
       <span>{{ label }}</span>
       <span v-if="required" class="apex-field__req" aria-hidden="true">*</span>
     </label>
-    <div class="apex-field__body">
+    <div class="apex-field__body" :class="ui.body">
       <slot v-bind="{
         id: st.id.value,
         describedBy: st.describedBy.value,
@@ -95,8 +102,10 @@ defineExpose({ state: st });
         size: st.size.value,
         disabled: !!disabled,
         statusGlyph,
+        ui,
       }" />
-      <p v-if="st.message.value" class="apex-field__msg" :id="st.describedBy.value" :data-tone="st.tone.value">
+      <p v-if="st.message.value" class="apex-field__msg" :class="ui.message"
+         :id="st.describedBy.value" :data-tone="st.tone.value">
         <ApexIcon v-if="st.tone.value !== 'default'" :name="TONE_ICON[st.tone.value]" />
         <span>{{ st.message.value }}</span>
       </p>
