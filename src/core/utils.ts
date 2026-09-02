@@ -33,6 +33,12 @@ export const TONE_ICON: Record<string, string> = {
 export const APEX_FIELD_KEYS = [
   'label', 'labelIcon', 'labelPlacement', 'labelWidth', 'help', 'error', 'warning', 'success',
   'tone', 'rules', 'context', 'required', 'disabled', 'readonly', 'size', 'statusIcon', 'id', 'name',
+  // Appearance. Anything left out here silently never reaches ApexField.
+  'background', 'borderColor', 'borderWidth', 'radius', 'hoverBorderColor', 'focusBorderColor',
+  'focusRing', 'disabledBackground', 'textColor', 'placeholderColor', 'controlHeight', 'fontSize',
+  'paddingInline', 'iconSize', 'iconColor', 'affixColor', 'buttonColor', 'labelColor',
+  'labelFontSize', 'messageColor', 'messageFontSize', 'requiredColor', 'popoverBackground',
+  'popoverBorderColor', 'optionHoverBackground', 'ui',
 ] as const;
 
 /** Picks only the ApexField props out of a control's props, so nothing leaks onto the DOM. */

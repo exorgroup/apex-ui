@@ -26,7 +26,51 @@ const valueRef = toRef(props, 'value');
 const st = useFieldState(props, valueRef);
 
 const float = computed(() => props.filled || props.focused);
-const rootStyle = computed(() => (props.labelWidth ? { '--apex-label-w': props.labelWidth } : undefined));
+/**
+ * Appearance prop -> CSS variable. The variables are declared on .apex-field in
+ * apex-ui.css with the design token as their default, so an unset prop changes
+ * nothing and a set one wins by being an inline style.
+ */
+const STYLE_VARS: Array<[keyof ApexFieldProps, string]> = [
+  ['labelWidth', '--apex-label-w'],
+  ['background', '--apex-ctl-bg'],
+  ['borderColor', '--apex-ctl-border'],
+  ['borderWidth', '--apex-ctl-border-w'],
+  ['radius', '--apex-ctl-radius'],
+  ['hoverBorderColor', '--apex-ctl-border-hover'],
+  ['focusBorderColor', '--apex-ctl-border-focus'],
+  ['focusRing', '--apex-ctl-ring'],
+  ['disabledBackground', '--apex-ctl-bg-disabled'],
+  ['textColor', '--apex-ctl-fg'],
+  ['placeholderColor', '--apex-ctl-placeholder'],
+  ['controlHeight', '--apex-ctl-h'],
+  ['fontSize', '--apex-ctl-fs'],
+  ['paddingInline', '--apex-ctl-pad'],
+  ['iconSize', '--apex-icon-size'],
+  ['iconColor', '--apex-ctl-icon'],
+  ['affixColor', '--apex-ctl-affix'],
+  ['buttonColor', '--apex-ctl-btn'],
+  ['labelColor', '--apex-label-fg'],
+  ['labelFontSize', '--apex-label-fs'],
+  ['messageColor', '--apex-msg-fg'],
+  ['messageFontSize', '--apex-msg-fs'],
+  ['requiredColor', '--apex-field-required'],
+  ['popoverBackground', '--apex-pop-bg'],
+  ['popoverBorderColor', '--apex-pop-border'],
+  ['optionHoverBackground', '--apex-opt-hover-bg'],
+];
+
+const rootStyle = computed(() => {
+  const out: Record<string, string> = {};
+
+  STYLE_VARS.forEach(([key, cssVar]) => {
+    const v = props[key];
+    if (v !== undefined && v !== null && v !== '') out[cssVar] = String(v);
+  });
+
+  // undefined rather than {} so Vue does not add an empty style attribute.
+  return Object.keys(out).length ? out : undefined;
+});
 const statusGlyph = computed(() => (props.statusIcon ? TONE_ICON[st.tone.value] : ''));
 
 defineExpose({ state: st });

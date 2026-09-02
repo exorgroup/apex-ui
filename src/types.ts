@@ -80,6 +80,51 @@ export interface ApexFieldProps {
   statusIcon?: boolean;
   id?: string;
   name?: string;
+
+  /* ------------------------------------------------------------------ *
+   * Appearance. Every one of these sets a CSS variable on the field root,
+   * so anything a prop can do a stylesheet can also do — see the variable
+   * table on the ApexField page. Props are the quick path; classes are the
+   * one that survives states and media queries.
+   * ------------------------------------------------------------------ */
+
+  /** The control box. */
+  background?: string;
+  borderColor?: string;
+  borderWidth?: string;
+  radius?: string;
+  hoverBorderColor?: string;
+  focusBorderColor?: string;
+  /** The whole focus ring shorthand, e.g. `color-mix(...)` or a flat colour. */
+  focusRing?: string;
+  disabledBackground?: string;
+
+  /** The value and its placeholder. */
+  textColor?: string;
+  placeholderColor?: string;
+
+  /** Sizing, beyond the three `size` presets. Any CSS length. */
+  controlHeight?: string;
+  fontSize?: string;
+  paddingInline?: string;
+  iconSize?: string;
+
+  /** Icons, affixes and the trailing buttons. */
+  iconColor?: string;
+  affixColor?: string;
+  buttonColor?: string;
+
+  /** Label, message line and the required asterisk. */
+  labelColor?: string;
+  labelFontSize?: string;
+  messageColor?: string;
+  messageFontSize?: string;
+  requiredColor?: string;
+
+  /** The typeahead overlay, where the control has one. */
+  popoverBackground?: string;
+  popoverBorderColor?: string;
+  optionHoverBackground?: string;
 }
 
 /** Resolved display state, provided to controls by ApexField. */
