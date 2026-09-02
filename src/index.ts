@@ -1,3 +1,20 @@
+/*
+ * The component stylesheet, pulled in so the build emits it. Nothing else
+ * imported it, so `cssFileName: 'apex-ui'` had nothing to name and
+ * exports['./style.css'] pointed at a file that was never produced.
+ *
+ * In library mode Vite extracts this to dist/apex-ui.css rather than injecting
+ * it, so consumers still opt in:
+ *
+ *   import '@exorgroup/apex-ui/tokens.css';   // or your own token values
+ *   import '@exorgroup/apex-ui/style.css';
+ *
+ * tokens.css is deliberately not imported here. The stylesheet's own header
+ * says to load it first or supply the same custom properties yourself, and
+ * bundling it would take that choice away.
+ */
+import './styles/apex-ui.css';
+
 import type { App, Plugin } from 'vue';
 import { APEX_UI_OPTIONS } from './core/symbols';
 import type { ApexUiOptions } from './types';
