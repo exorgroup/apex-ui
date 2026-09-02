@@ -3028,3 +3028,5 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 .apex-summary ul{margin:0;padding-inline-start:18px;font-size:13px;color:var(--fg-muted);display:flex;flex-direction:column;gap:3px}
 .apex-summary a{color:var(--apex-red-600);text-decoration:underline;text-underline-offset:2px}
 .apex-ctl__counter{justify-content:flex-end;color:var(--apex-counter-fg,var(--fg-subtle))}
+/* A literal character on a stepper button, sized to sit like the icon it replaces. */
+.apex-stepper__glyph{font-size:var(--apex-stepper-glyph-fs,17px);font-weight:600;line-height:1}

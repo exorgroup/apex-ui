@@ -14,9 +14,20 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   step?: number;
   /** Suffix tag beside the value, like ApexNumber's. */
   unit?: string;
+  /**
+   * What the buttons show. `*Icon` takes a Material Symbols name; `*Text` takes
+   * a literal character or short string and wins when both are given. Two props
+   * rather than one because a single prop cannot tell the glyph name "remove"
+   * from someone wanting the word remove printed on the button.
+   */
+  decrementIcon?: string;
+  incrementIcon?: string;
+  decrementText?: string;
+  incrementText?: string;
   /** Where the value sits between the two buttons. */
   align?: 'start' | 'center' | 'end';
-}>(), { step: 1, align: 'center', statusIcon: false });
+}>(), { step: 1, align: 'center', statusIcon: false, decrementIcon: 'remove', incrementIcon: 'add',
+});
 
 const emit = defineEmits<{ (e: 'update:modelValue', v: number): void }>();
 const t = useApexI18n();
@@ -41,7 +52,8 @@ function bump(d: number) {
     <div class="apex-stepper" :class="ui?.control" :data-focused="focused ? 'true' : 'false'">
       <button type="button" class="apex-stepper__btn" :class="ui?.decrement"
               :aria-label="t('apexui.decrement')" :disabled="disabled || atMin" @click="bump(-1)">
-        <ApexIcon name="remove" :size="18" />
+        <span v-if="decrementText" class="apex-stepper__glyph">{{ decrementText }}</span>
+        <ApexIcon v-else :name="decrementIcon" :size="18" />
       </button>
       <span class="apex-stepper__val" :class="ui?.value" :data-align="align" :data-unit="unit ? 'true' : 'false'">
         <input :id="id" :name="name || id" type="number" :value="modelValue ?? 0"
@@ -54,7 +66,8 @@ function bump(d: number) {
       </span>
       <button type="button" class="apex-stepper__btn" :class="ui?.increment"
               :aria-label="t('apexui.increment')" :disabled="disabled || atMax" @click="bump(1)">
-        <ApexIcon name="add" :size="18" />
+        <span v-if="incrementText" class="apex-stepper__glyph">{{ incrementText }}</span>
+        <ApexIcon v-else :name="incrementIcon" :size="18" />
       </button>
     </div>
   </ApexField>

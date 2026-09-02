@@ -119,9 +119,9 @@ export interface ApexFieldClasses {
   /** ApexStepper — the decrement and increment buttons. */
   decrement?: string;
   increment?: string;
-  /** ApexKnob — the unfilled arc, the filled arc, the centre text. */
+  /** ApexKnob — the unfilled rail, the filled arc, the centre text. */
   range?: string;
-  arc?: string;
+  valueArc?: string;
   text?: string;
   /** ApexSlider — the rail, the filled portion, a handle, the value bubble. */
   track?: string;

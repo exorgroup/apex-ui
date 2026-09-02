@@ -18,6 +18,12 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   diameter?: number;
   /** Arc thickness in pixels. */
   strokeWidth?: number;
+  /**
+   * How far the dial sweeps, in degrees. 270 leaves a gap at the bottom; 180 is
+   * a half dial across the top; 360 is a closed ring. The gap is always centred
+   * at the bottom, so the sweep stays symmetrical about the vertical.
+   */
+  arc?: number;
   /** Thickness of the unfilled arc. Follows strokeWidth unless set. */
   railWidth?: number;
   /** Centre text size in pixels. */
@@ -33,16 +39,35 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   /** Formats the centre text, e.g. (v) => v + '%'. */
   valueTemplate?: (v: number) => string;
 }>(), {
-  min: 0, max: 100, step: 1, diameter: 110, strokeWidth: 14, statusIcon: false,
+  min: 0, max: 100, step: 1, diameter: 110, strokeWidth: 14, arc: 270, statusIcon: false,
 });
 
 const emit = defineEmits<{ (e: 'update:modelValue', v: number): void; (e: 'change', v: number): void }>();
 
 const svg = ref<SVGSVGElement | null>(null);
 const focused = ref(false);
-/** Sweep runs from 7 o'clock round to 5 o'clock — 270°, gap at the bottom. */
-const START = 135;
-const SWEEP = 270;
+/**
+ * Sweep geometry, all of it derived from `arc` so the drawing and the drag
+ * mapping can never disagree. Previously 270 was a constant and the two
+ * offsets it implies — 135 for the SVG rotation, 225 for the pointer — were
+ * written out separately at their use sites.
+ *
+ * Below about 20° the dial is too small to aim at, and past 360 it would wrap
+ * over itself, so the value is clamped rather than trusted.
+ */
+const sweep = computed(() => Math.min(360, Math.max(20, props.arc)));
+
+/**
+ * Where the sweep starts, measured from the top and going clockwise, chosen so
+ * the gap is centred at the bottom. 270° gives 225 — the 7:30 position.
+ */
+const pointerStart = computed(() => (360 - sweep.value / 2) % 360);
+
+/**
+ * The same angle for the SVG, whose dasharray starts at 3 o'clock — a quarter
+ * turn ahead of the top.
+ */
+const svgRotate = computed(() => (pointerStart.value + 270) % 360);
 
 const value = computed(() => {
   const v = Number(props.modelValue ?? props.min);
@@ -67,7 +92,7 @@ const knobStyle = computed(() => {
   return out;
 });
 const CIRC = computed(() => 2 * Math.PI * R.value);
-const arcLen = computed(() => (CIRC.value * SWEEP) / 360);
+const arcLen = computed(() => (CIRC.value * sweep.value) / 360);
 
 function commit(raw: number) {
   const stepped = Math.round((raw - props.min) / props.step) * props.step + props.min;
@@ -85,9 +110,10 @@ function fromPointer(e: PointerEvent) {
   // 0° at the top, clockwise; shift so the gap sits at the bottom
   let deg = (Math.atan2(dx, -dy) * 180) / Math.PI;
   if (deg < 0) deg += 360;
-  const rel = (deg - 225 + 360) % 360;
-  if (rel > SWEEP) return; // inside the bottom gap — ignore
-  commit(props.min + (rel / SWEEP) * (props.max - props.min));
+  const rel = (deg - pointerStart.value + 360) % 360;
+  // Inside the gap: at 360° there is none, so every angle is live.
+  if (rel > sweep.value) return;
+  commit(props.min + (rel / sweep.value) * (props.max - props.min));
 }
 function onDown(e: PointerEvent) {
   if (props.disabled || props.readonly) return;
@@ -132,10 +158,10 @@ function onKey(e: KeyboardEvent) {
         <circle class="apex-knob__range" :class="ui?.range" cx="50" cy="50" :r="R" fill="none"
                 :stroke-width="railWidth ?? strokeWidth"
                 stroke-linecap="round" :stroke-dasharray="`${arcLen} ${CIRC}`"
-                transform="rotate(135 50 50)" />
-        <circle class="apex-knob__value" :class="ui?.arc" cx="50" cy="50" :r="R" fill="none" :stroke-width="strokeWidth"
+                :transform="`rotate(${svgRotate} 50 50)`" />
+        <circle class="apex-knob__value" :class="ui?.valueArc" cx="50" cy="50" :r="R" fill="none" :stroke-width="strokeWidth"
                 stroke-linecap="round" :stroke-dasharray="`${arcLen * pct} ${CIRC}`"
-                transform="rotate(135 50 50)" />
+                :transform="`rotate(${svgRotate} 50 50)`" />
         <text v-if="!hideValue" class="apex-knob__text" :class="ui?.text" x="50" y="50" text-anchor="middle"
               dominant-baseline="central">{{ centreText }}</text>
       </svg>
