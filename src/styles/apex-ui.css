@@ -352,6 +352,12 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 
 /* ─── slider ───────────────────────────────────────────── */
 .apex-slider{--sl-size:6px;display:block;padding-block:10px}
+/* A horizontal track is inline-size:100% and the handle is absolutely positioned,
+   so the control has no intrinsic width. In any shrink-to-fit parent — which is
+   what labelPlacement="after" creates with flex:0 0 auto — that 100% resolves to
+   zero and only the handle survives. Floor it at the same length the vertical
+   track uses, so `length` tunes both orientations. */
+.apex-slider[data-orientation="horizontal"]{min-inline-size:var(--sl-length,180px)}
 .apex-slider[data-orientation="vertical"]{display:inline-block;padding:0 10px}
 .apex-slider[data-disabled="true"]{opacity:.5}
 .apex-slider__track{position:relative;block-size:var(--sl-size);inline-size:100%;border-radius:var(--r-full);background:var(--sl-track,var(--bg-muted));cursor:pointer;touch-action:none}

@@ -22,7 +22,7 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   /** Minimum number of steps between the handles in range mode. */
   minStepsBetweenHandles?: number;
   orientation?: 'horizontal' | 'vertical';
-  /** Track length in vertical mode, in pixels. */
+  /** Track length in pixels: the vertical track's length, and the horizontal track's minimum width. */
   length?: number;
   /** Bubble showing the value while dragging. */
   showTooltip?: boolean;
