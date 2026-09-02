@@ -149,9 +149,18 @@ const usage = computed(() => {
  */
 const fmt = reactive<Record<string, unknown>>({});
 
+/** What "empty" means for this control — the rule under test is `{ empty: true }`. */
+const emptyFor = (model: unknown) => {
+  if (Array.isArray(model)) return [];
+  // A numeric control's empty is null, not ''. Seeding a string here fails its
+  // modelValue type check on ApexStepper, ApexKnob and ApexSlider.
+  if (typeof model === 'number') return null;
+  return '';
+};
+
 watch(current, (id) => {
   const e = ENTRIES.find((x) => x.id === id);
-  if (e && !(id in fmt)) fmt[id] = Array.isArray(e.model) ? [] : '';
+  if (e && !(id in fmt)) fmt[id] = emptyFor(e.model);
 }, { immediate: true });
 
 /** Conditional formatting page: type 3, then 50 or more, to move through both rules. */

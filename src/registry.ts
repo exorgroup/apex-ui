@@ -493,7 +493,7 @@ export const ENTRIES: DocEntry[] = [
       ['trim', 'boolean', 'true', 'Trim whitespace and drop empty entries'],
     ],
     events: [['update:modelValue', 'string[]'], ['add', 'string'], ['remove', 'string'], ['focus / blur', '—']],
-  },,
+  },
   {
     id: 'number', name: 'ApexNumber', group: 'Numbers',
     blurb: 'Numeric entry with a currency prefix or unit suffix. Clamps to min/max on blur.',
