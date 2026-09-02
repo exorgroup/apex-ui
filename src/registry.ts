@@ -580,7 +580,7 @@ export const ENTRIES: DocEntry[] = [
       ['range', 'boolean', 'false', 'Two handles; the value becomes an array'],
       ['minStepsBetweenHandles', 'number', '0', 'Minimum steps the handles keep apart'],
       ['orientation', "'horizontal' | 'vertical'", "'horizontal'", ''],
-      ['length', 'number', '180', 'Track length in pixels: the vertical track's length, and the horizontal track's minimum width'],
+      ['length', 'number', '180', 'Track length in pixels — sets the vertical track length, and floors the horizontal track width'],
       ['trackSize', 'number', '6', 'Track thickness in pixels'],
       ['showTooltip', 'boolean', 'false', 'Value bubble on hover, focus and drag'],
       ['color / trackColor / handleColor', 'string', 'tokens', 'Any CSS colour'],
