@@ -4,7 +4,7 @@ import {
   AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, COMMON_CONTROLS, ENTRIES, FORMATTING_RULE,
   ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
   PAGES, PG_COLORS, QUANTITY_RULES, ROLE_OPTIONS, SHARED_FIELD_PROPS, SIZES, STATE_CASES,
-  DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
+  BUTTON_FAMILY, DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
   OWN_PARTS, SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_OWN, SNIP_PROPS, SNIP_TONE,
   SNIP_UI, SPLIT_MODEL,
   SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
@@ -1130,7 +1130,20 @@ async function copyUsage() {
              documented once on ApexField; this covers only what this control adds. -->
         <template v-if="OWN_PARTS[entry.id]">
           <h2>Customising</h2>
-          <p class="note">
+          <!-- Which page carries the shared half depends on the family: the
+               field controls share ApexField, the action controls ApexButton,
+               and ApexIcon shares nothing at all. -->
+          <p v-if="BUTTON_FAMILY.includes(entry.id)" class="note">
+            The shared surface — the four severity colours, the size props and the
+            <code>ui</code> hooks common to every action control — is documented once on
+            <button class="linkish" @click="current = 'button'">ApexButton</button> and applies
+            here unchanged. Below is what {{ entry.name }} adds on top.
+          </p>
+          <p v-else-if="entry.id === 'icon'" class="note">
+            ApexIcon is neither a field nor a button, so it has no shared surface to
+            inherit — everything it responds to is listed here.
+          </p>
+          <p v-else class="note">
             The shared surface — the box, the label, the message line, the appearance
             props and the class hooks — is documented once on
             <button class="linkish" @click="current = 'field'">ApexField</button> and applies

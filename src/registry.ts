@@ -610,6 +610,9 @@ export const SNIP_TONE = `/* One variable per tone, and it reaches every control
 .pink-errors { --apex-field-danger: #B4004E; }`;
 
 
+/** The action controls, whose shared half lives on ApexButton rather than ApexField. */
+export const BUTTON_FAMILY = ['button', 'splitbutton', 'speeddial', 'buttongroup'];
+
 /** Per-control customisation: [ui key, part, variables it responds to]. */
 export const OWN_PARTS: Record<string, string[][]> = {
   textarea: [
@@ -648,12 +651,18 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['root', '.apex-split', 'the wrapper; colours cascade to both halves'],
     ['action', '.apex-split__action', 'an .apex-btn — same four colours'],
     ['toggle', '.apex-split__toggle', 'an .apex-btn — same four colours'],
+    ['menu', '.apex-menu', '--apex-menu-bg, --apex-menu-border, --apex-menu-radius'],
+    ['menuItem', '.apex-menu__row', '--apex-menu-fg, --apex-menu-hover-bg, --apex-menu-hover-fg, --apex-menu-icon'],
+    ['menuHeader', '.apex-menu__header', '--apex-menu-header-fg'],
+    ['menuHint', '.apex-menu__hint', '--apex-menu-hint-fg'],
+    ['menuSeparator', '.apex-menu__sep', '--apex-menu-sep'],
   ],
   speeddial: [
     ['root', '.apex-dial', ''],
     ['trigger', '.apex-dial__trigger', 'an .apex-btn — same four colours'],
     ['items', '.apex-dial__items', 'the fan'],
-    ['item', '.apex-dial__item', 'one action'],
+    ['item', '.apex-dial__item', 'positions one action on the arc — no paint of its own'],
+    ['action', '.apex-dial__btn', '--apex-dial-action-bg, -fg, -border, -radius, -hover-fg, -hover-border'],
     ['mask', '.apex-dial__mask', 'maskColor and maskOpacity props'],
     ['tooltip', '.apex-dial__tip', ''],
   ],
@@ -761,10 +770,35 @@ export const SNIP_OWN: Record<string, string> = {
   splitbutton: `<!-- Both halves are .apex-btn, so one set of colours covers them. -->
 <ApexSplitButton label="Save" :model="items"
   color="#6F2A03" hover-color="#8F3A08" label-color="#fff"
-  :ui="{ action: 'sb-action', toggle: 'sb-toggle' }" />`,
+  :ui="{ action: 'sb-action', toggle: 'sb-toggle' }" />
+
+<!-- The overlay is a second surface with its own colours. It sits inside
+     .apex-split, so the menu-* props ride on the same element as the
+     button's own — there is no separate wrapper to reach for. -->
+<ApexSplitButton label="Save" :model="items"
+  menu-background="#101820" menu-border-color="#243040" menu-radius="12px"
+  menu-color="#E8EEF7" menu-hover-background="#1D2735" menu-hover-color="#fff"
+  menu-icon-color="#7AA2F7" menu-header-color="#8B98AD"
+  menu-hint-color="#6B7789" menu-separator-color="#243040"
+  :ui="{ menu: 'sb-menu', menuItem: 'sb-row' }" />
+
+/* The class map follows the recursion, so a submenu's rows carry
+   menuItem too — you style one level and get every level. */`,
 
   speeddial: `<ApexSpeedDial :items="items" color="#6F2A03" mask mask-color="#2A1206"
-  :ui="{ trigger: 'dial-trigger', item: 'dial-item', tooltip: 'dial-tip' }" />
+  :ui="{ trigger: 'dial-trigger', action: 'dial-action', tooltip: 'dial-tip' }" />
+
+<!-- The trigger takes the shared button props; the small round actions it
+     fans out are their own surface. actionSize sets the trigger diameter
+     and, six pixels smaller, each action. -->
+<ApexSpeedDial :items="items"
+  action-background="#101820" action-color="#E8EEF7"
+  action-border-color="#243040" action-radius="10px"
+  action-hover-color="#7AA2F7" action-hover-border-color="#7AA2F7"
+  action-size="64px" :ui="{ action: 'dial-action' }" />
+
+/* ui.action is the button you see; ui.item is the wrapper that places it
+   on the arc. Paint the first, position with the second. */
 
 /* radius on this control is the arc radius in pixels, not a corner radius —
    it predates the shared appearance props, which stand aside here. */`,
