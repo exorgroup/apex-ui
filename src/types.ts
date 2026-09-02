@@ -116,6 +116,18 @@ export interface ApexFieldClasses {
   rules?: string;
   /** ApexTags — one tag chip. */
   chip?: string;
+  /** ApexStepper — the decrement and increment buttons. */
+  decrement?: string;
+  increment?: string;
+  /** ApexKnob — the unfilled arc, the filled arc, the centre text. */
+  range?: string;
+  arc?: string;
+  text?: string;
+  /** ApexSlider — the rail, the filled portion, a handle, the value bubble. */
+  track?: string;
+  fill?: string;
+  handle?: string;
+  tooltip?: string;
 }
 
 export interface ApexFieldProps {

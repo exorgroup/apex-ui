@@ -254,13 +254,13 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 
 /* ─── knob ─────────────────────────────────────────────── */
 .apex-knob{display:inline-flex}
-.apex-knob svg{inline-size:var(--knob-size,110px);block-size:var(--knob-size,110px);touch-action:none;cursor:pointer;outline:none;border-radius:50%;display:block;user-select:none;-webkit-user-select:none}
+.apex-knob svg{inline-size:var(--apex-knob-size,110px);block-size:var(--apex-knob-size,110px);touch-action:none;cursor:pointer;outline:none;border-radius:50%;display:block;user-select:none;-webkit-user-select:none}
 .apex-knob svg *{user-select:none;-webkit-user-select:none}
 .apex-knob svg:focus-visible{box-shadow:var(--focus-ring)}
 .apex-knob[data-disabled="true"] svg{cursor:not-allowed;opacity:.55}
-.apex-knob__range{stroke:var(--knob-range,var(--border-default))}
-.apex-knob__value{stroke:var(--knob-value,var(--accent-primary));transition:stroke-dasharray 120ms var(--ease-out)}
-.apex-knob__text{fill:var(--knob-text,var(--fg-default));font-family:var(--font-sans);font-size:19px;font-weight:600;pointer-events:none;user-select:none;-webkit-user-select:none}
+.apex-knob__range{stroke:var(--apex-knob-range,var(--border-default))}
+.apex-knob__value{stroke:var(--apex-knob-value,var(--accent-primary));transition:stroke-dasharray 120ms var(--ease-out)}
+.apex-knob__text{fill:var(--apex-knob-text,var(--fg-default));font-family:var(--font-sans);font-size:var(--apex-knob-text-size,19px);font-weight:600;pointer-events:none;user-select:none;-webkit-user-select:none}
 .apex-knob svg::selection,.apex-knob__text::selection{background:transparent}
 
 /* ─── listbox ──────────────────────────────────────────── */
@@ -351,28 +351,28 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-field[data-tone="danger"] .apex-sb{border-color:var(--apex-field-danger)}
 
 /* ─── slider ───────────────────────────────────────────── */
-.apex-slider{--sl-size:6px;display:block;padding-block:10px}
+.apex-slider{--apex-slider-size:6px;display:block;padding-block:10px}
 /* A horizontal track is inline-size:100% and the handle is absolutely positioned,
    so the control has no intrinsic width. In any shrink-to-fit parent — which is
    what labelPlacement="after" creates with flex:0 0 auto — that 100% resolves to
    zero and only the handle survives. Floor it at the same length the vertical
    track uses, so `length` tunes both orientations. */
-.apex-slider[data-orientation="horizontal"]{min-inline-size:var(--sl-length,180px)}
+.apex-slider[data-orientation="horizontal"]{min-inline-size:var(--apex-slider-length,180px)}
 .apex-slider[data-orientation="vertical"]{display:inline-block;padding:0 10px}
 .apex-slider[data-disabled="true"]{opacity:.5}
-.apex-slider__track{position:relative;block-size:var(--sl-size);inline-size:100%;border-radius:var(--r-full);background:var(--sl-track,var(--bg-muted));cursor:pointer;touch-action:none}
-.apex-slider[data-orientation="vertical"] .apex-slider__track{inline-size:var(--sl-size);block-size:var(--sl-length,180px)}
+.apex-slider__track{position:relative;block-size:var(--apex-slider-size);inline-size:100%;border-radius:var(--r-full);background:var(--apex-slider-track,var(--bg-muted));cursor:pointer;touch-action:none}
+.apex-slider[data-orientation="vertical"] .apex-slider__track{inline-size:var(--apex-slider-size);block-size:var(--apex-slider-length,180px)}
 .apex-slider[data-disabled="true"] .apex-slider__track{cursor:not-allowed}
-.apex-slider__fill{position:absolute;inset-block:0;border-radius:var(--r-full);background:var(--sl-color,var(--accent-primary))}
+.apex-slider__fill{position:absolute;inset-block:0;border-radius:var(--r-full);background:var(--apex-slider-color,var(--accent-primary))}
 .apex-slider[data-orientation="vertical"] .apex-slider__fill{inset-block:auto;inset-inline:0}
-.apex-slider__handle{position:absolute;inline-size:18px;block-size:18px;border-radius:50%;background:var(--sl-handle,var(--bg-surface));border:2px solid var(--sl-color,var(--accent-primary));box-shadow:var(--shadow-sm);cursor:grab;outline:none;touch-action:none}
+.apex-slider__handle{position:absolute;inline-size:var(--apex-slider-handle-size,18px);block-size:var(--apex-slider-handle-size,18px);border-radius:50%;background:var(--apex-slider-handle,var(--bg-surface));border:2px solid var(--apex-slider-color,var(--accent-primary));box-shadow:var(--shadow-sm);cursor:grab;outline:none;touch-action:none}
 .apex-slider[data-orientation="horizontal"] .apex-slider__handle{inset-block-start:50%;transform:translate(-50%,-50%)}
 [dir="rtl"] .apex-slider[data-orientation="horizontal"] .apex-slider__handle{transform:translate(50%,-50%)}
 .apex-slider[data-orientation="vertical"] .apex-slider__handle{inset-inline-start:50%;transform:translate(-50%,50%)}
-.apex-slider__handle:hover{border-color:var(--sl-color,var(--accent-primary-hover))}
+.apex-slider__handle:hover{border-color:var(--apex-slider-color,var(--accent-primary-hover))}
 .apex-slider__handle:active{cursor:grabbing}
 .apex-slider__handle:focus-visible{box-shadow:var(--focus-ring)}
-.apex-slider__tip{position:absolute;inset-block-end:calc(100% + 9px);inset-inline-start:50%;transform:translateX(-50%);background:var(--bg-sidebar);color:var(--fg-on-dark);font-family:var(--font-mono);font-size:11.5px;font-style:normal;font-weight:600;padding:3px 7px;border-radius:var(--r-sm);white-space:nowrap;opacity:0;transition:opacity var(--dur-fast);pointer-events:none}
+.apex-slider__tip{position:absolute;inset-block-end:calc(100% + 9px);inset-inline-start:50%;transform:translateX(-50%);background:var(--apex-slider-tip-bg,var(--bg-sidebar));color:var(--apex-slider-tip-fg,var(--fg-on-dark));font-family:var(--font-mono);font-size:11.5px;font-style:normal;font-weight:600;padding:3px 7px;border-radius:var(--r-sm);white-space:nowrap;opacity:0;transition:opacity var(--dur-fast);pointer-events:none}
 .apex-slider__handle:hover .apex-slider__tip,.apex-slider__handle:focus-visible .apex-slider__tip,.apex-slider__tip[data-open="true"]{opacity:1}
 .apex-slider[data-orientation="vertical"] .apex-slider__tip{inset-block-end:auto;inset-block-start:50%;inset-inline-start:calc(100% + 9px);transform:translateY(-50%)}
 .apex-field[data-tone="danger"] .apex-slider__handle{border-color:var(--apex-field-danger)}
@@ -2082,9 +2082,9 @@ border:0;background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;paddi
 .apex-tabs__panel>p:last-child{margin-block-end:0}
 
 /* ─── stepper ──────────────────────────────────────────── */
-.apex-stepper{display:flex;align-items:stretch;border:1px solid var(--border-default);border-radius:var(--r-md);overflow:hidden;background:var(--bg-surface);min-height:var(--apex-ctl-h)}
-.apex-stepper[data-focused="true"]{border-color:var(--accent-primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-primary) 15%,transparent)}
-.apex-stepper input{flex:1 1 auto;min-width:0;border:0;background:transparent;text-align:center;font-family:var(--font-mono);font-weight:600;font-size:var(--apex-ctl-fs);color:var(--fg-default);outline:none;appearance:textfield;-moz-appearance:textfield}
+.apex-stepper{display:flex;align-items:stretch;border:var(--apex-ctl-border-w,1px) solid var(--apex-ctl-border,var(--border-default));border-radius:var(--apex-ctl-radius,var(--r-md));overflow:hidden;background:var(--apex-ctl-bg,var(--bg-surface));min-height:var(--apex-ctl-h)}
+.apex-stepper[data-focused="true"]{border-color:var(--apex-ctl-border-focus,var(--accent-primary));box-shadow:0 0 0 3px var(--apex-ctl-ring,color-mix(in srgb,var(--accent-primary) 15%,transparent))}
+.apex-stepper input{flex:1 1 auto;min-width:0;border:0;background:transparent;text-align:center;font-family:var(--font-mono);font-weight:600;font-size:var(--apex-ctl-fs);color:var(--apex-ctl-fg,var(--fg-default));outline:none;appearance:textfield;-moz-appearance:textfield}
 .apex-stepper input::-webkit-outer-spin-button,.apex-stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .apex-stepper__val{display:flex;align-items:center;gap:5px;flex:1 1 auto;min-width:0;padding-inline:10px}
 .apex-stepper__val input{flex:1 1 auto;width:100%;min-width:0;text-align:center}
@@ -2094,11 +2094,11 @@ border:0;background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;paddi
 .apex-stepper__val[data-align="end"]{justify-content:flex-end}
 .apex-stepper__val[data-align="end"] input{text-align:end}
 .apex-stepper__unit{font-size:13px;font-weight:500;color:var(--fg-subtle);white-space:nowrap;flex:0 0 auto;padding-inline-end:2px}
-.apex-stepper button{inline-size:42px;display:grid;place-items:center;background:var(--bg-surface);border:0;color:var(--fg-muted);cursor:pointer;transition:background var(--dur-fast)}
-.apex-stepper button:first-child{border-inline-end:1px solid var(--border-subtle)}
-.apex-stepper button:last-child{border-inline-start:1px solid var(--border-subtle)}
-.apex-stepper button:hover:not(:disabled){background:var(--bg-muted);color:var(--fg-default)}
-.apex-stepper button:disabled{opacity:.4;cursor:not-allowed}
+.apex-stepper__btn{inline-size:var(--apex-stepper-btn-w,42px);display:grid;place-items:center;background:var(--apex-stepper-btn-bg,var(--bg-surface));border:0;color:var(--apex-stepper-btn-fg,var(--fg-muted));cursor:pointer;transition:background var(--dur-fast)}
+.apex-stepper__btn:first-child{border-inline-end:1px solid var(--apex-ctl-border,var(--border-subtle))}
+.apex-stepper__btn:last-child{border-inline-start:1px solid var(--apex-ctl-border,var(--border-subtle))}
+.apex-stepper__btn:hover:not(:disabled){background:var(--apex-stepper-btn-hover-bg,var(--bg-muted));color:var(--apex-stepper-btn-hover-fg,var(--fg-default))}
+.apex-stepper__btn:disabled{opacity:.4;cursor:not-allowed}
 .apex-field[data-tone="danger"] .apex-stepper{border-color:var(--apex-field-danger)}
 
 /* ─── button ───────────────────────────────────────────── */

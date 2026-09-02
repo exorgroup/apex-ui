@@ -24,6 +24,11 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   orientation?: 'horizontal' | 'vertical';
   /** Track length in pixels: the vertical track's length, and the horizontal track's minimum width. */
   length?: number;
+  /** Diameter of a handle, in pixels. */
+  handleSize?: number;
+  /** The value bubble, which otherwise sits on the sidebar surface. */
+  tooltipBackground?: string;
+  tooltipColor?: string;
   /** Bubble showing the value while dragging. */
   showTooltip?: boolean;
   /** Track thickness in pixels. */
@@ -76,13 +81,27 @@ const fillStyle = computed(() => {
     ? { bottom: from, height: size }
     : { insetInlineStart: from, width: size };
 });
-const rootStyle = computed(() => ({
-  '--sl-track': props.trackColor,
-  '--sl-color': props.color,
-  '--sl-handle': props.handleColor,
-  '--sl-size': props.trackSize + 'px',
-  '--sl-length': props.length + 'px',
-}));
+/**
+ * Only what is actually set. The earlier version emitted every key, so a plain
+ * slider still carried an inline style attribute listing undefined values —
+ * harmless, since Vue drops them, but it left every instance looking customised.
+ */
+const rootStyle = computed(() => {
+  const out: Record<string, string> = {
+    '--apex-slider-size': props.trackSize + 'px',
+    '--apex-slider-length': props.length + 'px',
+  };
+  const optional: Array<[string | undefined, string]> = [
+    [props.trackColor, '--apex-slider-track'],
+    [props.color, '--apex-slider-color'],
+    [props.handleColor, '--apex-slider-handle'],
+    [props.tooltipBackground, '--apex-slider-tip-bg'],
+    [props.tooltipColor, '--apex-slider-tip-fg'],
+  ];
+  optional.forEach(([v, name]) => { if (v) out[name] = v; });
+  if (props.handleSize) out['--apex-slider-handle-size'] = props.handleSize + 'px';
+  return out;
+});
 
 function snap(raw: number) {
   const stepped = Math.round((raw - props.min) / props.step) * props.step + props.min;
@@ -158,10 +177,10 @@ function onKey(i: number, e: KeyboardEvent) {
              v-slot="{ id, describedBy, invalid }">
     <div class="apex-slider" :id="id" :style="rootStyle" :data-orientation="orientation"
          :data-disabled="disabled ? 'true' : 'false'">
-      <div ref="track" class="apex-slider__track" @pointerdown="onDown" @pointermove="onMove"
+      <div ref="track" class="apex-slider__track" :class="ui?.track" @pointerdown="onDown" @pointermove="onMove"
            @pointerup="onUp" @pointercancel="onUp">
-        <span class="apex-slider__fill" :style="fillStyle"></span>
-        <span v-for="(p, i) in percents" :key="i" class="apex-slider__handle"
+        <span class="apex-slider__fill" :class="ui?.fill" :style="fillStyle"></span>
+        <span v-for="(p, i) in percents" :key="i" class="apex-slider__handle" :class="ui?.handle"
               :style="vertical ? { bottom: p + '%' } : { insetInlineStart: p + '%' }"
               role="slider" :tabindex="locked ? -1 : 0"
               :aria-valuemin="range && i === 1 ? values[0] : min"
@@ -171,7 +190,7 @@ function onKey(i: number, e: KeyboardEvent) {
               :aria-describedby="describedBy" :aria-invalid="invalid || undefined"
               :aria-disabled="disabled || undefined"
               @keydown="onKey(i, $event)" @focus="focused = true" @blur="focused = false">
-          <em v-if="showTooltip" class="apex-slider__tip" :data-open="dragging === i">{{ values[i] }}</em>
+          <em v-if="showTooltip" class="apex-slider__tip" :class="ui?.tooltip" :data-open="dragging === i">{{ values[i] }}</em>
         </span>
       </div>
     </div>

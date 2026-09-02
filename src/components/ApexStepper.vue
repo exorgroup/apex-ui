@@ -38,8 +38,9 @@ function bump(d: number) {
 <template>
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="true" :focused="focused"
              v-slot="{ id, describedBy, invalid }">
-    <div class="apex-stepper" :data-focused="focused ? 'true' : 'false'">
-      <button type="button" :aria-label="t('apexui.decrement')" :disabled="disabled || atMin" @click="bump(-1)">
+    <div class="apex-stepper" :class="ui?.control" :data-focused="focused ? 'true' : 'false'">
+      <button type="button" class="apex-stepper__btn" :class="ui?.decrement"
+              :aria-label="t('apexui.decrement')" :disabled="disabled || atMin" @click="bump(-1)">
         <ApexIcon name="remove" :size="18" />
       </button>
       <span class="apex-stepper__val" :class="ui?.value" :data-align="align" :data-unit="unit ? 'true' : 'false'">
@@ -51,7 +52,8 @@ function bump(d: number) {
                @focus="focused = true" @blur="focused = false" />
         <span v-if="unit" class="apex-stepper__unit" :class="ui?.unit">{{ unit }}</span>
       </span>
-      <button type="button" :aria-label="t('apexui.increment')" :disabled="disabled || atMax" @click="bump(1)">
+      <button type="button" class="apex-stepper__btn" :class="ui?.increment"
+              :aria-label="t('apexui.increment')" :disabled="disabled || atMax" @click="bump(1)">
         <ApexIcon name="add" :size="18" />
       </button>
     </div>

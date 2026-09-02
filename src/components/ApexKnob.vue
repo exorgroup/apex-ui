@@ -18,6 +18,10 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   diameter?: number;
   /** Arc thickness in pixels. */
   strokeWidth?: number;
+  /** Thickness of the unfilled arc. Follows strokeWidth unless set. */
+  railWidth?: number;
+  /** Centre text size in pixels. */
+  textSize?: number;
   /** Filled arc colour. Defaults to the accent. */
   valueColor?: string;
   /** Track colour. */
@@ -49,6 +53,19 @@ const fieldProps = computed(() => pickFieldProps(props as unknown as Record<stri
 const centreText = computed(() => (props.valueTemplate ? props.valueTemplate(value.value) : String(value.value)));
 
 const R = computed(() => 50 - props.strokeWidth / 2);
+
+/** Only the variables actually set, so a default knob carries no style attribute. */
+const knobStyle = computed(() => {
+  const out: Record<string, string> = { '--apex-knob-size': props.diameter + 'px' };
+  const optional: Array<[string | undefined, string]> = [
+    [props.valueColor, '--apex-knob-value'],
+    [props.rangeColor, '--apex-knob-range'],
+    [props.textColor, '--apex-knob-text'],
+  ];
+  optional.forEach(([v, name]) => { if (v) out[name] = v; });
+  if (props.textSize) out['--apex-knob-text-size'] = props.textSize + 'px';
+  return out;
+});
 const CIRC = computed(() => 2 * Math.PI * R.value);
 const arcLen = computed(() => (CIRC.value * SWEEP) / 360);
 
@@ -105,20 +122,21 @@ function onKey(e: KeyboardEvent) {
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="true" :focused="focused"
              v-slot="{ id, describedBy, invalid }">
     <div class="apex-knob" :data-disabled="disabled ? 'true' : 'false'"
-         :style="{ '--knob-size': diameter + 'px', '--knob-value': valueColor, '--knob-range': rangeColor, '--knob-text': textColor }">
+         :class="ui?.control" :style="knobStyle">
       <svg ref="svg" :id="id" viewBox="0 0 100 100" role="slider" :tabindex="disabled ? -1 : 0"
            :aria-valuemin="min" :aria-valuemax="max" :aria-valuenow="value" :aria-valuetext="centreText"
            :aria-label="label || 'Value'" :aria-describedby="describedBy" :aria-invalid="invalid || undefined"
            :aria-disabled="disabled || undefined"
            @pointerdown="onDown" @pointermove="onMove" @wheel="onWheel" @keydown="onKey"
            @focus="focused = true" @blur="focused = false">
-        <circle class="apex-knob__range" cx="50" cy="50" :r="R" fill="none" :stroke-width="strokeWidth"
+        <circle class="apex-knob__range" :class="ui?.range" cx="50" cy="50" :r="R" fill="none"
+                :stroke-width="railWidth ?? strokeWidth"
                 stroke-linecap="round" :stroke-dasharray="`${arcLen} ${CIRC}`"
                 transform="rotate(135 50 50)" />
-        <circle class="apex-knob__value" cx="50" cy="50" :r="R" fill="none" :stroke-width="strokeWidth"
+        <circle class="apex-knob__value" :class="ui?.arc" cx="50" cy="50" :r="R" fill="none" :stroke-width="strokeWidth"
                 stroke-linecap="round" :stroke-dasharray="`${arcLen * pct} ${CIRC}`"
                 transform="rotate(135 50 50)" />
-        <text v-if="!hideValue" class="apex-knob__text" x="50" y="50" text-anchor="middle"
+        <text v-if="!hideValue" class="apex-knob__text" :class="ui?.text" x="50" y="50" text-anchor="middle"
               dominant-baseline="central">{{ centreText }}</text>
       </svg>
     </div>
