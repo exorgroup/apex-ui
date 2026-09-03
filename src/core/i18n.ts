@@ -8,6 +8,7 @@ export const APEX_FALLBACK_STRINGS: ApexStrings = {
   'apexui.remove': 'Remove',
   'apexui.search': 'Search',
   'apexui.noResults': 'No matches',
+  'apexui.addNew': 'Add new…',
   'apexui.showPassword': 'Show password',
   'apexui.hidePassword': 'Hide password',
   'apexui.loading': 'Loading',

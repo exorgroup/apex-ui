@@ -180,6 +180,8 @@ export interface ApexFieldClasses {
       secondary line under a row's label. */
   thumbnail?: string;
   optionHelp?: string;
+  /** The "Add new" row at the foot of the overlay. */
+  addNew?: string;
 }
 
 /**
@@ -346,6 +348,20 @@ export interface ApexUiOptions {
   adapter?: ApexValidationAdapter;
   /** Icon resolver — swap Material Symbols for another set. */
   iconResolver?: (name: string) => string;
+  /**
+   * Decides whether a control may offer its "Add new" row, given the control's
+   * `resource`. Register it once and every chooser in the app is gated the same
+   * way, instead of each call site repeating the check.
+   *
+   * Nothing here is tied to any particular authorisation library: return a
+   * boolean however you like. With apex-autentica that is
+   * `canCreate: (r) => can(permissions, r, 'create')`; with a plain array it is
+   * `canCreate: (r) => allowed.includes(r)`.
+   *
+   * This is UX only. The endpoint that creates the record still has to
+   * authorise the request itself.
+   */
+  canCreate?: (resource: string) => boolean;
 }
 
 export interface ApexStrings {
@@ -354,6 +370,7 @@ export interface ApexStrings {
   'apexui.remove': string;
   'apexui.search': string;
   'apexui.noResults': string;
+  'apexui.addNew': string;
   'apexui.showPassword': string;
   'apexui.hidePassword': string;
   'apexui.loading': string;

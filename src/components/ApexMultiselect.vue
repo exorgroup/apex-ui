@@ -9,6 +9,7 @@ import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { normaliseOptions, pickFieldProps } from '../core/utils';
 import { useApexI18n } from '../core/i18n';
+import { useCanCreate } from '../core/canCreate';
 import type { ApexFieldProps, ApexOption, ApexOptionsInput } from '../types';
 
 const props = withDefaults(defineProps<ApexFieldProps & {
@@ -29,9 +30,32 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   filterThreshold?: number;
   /** Select all / clear all row above the list. */
   toggleAll?: boolean;
-}>(), { statusIcon: true });
 
-const emit = defineEmits<{ (e: 'update:modelValue', v: unknown[]): void; (e: 'change'): void }>();
+  /**
+   * Offer an "Add new" row at the foot of the list. Activating it emits
+   * `add-new` and closes the overlay; it is not an option, so it never
+   * toggles and never counts towards `max`.
+   */
+  addNew?: boolean;
+  /** Row text while the filter is empty. With a query it reads Add "…". */
+  addNewLabel?: string;
+  /** What is being created, passed to the app-level canCreate resolver. */
+  resource?: string;
+  /** Overrides the resolver. Set it and no resolver is consulted. */
+  canAddNew?: boolean;
+}>(), {
+  statusIcon: true,
+  /* Tri-state: yes, no, or "ask the resolver". Vue casts an absent boolean
+     prop to false, which would read as a denial and silence the resolver. */
+  canAddNew: undefined,
+});
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', v: unknown[]): void;
+  (e: 'change'): void;
+  /** The row was activated. `query` is whatever was typed in the filter. */
+  (e: 'add-new', payload: { query: string }): void;
+}>();
 
 const t = useApexI18n();
 const focused = ref(false);
@@ -44,6 +68,18 @@ const filterEl = ref<HTMLInputElement | null>(null);
 
 const allOpts = computed(() => normaliseOptions(props.options));
 const showFilter = computed(() => props.filter || (props.filterThreshold != null && allOpts.value.length >= props.filterThreshold));
+
+const canCreate = useCanCreate();
+const showAddNew = computed(() => props.addNew && canCreate(props.canAddNew, props.resource));
+const addNewText = computed(() => (query.value.trim()
+  ? `Add “${query.value.trim()}”`
+  : props.addNewLabel || t('apexui.addNew')));
+
+function pickAddNew() {
+  /* Close first: a dialog or a route is about to take over. */
+  open.value = false;
+  emit('add-new', { query: query.value.trim() });
+}
 const opts = computed(() => {
   const q = query.value.toLowerCase().trim();
   return q ? allOpts.value.filter((o) => o.label.toLowerCase().includes(q)) : allOpts.value;
@@ -82,11 +118,18 @@ function onKey(e: KeyboardEvent) {
   if (e.key === 'Escape' || e.key === 'Tab') { open.value = false; return; }
   if (!open.value && (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown')) { e.preventDefault(); openMenu(); return; }
   if (!open.value) return;
-  if (e.key === 'ArrowDown') { e.preventDefault(); active.value = Math.min(active.value + 1, opts.value.length - 1); }
+  /* One past the last option, so the row is keyboard-reachable like any other. */
+  const last = opts.value.length - 1 + (showAddNew.value ? 1 : 0);
+  if (e.key === 'ArrowDown') { e.preventDefault(); active.value = Math.min(active.value + 1, last); }
   if (e.key === 'ArrowUp') { e.preventDefault(); active.value = Math.max(active.value - 1, 0); }
   if (e.key === 'Home') { e.preventDefault(); active.value = 0; }
-  if (e.key === 'End') { e.preventDefault(); active.value = opts.value.length - 1; }
-  if (e.key === 'Enter') { e.preventDefault(); if (opts.value[active.value]) toggle(opts.value[active.value]); }
+  if (e.key === 'End') { e.preventDefault(); active.value = last; }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    /* The row is not an option: it opens a form rather than toggling. */
+    if (showAddNew.value && active.value === opts.value.length) pickAddNew();
+    else if (opts.value[active.value]) toggle(opts.value[active.value]);
+  }
   if (e.key === 'Backspace' && !query.value && selected.value.length) {
     const last = allOpts.value.find((o) => o.value === selected.value[selected.value.length - 1]);
     if (last) toggle(last);
@@ -170,6 +213,11 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
           </span>
         </button>
         <p v-if="!opts.length" class="apex-pop__empty" :class="ui.empty">{{ t('apexui.noResults') }}</p>
+        <button v-if="showAddNew" type="button" class="apex-pop__add" :class="ui.addNew"
+                :data-active="active === opts.length ? 'true' : 'false'" @click="pickAddNew">
+          <ApexIcon name="add" :size="18" />
+          <span>{{ addNewText }}</span>
+        </button>
       </div>
     </div>
   </ApexField>
