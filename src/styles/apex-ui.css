@@ -97,26 +97,26 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-ctl--select .apex-ctl__input{appearance:none;-webkit-appearance:none;cursor:pointer;color-scheme:inherit}
 .apex-ctl--select .apex-ctl__input:disabled{cursor:not-allowed}
 /* the native popup is drawn by the OS — these are the only hooks it honours */
-.apex-ctl--select option{background:var(--bg-elevated);color:var(--fg-default)}
-.apex-ctl--select option:disabled{color:var(--fg-subtle)}
-.apex-ctl--select option:checked{background:color-mix(in srgb,var(--accent-primary) 22%,var(--bg-elevated))}
+.apex-ctl--select option{background:var(--apex-ctl-select-opt-bg,var(--bg-elevated));color:var(--apex-ctl-select-opt-fg,var(--fg-default))}
+.apex-ctl--select option:disabled{color:var(--apex-ctl-select-opt-disabled-fg,var(--fg-subtle))}
+.apex-ctl--select option:checked{background:var(--apex-ctl-select-opt-selected-bg,color-mix(in srgb,var(--accent-primary) 22%,var(--bg-elevated)))}
 
 /* trigger (custom select) — same shell, popover matched to it */
 .apex-ctl--trigger{cursor:pointer;user-select:none}
 .apex-ctl--trigger[data-disabled="true"]{cursor:not-allowed}
 .apex-ctl--trigger:focus-visible{outline:none}
-.apex-ctl__value{flex:1 1 auto;min-width:0;font-size:var(--apex-ctl-fs);color:var(--fg-default);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apex-ctl__value{flex:1 1 auto;min-width:0;font-size:var(--apex-ctl-fs);color:var(--apex-ctl-fg,var(--fg-default));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .apex-ctl__chev{transition:transform var(--dur-fast) var(--ease-out)}
 .apex-ctl__chev[data-open="true"]{transform:rotate(180deg)}
 
 /* ─── multiselect ──────────────────────────────────────── */
 .apex-ctl--multi{flex-wrap:wrap;gap:6px;padding-block:7px;min-height:var(--apex-ctl-h)}
 .apex-chip{display:inline-flex;align-items:center;gap:5px;padding-block:4px;padding-inline:10px 6px;background:var(--apex-chip-bg,var(--bg-subtle));border:1px solid var(--apex-chip-border,var(--border-default));border-radius:var(--apex-chip-radius,var(--r-full));font-size:12.5px;font-weight:500;white-space:nowrap;color:var(--apex-chip-fg,var(--fg-default))}
-.apex-chip button{display:grid;place-items:center;border:0;background:transparent;color:var(--fg-subtle);cursor:pointer;padding:0;border-radius:var(--r-full);--apex-icon-size:15px}
-.apex-chip button:hover{color:var(--accent-danger)}
-.apex-ctl__ph{color:var(--fg-subtle);font-size:var(--apex-ctl-fs);flex:1 1 auto}
+.apex-chip button{display:grid;place-items:center;border:0;background:transparent;color:var(--apex-chip-remove,var(--fg-subtle));cursor:pointer;padding:0;border-radius:var(--r-full);--apex-icon-size:15px}
+.apex-chip button:hover{color:var(--apex-chip-remove-hover,var(--accent-danger))}
+.apex-ctl__ph{color:var(--apex-ctl-placeholder,var(--fg-subtle));font-size:var(--apex-ctl-fs);flex:1 1 auto}
 .apex-chip__img{inline-size:15px;block-size:15px;border-radius:2px;object-fit:cover}
-.apex-chip--more{background:var(--bg-muted);font-weight:600;padding-inline:10px;color:var(--fg-muted)}
+.apex-chip--more{background:var(--apex-chip-more-bg,var(--bg-muted));font-weight:600;padding-inline:10px;color:var(--apex-chip-more-fg,var(--fg-muted))}
 .apex-pop__all{display:flex;align-items:center;justify-content:space-between;width:100%;padding-block:7px;padding-inline:10px;margin-block-end:3px;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--apex-pop-all-fg,var(--accent-primary));border-radius:var(--apex-opt-radius,var(--r-sm));cursor:pointer;border-block-end:1px solid var(--apex-pop-all-border,var(--border-subtle))}
 .apex-pop__all:hover{background:var(--apex-pop-all-hover-bg,var(--bg-muted))}
 .apex-pop__all span{color:var(--apex-pop-all-count-fg,var(--fg-subtle));font-weight:500;font-family:var(--font-mono);font-size:11px}

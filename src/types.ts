@@ -171,6 +171,15 @@ export interface ApexFieldClasses {
   /** Every swatch — the trigger, the one beside the output, and each preset.
       They are one part, so scope by ancestor to reach a single kind. */
   swatch?: string;
+  /** ApexSelect and ApexMultiselect — the text shown when nothing is chosen,
+      the open/close arrow, and the no-results message. */
+  placeholder?: string;
+  chevron?: string;
+  empty?: string;
+  /** An option's thumbnail, in the box and in the overlay row alike, and the
+      secondary line under a row's label. */
+  thumbnail?: string;
+  optionHelp?: string;
 }
 
 /**

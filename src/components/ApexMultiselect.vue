@@ -108,9 +108,9 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
 
 <template>
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="chips.length > 0 || (isFloat && !!placeholder)" :focused="focused || open"
-             v-slot="{ id, describedBy, invalid, statusGlyph }">
+             v-slot="{ id, describedBy, invalid, statusGlyph, ui }">
     <div ref="root" style="position:relative">
-      <div ref="trigger" class="apex-ctl apex-ctl--trigger apex-ctl--multi" role="combobox" :id="id"
+      <div ref="trigger" class="apex-ctl apex-ctl--trigger apex-ctl--multi" :class="ui.control" role="combobox" :id="id"
            :aria-expanded="open" aria-haspopup="listbox" :aria-controls="listId"
            :aria-describedby="describedBy" :aria-invalid="invalid || undefined"
            :aria-label="labelPlacement === 'hidden' ? label : undefined"
@@ -118,9 +118,9 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
            :data-disabled="disabled ? 'true' : 'false'"
            @click="open ? (open = false) : openMenu()" @keydown="onKey"
            @focus="focused = true" @blur="focused = false">
-        <ApexIcon v-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" />
-        <span v-for="c in shownChips" :key="String(c.value)" class="apex-chip">
-          <img v-if="c.image" class="apex-chip__img" :src="c.image" alt="" />
+        <ApexIcon v-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" :class="ui.icon" />
+        <span v-for="c in shownChips" :key="String(c.value)" class="apex-chip" :class="ui.chip">
+          <img v-if="c.image" class="apex-chip__img" :class="ui.thumbnail" :src="c.image" alt="" />
           <ApexIcon v-else-if="c.icon" :name="c.icon" :size="15" />
           {{ c.label }}
           <button type="button" :aria-label="`${t('apexui.remove')} ${c.label}`"
@@ -128,24 +128,24 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
             <ApexIcon name="close" />
           </button>
         </span>
-        <span v-if="overflow" class="apex-chip apex-chip--more">+{{ overflow }}</span>
-        <span v-if="!chips.length" class="apex-ctl__ph">{{ placeholder || t('apexui.select') }}</span>
-        <ApexIcon v-if="loading" name="progress_activity" spin class="apex-ctl__icon" />
-        <button v-if="clearable && chips.length && !disabled" type="button" class="apex-ctl__btn"
+        <span v-if="overflow" class="apex-chip apex-chip--more" :class="ui.chip">+{{ overflow }}</span>
+        <span v-if="!chips.length" class="apex-ctl__ph" :class="ui.placeholder">{{ placeholder || t('apexui.select') }}</span>
+        <ApexIcon v-if="loading" name="progress_activity" spin class="apex-ctl__icon" :class="ui.icon" />
+        <button v-if="clearable && chips.length && !disabled" type="button" class="apex-ctl__btn" :class="ui.button"
                 :aria-label="t('apexui.clear')" @click.stop="emit('update:modelValue', [])">
           <ApexIcon name="close" :size="17" />
         </button>
         <ApexIcon v-if="statusGlyph" :name="statusGlyph" class="apex-ctl__status" :size="18" />
-        <ApexIcon name="keyboard_arrow_down" class="apex-ctl__icon apex-ctl__chev" :size="19" :data-open="open" />
+        <ApexIcon name="keyboard_arrow_down" class="apex-ctl__icon apex-ctl__chev" :class="ui.chevron" :size="19" :data-open="open" />
       </div>
 
-      <div v-if="open" class="apex-pop" :id="listId" role="listbox" aria-multiselectable="true">
+      <div v-if="open" class="apex-pop" :class="ui.popover" :id="listId" role="listbox" aria-multiselectable="true">
         <div v-if="showFilter" class="apex-pop__filter" :class="ui?.filter">
           <ApexIcon name="search" />
           <input ref="filterEl" type="text" :value="query" :placeholder="filterPlaceholder || t('apexui.search')"
                  :aria-label="t('apexui.search')" autocomplete="off"
                  @input="query = ($event.target as HTMLInputElement).value; active = 0" @keydown="onKey" />
-          <button v-if="query" type="button" class="apex-ctl__btn" :aria-label="t('apexui.clear')"
+          <button v-if="query" type="button" class="apex-ctl__btn" :class="ui.button" :aria-label="t('apexui.clear')"
                   @click="query = ''; filterEl?.focus()">
             <ApexIcon name="close" :size="16" />
           </button>
@@ -155,21 +155,21 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
           <span>{{ selected.length }} / {{ allOpts.length }}</span>
         </button>
         <button v-for="(o, i) in opts" :key="String(o.value)" :id="listId + '-' + i" type="button"
-                class="apex-pop__opt" role="option" :aria-selected="selected.includes(o.value)"
+                class="apex-pop__opt" :class="ui.option" role="option" :aria-selected="selected.includes(o.value)"
                 :data-active="i === active ? 'true' : 'false'"
                 :disabled="o.disabled || (atMax && !selected.includes(o.value))"
                 @mouseenter="active = i" @click="toggle(o)">
           <span class="apex-pop__box" :class="ui?.checkbox" :data-on="selected.includes(o.value)" aria-hidden="true">
             <ApexIcon v-if="selected.includes(o.value)" name="check" :size="15" />
           </span>
-          <img v-if="o.image" class="apex-pop__img" :src="o.image" alt="" />
+          <img v-if="o.image" class="apex-pop__img" :class="ui.thumbnail" :src="o.image" alt="" />
           <ApexIcon v-else-if="o.icon" :name="o.icon" :size="18" />
           <span>
             {{ o.label }}
-            <span v-if="o.help" class="apex-pop__help">{{ o.help }}</span>
+            <span v-if="o.help" class="apex-pop__help" :class="ui.optionHelp">{{ o.help }}</span>
           </span>
         </button>
-        <p v-if="!opts.length" class="apex-pop__empty">{{ t('apexui.noResults') }}</p>
+        <p v-if="!opts.length" class="apex-pop__empty" :class="ui.empty">{{ t('apexui.noResults') }}</p>
       </div>
     </div>
   </ApexField>
