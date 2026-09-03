@@ -775,6 +775,22 @@ function createCountry({ query }) {
 
 /** Per-control customisation: [ui key, part, variables it responds to]. */
 export const OWN_PARTS: Record<string, string[][]> = {
+  listbox: [
+    ['control', '.apex-listbox', '--apex-listbox-bg, --apex-listbox-border, --apex-listbox-radius'],
+    ['list', '.apex-listbox__list', '--apex-listbox-focus-ring; scrollHeight caps its height'],
+    ['group', '.apex-listbox__group', '--apex-listbox-group-fg — the heading a nested array produces'],
+    ['option', '.apex-listbox__opt', '--apex-listbox-opt-fg, --apex-listbox-opt-radius, --apex-listbox-opt-hover-bg, --apex-listbox-opt-selected-bg, --apex-listbox-opt-selected-fg'],
+    ['addNew', '.apex-pop__add', '--apex-pop-add-bg, --apex-pop-add-border, --apex-pop-add-fg, --apex-pop-add-hover-bg, --apex-pop-add-icon'],
+    ['filter / selectAll / checkbox / empty', '.apex-pop__filter, .apex-pop__all, .apex-cb__box, .apex-pop__empty', 'shared — all on ApexField'],
+  ],
+  cascadeselect: [
+    ['cascade', '.apex-cascade', 'the overlay holding the columns — layout only'],
+    ['column', '.apex-cascade__panel', 'each column is also .apex-pop, so every --apex-pop-* applies'],
+    ['heading', '.apex-cascade__heading', '--apex-cascade-heading-fg, --apex-cascade-heading-border (first column only)'],
+    ['footer', '.apex-cascade__footer', '--apex-cascade-footer-fg, --apex-cascade-footer-border, --apex-cascade-footer-radius, --apex-cascade-footer-hover-bg'],
+    ['addNew', '.apex-pop__add', '--apex-pop-add-bg, --apex-pop-add-border, --apex-pop-add-fg, --apex-pop-add-hover-bg, --apex-pop-add-icon — one per open column'],
+    ['option / tick / empty', '.apex-pop__opt, .apex-pop__tick, .apex-pop__empty', 'shared — all on ApexField. The tick doubles as the branch arrow'],
+  ],
   select: [
     ['placeholder', '.apex-ctl__ph', '--apex-ctl-placeholder, i.e. the placeholderColor prop'],
     ['value', '.apex-ctl__value', '--apex-ctl-fg, i.e. the textColor prop'],
@@ -894,6 +910,66 @@ export const OWN_PARTS: Record<string, string[][]> = {
 };
 
 export const SNIP_OWN: Record<string, string> = {
+  listbox: `<!-- The box, its list and its rows are this control's own. The filter,
+     select-all row, tick boxes and empty state are shared, so their
+     variables live on ApexField. -->
+.location-list {
+  --apex-listbox-bg: #101820;
+  --apex-listbox-border: #243040;
+  --apex-listbox-radius: 12px;
+  --apex-listbox-group-fg: #6B7789;
+  --apex-listbox-opt-fg: #E8EEF7;
+  --apex-listbox-opt-hover-bg: #1D2735;
+  --apex-listbox-opt-selected-bg: #16202C;
+  --apex-listbox-opt-selected-fg: #7AA2F7;
+  /* The ring drawn on the list itself when it takes keyboard focus. */
+  --apex-listbox-focus-ring: #7AA2F7;
+}
+
+<ApexListbox v-model="where" :options="options" label="Screen location"
+  :ui="{ control: 'location-list', group: 'loc-group', option: 'loc-row' }" />
+
+/* Add new sits at the foot of the list. There is no overlay to close here,
+   so the list stays exactly where it is when the row is used. */
+<ApexListbox v-model="where" :options="options" filter
+  add-new resource="locations" @add-new="createLocation" />`,
+
+  cascadeselect: `<!-- Each column is itself an .apex-pop, so the shared overlay variables
+     dress the columns and only the extras below are this control's own. -->
+.region-cascade {
+  --apex-cascade-heading-fg: #6B7789;
+  --apex-cascade-heading-border: #243040;
+  --apex-cascade-footer-fg: #7AA2F7;
+  --apex-cascade-footer-border: #243040;
+  --apex-cascade-footer-hover-bg: #1D2735;
+  /* Shared, but worth setting here: these dress every column. */
+  --apex-pop-bg: #101820;
+  --apex-pop-border: #243040;
+  --apex-opt-hover-bg: #1D2735;
+}
+
+<ApexCascadeSelect v-model="region" :options="tree" label="Region"
+  heading="Country" show-path
+  :ui="{ cascade: 'region-cascade', column: 'region-col', heading: 'region-head' }" />
+
+/* Add new differs here, because a tree has levels. Every open column gets
+   its own row, and the event carries the branch above it — so the same
+   handler can create a country at the first column and a locality at the
+   third. query is always empty: this control has no filter. */
+<ApexCascadeSelect v-model="region" :options="tree"
+  add-new resource="regions" @add-new="createRegion" />
+
+function createRegion({ path }) {
+  // path is [] on the first column, [Malta] on the second,
+  // [Malta, Northern Harbour] on the third.
+  const parent = path.length ? path[path.length - 1].value : null;
+  dialog.open(RegionForm, { contentProps: { parent } , /* … */ });
+}
+
+/* footerAction is a different thing and can be shown at the same time: a
+   general button on the first column that emits @action, with no permission
+   gate and no notion of level. Use it for "Manage regions", not for a
+   create. */`,
   select: `<!-- Almost everything here is shared. The box, the overlay, the rows
      and the filter are the same parts every chooser draws, so their
      variables live on ApexField and the props work here unchanged. -->

@@ -181,6 +181,12 @@ const arcDemo = reactive<Record<number, number>>({ 180: 30, 270: 55, 360: 80 });
  * and sharing one ref would break whichever page it was not shaped for.
  */
 const isMulti = computed(() => entry.value.id === 'multiselect');
+const isCascade = computed(() => entry.value.id === 'cascadeselect');
+/* The demo borrows the page's own sample options, so a cascade gets a tree
+   and a listbox gets groups rather than one shape forced on both. */
+const demoOptions = computed(
+  () => ((entry.value.base as Record<string, unknown> | undefined)?.options ?? []) as unknown[],
+);
 
 const addNewDemo = reactive<Record<string, unknown>>({ select: null, multiselect: [] });
 const addNewSeen = ref('');
@@ -1171,8 +1177,8 @@ async function copyUsage() {
         </template>
 
 
-        <!-- Add New — a row both choosers can offer, so one section serves both. -->
-        <template v-if="entry.id === 'select' || entry.id === 'multiselect'">
+        <!-- Add New — offered by all four choosers, so one section serves them all. -->
+        <template v-if="['select', 'multiselect', 'listbox', 'cascadeselect'].includes(entry.id)">
           <h2>Add new</h2>
           <p class="note">
             When the record the user needs is not in the list yet,
@@ -1182,17 +1188,25 @@ async function copyUsage() {
             value, so the same handler covers a dialog, a route or an inline form, and
             your list stays the one source of truth.
           </p>
+          <p v-if="isCascade" class="note">
+            A tree has levels, so this control differs in one way: <em>every open
+            column</em> carries its own row, and the event adds <code>path</code> —
+            the branch above that column, empty at the first. That is what lets one
+            handler create a country at the first column and a locality at the third.
+            <code>query</code> is always empty here, because the cascade has no filter.
+            <code>footerAction</code> is a different thing and can be shown alongside.
+          </p>
           <div class="grid grid--2">
             <div class="cell">
               <span class="cell__tag">Nothing typed</span>
               <component :is="entry.name" v-model="addNewDemo[entry.id]"
-                         :options="ZONE_OPTIONS" label="Zone"
-                         add-new filter placeholder="Choose a zone"
+                         :options="demoOptions" label="Zone"
+                         add-new :filter="!isCascade" placeholder="Choose a zone"
                          @add-new="onDemoAddNew" />
             </div>
             <div class="cell">
               <span class="cell__tag">Permission denied — the row is hidden</span>
-              <component :is="entry.name" :options="ZONE_OPTIONS" label="Zone" add-new
+              <component :is="entry.name" :options="demoOptions" label="Zone" add-new
                          :can-add-new="false" placeholder="Choose a zone" />
             </div>
           </div>
