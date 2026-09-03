@@ -1217,6 +1217,33 @@ export const ENTRIES: DocEntry[] = [
     slots: [['date', 'Custom cell content; receives { date, outside, selected }']],
   },
   {
+    id: 'colorpicker', name: 'ApexColorPicker', group: 'Dates',
+    blurb: 'Composable colour picker: saturation/value area, hue and opacity sliders, swatch presets, channel boxes and a format switcher. Popover by default, inline when embedded.',
+    model: '#0B5FFF',
+    base: {
+      label: 'Brand colour', showAlpha: true, showFormatToggle: true, showChannels: true,
+      presets: ['#0B5FFF', '#137C4A', '#C24A06', '#C41E1E', '#0F141C', '#5F6C7E', '#FFFFFF'],
+    },
+    controls: [
+      { key: 'label', type: 'text' },
+      { key: 'format', type: 'select', options: ['hex', 'rgb', 'hsl', 'hsb'] },
+      { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'showAlpha', type: 'bool' }, { key: 'showFormatToggle', type: 'bool' },
+      { key: 'showChannels', type: 'bool' }, { key: 'showInput', type: 'bool' },
+      { key: 'inline', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'string', '—', 'v-model — a CSS colour string in the current format'],
+      ['format', "'hex' | 'rgb' | 'hsl' | 'hsb'", "'hex'", 'Output format'],
+      ['showAlpha', 'boolean', 'true', 'Opacity slider, and alpha in the output'],
+      ['orientation', "'horizontal' | 'vertical'", "'horizontal'", 'Sliders under the area, or beside it'],
+      ['presets', 'string[]', '—', 'Swatch row under the picker'],
+      ['showInput / showChannels / showFormatToggle', 'boolean', 'true / false / false', 'Optional parts'],
+      ['inline', 'boolean', 'false', 'Render in place instead of a popover'],
+    ],
+    events: [['update:modelValue', 'string'], ['change', 'ApexColor']],
+  },
+  {
     id: 'button', name: 'ApexButton', group: 'Actions',
     blurb: 'Eight severities \u00d7 four variants, three sizes, four icon positions, raised elevation, pill and circular shapes, a corner badge and a loading state. Renders an <a> when given href.',
     noField: true, demo: 'button',
