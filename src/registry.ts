@@ -1116,6 +1116,51 @@ export const ENTRIES: DocEntry[] = [
     events: [['update:modelValue', 'number | number[]'], ['change', 'fired during the drag'], ['slideend', 'fired once the drag completes']],
   },
   {
+    id: 'datepicker', name: 'ApexDatePicker', group: 'Dates',
+    blurb: 'Calendar popup on the same shell as the selects. Single, multiple or range selection; date, month or year views; optional time picker; boundaries, locales, button bar and inline mode.',
+    /* The gallery seeds this with `new Date()`. Here the value is JSON-cloned
+       when you switch pages or press reset, which would turn a Date into an
+       ISO string the dd/mm/yy parser then rejects. A string in the field's own
+       format survives the round trip, and `modelType: 'date'` still hands your
+       code a real Date once a day is picked. */
+    model: '14/03/2026',
+    base: { label: 'Campaign start', dateFormat: 'dd/mm/yy', showIcon: true, showButtonBar: true, clearable: true },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'dateFormat', type: 'text' },
+      { key: 'selectionMode', type: 'select', options: ['single', 'multiple', 'range'] },
+      { key: 'view', type: 'select', options: ['date', 'month', 'year'] },
+      { key: 'modelType', type: 'select', options: ['date', 'string'] },
+      { key: 'numberOfMonths', type: 'number' },
+      { key: 'showIcon', type: 'bool' }, { key: 'showTime', type: 'bool' },
+      { key: 'hourFormat', type: 'select', options: ['24', '12'] },
+      { key: 'showSeconds', type: 'bool' }, { key: 'timeOnly', type: 'bool' },
+      { key: 'showButtonBar', type: 'bool' }, { key: 'inline', type: 'bool' },
+      { key: 'readonlyInput', type: 'bool' }, { key: 'clearable', type: 'bool' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'Date | string | (Date|string)[]', '—', 'v-model; an array for multiple and range'],
+      ['dateFormat', 'string', "'dd/mm/yy'", "d dd o oo D DD m mm M MM y yy @ ! '…' — anything else is literal"],
+      ['modelType', "'date' | 'string'", "'date'", 'What v-model holds'],
+      ['selectionMode', "'single' | 'multiple' | 'range'", "'single'", ''],
+      ['view', "'date' | 'month' | 'year'", "'date'", 'Month-only and year-only pickers'],
+      ['locale', 'Partial<ApexDateLocale>', 'English', 'Day and month names, firstDayOfWeek, button labels'],
+      ['numberOfMonths', 'number', '1', 'Months shown side by side'],
+      ['minDate / maxDate', 'Date', '—', 'Permitted boundaries'],
+      ['disabledDates', 'Date[]', '—', 'Specific dates to block'],
+      ['disabledDays', 'number[]', '—', 'Weekday indexes to block, 0 = Sunday'],
+      ['showIcon / icon', 'boolean / string', 'false', 'Calendar button beside the field'],
+      ['showButtonBar', 'boolean', 'false', 'Today and Clear in the footer'],
+      ['showTime / timeOnly', 'boolean', 'false', 'Time picker, with or without the calendar'],
+      ['hourFormat', "'12' | '24'", "'24'", ''],
+      ['showSeconds / stepMinute', 'boolean / number', 'false / 1', ''],
+      ['inline', 'boolean', 'false', 'Render the calendar in place'],
+      ['readonlyInput', 'boolean', 'false', 'Calendar only, no typing'],
+    ],
+    events: [['update:modelValue', 'Date | string | array'], ['change', '—'], ['month-change', '{ month, year }']],
+    slots: [['date', 'Custom cell content; receives { date, outside, selected }']],
+  },
+  {
     id: 'button', name: 'ApexButton', group: 'Actions',
     blurb: 'Eight severities \u00d7 four variants, three sizes, four icon positions, raised elevation, pill and circular shapes, a corner badge and a loading state. Renders an <a> when given href.',
     noField: true, demo: 'button',
