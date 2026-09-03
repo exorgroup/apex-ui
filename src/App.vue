@@ -10,7 +10,7 @@ import {
   SNIP_UI, SPLIT_MODEL,
   SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
-import type { DocEntry, DocPage } from './registry';
+import type { AddNewKind, DocEntry, DocPage } from './registry';
 import { useApexDialog } from '@exorgroup/apex-ui';
 import LocalityForm from './demos/LocalityForm.vue';
 
@@ -23,6 +23,9 @@ const copied = ref(false);
 
 /** v-model per control, so switching away and back keeps what you typed. */
 const model = reactive<Record<string, unknown>>({});
+
+/** ApexOrderList's second model — the rows its move buttons act on. */
+const orderSelection = ref<unknown[]>(['interval']);
 
 /**
  * Live prop overrides from the playground rail, per control. Kept apart from
@@ -182,19 +185,50 @@ const arcDemo = reactive<Record<number, number>>({ 180: 30, 270: 55, 360: 80 });
  */
 const isMulti = computed(() => entry.value.id === 'multiselect');
 const isCascade = computed(() => entry.value.id === 'cascadeselect');
-/* The demo borrows the page's own sample options, so a cascade gets a tree
-   and a listbox gets groups rather than one shape forced on both. */
+const isTree = computed(() => entry.value.id === 'treeselect');
+const isOrder = computed(() => entry.value.id === 'orderlist');
+/** The two that place a row per level rather than one at the foot. */
+const isLevelled = computed(() => isCascade.value || isTree.value);
+/** Which snippet shape this page's control needs. */
+const addNewKind = computed<AddNewKind>(() => {
+  if (isTree.value) return 'tree';
+  if (isCascade.value) return 'cascade';
+  if (isOrder.value) return 'order';
+  return isMulti.value ? 'multi' : 'single';
+});
+/* The demo borrows the page's own sample data, so a cascade gets a tree and a
+   listbox gets groups rather than one shape forced on both. */
 const demoOptions = computed(
   () => ((entry.value.base as Record<string, unknown> | undefined)?.options ?? []) as unknown[],
 );
-
-/* One entry per chooser: only the multiselect holds an array. */
-const addNewDemo = reactive<Record<string, unknown>>(
-  { select: null, multiselect: [], listbox: null, cascadeselect: null },
+const demoNodes = computed(
+  () => ((entry.value.base as Record<string, unknown> | undefined)?.nodes ?? []) as unknown[],
 );
+/**
+ * Each control takes its list under a different prop — `options`, `nodes`, or
+ * v-model for the order list, whose model IS the list. Binding one shape to
+ * all six would render a demo that does not match the page it is on.
+ */
+const demoListProps = computed<Record<string, unknown>>(() => {
+  if (isTree.value) {
+    return { nodes: demoNodes.value, filter: true, expandAll: true, placeholder: 'Choose a zone' };
+  }
+  // No placeholder here: the order list has no empty state to label.
+  if (isOrder.value) return { filter: true };
+  return { options: demoOptions.value, filter: !isCascade.value, placeholder: 'Choose a zone' };
+});
+
+/* One entry per chooser: the multiselect holds an array, and the order list's
+   model is the collection itself. */
+const addNewDemo = reactive<Record<string, unknown>>({
+  select: null, multiselect: [], listbox: null, cascadeselect: null, treeselect: null,
+  orderlist: [{ value: 'north', label: 'North stand' }, { value: 'south', label: 'South stand' }],
+});
 const addNewSeen = ref('');
-const onDemoAddNew = (p: { query: string }) => {
-  addNewSeen.value = `add-new { query: "${p.query}" }`;
+const onDemoAddNew = (p: { query: string; path?: Array<{ label: string }> }) => {
+  addNewSeen.value = p.path && p.path.length
+    ? `add-new { query: "${p.query}", path: [${p.path.map((n) => n.label).join(' › ')}] }`
+    : `add-new { query: "${p.query}"${p.path ? ', path: [] — the root' : ''} }`;
 };
 
 /**
@@ -203,48 +237,44 @@ const onDemoAddNew = (p: { query: string }) => {
  */
 const dialog = useApexDialog();
 
-interface Node { value: string; label: string; children?: Node[] }
+/**
+ * `value` and `key` are the same string on purpose: ApexCascadeSelect reads
+ * `value`, ApexTreeSelect reads `key`, and carrying both lets one demo tree
+ * serve both pages without a mapping layer in between.
+ */
+interface Node { value: string; key: string; label: string; children?: Node[] }
+const node = (id: string, label: string, children?: Node[]): Node =>
+  ({ value: id, key: id, label, ...(children ? { children } : {}) });
 
-/* Flat for the three list controls. */
-const localities = ref<Node[]>([
-  { value: 'valletta', label: 'Valletta' },
-  { value: 'mosta', label: 'Mosta' },
-]);
-/* Nested for the cascade, which would otherwise draw a single column and
-   demonstrate nothing it does differently. */
+/* Flat for the three list controls and the order list. */
+const localities = ref<Node[]>([node('valletta', 'Valletta'), node('mosta', 'Mosta')]);
+/* Nested for the two that drill: a flat list would draw a single column, or a
+   tree with no branches, and demonstrate nothing either does differently. */
 const localityTree = ref<Node[]>([
-  { value: 'mt', label: 'Malta', children: [
-    { value: 'mt-nh', label: 'Northern Harbour', children: [
-      { value: 'mt-nh-valletta', label: 'Valletta' },
-    ] },
-  ] },
-  { value: 'go', label: 'Gozo', children: [
-    { value: 'go-c', label: 'Central', children: [
-      { value: 'go-c-victoria', label: 'Victoria' },
-    ] },
-  ] },
+  node('mt', 'Malta', [node('mt-nh', 'Northern Harbour', [node('mt-nh-valletta', 'Valletta')])]),
+  node('go', 'Gozo', [node('go-c', 'Central', [node('go-c-victoria', 'Victoria')])]),
 ]);
-const demoLocalities = computed(() => (isCascade.value ? localityTree.value : localities.value));
+const demoLocalities = computed(() => (isLevelled.value ? localityTree.value : localities.value));
 
-const locality = reactive<Record<string, unknown>>(
-  { select: null, multiselect: [], listbox: null, cascadeselect: null },
-);
+const locality = reactive<Record<string, unknown>>({
+  select: null, multiselect: [], listbox: null, cascadeselect: null, treeselect: null,
+});
 const localityLog = ref<string[]>([]);
 
-/** Find a node by value so a cascade record can be inserted under its parent. */
-function findNode(list: Node[], value: string): Node | undefined {
+/** Find a node by id so a record can be inserted under its parent. */
+function findNode(list: Node[], id: string): Node | undefined {
   for (const n of list) {
-    if (n.value === value) return n;
-    const hit = n.children && findNode(n.children, value);
+    if (n.value === id) return n;
+    const hit = n.children && findNode(n.children, id);
     if (hit) return hit;
   }
   return undefined;
 }
 
 /**
- * One handler for all four. The cascade adds `path` — the branch above the
- * column whose row was used — so the record lands at the right level rather
- * than always at the root.
+ * One handler for all six. The cascade and the tree add `path` — the branch
+ * above the column or node whose row was used — so the record lands at the
+ * right level rather than always at the root.
  */
 function createLocality({ query, path }: { query: string; path?: Node[] }) {
   const under = path && path.length ? path[path.length - 1] : null;
@@ -256,24 +286,34 @@ function createLocality({ query, path }: { query: string; path?: Node[] }) {
     props: { header: under ? `New entry under ${under.label}` : 'New locality', width: '430px', modal: true },
     contentProps: { name: query, parent: under?.label },
     onClose: ({ data }) => {
-      const rec = data as { value: string; label: string } | undefined;
-      if (!rec) { localityLog.value.unshift('dismissed — nothing added'); return; }
+      const raw = data as { value: string; label: string } | undefined;
+      if (!raw) { localityLog.value.unshift('dismissed — nothing added'); return; }
+      const rec = node(raw.value, raw.label);
 
-      if (isCascade.value) {
+      if (isLevelled.value) {
         // The page owns the tree: put it under the branch the row came from.
-        const parent = under ? findNode(localityTree.value, under.value) : null;
+        const parent = under ? findNode(localityTree.value, under.value ?? under.key) : null;
         if (parent) (parent.children ||= []).push(rec);
         else localityTree.value.push(rec);
-        locality.cascadeselect = rec.value;
+        locality[entry.value.id] = rec.value;
+      } else if (isOrder.value) {
+        // The order list's model IS the collection: append and it lands last,
+        // ready to be dragged into place.
+        orderLocalities.value = [...orderLocalities.value, rec];
       } else {
         localities.value.push(rec);
         if (isMulti.value) locality.multiselect = [...(locality.multiselect as unknown[]), rec.value];
         else locality[entry.value.id] = rec.value;
       }
-      localityLog.value.unshift(`added "${rec.label}"${under ? ` under ${under.label}` : ''} and selected it`);
+      localityLog.value.unshift(isOrder.value
+        ? `added "${rec.label}" to the end of the order`
+        : `added "${rec.label}"${under ? ` under ${under.label}` : ''} and selected it`);
     },
   });
 }
+
+/** The order list's working demo owns its own collection. */
+const orderLocalities = ref<Node[]>([node('valletta', 'Valletta'), node('mosta', 'Mosta')]);
 
 /** ApexField demos: the bare shell, and the two restyled inputs. */
 const fieldValue = ref('8080');
@@ -526,6 +566,15 @@ async function copyUsage() {
                   />
                 </div>
               </ApexField>
+
+              <!-- Two models: the collection, and the rows the move buttons
+                   act on. Without the second the buttons never enable. -->
+              <ApexOrderList
+                v-else-if="entry.demo === 'order'"
+                v-model="model[entry.id]"
+                v-model:selection="orderSelection"
+                v-bind="live"
+              />
 
               <component v-else :is="entry.name" v-model="model[entry.id]" v-bind="live" />
             </div>
@@ -1230,7 +1279,7 @@ async function copyUsage() {
 
 
         <!-- Add New — offered by all four choosers, so one section serves them all. -->
-        <template v-if="['select', 'multiselect', 'listbox', 'cascadeselect'].includes(entry.id)">
+        <template v-if="['select', 'multiselect', 'listbox', 'cascadeselect', 'treeselect', 'orderlist'].includes(entry.id)">
           <h2>Add new</h2>
           <p class="note">
             When the record the user needs is not in the list yet,
@@ -1248,18 +1297,33 @@ async function copyUsage() {
             <code>query</code> is always empty here, because the cascade has no filter.
             <code>footerAction</code> is a different thing and can be shown alongside.
           </p>
+          <p v-if="isTree" class="note">
+            This control has levels too, so it works as the cascade does: <em>every
+            open branch</em> carries its own row, drawn at its children's depth, and
+            one more sits at the foot for a record that belongs under no branch. The
+            event adds <code>path</code> — the branch above that row, root first, and
+            empty at the foot. Collapse a branch and its row goes with it.
+          </p>
+          <p v-if="isOrder" class="note">
+            Here the row is flattened into the panel rather than floating, because
+            there is no overlay to close — the list stays exactly where it is. Since
+            <code>v-model</code> is the collection itself, appending the new record
+            puts it last, ready to be dragged into place.
+          </p>
           <div class="grid grid--2">
             <div class="cell">
               <span class="cell__tag">Nothing typed</span>
               <component :is="entry.name" v-model="addNewDemo[entry.id]"
-                         :options="demoOptions" label="Zone"
-                         add-new :filter="!isCascade" placeholder="Choose a zone"
+                         v-bind="demoListProps" label="Zone" add-new
                          @add-new="onDemoAddNew" />
             </div>
             <div class="cell">
               <span class="cell__tag">Permission denied — the row is hidden</span>
-              <component :is="entry.name" :options="demoOptions" label="Zone" add-new
-                         :can-add-new="false" placeholder="Choose a zone" />
+              <!-- The order list's model IS its list, so this second copy needs
+                   one of its own or it would render an empty panel. -->
+              <component :is="entry.name" v-bind="demoListProps" label="Zone" add-new
+                         :model-value="isOrder ? addNewDemo.orderlist : undefined"
+                         :can-add-new="false" />
             </div>
           </div>
           <p v-if="addNewSeen" class="note">
@@ -1272,7 +1336,7 @@ async function copyUsage() {
             what it creates. It takes a plain function and is tied to no authorisation
             library.
           </p>
-          <div class="usage"><pre><code>{{ ADD_NEW_PERMISSION(entry.name) }}</code></pre></div>
+          <div class="usage"><pre><code>{{ ADD_NEW_PERMISSION(entry.name, addNewKind) }}</code></pre></div>
 
           <h3>Opening a form in a dialog</h3>
           <p class="note">
@@ -1285,7 +1349,17 @@ async function copyUsage() {
           <div class="grid grid--2">
             <div class="cell">
               <span class="cell__tag">Try it</span>
-              <component :is="entry.name" v-model="locality[entry.id]"
+              <!-- Three shapes, because the six controls take their list three
+                   different ways. Feeding one shape to all of them would render
+                   a demo that does not match the page it is on. -->
+              <ApexTreeSelect v-if="isTree" v-model="locality.treeselect"
+                              :nodes="demoLocalities" label="Locality"
+                              placeholder="Choose a locality" filter expand-all add-new
+                              resource="localities" @add-new="createLocality" />
+              <ApexOrderList v-else-if="isOrder" v-model="orderLocalities"
+                             label="Locality order" filter add-new
+                             resource="localities" @add-new="createLocality" />
+              <component v-else :is="entry.name" v-model="locality[entry.id]"
                          :options="demoLocalities" label="Locality"
                          placeholder="Choose a locality" filter add-new
                          resource="localities" @add-new="createLocality" />
@@ -1298,7 +1372,7 @@ async function copyUsage() {
               </ul>
             </div>
           </div>
-          <div class="usage"><pre><code>{{ ADD_NEW_MODAL(entry.name, isMulti) }}</code></pre></div>
+          <div class="usage"><pre><code>{{ ADD_NEW_MODAL(entry.name, addNewKind) }}</code></pre></div>
 
           <h3>Cascaded — a chooser inside the form it opened</h3>
           <p class="note">

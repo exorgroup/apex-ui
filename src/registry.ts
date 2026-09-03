@@ -29,7 +29,7 @@ export interface DocEntry {
    * How the live stage renders this one. Omitted means the default: the
    * component with v-model and the playground props.
    */
-  demo?: 'icon' | 'button' | 'split' | 'dial' | 'group' | 'field';
+  demo?: 'icon' | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -515,6 +515,45 @@ export const FIELD_VARS: string[][] = [
   ['--apex-cb-card-hover-border', 'var(--border-strong)', 'Card border on hover'],
   ['--apex-cb-card-on-border', 'var(--accent-primary)', 'Card border when checked'],
   ['--apex-cb-card-on-bg', 'color-mix(— 5%)', 'Card background when checked'],
+
+  ['--apex-tree-row-fg', 'var(--fg-default)', 'ApexTreeSelect — a node at rest'],
+  ['--apex-tree-row-radius', 'var(--r-sm)', 'Node corner'],
+  ['--apex-tree-row-pad', '8px', 'Node vertical padding'],
+  ['--apex-tree-row-fs', '14px', 'Node text size'],
+  ['--apex-tree-row-hover-bg', 'var(--bg-muted)', 'Node under the pointer'],
+  ['--apex-tree-row-selected-bg', 'color-mix(— 12%)', 'Selected node'],
+  ['--apex-tree-row-selected-fg', 'var(--accent-primary)', 'Selected node text'],
+  ['--apex-tree-twisty-fg', 'var(--fg-subtle)', 'The expand/collapse chevron'],
+  ['--apex-tree-twisty-size', '20px', 'Chevron box — the leaf spacer reads this too, so rows stay in line'],
+  ['--apex-tree-twisty-radius', 'var(--r-xs)', 'Chevron corner'],
+  ['--apex-tree-twisty-hover-bg', 'var(--bg-subtle)', 'Chevron under the pointer'],
+  ['--apex-tree-twisty-hover-fg', 'var(--fg-default)', 'Chevron glyph on hover'],
+  ['--apex-tree-indent', '18px', 'How far each level steps in'],
+
+  ['--apex-order-panel-bg', 'var(--bg-surface)', 'ApexOrderList — the framed panel'],
+  ['--apex-order-panel-border', 'var(--border-default)', 'Panel edge'],
+  ['--apex-order-panel-radius', 'var(--r-md)', 'Panel corner'],
+  ['--apex-order-row-fg', 'var(--fg-default)', 'A row at rest'],
+  ['--apex-order-row-radius', 'var(--r-sm)', 'Row corner'],
+  ['--apex-order-row-pad', '9px', 'Row vertical padding'],
+  ['--apex-order-row-fs', '14px', 'Row text size'],
+  ['--apex-order-row-hover-bg', 'var(--bg-muted)', 'Row under the pointer'],
+  ['--apex-order-row-selected-bg', 'color-mix(— 10%)', 'Chosen row'],
+  ['--apex-order-row-selected-border', 'color-mix(— 30%)', 'Chosen row edge'],
+  ['--apex-order-row-selected-fg', 'var(--accent-primary)', 'Chosen row text'],
+  ['--apex-order-row-dragover-bg', 'var(--bg-subtle)', 'The row being dragged over'],
+  ['--apex-order-row-dragover-border', 'var(--accent-primary)', 'Its edge — the only feedback the drag gives'],
+  ['--apex-order-btn-bg', 'var(--bg-surface)', 'A move button'],
+  ['--apex-order-btn-fg', 'var(--fg-muted)', 'Its glyph'],
+  ['--apex-order-btn-border', 'var(--border-default)', 'Its edge'],
+  ['--apex-order-btn-radius', 'var(--r-sm)', 'Its corner'],
+  ['--apex-order-btn-size', '34px', 'Its box, both axes'],
+  ['--apex-order-btn-hover-bg', 'var(--bg-subtle)', 'Move button under the pointer'],
+  ['--apex-order-btn-hover-fg', 'var(--accent-primary)', 'Its glyph on hover'],
+  ['--apex-order-btn-hover-border', 'var(--accent-primary)', 'Its edge on hover'],
+  ['--apex-order-grip-fg', 'var(--fg-subtle)', 'The drag handle'],
+  ['--apex-order-num-fg', 'var(--fg-subtle)', 'The position number'],
+  ['--apex-order-num-fs', '11px', 'Its size'],
 ];
 
 /** [group, prop, variable it sets] */
@@ -659,7 +698,14 @@ export const BUTTON_FAMILY = ['button', 'splitbutton', 'speeddial', 'buttongroup
  * One block, shown on ApexSelect and ApexMultiselect alike, because the API
  * and the flows are identical on both.
  */
-export const ADD_NEW_PERMISSION = (Ctl: string) => `// main.ts — register the resolver once and every chooser is gated.
+export const ADD_NEW_PERMISSION = (Ctl: string, kind: AddNewKind = 'single') => {
+  /* Same reason as the modal snippet: printing `:options` on the two that do
+     not take it would show code that cannot run on the page it is shown on. */
+  const list = kind === 'tree' ? ':nodes="localities"'
+    : kind === 'order' ? '' : ':options="localities"';
+  const model = kind === 'order' ? 'localities' : 'locality';
+  const bind = `v-model="${model}"${list ? ` ${list}` : ''}`;
+  return `// main.ts — register the resolver once and every chooser is gated.
 // It is tied to no authorisation library: return a boolean however you like.
 app.use(ApexUI, {
   canCreate: (resource) => permissions.value[resource]?.includes('create') ?? false,
@@ -675,41 +721,108 @@ const allowed = ['localities', 'venues'];
 app.use(ApexUI, { canCreate: (r) => allowed.includes(r) });
 
 <!-- Then a control only names what it creates. -->
-<${Ctl} v-model="locality" :options="localities" add-new resource="localities" />
+<${Ctl} ${bind} add-new resource="localities" />
 
 <!-- canAddNew overrides the resolver, in either direction. Useful for a
      screen-specific rule the resolver cannot know about. -->
-<${Ctl} v-model="locality" :options="localities" add-new :can-add-new="form.editable" />
+<${Ctl} ${bind} add-new :can-add-new="form.editable" />
 
 /* Denied means the row is hidden, not disabled: a greyed-out "Add new"
    still advertises a feature the user cannot have. And this is UX only —
    the endpoint that creates the record must authorise the request itself. */`;
+};
 
-export const ADD_NEW_MODAL = (Ctl: string, multi: boolean) => `<!-- The control emits and steps back. It never mutates the list or the
+/**
+ * The six choosers take their list three different ways, so the snippet is
+ * built per shape rather than printing `:options` for all of them:
+ *   single / multi — `options`, and a scalar or array value
+ *   tree           — `nodes`, and the event carries the branch
+ *   order          — no list prop at all: v-model IS the collection
+ */
+export type AddNewKind = 'single' | 'multi' | 'cascade' | 'tree' | 'order';
+
+/** The branch key differs: the cascade reads `value`, the tree reads `key`. */
+const ID = { cascade: 'value', tree: 'key' } as const;
+
+const FLAT = (C: string) => `<${C} v-model="locality" :options="localities" add-new resource="localities"
+  filter @add-new="createLocality" />`;
+
+const MODAL_TAG: Record<AddNewKind, (Ctl: string) => string> = {
+  single: FLAT,
+  multi: FLAT,
+  // No filter: the cascade has none, so `query` always arrives empty.
+  cascade: (C) => `<${C} v-model="locality" :options="localities" add-new
+  resource="localities" @add-new="createLocality" />`,
+  tree: (C) => `<${C} v-model="locality" :nodes="localities" add-new resource="localities"
+  filter @add-new="createLocality" />`,
+  order: (C) => `<!-- No list prop: v-model is the collection, in its current order. -->
+<${C} v-model="localities" add-new resource="localities"
+  filter @add-new="createLocality" />`,
+};
+
+const LEVELLED_SIG = (where: string) => `/* \`path\` is the branch the row sat under, root first — empty ${where}.
+   One handler therefore serves every level. */
+function createLocality({ query, path }) {
+  const parent = path.length ? path[path.length - 1] : null;`;
+
+const MODAL_SIG: Record<AddNewKind, string> = {
+  single: 'function createLocality({ query }) {',
+  multi: 'function createLocality({ query }) {',
+  cascade: LEVELLED_SIG('at the first column'),
+  tree: LEVELLED_SIG('at the foot'),
+  order: 'function createLocality({ query }) {',
+};
+
+const LEVELLED_CLOSE = (id: string) => `      // The app owns the tree: insert under the branch, or at the root.
+      const at = parent ? findNode(localities.value, parent.${id}) : null;
+      if (at) (at.children ||= []).push(data);
+      else localities.value.push(data);
+      locality.value = data.${id};`;
+
+const MODAL_CLOSE: Record<AddNewKind, string> = {
+  single: `      localities.value.push(data);     // the app owns the list…
+      locality.value = data.value;     // …and the value`,
+  multi: `      localities.value.push(data);     // the app owns the list…
+      locality.value = [...locality.value, data.value];  // …and the value`,
+  cascade: LEVELLED_CLOSE(ID.cascade),
+  tree: LEVELLED_CLOSE(ID.tree),
+  order: `      // The collection IS the model, so appending puts the record last,
+      // ready for the user to drag into place.
+      localities.value = [...localities.value, data];`,
+};
+
+const PLAIN_HEADER = "{ header: 'New locality', width: '420px', modal: true }";
+const LEVELLED_HEADER = "{ header: parent ? `New entry under ${parent.label}` : 'New locality', width: '420px', modal: true }";
+
+const MODAL_HEADER: Record<AddNewKind, string> = {
+  single: PLAIN_HEADER,
+  multi: PLAIN_HEADER,
+  cascade: LEVELLED_HEADER,
+  tree: LEVELLED_HEADER,
+  order: PLAIN_HEADER,
+};
+
+export const ADD_NEW_MODAL = (Ctl: string, kind: AddNewKind) => `<!-- The control emits and steps back. It never mutates the list or the
      value, so the same handler covers a dialog, a route or an inline form. -->
-<${Ctl} v-model="locality" :options="localities" add-new resource="localities"
-  filter @add-new="createLocality" />
+${MODAL_TAG[kind](Ctl)}
 
 <script setup>
 import { useApexDialog } from '@exorgroup/apex-ui';
 import LocalityForm from './LocalityForm.vue';
 
 const localities = ref([...]);
-const locality = ref(null);
+const locality = ref(${kind === 'multi' ? '[]' : 'null'});
 const dialog = useApexDialog();
 
 /* \`query\` is whatever was typed in the filter, so the form opens with the
    name already filled in — the user typed it once and should not retype it. */
-function createLocality({ query }) {
+${MODAL_SIG[kind]}
   dialog.open(LocalityForm, {
-    props: { header: 'New locality', width: '420px', modal: true },
+    props: ${MODAL_HEADER[kind]},
     contentProps: { name: query },
     onClose: ({ data }) => {
       if (!data) return;               // dismissed
-      localities.value.push(data);     // the app owns the list…
-      ${multi
-        ? 'locality.value = [...locality.value, data.value];  // …and the value'
-        : 'locality.value = data.value;     // …and the value'}
+${MODAL_CLOSE[kind]}
     },
   });
 }
@@ -734,17 +847,21 @@ async function save() {
    which is the reason to prefer the dialog. */
 function createLocality() { router.visit('/localities/create'); }`;
 
-export const ADD_NEW_CASCADED = (Ctl: string) => `<!-- Cascaded: the form opened from a select contains a select, and that one
-     offers Add New too. Nothing extra is needed — useApexDialog holds a
-     stack, so each dialog sits above the one that opened it and closes
-     independently. -->
+export const ADD_NEW_CASCADED = (Ctl: string) => `<!-- Cascaded: the form opened from the ${Ctl} above contains a chooser of
+     its own, and that one offers Add New too. Nothing extra is needed —
+     useApexDialog holds a stack, so each dialog sits above the one that
+     opened it and closes independently.
 
-<!-- LocalityForm.vue, opened from the locality picker above -->
+     The inner control here is an ApexSelect whatever the outer one is: a
+     country is one value off a short list, which is what a select is for.
+     Any of the six would stack the same way. -->
+
+<!-- LocalityForm.vue, opened from the picker above -->
 <template>
   <ApexInput v-model="form.label" label="Locality" />
 
   <!-- …and this one can create a country without leaving the form. -->
-  <${Ctl} v-model="form.country" :options="countries" label="Country"
+  <ApexSelect v-model="form.country" :options="countries" label="Country"
     add-new resource="countries" filter @add-new="createCountry" />
 </template>
 
@@ -790,6 +907,26 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['footer', '.apex-cascade__footer', '--apex-cascade-footer-fg, --apex-cascade-footer-border, --apex-cascade-footer-radius, --apex-cascade-footer-hover-bg'],
     ['addNew', '.apex-pop__add', '--apex-pop-add-bg, --apex-pop-add-border, --apex-pop-add-fg, --apex-pop-add-hover-bg, --apex-pop-add-icon — one per open column'],
     ['option / tick / empty', '.apex-pop__opt, .apex-pop__tick, .apex-pop__empty', 'shared — all on ApexField. The tick doubles as the branch arrow'],
+  ],
+  treeselect: [
+    ['branch', '.apex-tree__branch', 'a node and everything under it — layout only'],
+    ['option', '.apex-tree__row', '--apex-tree-row-fg, --apex-tree-row-radius, --apex-tree-row-pad, --apex-tree-row-fs, --apex-tree-row-hover-bg, --apex-tree-row-selected-bg, --apex-tree-row-selected-fg'],
+    ['twisty', '.apex-tree__twisty', '--apex-tree-twisty-fg, --apex-tree-twisty-size, --apex-tree-twisty-radius, --apex-tree-twisty-hover-bg, --apex-tree-twisty-hover-fg'],
+    ['— (indent)', '.apex-tree__row padding', '--apex-tree-indent — how far each level steps in. The leaf spacer reads the same --apex-tree-twisty-size, so rows stay in line'],
+    ['addNew', '.apex-pop__add', '--apex-pop-add-bg, --apex-pop-add-border, --apex-pop-add-fg, --apex-pop-add-hover-bg, --apex-pop-add-icon — one per open branch, plus one for the root'],
+    ['popover / filter / checkbox / tick / empty', '.apex-pop, .apex-pop__filter, .apex-cb__box, .apex-pop__tick, .apex-pop__empty', 'shared — all on ApexField'],
+    ['chip', '.apex-chip', 'the chips in the box under multiple/checkbox; --apex-chip-* as on Multiselect'],
+  ],
+  orderlist: [
+    ['panel', '.apex-order__panel', '--apex-order-panel-bg, --apex-order-panel-border, --apex-order-panel-radius'],
+    ['controls', '.apex-order__controls', 'the column of move buttons — layout only; `controls` and `controlsAlign` place it'],
+    ['moveButton', '.apex-order__btn', '--apex-order-btn-bg, --apex-order-btn-fg, --apex-order-btn-border, --apex-order-btn-radius, --apex-order-btn-size, --apex-order-btn-hover-bg, --apex-order-btn-hover-fg, --apex-order-btn-hover-border'],
+    ['list', '.apex-order__list', 'the scrolling list; scrollHeight caps its height'],
+    ['option', '.apex-order__row', '--apex-order-row-fg, --apex-order-row-radius, --apex-order-row-pad, --apex-order-row-fs, --apex-order-row-hover-bg, --apex-order-row-selected-bg, --apex-order-row-selected-border, --apex-order-row-selected-fg, --apex-order-row-dragover-bg, --apex-order-row-dragover-border'],
+    ['grip', '.apex-order__grip', '--apex-order-grip-fg — the drag handle, hidden while a filter is live'],
+    ['index', '.apex-order__num', '--apex-order-num-fg, --apex-order-num-fs — the position in the whole collection, not in the filtered view'],
+    ['addNew', '.apex-pop__add', 'flattened into the panel, so it takes the panel border rather than the overlay one'],
+    ['filter / checkbox / empty', '.apex-pop__filter, .apex-cb__box, .apex-pop__empty', 'shared — all on ApexField'],
   ],
   select: [
     ['placeholder', '.apex-ctl__ph', '--apex-ctl-placeholder, i.e. the placeholderColor prop'],
@@ -910,6 +1047,72 @@ export const OWN_PARTS: Record<string, string[][]> = {
 };
 
 export const SNIP_OWN: Record<string, string> = {
+  treeselect: `<!-- The overlay is a plain .apex-pop, so the shared variables dress it.
+     Only the rows, the chevron and the indent are this control's own. -->
+.locality-tree {
+  --apex-tree-row-fg: #E8EEF7;
+  --apex-tree-row-hover-bg: #1D2735;
+  --apex-tree-row-selected-bg: #16202C;
+  --apex-tree-row-selected-fg: #7AA2F7;
+  --apex-tree-twisty-fg: #6B7789;
+  --apex-tree-twisty-hover-bg: #1D2735;
+  /* One step per level. The leaf spacer reads the twisty size, so a leaf
+     still lines up with its siblings when you change either. */
+  --apex-tree-indent: 22px;
+  /* Shared, but this is where you would set them. */
+  --apex-pop-bg: #101820;
+  --apex-pop-border: #243040;
+}
+
+<ApexTreeSelect v-model="where" :nodes="tree" label="Locality"
+  :ui="{ popover: 'locality-tree', option: 'loc-row', twisty: 'loc-twisty' }" />
+
+/* The same three props do it without a stylesheet. */
+<ApexTreeSelect v-model="where" :nodes="tree"
+  node-selected-background="#16202C" node-selected-color="#7AA2F7" indent="22px" />
+
+/* Add new works as it does on the cascade, because a tree has levels too:
+   every OPEN branch gets its own row at its children's depth, and one more
+   sits at the foot for a record that belongs under no branch. The event
+   carries that branch, so one handler serves every level. */
+<ApexTreeSelect v-model="where" :nodes="tree" filter
+  add-new resource="localities" @add-new="createLocality" />
+
+function createLocality({ query, path }) {
+  // path is [] at the foot, [Malta] under Malta,
+  // [Malta, Northern Harbour] under that branch.
+  const parent = path.length ? path[path.length - 1].key : null;
+  dialog.open(LocalityForm, { contentProps: { name: query, parent } /* … */ });
+}`,
+
+  orderlist: `<!-- The panel, the move buttons and the rows are this control's own.
+     The filter row and the tick boxes are shared. -->
+.running-order {
+  --apex-order-panel-bg: #101820;
+  --apex-order-panel-border: #243040;
+  --apex-order-panel-radius: 12px;
+  --apex-order-row-fg: #E8EEF7;
+  --apex-order-row-hover-bg: #1D2735;
+  --apex-order-row-selected-bg: #16202C;
+  --apex-order-row-selected-fg: #7AA2F7;
+  /* The row you are dragging over. Worth making obvious — it is the only
+     feedback the drag gives. */
+  --apex-order-row-dragover-border: #7AA2F7;
+  --apex-order-grip-fg: #6B7789;
+  --apex-order-num-fg: #6B7789;
+  --apex-order-btn-size: 38px;
+  --apex-order-btn-hover-fg: #7AA2F7;
+}
+
+<ApexOrderList v-model="acts" v-model:selection="picked" label="Running order"
+  :ui="{ control: 'running-order', panel: 'ro-panel', moveButton: 'ro-btn',
+         option: 'ro-row', grip: 'ro-grip', index: 'ro-num' }" />
+
+/* Add new sits at the foot, flattened into the panel. The control never
+   touches the collection itself — push the new record onto v-model and it
+   appears at the end, ready to be dragged into place. */
+<ApexOrderList v-model="acts" filter add-new resource="acts" @add-new="createAct" />`,
+
   listbox: `<!-- The box, its list and its rows are this control's own. The filter,
      select-all row, tick boxes and empty state are shared, so their
      variables live on ApexField. -->
@@ -1665,6 +1868,109 @@ export const ENTRIES: DocEntry[] = [
       ['footerAction', '{ label, icon? }', '—', 'A button under the first column; emits @action rather than selecting'],
     ],
     events: [['update:modelValue', 'value'], ['change', '—'], ['action', 'the footer button was pressed']],
+  },
+  {
+    id: 'treeselect', name: 'ApexTreeSelect', group: 'Choosers',
+    blurb: 'A popover tree for hierarchical data. One node, or many with checkbox propagation and a partial state on a half-ticked branch. Filtering keeps the branch a match sits under, so a result is never left floating without its context.',
+    model: 'sliema',
+    base: {
+      label: 'Locality', placeholder: 'Choose a locality', filter: true,
+      showPath: true, clearable: true,
+      nodes: [
+        { key: 'mt', label: 'Malta', icon: 'public', children: [
+          { key: 'mt-nh', label: 'Northern Harbour', children: [
+            { key: 'sliema', label: 'Sliema', help: 'Coastal' },
+            { key: 'msida', label: 'Msida' },
+          ] },
+          { key: 'mt-se', label: 'South Eastern', children: [
+            { key: 'zejtun', label: 'Żejtun' },
+            { key: 'marsascala', label: 'Marsascala' },
+          ] },
+        ] },
+        { key: 'go', label: 'Gozo', icon: 'public', children: [
+          { key: 'go-c', label: 'Central', children: [
+            { key: 'victoria', label: 'Victoria' },
+            { key: 'xewkija', label: 'Xewkija' },
+          ] },
+        ] },
+      ],
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'placeholder', type: 'text' },
+      { key: 'multiple', type: 'bool' }, { key: 'checkbox', type: 'bool' },
+      { key: 'leafOnly', type: 'bool' }, { key: 'filter', type: 'bool' },
+      { key: 'expandAll', type: 'bool' }, { key: 'showPath', type: 'bool' },
+      { key: 'pathSeparator', type: 'text' }, { key: 'maxChips', type: 'number' },
+      { key: 'scrollHeight', type: 'number' }, { key: 'clearable', type: 'bool' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'string | string[]', '—', 'A node key; an array once multiple or checkbox is on'],
+      ['nodes', 'TreeNode[]', '[]', '{ key, label, icon?, image?, help?, disabled?, children? }'],
+      ['multiple', 'boolean', 'false', 'Choose more than one node'],
+      ['checkbox', 'boolean', 'false', 'A box per node. Implies multiple, and ticking a branch ticks its descendants'],
+      ['leafOnly', 'boolean', 'false', 'Only leaves are selectable; clicking a branch expands it instead'],
+      ['filter', 'boolean', 'false', 'Search box in the overlay. A match brings its ancestors with it'],
+      ['expandAll', 'boolean', 'false', 'Start with every branch open'],
+      ['showPath', 'boolean', 'false', 'Show the whole branch in the field rather than just the node'],
+      ['pathSeparator', 'string', "'›'", 'What joins the parts of that path'],
+      ['maxChips', 'number', '—', 'Cap the chips shown; the rest collapse into a "+N" pill'],
+      ['scrollHeight', 'number', '280', 'Max overlay height in pixels'],
+      ['addNew', 'boolean', 'false', 'A row under each open branch, and one at the foot for the root'],
+      ['resource / canAddNew', 'string / boolean', '—', 'Permission for that row — see Add new'],
+    ],
+    events: [
+      ['update:modelValue', 'key | key[]'], ['change', '—'],
+      ['node-expand / node-collapse', 'the TreeNode'],
+      ['add-new', '{ query, path } — path is the branch, root first, or [] at the foot'],
+    ],
+  },
+  {
+    id: 'orderlist', name: 'ApexOrderList', group: 'Choosers',
+    blurb: 'Put a collection into an order. Drag a row, or use the move controls; alt+arrow moves the focused row without a selection. v-model is the collection itself, so the order you see is the order you hold.',
+    /* v-model IS the collection here, so the stage seeds it from `model` like
+       any other control. The chosen rows are a second model, which the stage
+       binds through demo: 'order' — the move buttons act on that, and without
+       it they would sit permanently disabled. */
+    demo: 'order',
+    model: [
+      { value: 'doors', label: 'Doors open', help: '19:00' },
+      { value: 'support', label: 'Support act', help: '19:45' },
+      { value: 'interval', label: 'Interval', help: '20:30' },
+      { value: 'headline', label: 'Headline set', help: '21:00' },
+      { value: 'encore', label: 'Encore', help: '22:15' },
+    ],
+    base: { label: 'Running order', filter: true, checkbox: true, scrollHeight: 240 },
+    controls: [
+      { key: 'label', type: 'text' },
+      { key: 'controls', type: 'select', options: ['start', 'end', 'top', 'none'] },
+      { key: 'controlsAlign', type: 'select', options: ['start', 'center', 'end'] },
+      { key: 'extremes', type: 'bool' }, { key: 'checkbox', type: 'bool' },
+      { key: 'multiple', type: 'bool' }, { key: 'filter', type: 'bool' },
+      { key: 'noDrag', type: 'bool' }, { key: 'scrollHeight', type: 'number' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'ApexOption[] | string[]', '[]', 'v-model — the collection, in its current order'],
+      ['selection', 'unknown[]', '[]', 'v-model:selection — the chosen values, which the move buttons act on'],
+      ['checkbox', 'boolean', 'false', 'A box per row. Implies multiple, and clicks accumulate rather than replace'],
+      ['multiple', 'boolean', 'false', 'Allow several rows; without checkbox, hold ctrl/cmd/shift'],
+      ['filter', 'boolean', 'false', 'Search above the list. Dragging and the move buttons are suspended while a query is live, since the visible order is only part of the whole'],
+      ['controls', "'start' | 'end' | 'top' | 'none'", "'start'", 'Where the move buttons sit'],
+      ['controlsAlign', "'start' | 'center' | 'end'", "'start'", 'How they align along the list'],
+      ['extremes', 'boolean', 'true', 'Include jump-to-top and jump-to-bottom'],
+      ['noDrag', 'boolean', 'false', 'Buttons and keyboard only'],
+      ['scrollHeight', 'number', '280', 'Max list height in pixels'],
+      ['addNew', 'boolean', 'false', 'A row at the foot of the list'],
+      ['resource / canAddNew', 'string / boolean', '—', 'Permission for that row — see Add new'],
+    ],
+    events: [
+      ['update:modelValue', 'the reordered collection'],
+      ['update:selection', 'value[]'],
+      ['reorder', '{ from, to }'], ['change', '—'],
+      ['add-new', '{ query }'],
+    ],
+    slots: [['item', 'Custom row content; receives { item, index }']],
   },
   {
     id: 'datepicker', name: 'ApexDatePicker', group: 'Dates',
