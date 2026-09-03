@@ -241,7 +241,8 @@ describe('ApexMultiselect — the props the gallery exposes', () => {
 
   it('clearable empties the selection', async () => {
     const w = ms({ modelValue: ['a', 'b'], clearable: true });
-    const clear = w.findAll('.apex-ctl__btn').at(-1)!;
+    const btns = w.findAll('.apex-ctl__btn');
+    const clear = btns[btns.length - 1];
     await clear.trigger('click');
     expect((w.emitted('update:modelValue') as unknown[][])[0][0]).toEqual([]);
   });
