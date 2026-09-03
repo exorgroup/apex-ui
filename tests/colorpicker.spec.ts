@@ -89,3 +89,96 @@ describe('ApexColorPicker — appearance props', () => {
     expect(w.find('.apex-picker__area').attributes('style')).toContain('--hue');
   });
 });
+
+describe('ApexColorPicker — the props the gallery exposes', () => {
+  const pick = (props: Record<string, unknown> = {}) =>
+    mount(ApexColorPicker, {
+      props: { label: 'Brand colour', modelValue: '#0B5FFF', inline: true, ...props },
+    });
+
+  it('format decides how the value is serialised', async () => {
+    for (const [format, re] of [
+      ['hex', /^#[0-9a-f]{6}/i], ['rgb', /^rgb/], ['hsl', /^hsl/], ['hsb', /^hsb/],
+    ] as const) {
+      const w = pick({ format, showInput: true });
+      const shown = (w.find('.apex-picker__value input').element as HTMLInputElement).value;
+      expect(shown, format).toMatch(re);
+    }
+  });
+
+  it('the format switcher changes the emitted string', async () => {
+    const w = pick({ showFormatToggle: true });
+    const rgb = w.findAll('.apex-picker__formats button')[1];
+    await rgb.trigger('click');
+    const v = (w.emitted('update:modelValue') as string[][])[0][0];
+    expect(v).toMatch(/^rgb/);
+  });
+
+  it('showAlpha adds the opacity track and an alpha channel', () => {
+    expect(pick({ showAlpha: true }).findAll('.apex-picker__slider').length).toBe(2);
+    expect(pick({ showAlpha: false }).findAll('.apex-picker__slider').length).toBe(1);
+    const withA = pick({ showAlpha: true, showChannels: true });
+    expect(withA.findAll('.apex-picker__channels label').length).toBe(4);
+  });
+
+  it('orientation is reported to CSS', () => {
+    expect(pick({ orientation: 'vertical' }).find('.apex-picker').attributes('data-orientation'))
+      .toBe('vertical');
+  });
+
+  it('presets render, mark the active one, and commit on click', async () => {
+    const w = pick({ presets: ['#0B5FFF', '#E11D48'] });
+    const swatches = w.findAll('.apex-picker__presets .apex-swatch');
+    expect(swatches.length).toBe(2);
+    // The one matching the model is flagged.
+    expect(swatches[0].attributes('data-on')).toBe('true');
+    expect(swatches[1].attributes('data-on')).toBe('false');
+    await swatches[1].trigger('click');
+    expect((w.emitted('update:modelValue') as string[][])[0][0].toLowerCase()).toBe('#e11d48');
+  });
+
+  it('showInput, showChannels and showFormatToggle each gate their part', () => {
+    const off = pick({ showInput: false, showChannels: false, showFormatToggle: false });
+    expect(off.find('.apex-picker__value').exists()).toBe(false);
+    expect(off.find('.apex-picker__channels').exists()).toBe(false);
+    expect(off.find('.apex-picker__formats').exists()).toBe(false);
+    const on = pick({ showInput: true, showChannels: true, showFormatToggle: true });
+    expect(on.find('.apex-picker__value').exists()).toBe(true);
+    expect(on.find('.apex-picker__channels').exists()).toBe(true);
+    expect(on.find('.apex-picker__formats').exists()).toBe(true);
+  });
+
+  it('inline embeds the picker; otherwise it is a popover behind the swatch', async () => {
+    expect(pick().find('.apex-ctl').exists()).toBe(false);
+    const popover = mount(ApexColorPicker, { props: { label: 'Brand colour', modelValue: '#0B5FFF' } });
+    expect(popover.find('.apex-picker').exists()).toBe(false);
+    await popover.find('.apex-ctl .apex-swatch').trigger('click');
+    expect(popover.find('.apex-picker').exists()).toBe(true);
+  });
+
+  it('typing a colour into the box commits it', async () => {
+    const w = mount(ApexColorPicker, { props: { label: 'Brand colour', modelValue: '#0B5FFF' } });
+    const input = w.find('.apex-ctl__input');
+    await input.setValue('#E11D48');
+    expect((w.emitted('update:modelValue') as string[][])[0][0].toLowerCase()).toBe('#e11d48');
+  });
+
+  it('the hue track and the arrow keys both move the colour', async () => {
+    const w = pick({});
+    await w.find('.apex-picker__slider--hue input').setValue('200');
+    expect(w.emitted('update:modelValue')).toBeTruthy();
+
+    const keyed = pick({});
+    await keyed.find('.apex-picker__area').trigger('keydown', { key: 'ArrowRight' });
+    expect(keyed.emitted('update:modelValue')).toBeTruthy();
+  });
+
+  it('disabled blocks the trigger', async () => {
+    const w = mount(ApexColorPicker, {
+      props: { label: 'Brand colour', modelValue: '#0B5FFF', disabled: true },
+    });
+    expect(w.find('.apex-ctl .apex-swatch').attributes('disabled')).toBeDefined();
+    await w.find('.apex-ctl .apex-swatch').trigger('click');
+    expect(w.find('.apex-picker').exists()).toBe(false);
+  });
+});
