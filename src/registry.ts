@@ -656,6 +656,27 @@ export const BUTTON_FAMILY = ['button', 'splitbutton', 'speeddial', 'buttongroup
 
 /** Per-control customisation: [ui key, part, variables it responds to]. */
 export const OWN_PARTS: Record<string, string[][]> = {
+  select: [
+    ['placeholder', '.apex-ctl__ph', '--apex-ctl-placeholder, i.e. the placeholderColor prop'],
+    ['value', '.apex-ctl__value', '--apex-ctl-fg, i.e. the textColor prop'],
+    ['chevron', '.apex-ctl__chev', 'the open/close arrow; --apex-ctl-icon like any other'],
+    ['thumbnail', '.apex-ctl__img and .apex-pop__img', "an option's image, in the box and in the row alike"],
+    ['optionHelp', '.apex-pop__help', '--apex-pop-help-fg'],
+    ['empty', '.apex-pop__empty', '--apex-pop-empty-fg'],
+    ['tick', '.apex-pop__tick', 'the check beside the chosen row'],
+    ['popover / option / filter', '.apex-pop, .apex-pop__opt, .apex-pop__filter', 'the shared overlay — all 26 --apex-pop-* and --apex-opt-* variables are on ApexField'],
+    ['—' , '.apex-ctl--select option', '--apex-ctl-select-opt-bg, --apex-ctl-select-opt-fg, --apex-ctl-select-opt-disabled-fg, --apex-ctl-select-opt-selected-bg (native only; the OS draws this menu, so these are all it will honour)'],
+  ],
+  multiselect: [
+    ['chip', '.apex-chip', '--apex-chip-bg, --apex-chip-fg, --apex-chip-border, --apex-chip-radius, --apex-chip-remove, --apex-chip-remove-hover'],
+    ['chip (overflow)', '.apex-chip--more', '--apex-chip-more-bg, --apex-chip-more-fg — the "+N" pill, which takes the chip key too'],
+    ['thumbnail', '.apex-chip__img and .apex-pop__img', "an option's image, on the chip and in the row"],
+    ['placeholder', '.apex-ctl__ph', '--apex-ctl-placeholder'],
+    ['chevron', '.apex-ctl__chev', 'the open/close arrow'],
+    ['optionHelp', '.apex-pop__help', '--apex-pop-help-fg'],
+    ['empty', '.apex-pop__empty', '--apex-pop-empty-fg'],
+    ['selectAll / checkbox', '.apex-pop__all, .apex-pop__box', 'the shared overlay — --apex-pop-all-* and --apex-pop-box-* are on ApexField'],
+  ],
   colorpicker: [
     ['picker', '.apex-picker', '--apex-picker-bg, --apex-picker-border, --apex-picker-radius, --apex-picker-shadow'],
     ['area', '.apex-picker__area', '--apex-picker-area-h, --apex-picker-area-w, --apex-picker-area-radius — its gradient is the colour maths and is not themeable'],
@@ -754,6 +775,51 @@ export const OWN_PARTS: Record<string, string[][]> = {
 };
 
 export const SNIP_OWN: Record<string, string> = {
+  select: `<!-- Almost everything here is shared. The box, the overlay, the rows
+     and the filter are the same parts every chooser draws, so their
+     variables live on ApexField and the props work here unchanged. -->
+<ApexSelect v-model="zone" label="Zone layout" :options="options"
+  placeholder-color="#5A6B7D" text-color="#E8EEF7" />
+
+/* Those two were inert on this control until recently: the placeholder and
+   value spans read the raw tokens instead of --apex-ctl-placeholder and
+   --apex-ctl-fg, so the props were accepted and ignored. */
+
+/* What ApexSelect adds is the native branch. Pass native and the browser
+   draws the menu, so only these four reach it — everything else about that
+   list belongs to the operating system. */
+.zone-select {
+  --apex-ctl-select-opt-bg: #101820;
+  --apex-ctl-select-opt-fg: #E8EEF7;
+  --apex-ctl-select-opt-disabled-fg: #5A6B7D;
+  --apex-ctl-select-opt-selected-bg: #1D2735;
+}
+
+<!-- ui reaches every part it renders. -->
+<ApexSelect v-model="zone" label="Zone layout" :options="options"
+  :ui="{ control: 'zone-ctl', popover: 'zone-pop', option: 'zone-opt',
+         placeholder: 'zone-ph', chevron: 'zone-chev', empty: 'zone-empty' }" />`,
+
+  multiselect: `<!-- The chips are what this control adds; the trigger, overlay,
+     select-all row and tick boxes are shared and documented on ApexField. -->
+<ApexMultiselect v-model="roles" label="Roles" :options="options" :max-chips="3" />
+
+.role-picker {
+  --apex-chip-bg: #16202C;
+  --apex-chip-fg: #E8EEF7;
+  --apex-chip-border: #243040;
+  --apex-chip-remove: #6B7789;
+  --apex-chip-remove-hover: #E11D48;
+  /* The "+N" pill shown once maxChips is passed. */
+  --apex-chip-more-bg: #1D2735;
+  --apex-chip-more-fg: #8B98AD;
+}
+
+<!-- One chip key covers both the ordinary chips and the overflow pill, so
+     reach the pill on its own through .apex-chip--more when you need to. -->
+<ApexMultiselect v-model="roles" label="Roles" :options="options"
+  :ui="{ control: 'role-picker', chip: 'role-chip', selectAll: 'role-all',
+         checkbox: 'role-box', thumbnail: 'role-thumb' }" />`,
   colorpicker: `<!-- Twelve props cover the popover, the square, the tracks and the
      swatches. They are sugar over --apex-picker-* and --apex-swatch-*. -->
 <ApexColorPicker v-model="brand" label="Brand colour" show-format-toggle
@@ -1269,6 +1335,59 @@ export const ENTRIES: DocEntry[] = [
       ['color / trackColor / handleColor', 'string', 'tokens', 'Any CSS colour'],
     ],
     events: [['update:modelValue', 'number | number[]'], ['change', 'fired during the drag'], ['slideend', 'fired once the drag completes']],
+  },
+  {
+    id: 'select', name: 'ApexSelect', group: 'Choosers',
+    blurb: 'Popover listbox matched to the field. Pass native for a real <select> when a mobile picker or a plain form post matters more than the styling.',
+    model: 'split',
+    base: {
+      label: 'Zone layout', options: ZONE_OPTIONS, placeholder: 'Choose a layout',
+      leadingIcon: 'dashboard', clearable: true, filter: true,
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'placeholder', type: 'text' },
+      { key: 'leadingIcon', type: 'text' }, { key: 'clearable', type: 'bool' },
+      { key: 'native', type: 'bool' }, { key: 'filter', type: 'bool' },
+      { key: 'filterPlaceholder', type: 'text' },
+      { key: 'loading', type: 'bool' }, { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'string | number | null', '—', 'v-model'],
+      ['options', 'Array<{value,label,help?,icon?,image?,disabled?}> | string[]', '[]', 'image is a thumbnail URL — flags, avatars, product shots'],
+      ['clearable', 'boolean', 'false', 'Reset to null'],
+      ['leadingIcon', 'string', '—', 'Icon before the value'],
+      ['native', 'boolean', 'false', "Use the browser's <select>; the OS draws that menu and it cannot be styled"],
+      ['filter', 'boolean', 'false', 'Search box at the top of the popover'],
+      ['filterPlaceholder', 'string', "'Search'", 'Placeholder for that box'],
+      ['filterThreshold', 'number', '—', 'Show the filter automatically past this many options'],
+    ],
+    events: [['update:modelValue', 'value'], ['change', '—']],
+  },
+  {
+    id: 'multiselect', name: 'ApexMultiselect', group: 'Choosers',
+    blurb: 'ApexSelect with multiple selection — same trigger, same popover, same filter and icon support. Chips in the field, ticks in the list. Down and Up move, Enter toggles, Backspace removes the last chip, Esc closes.',
+    model: ['admin', 'scheduler'],
+    base: {
+      label: 'Roles', options: ROLE_OPTIONS, placeholder: 'Assign roles', filter: true,
+      toggleAll: true, clearable: true, help: 'Roles stack — the widest permission wins.',
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'placeholder', type: 'text' },
+      { key: 'filter', type: 'bool' }, { key: 'toggleAll', type: 'bool' },
+      { key: 'clearable', type: 'bool' }, { key: 'max', type: 'number' }, { key: 'maxChips', type: 'number' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'unknown[]', '[]', 'v-model'],
+      ['options', 'ApexOption[] | string[]', '[]', 'Same shape as ApexSelect — icon, image, help'],
+      ['filter', 'boolean', 'false', 'Search box at the top of the popover'],
+      ['filterThreshold', 'number', '—', 'Show the filter automatically past this many options'],
+      ['toggleAll', 'boolean', 'false', 'Select all / clear all row with a running count'],
+      ['max', 'number', '—', 'Cap the number of selections'],
+      ['maxChips', 'number', '—', 'Collapse to "+N" past this many chips'],
+      ['clearable', 'boolean', 'false', 'Clear every selection'],
+    ],
+    events: [['update:modelValue', 'unknown[]'], ['change', '—']],
   },
   {
     id: 'datepicker', name: 'ApexDatePicker', group: 'Dates',
