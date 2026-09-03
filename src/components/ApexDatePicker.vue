@@ -55,6 +55,31 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   readonlyInput?: boolean;
   /** Show the week's ISO number down the side. */
   showWeek?: boolean;
+
+  /* The calendar's appearance. These are sugar over --apex-cal-*: the popover
+     itself, and every state a day can be in. The rest of the calendar — title
+     and nav, the month/year grids, the time spinners, the meridiem toggle, the
+     button bar — is reachable through the remaining variables and the `ui`
+     classes, both listed on the docs page. */
+  /** The popover: its surface, edge, corner and lift. */
+  calendarBackground?: string;
+  calendarBorderColor?: string;
+  calendarRadius?: string;
+  calendarShadow?: string;
+  /** A day at rest, and its corner. */
+  dayColor?: string;
+  dayRadius?: string;
+  /** Under the pointer. */
+  dayHoverBackground?: string;
+  /** The selected day. Set both — the text is #fff by default, which a light
+      background leaves unreadable. */
+  daySelectedBackground?: string;
+  daySelectedColor?: string;
+  /** Today's ring, a day spilling in from the neighbouring month, and the
+      band between the two ends of a range. */
+  dayTodayRing?: string;
+  dayOutsideColor?: string;
+  dayRangeBackground?: string;
 }>(), {
   dateFormat: 'dd/mm/yy', modelType: 'date', selectionMode: 'single', view: 'date',
   numberOfMonths: 1, hourFormat: '24', stepMinute: 1, statusIcon: true, icon: 'calendar_month',
@@ -74,6 +99,31 @@ const inputEl = ref<HTMLInputElement | null>(null);
 const typed = ref<string | null>(null);
 const panel = ref<'date' | 'month' | 'year'>(props.view);
 const fieldProps = computed(() => pickFieldProps(props as unknown as Record<string, unknown>));
+
+/**
+ * Appearance prop -> CSS variable, set on the element that wraps both the box
+ * and the calendar so it reaches the popover by cascade. Only what is set, so
+ * an untouched picker carries nothing extra.
+ */
+const calStyle = computed(() => {
+  const out: Record<string, string> = { position: 'relative' };
+  const map: Array<[string | undefined, string]> = [
+    [props.calendarBackground, '--apex-cal-bg'],
+    [props.calendarBorderColor, '--apex-cal-border'],
+    [props.calendarRadius, '--apex-cal-radius'],
+    [props.calendarShadow, '--apex-cal-shadow'],
+    [props.dayColor, '--apex-cal-day-fg'],
+    [props.dayRadius, '--apex-cal-day-radius'],
+    [props.dayHoverBackground, '--apex-cal-day-hover-bg'],
+    [props.daySelectedBackground, '--apex-cal-day-selected-bg'],
+    [props.daySelectedColor, '--apex-cal-day-selected-fg'],
+    [props.dayTodayRing, '--apex-cal-day-today-ring'],
+    [props.dayOutsideColor, '--apex-cal-day-outside-fg'],
+    [props.dayRangeBackground, '--apex-cal-day-range-bg'],
+  ];
+  map.forEach(([v, name]) => { if (v) out[name] = v; });
+  return out;
+});
 
 /* ── model in / out ─────────────────────────────────────── */
 const toDate = (v: DateValue): Date | null => {
@@ -253,37 +303,38 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
 
 <template>
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="filled || (isFloat && !!placeholder)" :focused="focused || open"
-             v-slot="{ id, describedBy, invalid, statusGlyph }">
-    <div ref="root" style="position:relative">
-      <div v-if="!inline" class="apex-ctl" :data-focused="(focused || open) ? 'true' : 'false'"
+             v-slot="{ id, describedBy, invalid, statusGlyph, ui }">
+    <div ref="root" :style="calStyle">
+      <div v-if="!inline" class="apex-ctl" :class="ui.control" :data-focused="(focused || open) ? 'true' : 'false'"
            :data-disabled="disabled ? 'true' : 'false'">
-        <ApexIcon v-if="!showIcon" :name="icon" class="apex-ctl__icon" />
-        <input ref="inputEl" class="apex-ctl__input" :id="id" :name="name || id" type="text"
+        <ApexIcon v-if="!showIcon" :name="icon" class="apex-ctl__icon" :class="ui.icon" />
+        <input ref="inputEl" class="apex-ctl__input" :class="ui.input" :id="id" :name="name || id" type="text"
                :value="display" :placeholder="placeholder || dateFormat"
                :disabled="disabled" :readonly="readonly || readonlyInput" :required="required"
                :aria-describedby="describedBy" :aria-invalid="invalid || undefined"
                :aria-label="labelPlacement === 'hidden' ? label : undefined"
                autocomplete="off" @input="onType" @focus="focused = true" @blur="commit"
                @keydown="onKey" @click="readonlyInput && openMenu()" />
-        <button v-if="clearable && filled && !disabled" type="button" class="apex-ctl__btn"
+        <button v-if="clearable && filled && !disabled" type="button" class="apex-ctl__btn" :class="ui.button"
                 aria-label="Clear" @click="clear">
           <ApexIcon name="close" :size="17" />
         </button>
         <ApexIcon v-if="statusGlyph" :name="statusGlyph" class="apex-ctl__status" :size="18" />
-        <button v-if="showIcon" type="button" class="apex-ctl__btn" :disabled="disabled"
+        <button v-if="showIcon" type="button" class="apex-ctl__btn" :class="ui.button" :disabled="disabled"
                 :aria-label="'Open calendar'" :aria-expanded="open" @click="open ? (open = false) : openMenu()">
           <ApexIcon :name="icon" :size="19" />
         </button>
       </div>
 
-      <div v-if="inline || open" class="apex-cal" :class="{ 'apex-cal--inline': inline }" role="dialog">
+      <div v-if="inline || open" class="apex-cal"
+           :class="[{ 'apex-cal--inline': inline }, ui.calendar]" role="dialog">
         <!-- time only -->
         <template v-if="!timeOnly">
-          <div class="apex-cal__nav">
+          <div class="apex-cal__nav" :class="ui.nav">
             <button type="button" class="apex-ctl__btn" aria-label="Previous" @click="shift(-1)">
               <ApexIcon name="chevron_left" :size="20" />
             </button>
-            <div class="apex-cal__title">
+            <div class="apex-cal__title" :class="ui.title">
               <button v-if="panel === 'date'" type="button" @click="panel = 'month'">
                 {{ loc.monthNames[cursor.getMonth()] }}
               </button>
@@ -294,13 +345,13 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
             </button>
           </div>
 
-          <div v-if="panel === 'date'" class="apex-cal__months">
-            <div v-for="(m, mi) in months" :key="mi" class="apex-cal__month">
-              <p v-if="numberOfMonths > 1" class="apex-cal__mlabel">{{ loc.monthNames[m.getMonth()] }} {{ m.getFullYear() }}</p>
-              <div class="apex-cal__grid">
-                <span v-for="w in weekdays" :key="w" class="apex-cal__wd">{{ w }}</span>
+          <div v-if="panel === 'date'" class="apex-cal__months" :class="ui.months">
+            <div v-for="(m, mi) in months" :key="mi" class="apex-cal__month" :class="ui.month">
+              <p v-if="numberOfMonths > 1" class="apex-cal__mlabel" :class="ui.monthLabel">{{ loc.monthNames[m.getMonth()] }} {{ m.getFullYear() }}</p>
+              <div class="apex-cal__grid" :class="ui.grid">
+                <span v-for="w in weekdays" :key="w" class="apex-cal__wd" :class="ui.weekday">{{ w }}</span>
                 <button v-for="cell in monthGrid(m.getFullYear(), m.getMonth(), loc.firstDayOfWeek)"
-                        :key="cell.date.toISOString()" type="button" class="apex-cal__day"
+                        :key="cell.date.toISOString()" type="button" class="apex-cal__day" :class="ui.day"
                         :data-outside="cell.outside ? 'true' : 'false'"
                         :data-today="isSameDay(cell.date, new Date()) ? 'true' : 'false'"
                         :data-selected="selected(cell.date) ? 'true' : 'false'"
@@ -316,43 +367,44 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
             </div>
           </div>
 
-          <div v-else-if="panel === 'month'" class="apex-cal__pick">
+          <div v-else-if="panel === 'month'" class="apex-cal__pick" :class="ui.pick">
             <button v-for="(mn, i) in loc.monthNamesShort" :key="mn" type="button"
                     :data-selected="single && single.getMonth() === i && single.getFullYear() === cursor.getFullYear() ? 'true' : 'false'"
                     @click="pickMonth(i)">{{ mn }}</button>
           </div>
 
-          <div v-else class="apex-cal__pick">
+          <div v-else class="apex-cal__pick" :class="ui.pick">
             <button v-for="y in yearRange" :key="y" type="button"
                     :data-selected="single && single.getFullYear() === y ? 'true' : 'false'"
                     @click="pickYear(y)">{{ y }}</button>
           </div>
         </template>
 
-        <div v-if="showTime || timeOnly" class="apex-cal__time">
-          <div class="apex-cal__spin">
+        <div v-if="showTime || timeOnly" class="apex-cal__time" :class="ui.time">
+          <div class="apex-cal__spin" :class="ui.spin">
             <button type="button" aria-label="Hour up" @click="setTime('h', 1)"><ApexIcon name="keyboard_arrow_up" :size="18" /></button>
             <span>{{ hourText }}</span>
             <button type="button" aria-label="Hour down" @click="setTime('h', -1)"><ApexIcon name="keyboard_arrow_down" :size="18" /></button>
           </div>
           <em>:</em>
-          <div class="apex-cal__spin">
+          <div class="apex-cal__spin" :class="ui.spin">
             <button type="button" aria-label="Minute up" @click="setTime('m', 1)"><ApexIcon name="keyboard_arrow_up" :size="18" /></button>
             <span>{{ minuteText }}</span>
             <button type="button" aria-label="Minute down" @click="setTime('m', -1)"><ApexIcon name="keyboard_arrow_down" :size="18" /></button>
           </div>
           <template v-if="showSeconds">
             <em>:</em>
-            <div class="apex-cal__spin">
+            <div class="apex-cal__spin" :class="ui.spin">
               <button type="button" aria-label="Second up" @click="setTime('s', 1)"><ApexIcon name="keyboard_arrow_up" :size="18" /></button>
               <span>{{ secondText }}</span>
               <button type="button" aria-label="Second down" @click="setTime('s', -1)"><ApexIcon name="keyboard_arrow_down" :size="18" /></button>
             </div>
           </template>
-          <button v-if="hourFormat === '12'" type="button" class="apex-cal__mer" @click="toggleMeridiem">{{ meridiem }}</button>
+          <button v-if="hourFormat === '12'" type="button" class="apex-cal__mer" :class="ui.meridiem"
+                  @click="toggleMeridiem">{{ meridiem }}</button>
         </div>
 
-        <div v-if="showButtonBar" class="apex-cal__bar">
+        <div v-if="showButtonBar" class="apex-cal__bar" :class="ui.bar">
           <button type="button" @click="today">{{ loc.today }}</button>
           <button type="button" @click="clear">{{ loc.clear }}</button>
         </div>

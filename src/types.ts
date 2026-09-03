@@ -128,6 +128,29 @@ export interface ApexFieldClasses {
   fill?: string;
   handle?: string;
   tooltip?: string;
+  /** ApexDatePicker — the calendar popover and the row above the grid. The
+      prev/next buttons are .apex-ctl__btn inside `nav`, so reach them from
+      there rather than through `button`, which is the field's own. */
+  calendar?: string;
+  nav?: string;
+  title?: string;
+  /** The month columns — `months` is the row, `month` one column, `monthLabel`
+      the caption that appears once numberOfMonths is above one. */
+  months?: string;
+  month?: string;
+  monthLabel?: string;
+  /** The seven-column grid, a weekday heading, one day. */
+  grid?: string;
+  weekday?: string;
+  day?: string;
+  /** The month and year grids behind the title. */
+  pick?: string;
+  /** The time row, one hour/minute/second spinner, the AM-PM toggle. */
+  time?: string;
+  spin?: string;
+  meridiem?: string;
+  /** The Today / Clear bar. */
+  bar?: string;
 }
 
 /**
