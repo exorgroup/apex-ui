@@ -1509,6 +1509,88 @@ export const ENTRIES: DocEntry[] = [
     events: [['update:modelValue', 'unknown[]'], ['change', '—']],
   },
   {
+    id: 'listbox', name: 'ApexListbox', group: 'Choosers',
+    blurb: 'An always-visible option list. Single selection by default, multiple for many, checkbox for a box per option, built-in filtering, and grouped options from a nested array.',
+    model: 'sliema',
+    base: {
+      label: 'Screen location', filter: true, scrollHeight: 240,
+      options: [
+        { label: 'Malta', icon: 'public', items: [
+          { value: 'sliema', label: 'Sliema', help: 'Northern Harbour' },
+          { value: 'msida', label: 'Msida', help: 'Northern Harbour' },
+          { value: 'zejtun', label: 'Żejtun', help: 'South Eastern' },
+        ] },
+        { label: 'Gozo', icon: 'public', items: [
+          { value: 'victoria', label: 'Victoria', help: 'Central' },
+          { value: 'xewkija', label: 'Xewkija', help: 'Central' },
+        ] },
+      ],
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'multiple', type: 'bool' }, { key: 'checkbox', type: 'bool' },
+      { key: 'filter', type: 'bool' }, { key: 'filterPlaceholder', type: 'text' },
+      { key: 'toggleAll', type: 'bool' }, { key: 'max', type: 'number' },
+      { key: 'scrollHeight', type: 'number' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'unknown | unknown[]', '—', 'v-model; an array once multiple or checkbox is on'],
+      ['options', 'ApexOption[] | string[] | { label, items }[]', '[]', 'A nested array renders group headers'],
+      ['multiple', 'boolean', 'false', 'Choose more than one'],
+      ['checkbox', 'boolean', 'false', 'A checkbox per option; implies multiple'],
+      ['filter', 'boolean', 'false', 'Built-in search pinned to the top'],
+      ['toggleAll', 'boolean', 'false', 'Select all / clear all with a running count'],
+      ['max', 'number', '—', 'Cap the number of selections'],
+      ['scrollHeight', 'number', '260', 'Max list height in pixels'],
+    ],
+    events: [['update:modelValue', 'value | value[]'], ['change', '—']],
+    slots: [['option', 'Custom row content; receives { option }']],
+  },
+  {
+    id: 'cascadeselect', name: 'ApexCascadeSelect', group: 'Choosers',
+    /* Written from the component's API: this is the one control with no entry
+       in the design gallery, so nothing here was inherited. */
+    blurb: 'Drill through nested options one column at a time. Each level opens the next beside it, and only a leaf commits a value — useful when a flat list would be too long to scan.',
+    model: 'mt-nh-sliema',
+    base: {
+      label: 'Region', placeholder: 'Choose a locality', heading: 'Country',
+      showPath: true, clearable: true,
+      options: [
+        { value: 'mt', label: 'Malta', icon: 'public', children: [
+          { value: 'mt-nh', label: 'Northern Harbour', children: [
+            { value: 'mt-nh-sliema', label: 'Sliema' },
+            { value: 'mt-nh-msida', label: 'Msida' },
+          ] },
+          { value: 'mt-se', label: 'South Eastern', children: [
+            { value: 'mt-se-zejtun', label: 'Żejtun' },
+          ] },
+        ] },
+        { value: 'go', label: 'Gozo', icon: 'public', children: [
+          { value: 'go-c', label: 'Central', children: [
+            { value: 'go-c-victoria', label: 'Victoria' },
+          ] },
+        ] },
+      ],
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'placeholder', type: 'text' },
+      { key: 'heading', type: 'text' }, { key: 'showPath', type: 'bool' },
+      { key: 'pathSeparator', type: 'text' }, { key: 'leadingIcon', type: 'text' },
+      { key: 'clearable', type: 'bool' }, { key: 'loading', type: 'bool' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'unknown', '—', "v-model — a leaf's value. Choosing a branch only opens it"],
+      ['options', 'CascadeOption[]', '[]', 'Nested through `children`; a node without children is a leaf'],
+      ['heading', 'string', '—', 'Caption above the first column'],
+      ['showPath', 'boolean', 'false', 'Show the whole branch in the field rather than just the leaf'],
+      ['pathSeparator', 'string', "'›'", 'What joins the parts of that path'],
+      ['leadingIcon', 'string', '—', 'Icon before the value'],
+      ['clearable', 'boolean', 'false', 'Reset to null'],
+      ['footerAction', '{ label, icon? }', '—', 'A button under the first column; emits @action rather than selecting'],
+    ],
+    events: [['update:modelValue', 'value'], ['change', '—'], ['action', 'the footer button was pressed']],
+  },
+  {
     id: 'datepicker', name: 'ApexDatePicker', group: 'Dates',
     blurb: 'Calendar popup on the same shell as the selects. Single, multiple or range selection; date, month or year views; optional time picker; boundaries, locales, button bar and inline mode.',
     /* The gallery seeds this with `new Date()`. Here the value is JSON-cloned
