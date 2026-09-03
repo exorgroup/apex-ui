@@ -615,6 +615,20 @@ export const BUTTON_FAMILY = ['button', 'splitbutton', 'speeddial', 'buttongroup
 
 /** Per-control customisation: [ui key, part, variables it responds to]. */
 export const OWN_PARTS: Record<string, string[][]> = {
+  colorpicker: [
+    ['picker', '.apex-picker', '--apex-picker-bg, --apex-picker-border, --apex-picker-radius, --apex-picker-shadow'],
+    ['area', '.apex-picker__area', '--apex-picker-area-h, --apex-picker-area-w, --apex-picker-area-radius — its gradient is the colour maths and is not themeable'],
+    ['thumb', '.apex-picker__thumb', '--apex-picker-thumb-size, --apex-picker-thumb-border — the fill always shows the colour under it'],
+    ['sliders', '.apex-picker__sliders', 'the pair of tracks — layout only'],
+    ['slider', '.apex-picker__slider', '--apex-picker-slider-h, --apex-picker-slider-radius, --apex-picker-slider-border, --apex-picker-slider-thumb, --apex-picker-slider-thumb-size, --apex-picker-check'],
+    ['formats', '.apex-picker__formats', '--apex-picker-formats-bg, --apex-picker-formats-border, --apex-picker-formats-radius'],
+    ['format', '.apex-picker__formats button', '--apex-picker-format-fg, --apex-picker-format-radius, --apex-picker-format-on-bg, --apex-picker-format-on-fg, --apex-picker-format-on-shadow'],
+    ['channels', '.apex-picker__channels', 'the row of boxes — layout only'],
+    ['channel', '.apex-picker__channels label', '--apex-picker-channel-fg, and the input set below'],
+    ['output', '.apex-picker__value', '--apex-picker-input-bg, --apex-picker-input-fg, --apex-picker-input-border, --apex-picker-input-focus-border, --apex-picker-input-radius, --apex-picker-input-font — shared with the channel boxes'],
+    ['presets', '.apex-picker__presets', '--apex-picker-presets-border, --apex-swatch-preset-size, --apex-swatch-preset-radius'],
+    ['swatch', '.apex-swatch', '--apex-swatch-size, --apex-swatch-border, --apex-swatch-radius, --apex-swatch-hover-border, --apex-swatch-check, --apex-swatch-on-gap, --apex-swatch-on-ring'],
+  ],
   datepicker: [
     ['calendar', '.apex-cal', '--apex-cal-bg, --apex-cal-border, --apex-cal-radius, --apex-cal-shadow'],
     ['nav', '.apex-cal__nav', 'the prev/next buttons are .apex-ctl__btn inside it'],
@@ -699,6 +713,49 @@ export const OWN_PARTS: Record<string, string[][]> = {
 };
 
 export const SNIP_OWN: Record<string, string> = {
+  colorpicker: `<!-- Twelve props cover the popover, the square, the tracks and the
+     swatches. They are sugar over --apex-picker-* and --apex-swatch-*. -->
+<ApexColorPicker v-model="brand" label="Brand colour" show-format-toggle
+  picker-background="#101820" picker-border-color="#243040"
+  picker-radius="14px" picker-shadow="0 10px 34px #0009"
+  area-height="190px" area-width="260px" area-radius="8px"
+  thumb-color="#0B0F14" slider-height="16px" slider-thumb-color="#E8EEF7"
+  swatch-size="28px" swatch-border-color="#243040" />
+
+/* Two things are deliberately not settable, because they are what the
+   control measures rather than how it looks: the hue spectrum on the hue
+   track, and the saturation/value square's own gradient. So are --hue,
+   --solid and --sw, which the component rewrites on every render. Theming
+   any of them would let the picker show one colour and report another. */
+
+/* The remaining twenty-eight variables have no prop — the format
+   switcher, the channel boxes, the output row, the preset row. Scope a
+   class of your own to reach them. */
+.brand-picker {
+  --apex-picker-formats-bg: #0B0F14;
+  --apex-picker-format-fg: #6B7789;
+  --apex-picker-format-on-bg: #16202C;
+  --apex-picker-format-on-fg: #7AA2F7;
+  --apex-picker-input-bg: #0B0F14;
+  --apex-picker-input-fg: #E8EEF7;
+  --apex-picker-input-border: #243040;
+  --apex-picker-input-focus-border: #7AA2F7;
+  --apex-picker-presets-border: #243040;
+  --apex-swatch-on-ring: #7AA2F7;
+  /* The chequerboard behind a transparent colour, on the alpha track and
+     on every swatch. */
+  --apex-picker-check: #1D2735;
+  --apex-swatch-check: #1D2735;
+}
+
+<!-- ui puts your class on any part. control and input reach the box, as on
+     every field. -->
+<ApexColorPicker v-model="brand" label="Brand colour"
+  :ui="{ picker: 'brand-picker', area: 'brand-area', swatch: 'brand-swatch' }" />
+
+/* swatch is one part in three places: the trigger in the box, the one
+   beside the output, and each preset. Scope by ancestor to reach one
+   kind — .apex-picker__presets .brand-swatch, and so on. */`,
   datepicker: `<!-- Twelve props cover the popover and every state a day can be in.
      They are sugar over --apex-cal-*, so this and the CSS below do the
      same thing. -->
