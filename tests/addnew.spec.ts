@@ -3,6 +3,7 @@ import { mount } from '@vue/test-utils';
 import ApexSelect from '../src/components/ApexSelect.vue';
 import ApexMultiselect from '../src/components/ApexMultiselect.vue';
 import ApexListbox from '../src/components/ApexListbox.vue';
+import ApexCascadeSelect from '../src/components/ApexCascadeSelect.vue';
 import { APEX_UI_OPTIONS } from '../src/core/symbols';
 
 const O = [{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Bravo' }];
@@ -276,6 +277,80 @@ describe('ApexListbox — the Add New row', () => {
       props: { label: 'Where', options: O, addNew: true, resource: 'places' },
       global: { provide: { [APEX_UI_OPTIONS as symbol]: { canCreate: () => false } } },
     });
+    expect(denied.find('.apex-pop__add').exists()).toBe(false);
+  });
+});
+
+describe('ApexCascadeSelect — Add New knows which level it is on', () => {
+  const TREE = [
+    { value: 'mt', label: 'Malta', children: [
+      { value: 'mt-nh', label: 'Northern Harbour', children: [
+        { value: 'mt-nh-sliema', label: 'Sliema' },
+      ] },
+    ] },
+    { value: 'go', label: 'Gozo', children: [{ value: 'go-c', label: 'Central' }] },
+  ];
+  const cs = (p: Record<string, unknown> = {}) =>
+    mount(ApexCascadeSelect, { props: { label: 'Region', options: TREE, ...p } });
+
+  it('every open column carries its own row', async () => {
+    const w = cs({ addNew: true });
+    await w.find('.apex-ctl').trigger('click');
+    expect(w.findAll('.apex-cascade__panel').length).toBe(1);
+    expect(w.findAll('.apex-pop__add').length).toBe(1);
+
+    await w.findAll('.apex-pop__opt')[0].trigger('click');   // open Malta
+    expect(w.findAll('.apex-cascade__panel').length).toBe(2);
+    expect(w.findAll('.apex-pop__add').length).toBe(2);
+  });
+
+  it('the first column reports an empty path — the root', async () => {
+    const w = cs({ addNew: true });
+    await w.find('.apex-ctl').trigger('click');
+    await w.find('.apex-pop__add').trigger('click');
+    const p = (w.emitted('add-new') as Array<[{ query: string; path: Array<{ label: string }> }]>)[0][0];
+    expect(p.path).toEqual([]);
+    expect(p.query).toBe('');
+  });
+
+  it('a deeper column reports the branch above it', async () => {
+    const w = cs({ addNew: true });
+    await w.find('.apex-ctl').trigger('click');
+    await w.findAll('.apex-pop__opt')[0].trigger('click');            // Malta
+    await w.findAll('.apex-cascade__panel')[1]
+      .findAll('.apex-pop__opt')[0].trigger('click');                 // Northern Harbour
+
+    // The third column creates under Malta > Northern Harbour.
+    const rows = w.findAll('.apex-pop__add');
+    await rows[rows.length - 1].trigger('click');
+    const p = (w.emitted('add-new') as Array<[{ path: Array<{ label: string }> }]>)[0][0];
+    expect(p.path.map((o) => o.label)).toEqual(['Malta', 'Northern Harbour']);
+  });
+
+  it('it closes the overlay and selects nothing', async () => {
+    const w = cs({ addNew: true });
+    await w.find('.apex-ctl').trigger('click');
+    await w.find('.apex-pop__add').trigger('click');
+    expect(w.find('.apex-cascade').exists()).toBe(false);
+    expect(w.emitted('update:modelValue')).toBeFalsy();
+  });
+
+  it('sits alongside footerAction rather than replacing it', async () => {
+    const w = cs({ addNew: true, footerAction: { label: 'Manage regions' } });
+    await w.find('.apex-ctl').trigger('click');
+    expect(w.find('.apex-pop__add').exists()).toBe(true);
+    expect(w.find('.apex-cascade__footer').exists()).toBe(true);
+    await w.find('.apex-cascade__footer').trigger('click');
+    expect(w.emitted('action')).toBeTruthy();
+    expect(w.emitted('add-new')).toBeFalsy();
+  });
+
+  it('honours the same permission rule', async () => {
+    const denied = mount(ApexCascadeSelect, {
+      props: { label: 'Region', options: TREE, addNew: true, resource: 'regions' },
+      global: { provide: { [APEX_UI_OPTIONS as symbol]: { canCreate: () => false } } },
+    });
+    await denied.find('.apex-ctl').trigger('click');
     expect(denied.find('.apex-pop__add').exists()).toBe(false);
   });
 });

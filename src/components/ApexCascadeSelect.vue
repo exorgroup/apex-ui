@@ -11,6 +11,7 @@ import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { pickFieldProps } from '../core/utils';
 import { useApexI18n } from '../core/i18n';
+import { useCanCreate } from '../core/canCreate';
 import type { ApexFieldProps } from '../types';
 
 export interface CascadeOption {
@@ -37,12 +38,41 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   pathSeparator?: string;
   /** Button under the first panel; emits @action. */
   footerAction?: { label: string; icon?: string };
-}>(), { statusIcon: true, pathSeparator: '›' });
+
+  /**
+   * Offer an "Add new" row at the foot of every open column. Unlike the flat
+   * choosers, a cascade has levels, so the event carries the branch the row
+   * sits under: `path` is the chain of options above it, empty at the first
+   * column. That is what lets a handler create in the right place.
+   *
+   * Distinct from `footerAction`, which is a general button on the first
+   * column. Both can be shown at once.
+   */
+  addNew?: boolean;
+  /** Row text. This control has no filter, so it never carries a query. */
+  addNewLabel?: string;
+  /** What is being created, passed to the app-level canCreate resolver. */
+  resource?: string;
+  /** Overrides the resolver. Set it and no resolver is consulted. */
+  canAddNew?: boolean;
+}>(), {
+  statusIcon: true,
+  pathSeparator: '›',
+  /* Tri-state: yes, no, or "ask the resolver". Vue casts an absent boolean
+     prop to false, which would read as a denial and silence the resolver. */
+  canAddNew: undefined,
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: unknown): void;
   (e: 'change'): void;
   (e: 'action'): void;
+  /**
+   * A column's Add New row was used. `path` is the branch above that column,
+   * so `[]` means the first level. `query` is always empty here — the shape
+   * matches the other choosers so one handler can serve any of them.
+   */
+  (e: 'add-new', payload: { query: string; path: CascadeOption[] }): void;
 }>();
 
 const t = useApexI18n();
@@ -56,6 +86,26 @@ const trigger = ref<HTMLElement | null>(null);
 
 const fieldProps = computed(() => pickFieldProps(props as unknown as Record<string, unknown>));
 const isLeaf = (o: CascadeOption) => !o.children || !o.children.length;
+
+const canCreate = useCanCreate();
+const showAddNew = computed(() => props.addNew && canCreate(props.canAddNew, props.resource));
+
+/** The options chosen above a column: [] for the first, one per level after. */
+function pathTo(level: number): CascadeOption[] {
+  const out: CascadeOption[] = [];
+  for (let i = 0; i < level; i += 1) {
+    const parent = panels.value[i]?.[branch.value[i]];
+    if (!parent) break;
+    out.push(parent);
+  }
+  return out;
+}
+
+function pickAddNew(level: number) {
+  /* Close first: a dialog or a route is about to take over. */
+  open.value = false;
+  emit('add-new', { query: '', path: pathTo(level) });
+}
 
 /** Panels currently shown, left to right. */
 const panels = computed<CascadeOption[][]>(() => {
@@ -189,6 +239,11 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
             <ApexIcon v-else-if="o.value === modelValue" name="check" class="apex-pop__tick" :class="ui.tick" />
           </button>
           <p v-if="!list.length" class="apex-pop__empty" :class="ui.empty">{{ t('apexui.noResults') }}</p>
+          <button v-if="showAddNew" type="button" class="apex-pop__add" :class="ui.addNew"
+                  @click="pickAddNew(level)">
+            <ApexIcon name="add" :size="18" />
+            <span>{{ addNewLabel || t('apexui.addNew') }}</span>
+          </button>
           <button v-if="level === 0 && footerAction" type="button" class="apex-cascade__footer" :class="ui.footer" @click="emit('action')">
             <ApexIcon v-if="footerAction.icon" :name="footerAction.icon" :size="17" />
             {{ footerAction.label }}
