@@ -620,7 +620,7 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['area', '.apex-picker__area', '--apex-picker-area-h, --apex-picker-area-w, --apex-picker-area-radius — its gradient is the colour maths and is not themeable'],
     ['thumb', '.apex-picker__thumb', '--apex-picker-thumb-size, --apex-picker-thumb-border — the fill always shows the colour under it'],
     ['sliders', '.apex-picker__sliders', 'the pair of tracks — layout only'],
-    ['slider', '.apex-picker__slider', '--apex-picker-slider-h, --apex-picker-slider-radius, --apex-picker-slider-border, --apex-picker-slider-thumb, --apex-picker-slider-thumb-size, --apex-picker-check'],
+    ['slider', '.apex-picker__slider', '--apex-picker-slider-h, --apex-picker-slider-length (vertical only), --apex-picker-slider-radius, --apex-picker-slider-border, --apex-picker-slider-thumb, --apex-picker-slider-thumb-size, --apex-picker-check'],
     ['formats', '.apex-picker__formats', '--apex-picker-formats-bg, --apex-picker-formats-border, --apex-picker-formats-radius'],
     ['format', '.apex-picker__formats button', '--apex-picker-format-fg, --apex-picker-format-radius, --apex-picker-format-on-bg, --apex-picker-format-on-fg, --apex-picker-format-on-shadow'],
     ['channels', '.apex-picker__channels', 'the row of boxes — layout only'],
@@ -719,7 +719,8 @@ export const SNIP_OWN: Record<string, string> = {
   picker-background="#101820" picker-border-color="#243040"
   picker-radius="14px" picker-shadow="0 10px 34px #0009"
   area-height="190px" area-width="260px" area-radius="8px"
-  thumb-color="#0B0F14" slider-height="16px" slider-thumb-color="#E8EEF7"
+  thumb-color="#0B0F14" slider-height="16px" slider-length="190px"
+  slider-thumb-color="#E8EEF7"
   swatch-size="28px" swatch-border-color="#243040" />
 
 /* Two things are deliberately not settable, because they are what the
