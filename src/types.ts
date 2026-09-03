@@ -151,6 +151,26 @@ export interface ApexFieldClasses {
   meridiem?: string;
   /** The Today / Clear bar. */
   bar?: string;
+  /** ApexColorPicker — the popover, the saturation/value square and the
+      marker you drag across it. */
+  picker?: string;
+  area?: string;
+  thumb?: string;
+  /** The hue and alpha tracks: `sliders` is the pair, `slider` each one. */
+  sliders?: string;
+  slider?: string;
+  /** The hex/rgb/hsl/hsb switcher, and one segment of it. */
+  formats?: string;
+  format?: string;
+  /** The numeric channel boxes, and one box with its caption. */
+  channels?: string;
+  channel?: string;
+  /** The row holding the serialised colour, and the preset row. */
+  output?: string;
+  presets?: string;
+  /** Every swatch — the trigger, the one beside the output, and each preset.
+      They are one part, so scope by ancestor to reach a single kind. */
+  swatch?: string;
 }
 
 /**
