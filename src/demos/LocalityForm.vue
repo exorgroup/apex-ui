@@ -11,7 +11,7 @@ import { inject, reactive, ref } from 'vue';
 import { useApexDialog } from '@exorgroup/apex-ui';
 import CountryForm from './CountryForm.vue';
 
-const props = defineProps<{ name?: string }>();
+const props = defineProps<{ name?: string; parent?: string }>();
 
 /* Plain object, not a ref: dialogRef.close(), no .value. */
 const dialogRef = inject<{ close: (data?: unknown) => void }>('dialogRef');
@@ -48,6 +48,10 @@ function save() {
 
 <template>
   <div class="demo-form">
+    <p v-if="parent" class="demo-form__hint">
+      Adding under <strong>{{ parent }}</strong> — the cascade told the handler
+      which branch its row came from.
+    </p>
     <ApexInput v-model="form.label" label="Locality" placeholder="e.g. Sliema" />
 
     <!-- A chooser inside the dialog, offering Add new of its own. -->

@@ -188,7 +188,10 @@ const demoOptions = computed(
   () => ((entry.value.base as Record<string, unknown> | undefined)?.options ?? []) as unknown[],
 );
 
-const addNewDemo = reactive<Record<string, unknown>>({ select: null, multiselect: [] });
+/* One entry per chooser: only the multiselect holds an array. */
+const addNewDemo = reactive<Record<string, unknown>>(
+  { select: null, multiselect: [], listbox: null, cascadeselect: null },
+);
 const addNewSeen = ref('');
 const onDemoAddNew = (p: { query: string }) => {
   addNewSeen.value = `add-new { query: "${p.query}" }`;
@@ -199,26 +202,75 @@ const onDemoAddNew = (p: { query: string }) => {
  * the page owns the list and the value, and the dialog hands a record back.
  */
 const dialog = useApexDialog();
-const localities = ref([
+
+interface Node { value: string; label: string; children?: Node[] }
+
+/* Flat for the three list controls. */
+const localities = ref<Node[]>([
   { value: 'valletta', label: 'Valletta' },
   { value: 'mosta', label: 'Mosta' },
 ]);
-const locality = reactive<Record<string, unknown>>({ select: null, multiselect: [] });
+/* Nested for the cascade, which would otherwise draw a single column and
+   demonstrate nothing it does differently. */
+const localityTree = ref<Node[]>([
+  { value: 'mt', label: 'Malta', children: [
+    { value: 'mt-nh', label: 'Northern Harbour', children: [
+      { value: 'mt-nh-valletta', label: 'Valletta' },
+    ] },
+  ] },
+  { value: 'go', label: 'Gozo', children: [
+    { value: 'go-c', label: 'Central', children: [
+      { value: 'go-c-victoria', label: 'Victoria' },
+    ] },
+  ] },
+]);
+const demoLocalities = computed(() => (isCascade.value ? localityTree.value : localities.value));
+
+const locality = reactive<Record<string, unknown>>(
+  { select: null, multiselect: [], listbox: null, cascadeselect: null },
+);
 const localityLog = ref<string[]>([]);
 
-function createLocality({ query }: { query: string }) {
-  localityLog.value.unshift(`add-new fired with query "${query}"`);
+/** Find a node by value so a cascade record can be inserted under its parent. */
+function findNode(list: Node[], value: string): Node | undefined {
+  for (const n of list) {
+    if (n.value === value) return n;
+    const hit = n.children && findNode(n.children, value);
+    if (hit) return hit;
+  }
+  return undefined;
+}
+
+/**
+ * One handler for all four. The cascade adds `path` — the branch above the
+ * column whose row was used — so the record lands at the right level rather
+ * than always at the root.
+ */
+function createLocality({ query, path }: { query: string; path?: Node[] }) {
+  const under = path && path.length ? path[path.length - 1] : null;
+  localityLog.value.unshift(under
+    ? `add-new under ${path!.map((n) => n.label).join(' › ')}`
+    : `add-new fired with query "${query}"`);
+
   dialog.open(LocalityForm, {
-    props: { header: 'New locality', width: '430px', modal: true },
-    contentProps: { name: query },
+    props: { header: under ? `New entry under ${under.label}` : 'New locality', width: '430px', modal: true },
+    contentProps: { name: query, parent: under?.label },
     onClose: ({ data }) => {
       const rec = data as { value: string; label: string } | undefined;
       if (!rec) { localityLog.value.unshift('dismissed — nothing added'); return; }
-      localities.value.push(rec);   // the page owns the list…
-      // …and the value, appended or assigned to suit the control.
-      if (isMulti.value) locality.multiselect = [...(locality.multiselect as unknown[]), rec.value];
-      else locality.select = rec.value;
-      localityLog.value.unshift(`added "${rec.label}" and selected it`);
+
+      if (isCascade.value) {
+        // The page owns the tree: put it under the branch the row came from.
+        const parent = under ? findNode(localityTree.value, under.value) : null;
+        if (parent) (parent.children ||= []).push(rec);
+        else localityTree.value.push(rec);
+        locality.cascadeselect = rec.value;
+      } else {
+        localities.value.push(rec);
+        if (isMulti.value) locality.multiselect = [...(locality.multiselect as unknown[]), rec.value];
+        else locality[entry.value.id] = rec.value;
+      }
+      localityLog.value.unshift(`added "${rec.label}"${under ? ` under ${under.label}` : ''} and selected it`);
     },
   });
 }
@@ -1234,7 +1286,7 @@ async function copyUsage() {
             <div class="cell">
               <span class="cell__tag">Try it</span>
               <component :is="entry.name" v-model="locality[entry.id]"
-                         :options="localities" label="Locality"
+                         :options="demoLocalities" label="Locality"
                          placeholder="Choose a locality" filter add-new
                          resource="localities" @add-new="createLocality" />
             </div>
