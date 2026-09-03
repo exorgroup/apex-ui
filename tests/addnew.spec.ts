@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
 import ApexSelect from '../src/components/ApexSelect.vue';
 import ApexMultiselect from '../src/components/ApexMultiselect.vue';
+import ApexListbox from '../src/components/ApexListbox.vue';
 import { APEX_UI_OPTIONS } from '../src/core/symbols';
 
 const O = [{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Bravo' }];
@@ -226,5 +227,55 @@ describe('the row takes a class of its own', () => {
     const w = mount(ApexSelect, { props: { label: 'Zone', options: O, addNew: true } });
     await w.find('.apex-ctl').trigger('click');
     expect(w.find('.apex-pop__add').attributes('class')).toBe('apex-pop__add');
+  });
+});
+
+describe('ApexListbox — the Add New row', () => {
+  const lb = (p: Record<string, unknown> = {}) =>
+    mount(ApexListbox, { props: { label: 'Where', options: O, ...p } });
+  const lbLabel = (w: ReturnType<typeof lb>) => {
+    const spans = w.findAll('.apex-pop__add span');
+    return spans[spans.length - 1].text();
+  };
+
+  it('sits at the foot of the always-visible list', () => {
+    expect(lb().find('.apex-pop__add').exists()).toBe(false);
+    const w = lb({ addNew: true });
+    const kids = Array.from(w.find('.apex-listbox__list').element.children);
+    expect(kids[kids.length - 1].querySelector('.apex-pop__add')).toBeTruthy();
+  });
+
+  it('names the query, and emits it', async () => {
+    const w = lb({ addNew: true, filter: true });
+    expect(lbLabel(w)).toBe('Add new…');
+    await w.find('.apex-pop__filter input').setValue('Xaghra');
+    expect(lbLabel(w)).toBe('Add “Xaghra”');
+    await w.find('.apex-pop__add').trigger('click');
+    expect(w.emitted('add-new')).toEqual([[{ query: 'Xaghra' }]]);
+  });
+
+  it('changes nothing else — no selection, and the list stays put', async () => {
+    const w = lb({ addNew: true, modelValue: 'a' });
+    await w.find('.apex-pop__add').trigger('click');
+    expect(w.emitted('update:modelValue')).toBeFalsy();
+    expect(w.find('.apex-listbox__list').exists()).toBe(true);
+  });
+
+  it('is keyboard-reachable past the last option', async () => {
+    const w = lb({ addNew: true });
+    const list = w.find('.apex-listbox__list');
+    await list.trigger('keydown', { key: 'End' });
+    expect(w.find('.apex-pop__add').attributes('data-active')).toBe('true');
+    await list.trigger('keydown', { key: 'Enter' });
+    expect(w.emitted('add-new')).toBeTruthy();
+    expect(w.emitted('update:modelValue')).toBeFalsy();
+  });
+
+  it('honours the same permission rule', async () => {
+    const denied = mount(ApexListbox, {
+      props: { label: 'Where', options: O, addNew: true, resource: 'places' },
+      global: { provide: { [APEX_UI_OPTIONS as symbol]: { canCreate: () => false } } },
+    });
+    expect(denied.find('.apex-pop__add').exists()).toBe(false);
   });
 });

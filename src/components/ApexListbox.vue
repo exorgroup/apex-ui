@@ -9,6 +9,7 @@ import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { normaliseOptions, pickFieldProps } from '../core/utils';
 import { useApexI18n } from '../core/i18n';
+import { useCanCreate } from '../core/canCreate';
 import type { ApexFieldProps, ApexOption, ApexOptionsInput } from '../types';
 
 export interface ListboxGroup {
@@ -35,15 +36,44 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   /** Cap the number of selections. */
   max?: number;
   emptyMessage?: string;
-}>(), { scrollHeight: 260, statusIcon: false });
+
+  /**
+   * Offer an "Add new" row at the foot of the list. Activating it emits
+   * `add-new` with whatever was typed in the filter; the list stays where it
+   * is, since there is no overlay to dismiss.
+   */
+  addNew?: boolean;
+  /** Row text while the filter is empty. With a query it reads Add "…". */
+  addNewLabel?: string;
+  /** What is being created, passed to the app-level canCreate resolver. */
+  resource?: string;
+  /** Overrides the resolver. Set it and no resolver is consulted. */
+  canAddNew?: boolean;
+}>(), {
+  scrollHeight: 260,
+  statusIcon: false,
+  /* Tri-state: yes, no, or "ask the resolver". Vue casts an absent boolean
+     prop to false, which would read as a denial and silence the resolver. */
+  canAddNew: undefined,
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: unknown): void;
   (e: 'change'): void;
+  /** The row was activated. `query` is whatever was typed in the filter. */
+  (e: 'add-new', payload: { query: string }): void;
 }>();
 
 const t = useApexI18n();
 const query = ref('');
+
+const canCreate = useCanCreate();
+const showAddNew = computed(() => props.addNew && canCreate(props.canAddNew, props.resource));
+const addNewText = computed(() => (query.value.trim()
+  ? `Add “${query.value.trim()}”`
+  : props.addNewLabel || t('apexui.addNew')));
+/* Nothing to close here: the list is part of the page. */
+const pickAddNew = () => emit('add-new', { query: query.value.trim() });
 const active = ref(-1);
 const many = computed(() => props.multiple || props.checkbox);
 
@@ -93,11 +123,16 @@ function toggleEverything() {
   emit('change');
 }
 function onKey(e: KeyboardEvent) {
-  if (e.key === 'ArrowDown') { e.preventDefault(); active.value = Math.min(active.value + 1, flat.value.length - 1); }
+  const last = flat.value.length - 1 + (showAddNew.value ? 1 : 0);
+  if (e.key === 'ArrowDown') { e.preventDefault(); active.value = Math.min(active.value + 1, last); }
   if (e.key === 'ArrowUp') { e.preventDefault(); active.value = Math.max(active.value - 1, 0); }
   if (e.key === 'Home') { e.preventDefault(); active.value = 0; }
-  if (e.key === 'End') { e.preventDefault(); active.value = flat.value.length - 1; }
-  if ((e.key === 'Enter' || e.key === ' ') && flat.value[active.value]) { e.preventDefault(); pick(flat.value[active.value]); }
+  if (e.key === 'End') { e.preventDefault(); active.value = last; }
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    if (showAddNew.value && active.value === flat.value.length) pickAddNew();
+    else if (flat.value[active.value]) pick(flat.value[active.value]);
+  }
 }
 </script>
 
@@ -148,6 +183,13 @@ function onKey(e: KeyboardEvent) {
         </template>
         <li v-if="!flat.length" class="apex-pop__empty" :class="ui.empty" role="presentation">
           {{ emptyMessage || t('apexui.noResults') }}
+        </li>
+        <li v-if="showAddNew" role="presentation">
+          <button type="button" class="apex-pop__add" :class="ui.addNew"
+                  :data-active="active === flat.length ? 'true' : 'false'" @click="pickAddNew">
+            <ApexIcon name="add" :size="18" />
+            <span>{{ addNewText }}</span>
+          </button>
         </li>
       </ul>
     </div>
