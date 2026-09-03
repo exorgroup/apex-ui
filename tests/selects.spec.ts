@@ -134,3 +134,115 @@ describe('the shared appearance props now reach the select', () => {
     expect(w.find('.apex-ctl__ph').exists()).toBe(true);
   });
 });
+
+describe('ApexSelect — the props the gallery exposes', () => {
+  const O = [
+    { value: 'a', label: 'Alpha' }, { value: 'b', label: 'Bravo' },
+    { value: 'c', label: 'Charlie' }, { value: 'd', label: 'Delta', disabled: true },
+  ];
+  const sel = (p: Record<string, unknown> = {}) =>
+    mount(ApexSelect, { props: { label: 'Zone', options: O, ...p } });
+
+  it('native swaps the trigger for a real <select> with one option each', () => {
+    const w = sel({ native: true });
+    expect(w.find('select.apex-ctl__input').exists()).toBe(true);
+    // Four options plus the placeholder row.
+    expect(w.findAll('option').length).toBeGreaterThanOrEqual(4);
+    expect(sel().find('select').exists()).toBe(false);
+  });
+
+  it('clearable resets to null, and only shows once something is chosen', async () => {
+    expect(sel({ clearable: true }).find('.apex-ctl__btn').exists()).toBe(false);
+    const w = sel({ clearable: true, modelValue: 'a' });
+    await w.find('.apex-ctl__btn').trigger('click');
+    expect((w.emitted('update:modelValue') as unknown[][])[0][0]).toBe(null);
+  });
+
+  it('filter narrows the list; filterThreshold turns it on by size', async () => {
+    const w = sel({ filter: true });
+    await w.find('.apex-ctl').trigger('click');
+    await w.find('.apex-pop__filter input').setValue('brav');
+    expect(w.findAll('.apex-pop__opt').length).toBe(1);
+    expect(w.find('.apex-pop__opt').text()).toContain('Bravo');
+
+    // Below the threshold there is no filter; at or above it there is.
+    const under = sel({ filterThreshold: 10 });
+    await under.find('.apex-ctl').trigger('click');
+    expect(under.find('.apex-pop__filter').exists()).toBe(false);
+    const over = sel({ filterThreshold: 4 });
+    await over.find('.apex-ctl').trigger('click');
+    expect(over.find('.apex-pop__filter').exists()).toBe(true);
+  });
+
+  it('a disabled option cannot be picked', async () => {
+    const w = sel({});
+    await w.find('.apex-ctl').trigger('click');
+    const rows = w.findAll('.apex-pop__opt');
+    expect(rows[3].attributes('disabled')).toBeDefined();
+    await rows[3].trigger('click');
+    expect(w.emitted('update:modelValue')).toBeFalsy();
+  });
+
+  it('loading and disabled each block opening', async () => {
+    const off = sel({ disabled: true });
+    await off.find('.apex-ctl').trigger('click');
+    expect(off.find('.apex-pop').exists()).toBe(false);
+  });
+
+  it('picking a row commits its value and closes', async () => {
+    const w = sel({});
+    await w.find('.apex-ctl').trigger('click');
+    await w.findAll('.apex-pop__opt')[1].trigger('click');
+    expect((w.emitted('update:modelValue') as unknown[][])[0][0]).toBe('b');
+    expect(w.emitted('change')).toBeTruthy();
+  });
+});
+
+describe('ApexMultiselect — the props the gallery exposes', () => {
+  const O = [
+    { value: 'a', label: 'Alpha' }, { value: 'b', label: 'Bravo' },
+    { value: 'c', label: 'Charlie' },
+  ];
+  const ms = (p: Record<string, unknown> = {}) =>
+    mount(ApexMultiselect, { props: { label: 'Roles', options: O, ...p } });
+
+  it('toggleAll selects everything, then clears it', async () => {
+    const w = ms({ toggleAll: true });
+    await w.find('.apex-ctl').trigger('click');
+    await w.find('.apex-pop__all').trigger('click');
+    const all = (w.emitted('update:modelValue') as unknown[][])[0][0] as unknown[];
+    expect(all.length).toBe(3);
+
+    const full = ms({ toggleAll: true, modelValue: ['a', 'b', 'c'] });
+    await full.find('.apex-ctl').trigger('click');
+    await full.find('.apex-pop__all').trigger('click');
+    expect(((full.emitted('update:modelValue') as unknown[][])[0][0] as unknown[]).length).toBe(0);
+  });
+
+  it('maxChips collapses the rest into a +N chip', () => {
+    const w = ms({ modelValue: ['a', 'b', 'c'], maxChips: 2 });
+    expect(w.findAll('.apex-chip:not(.apex-chip--more)').length).toBe(2);
+    expect(w.find('.apex-chip--more').text()).toBe('+1');
+  });
+
+  it('max caps how many can be chosen', async () => {
+    const w = ms({ modelValue: ['a', 'b'], max: 2 });
+    await w.find('.apex-ctl').trigger('click');
+    await w.findAll('.apex-pop__opt')[2].trigger('click');
+    // Already at the cap, so the third pick is refused.
+    expect(w.emitted('update:modelValue')).toBeFalsy();
+  });
+
+  it('a chip removes just its own value', async () => {
+    const w = ms({ modelValue: ['a', 'b'] });
+    await w.find('.apex-chip button').trigger('click');
+    expect((w.emitted('update:modelValue') as unknown[][])[0][0]).toEqual(['b']);
+  });
+
+  it('clearable empties the selection', async () => {
+    const w = ms({ modelValue: ['a', 'b'], clearable: true });
+    const clear = w.findAll('.apex-ctl__btn').at(-1)!;
+    await clear.trigger('click');
+    expect((w.emitted('update:modelValue') as unknown[][])[0][0]).toEqual([]);
+  });
+});
