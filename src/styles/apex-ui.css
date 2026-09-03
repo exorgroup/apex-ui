@@ -197,7 +197,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-picker[data-orientation="vertical"] .apex-picker__sliders{flex-direction:row}
 .apex-picker__slider{display:block}
 .apex-picker__slider input{-webkit-appearance:none;appearance:none;inline-size:100%;block-size:var(--apex-picker-slider-h,12px);border-radius:var(--apex-picker-slider-radius,var(--r-full));border:1px solid var(--apex-picker-slider-border,var(--border-subtle));outline:none;margin:0;cursor:pointer}
-.apex-picker[data-orientation="vertical"] .apex-picker__slider input{writing-mode:vertical-lr;direction:rtl;inline-size:12px;block-size:150px}
+.apex-picker[data-orientation="vertical"] .apex-picker__slider input{writing-mode:vertical-lr;direction:rtl;inline-size:var(--apex-picker-slider-length,150px);block-size:var(--apex-picker-slider-h,12px)}
 .apex-picker__slider--hue input{background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
 .apex-picker[data-orientation="vertical"] .apex-picker__slider--hue input{background:linear-gradient(to bottom,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
 .apex-picker__slider--alpha input{background:linear-gradient(to right,transparent,var(--solid,#000)),repeating-conic-gradient(var(--apex-picker-check,var(--bg-muted)) 0% 25%,transparent 0% 50%) 0 0/8px 8px}
@@ -3032,3 +3032,7 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 .apex-stepper__glyph{font-size:var(--apex-stepper-glyph-fs,17px);font-weight:600;line-height:1}
 /* Button group help. Was .apex-field__msg, which coupled it to a component it has nothing to do with. */
 .apex-btngroup__help{margin:0;font-size:var(--apex-btngroup-help-fs,12.5px);line-height:1.45;color:var(--apex-btngroup-help-fg,var(--fg-subtle))}
+/* Visually hidden, still read aloud. Used where a control carries its own
+   visible affordance but needs a name — the picker's hue and opacity
+   tracks, for instance. */
+.sr-only{position:absolute;inline-size:1px;block-size:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}

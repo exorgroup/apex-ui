@@ -51,8 +51,11 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   /** The marker dragged across the square — its ring, not its fill, which
       always shows the colour under it. */
   thumbColor?: string;
-  /** The hue and alpha tracks, and the handle on them. */
+  /** The hue and alpha tracks, and the handle on them. `sliderHeight` is the
+      track's thickness; `sliderLength` its long axis, which only applies when
+      orientation is vertical (horizontally it fills the width). */
   sliderHeight?: string;
+  sliderLength?: string;
   sliderThumbColor?: string;
   /** Every swatch. */
   swatchSize?: string;
@@ -90,6 +93,7 @@ const pickerStyle = computed(() => {
     [props.areaRadius, '--apex-picker-area-radius'],
     [props.thumbColor, '--apex-picker-thumb-border'],
     [props.sliderHeight, '--apex-picker-slider-h'],
+    [props.sliderLength, '--apex-picker-slider-length'],
     [props.sliderThumbColor, '--apex-picker-slider-thumb'],
     [props.swatchSize, '--apex-swatch-size'],
     [props.swatchBorderColor, '--apex-swatch-border'],

@@ -182,3 +182,30 @@ describe('ApexColorPicker — the props the gallery exposes', () => {
     expect(w.find('.apex-picker').exists()).toBe(false);
   });
 });
+
+describe('ApexColorPicker — vertical tracks and hidden labels', () => {
+  it('the vertical tracks are long on the inline axis and thin on the block one', () => {
+    // writing-mode: vertical-lr turns the inline axis vertical, so inline-size
+    // is the track's length and block-size its thickness. Having those the
+    // wrong way round drew wide, short bars lying across the popover.
+    const w = mount(ApexColorPicker, {
+      props: {
+        label: 'Brand colour', modelValue: '#0B5FFF', inline: true,
+        orientation: 'vertical', sliderLength: '190px', sliderHeight: '14px',
+      },
+    });
+    const style = w.find('.apex-picker').element.parentElement!.getAttribute('style') || '';
+    expect(style).toContain('--apex-picker-slider-length: 190px');
+    expect(style).toContain('--apex-picker-slider-h: 14px');
+    expect(w.find('.apex-picker').attributes('data-orientation')).toBe('vertical');
+  });
+
+  it('the track labels are marked screen-reader-only', () => {
+    const w = mount(ApexColorPicker, {
+      props: { label: 'Brand colour', modelValue: '#0B5FFF', inline: true, showAlpha: true },
+    });
+    const hidden = w.findAll('.sr-only').map((n) => n.text());
+    expect(hidden).toContain('Hue');
+    expect(hidden).toContain('Opacity');
+  });
+});
