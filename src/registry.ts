@@ -654,6 +654,122 @@ export const SNIP_TONE = `/* One variable per tone, and it reaches every control
 /** The action controls, whose shared half lives on ApexButton rather than ApexField. */
 export const BUTTON_FAMILY = ['button', 'splitbutton', 'speeddial', 'buttongroup'];
 
+/**
+ * "Add new" — the row both choosers can offer at the foot of their list.
+ * One block, shown on ApexSelect and ApexMultiselect alike, because the API
+ * and the flows are identical on both.
+ */
+export const ADD_NEW_PERMISSION = `// main.ts — register the resolver once and every chooser is gated.
+// It is tied to no authorisation library: return a boolean however you like.
+app.use(ApexUI, {
+  canCreate: (resource) => permissions.value[resource]?.includes('create') ?? false,
+});
+
+// With apex-autentica, the same option reads its permission map:
+import { can, useCan } from '@exorgroup/apex-autentica';
+const { permissions } = useCan();
+app.use(ApexUI, { canCreate: (r) => can(permissions.value, r, 'create') });
+
+// Without any library at all — a plain list is perfectly valid:
+const allowed = ['localities', 'venues'];
+app.use(ApexUI, { canCreate: (r) => allowed.includes(r) });
+
+<!-- Then a control only names what it creates. -->
+<ApexSelect v-model="locality" :options="localities" add-new resource="localities" />
+
+<!-- canAddNew overrides the resolver, in either direction. Useful for a
+     screen-specific rule the resolver cannot know about. -->
+<ApexSelect v-model="locality" :options="localities" add-new :can-add-new="form.editable" />
+
+/* Denied means the row is hidden, not disabled: a greyed-out "Add new"
+   still advertises a feature the user cannot have. And this is UX only —
+   the endpoint that creates the record must authorise the request itself. */`;
+
+export const ADD_NEW_MODAL = `<!-- The control emits and steps back. It never mutates the list or the
+     value, so the same handler covers a dialog, a route or an inline form. -->
+<ApexSelect v-model="locality" :options="localities" add-new resource="localities"
+  filter @add-new="createLocality" />
+
+<script setup>
+import { useApexDialog } from '@exorgroup/apex-ui';
+import LocalityForm from './LocalityForm.vue';
+
+const localities = ref([...]);
+const locality = ref(null);
+const dialog = useApexDialog();
+
+/* \`query\` is whatever was typed in the filter, so the form opens with the
+   name already filled in — the user typed it once and should not retype it. */
+function createLocality({ query }) {
+  dialog.open(LocalityForm, {
+    props: { header: 'New locality', width: '420px', modal: true },
+    contentProps: { name: query },
+    onClose: ({ data }) => {
+      if (!data) return;               // dismissed
+      localities.value.push(data);     // the app owns the list…
+      locality.value = data.value;     // …and the value
+    },
+  });
+}
+<\/script>
+
+<!-- LocalityForm.vue — a small form that hands its record back. -->
+<script setup>
+const props = defineProps({ name: String });
+const dialogRef = inject('dialogRef');
+const form = reactive({ label: props.name ?? '', code: '' });
+
+async function save() {
+  const saved = await api.post('/localities', form);
+  dialogRef.value.close({ value: saved.id, label: saved.name });
+}
+<\/script>
+
+/* The redirect flow needs none of this. Navigate in the handler; when the
+   user comes back the page has refetched its options anyway. Worth knowing
+   that leaving the page discards anything unsaved on the form behind it,
+   which is the reason to prefer the dialog. */
+function createLocality() { router.visit('/localities/create'); }`;
+
+export const ADD_NEW_CASCADED = `<!-- Cascaded: the form opened from a select contains a select, and that one
+     offers Add New too. Nothing extra is needed — useApexDialog holds a
+     stack, so each dialog sits above the one that opened it and closes
+     independently. -->
+
+<!-- LocalityForm.vue, opened from the locality picker above -->
+<template>
+  <ApexInput v-model="form.label" label="Locality" />
+
+  <!-- …and this one can create a country without leaving the form. -->
+  <ApexSelect v-model="form.country" :options="countries" label="Country"
+    add-new resource="countries" filter @add-new="createCountry" />
+</template>
+
+<script setup>
+const dialog = useApexDialog();
+const countries = ref([...]);
+
+function createCountry({ query }) {
+  /* Opens a SECOND dialog over this one. z-index is handled: each instance
+     gets 1000 + index * 10, so the new form is always on top. */
+  dialog.open(CountryForm, {
+    props: { header: 'New country', width: '380px', modal: true },
+    contentProps: { name: query },
+    onClose: ({ data }) => {
+      if (!data) return;
+      countries.value.push(data);
+      form.country = data.value;   // back on the locality form, unharmed
+    },
+  });
+}
+<\/script>
+
+/* One layout caveat, stated rather than discovered: a dialog panel is
+   overflow:hidden and its body overflow:auto, so a select's overlay opened
+   near the foot of a short dialog is clipped at the body edge and scrolls
+   into view rather than floating over it. Give a dialog that hosts a
+   chooser enough height, or put the chooser away from the bottom edge. */`;
+
 /** Per-control customisation: [ui key, part, variables it responds to]. */
 export const OWN_PARTS: Record<string, string[][]> = {
   select: [

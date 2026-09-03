@@ -4,6 +4,7 @@ import {
   AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, COMMON_CONTROLS, ENTRIES, FORMATTING_RULE,
   ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
   PAGES, PG_COLORS, QUANTITY_RULES, ROLE_OPTIONS, SHARED_FIELD_PROPS, SIZES, STATE_CASES,
+  ADD_NEW_CASCADED, ADD_NEW_MODAL, ADD_NEW_PERMISSION,
   BUTTON_FAMILY, DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
   OWN_PARTS, SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_OWN, SNIP_PROPS, SNIP_TONE,
   SNIP_UI, SPLIT_MODEL,
@@ -171,6 +172,13 @@ const rulesQty = ref(3);
 
 /** One value per arc so the three knobs move independently. */
 const arcDemo = reactive<Record<number, number>>({ 180: 30, 270: 55, 360: 80 });
+
+/** The Add New demo: the row emits, and the page shows what it emitted. */
+const addNewDemo = ref<string | null>(null);
+const addNewSeen = ref('');
+const onDemoAddNew = (p: { query: string }) => {
+  addNewSeen.value = `add-new { query: "${p.query}" }`;
+};
 
 /** ApexField demos: the bare shell, and the two restyled inputs. */
 const fieldValue = ref('8080');
@@ -1125,6 +1133,53 @@ async function copyUsage() {
           </div>
         </template>
 
+
+        <!-- Add New — a row both choosers can offer, so one section serves both. -->
+        <template v-if="entry.id === 'select' || entry.id === 'multiselect'">
+          <h2>Add new</h2>
+          <p class="note">
+            When the record the user needs is not in the list yet,
+            <code>add-new</code> puts a row at the foot of the overlay. Activating it
+            emits <code>add-new</code> with whatever was typed in the filter and closes
+            the overlay — nothing else. The control never changes the options or the
+            value, so the same handler covers a dialog, a route or an inline form, and
+            your list stays the one source of truth.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">Nothing typed</span>
+              <ApexSelect v-model="addNewDemo" :options="ZONE_OPTIONS" label="Zone"
+                          add-new filter placeholder="Choose a zone"
+                          @add-new="onDemoAddNew" />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">Permission denied — the row is hidden</span>
+              <ApexSelect :options="ZONE_OPTIONS" label="Zone" add-new
+                          :can-add-new="false" placeholder="Choose a zone" />
+            </div>
+          </div>
+          <p v-if="addNewSeen" class="note">
+            Last event: <code>{{ addNewSeen }}</code>
+          </p>
+
+          <h3>Who may see the row</h3>
+          <p class="note">
+            One plugin option gates every chooser in the app, so a call site names only
+            what it creates. It takes a plain function and is tied to no authorisation
+            library.
+          </p>
+          <div class="usage"><pre><code>{{ ADD_NEW_PERMISSION }}</code></pre></div>
+
+          <h3>Opening a form in a dialog</h3>
+          <div class="usage"><pre><code>{{ ADD_NEW_MODAL }}</code></pre></div>
+
+          <h3>Cascaded — a chooser inside the form it opened</h3>
+          <p class="note">
+            No extra work: <code>useApexDialog</code> keeps a stack, so a second form
+            opened from the first sits above it and closes on its own.
+          </p>
+          <div class="usage"><pre><code>{{ ADD_NEW_CASCADED }}</code></pre></div>
+        </template>
 
         <!-- Every field control gets a Customising section. The shared surface is
              documented once on ApexField; this covers only what this control adds. -->
