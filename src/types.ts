@@ -106,7 +106,8 @@ export interface ApexFieldClasses {
   checkbox?: string;
   /** ApexTextarea — the character counter. */
   counter?: string;
-  /** ApexPassword — the meter and checklist panel. */
+  /** ApexPassword — the meter and checklist panel. ApexOrderList — the framed
+      panel holding the filter and the list. */
   panel?: string;
   /** ApexPassword — the four-band strength bar. */
   meter?: string;
@@ -192,6 +193,17 @@ export interface ApexFieldClasses {
   column?: string;
   heading?: string;
   footer?: string;
+  /** ApexTreeSelect — a branch and its children, and the expand/collapse
+      button. A node's row is `option`, as a row is everywhere else. */
+  branch?: string;
+  twisty?: string;
+  /** ApexOrderList — the framed panel, the column of move buttons, one of
+      those buttons, a row's drag handle and its position number. The scrolling
+      list is `list` and a row is `option`. */
+  controls?: string;
+  moveButton?: string;
+  grip?: string;
+  index?: string;
 }
 
 /**
@@ -231,7 +243,8 @@ export interface ApexButtonClasses {
   /** ApexButton — the label span and the corner badge. */
   label?: string;
   badge?: string;
-  /** ApexSplitButton — the default action and the chevron half. */
+  /** ApexSplitButton — the default action and the chevron half. Also
+      ApexSpeedDial's action button, inside its positioner. */
   action?: string;
   toggle?: string;
   /** ApexSpeedDial — the trigger, the fan, one action, the page mask, a tooltip. */
@@ -250,8 +263,6 @@ export interface ApexButtonClasses {
   menuHeader?: string;
   menuHint?: string;
   menuSeparator?: string;
-  /** ApexSpeedDial — one action button, inside its positioner. */
-  action?: string;
 }
 
 export interface ApexFieldProps {

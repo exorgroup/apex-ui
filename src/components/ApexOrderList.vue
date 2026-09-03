@@ -12,6 +12,7 @@ import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { normaliseOptions, pickFieldProps } from '../core/utils';
 import { useApexI18n } from '../core/i18n';
+import { useCanCreate } from '../core/canCreate';
 import type { ApexFieldProps, ApexOption, ApexOptionsInput } from '../types';
 
 const props = withDefaults(defineProps<ApexFieldProps & {
@@ -37,13 +38,54 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   /** Turn off drag-and-drop, leaving only the buttons. */
   noDrag?: boolean;
   emptyMessage?: string;
-}>(), { scrollHeight: 280, controls: 'start', controlsAlign: 'start', extremes: true, statusIcon: false });
+
+  /**
+   * Offer an "Add new" row at the foot of the list, for when the record the
+   * user wants to place in the order does not exist yet. Activating it emits
+   * `add-new`; the list stays put, since there is no overlay to dismiss.
+   */
+  addNew?: boolean;
+  /** Row text while the filter is empty. With a query it reads Add "…". */
+  addNewLabel?: string;
+  /** What is being created, passed to the app-level canCreate resolver. */
+  resource?: string;
+  /** Overrides the resolver. Set it and no resolver is consulted. */
+  canAddNew?: boolean;
+
+  /* The list's appearance. Sugar over --apex-order-*. */
+  /** The framed panel around the filter and the list. */
+  panelBackground?: string;
+  panelBorderColor?: string;
+  panelRadius?: string;
+  /** A row: its text, corner, and the tint under the pointer. */
+  rowColor?: string;
+  rowRadius?: string;
+  rowHoverBackground?: string;
+  /** A chosen row. Set both — the default foreground is the accent. */
+  rowSelectedBackground?: string;
+  rowSelectedColor?: string;
+  /** The move buttons beside the list, and the drag handle on a row. */
+  moveButtonColor?: string;
+  moveButtonSize?: string;
+  gripColor?: string;
+}>(), {
+  scrollHeight: 280,
+  controls: 'start',
+  controlsAlign: 'start',
+  extremes: true,
+  statusIcon: false,
+  /* Tri-state: yes, no, or "ask the resolver". Vue casts an absent boolean
+     prop to false, which would read as a denial and silence the resolver. */
+  canAddNew: undefined,
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: unknown[]): void;
   (e: 'update:selection', v: unknown[]): void;
   (e: 'reorder', payload: { from: number; to: number }): void;
   (e: 'change'): void;
+  /** The row was activated. `query` is whatever was typed in the filter. */
+  (e: 'add-new', payload: { query: string }): void;
 }>();
 
 const t = useApexI18n();
@@ -68,6 +110,36 @@ const chosenIndexes = computed(() =>
   items.value.reduce<number[]>((acc, o, i) => (chosen.value.includes(o.value) ? [...acc, i] : acc), []));
 
 const isChosen = (o: ApexOption) => chosen.value.includes(o.value);
+
+/* Explicit prop wins; otherwise the app-level resolver is asked about this
+   control's resource; otherwise the row shows. Hidden, not disabled, when the
+   answer is no. */
+const canCreate = useCanCreate();
+const showAddNew = computed(() => !!props.addNew && canCreate(props.canAddNew, props.resource));
+const addNewText = computed(() => (query.value.trim()
+  ? `Add “${query.value.trim()}”`
+  : props.addNewLabel || t('apexui.addNew')));
+const pickAddNew = () => emit('add-new', { query: query.value.trim() });
+
+/** Appearance prop -> CSS variable. Only what is set. */
+const orderStyle = computed(() => {
+  const out: Record<string, string> = {};
+  const map: Array<[string | undefined, string]> = [
+    [props.panelBackground, '--apex-order-panel-bg'],
+    [props.panelBorderColor, '--apex-order-panel-border'],
+    [props.panelRadius, '--apex-order-panel-radius'],
+    [props.rowColor, '--apex-order-row-fg'],
+    [props.rowRadius, '--apex-order-row-radius'],
+    [props.rowHoverBackground, '--apex-order-row-hover-bg'],
+    [props.rowSelectedBackground, '--apex-order-row-selected-bg'],
+    [props.rowSelectedColor, '--apex-order-row-selected-fg'],
+    [props.moveButtonColor, '--apex-order-btn-fg'],
+    [props.moveButtonSize, '--apex-order-btn-size'],
+    [props.gripColor, '--apex-order-grip-fg'],
+  ];
+  map.forEach(([v, name]) => { if (v) out[name] = v; });
+  return Object.keys(out).length ? out : undefined;
+});
 const canUp = computed(() => chosenIndexes.value.length > 0 && chosenIndexes.value[0] > 0);
 const canDown = computed(() => {
   const idx = chosenIndexes.value;
@@ -172,36 +244,37 @@ function onRowKey(i: number, o: ApexOption, e: KeyboardEvent) {
 </script>
 
 <template>
-  <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, invalid }">
-    <div class="apex-order" :data-controls="controls" :data-controls-align="controlsAlign"
+  <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, invalid, ui }">
+    <div class="apex-order" :class="ui.control" :style="orderStyle"
+         :data-controls="controls" :data-controls-align="controlsAlign"
          :data-disabled="disabled ? 'true' : 'false'">
-      <div v-if="controls !== 'none'" class="apex-order__controls">
-        <button type="button" class="apex-order__btn" :disabled="disabled || !canUp || filtering"
+      <div v-if="controls !== 'none'" class="apex-order__controls" :class="ui.controls">
+        <button type="button" class="apex-order__btn" :class="ui.moveButton" :disabled="disabled || !canUp || filtering"
                 :aria-label="'Move up'" @click="move(-1)"><ApexIcon name="keyboard_arrow_up" :size="19" /></button>
-        <button v-if="extremes" type="button" class="apex-order__btn" :disabled="disabled || !canUp || filtering"
+        <button v-if="extremes" type="button" class="apex-order__btn" :class="ui.moveButton" :disabled="disabled || !canUp || filtering"
                 :aria-label="'Move to top'" @click="moveToEdge(false)"><ApexIcon name="keyboard_double_arrow_up" :size="19" /></button>
-        <button v-if="extremes" type="button" class="apex-order__btn" :disabled="disabled || !canDown || filtering"
+        <button v-if="extremes" type="button" class="apex-order__btn" :class="ui.moveButton" :disabled="disabled || !canDown || filtering"
                 :aria-label="'Move to bottom'" @click="moveToEdge(true)"><ApexIcon name="keyboard_double_arrow_down" :size="19" /></button>
-        <button type="button" class="apex-order__btn" :disabled="disabled || !canDown || filtering"
+        <button type="button" class="apex-order__btn" :class="ui.moveButton" :disabled="disabled || !canDown || filtering"
                 :aria-label="'Move down'" @click="move(1)"><ApexIcon name="keyboard_arrow_down" :size="19" /></button>
       </div>
 
-      <div class="apex-order__panel">
-        <div v-if="filter" class="apex-pop__filter">
+      <div class="apex-order__panel" :class="ui.panel">
+        <div v-if="filter" class="apex-pop__filter" :class="ui.filter">
           <ApexIcon name="search" />
           <input type="text" :value="query" :placeholder="filterPlaceholder || t('apexui.search')"
                  :aria-label="t('apexui.search')" autocomplete="off" :disabled="disabled"
                  @input="query = ($event.target as HTMLInputElement).value" />
-          <button v-if="query" type="button" class="apex-ctl__btn" :aria-label="t('apexui.clear')" @click="query = ''">
+          <button v-if="query" type="button" class="apex-ctl__btn" :class="ui.button" :aria-label="t('apexui.clear')" @click="query = ''">
             <ApexIcon name="close" :size="16" />
           </button>
         </div>
 
-        <ul ref="listEl" class="apex-order__list" :id="id" role="listbox" :aria-multiselectable="many || undefined"
+        <ul ref="listEl" class="apex-order__list" :class="ui.list" :id="id" role="listbox" :aria-multiselectable="many || undefined"
             :aria-describedby="describedBy" :aria-invalid="invalid || undefined"
             :aria-label="labelPlacement === 'hidden' ? label : undefined"
             :style="{ maxHeight: scrollHeight + 'px' }">
-          <li v-for="(o, vi) in visible" :key="String(o.value)" class="apex-order__row" role="option"
+          <li v-for="o in visible" :key="String(o.value)" class="apex-order__row" :class="ui.option" role="option"
               :aria-selected="isChosen(o)" :aria-disabled="o.disabled || undefined"
               :tabindex="disabled ? -1 : 0" :data-index="items.indexOf(o)"
               :data-selected="isChosen(o) ? 'true' : 'false'"
@@ -215,22 +288,27 @@ function onRowKey(i: number, o: ApexOption, e: KeyboardEvent) {
               @dragover="onDragOver(items.indexOf(o), $event)"
               @drop.prevent="onDrop(items.indexOf(o))"
               @dragend="onDragEnd">
-            <ApexIcon v-if="canDrag" name="drag_indicator" class="apex-order__grip" :size="18" />
-            <span v-if="checkbox" class="apex-cb__box" :data-on="isChosen(o)" aria-hidden="true">
+            <ApexIcon v-if="canDrag" name="drag_indicator" class="apex-order__grip" :class="ui.grip" :size="18" />
+            <span v-if="checkbox" class="apex-cb__box" :class="ui.checkbox" :data-on="isChosen(o)" aria-hidden="true">
               <ApexIcon v-if="isChosen(o)" name="check" :size="14" />
             </span>
-            <img v-if="o.image" class="apex-pop__img" :src="o.image" alt="" />
+            <img v-if="o.image" class="apex-pop__img" :class="ui.thumbnail" :src="o.image" alt="" />
             <ApexIcon v-else-if="o.icon" :name="o.icon" :size="18" />
             <span class="apex-order__txt">
               <slot name="item" :item="o" :index="items.indexOf(o)">{{ o.label }}</slot>
-              <span v-if="o.help" class="apex-pop__help">{{ o.help }}</span>
+              <span v-if="o.help" class="apex-pop__help" :class="ui.optionHelp">{{ o.help }}</span>
             </span>
-            <span class="apex-order__num">{{ items.indexOf(o) + 1 }}</span>
+            <span class="apex-order__num" :class="ui.index">{{ items.indexOf(o) + 1 }}</span>
           </li>
-          <li v-if="!visible.length" class="apex-pop__empty" role="presentation">
+          <li v-if="!visible.length" class="apex-pop__empty" :class="ui.empty" role="presentation">
             {{ emptyMessage || t('apexui.noResults') }}
           </li>
         </ul>
+        <button v-if="showAddNew" type="button" class="apex-pop__add" :class="ui.addNew"
+                :disabled="disabled" @click="pickAddNew">
+          <ApexIcon name="add" :size="18" />
+          <span>{{ addNewText }}</span>
+        </button>
       </div>
     </div>
   </ApexField>
