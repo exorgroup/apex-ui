@@ -182,6 +182,16 @@ export interface ApexFieldClasses {
   optionHelp?: string;
   /** The "Add new" row at the foot of the overlay. */
   addNew?: string;
+  /** ApexListbox — the scrolling list inside the box, and a group heading in
+      it. The box itself is `control` and a row is `option`, as elsewhere. */
+  list?: string;
+  group?: string;
+  /** ApexCascadeSelect — the overlay holding the columns, one column, and the
+      heading and footer a column can carry. */
+  cascade?: string;
+  column?: string;
+  heading?: string;
+  footer?: string;
 }
 
 /**

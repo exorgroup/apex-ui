@@ -146,9 +146,9 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
 
 <template>
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="filled || (isFloat && !!placeholder)" :focused="focused || open"
-             v-slot="{ id, describedBy, invalid, statusGlyph }">
+             v-slot="{ id, describedBy, invalid, statusGlyph, ui }">
     <div ref="root" style="position:relative">
-      <div ref="trigger" class="apex-ctl apex-ctl--trigger" role="combobox" :id="id"
+      <div ref="trigger" class="apex-ctl apex-ctl--trigger" :class="ui.control" role="combobox" :id="id"
            :aria-expanded="open" aria-haspopup="tree" :aria-controls="listId"
            :aria-describedby="describedBy" :aria-invalid="invalid || undefined"
            :aria-label="labelPlacement === 'hidden' ? label : undefined"
@@ -156,40 +156,40 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
            :data-disabled="disabled ? 'true' : 'false'"
            @click="open ? (open = false) : openMenu()" @keydown="onKey"
            @focus="focused = true" @blur="focused = false">
-        <img v-if="selectedLeaf && selectedLeaf.image" class="apex-ctl__img" :src="selectedLeaf.image" alt="" />
-        <ApexIcon v-else-if="selectedLeaf && selectedLeaf.icon" :name="selectedLeaf.icon" class="apex-ctl__icon" />
-        <ApexIcon v-else-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" />
-        <span v-if="filled" class="apex-ctl__value">{{ displayValue }}</span>
-        <span v-else class="apex-ctl__ph">{{ placeholder || t('apexui.select') }}</span>
-        <ApexIcon v-if="loading" name="progress_activity" spin class="apex-ctl__icon" />
-        <button v-if="clearable && filled && !disabled" type="button" class="apex-ctl__btn"
+        <img v-if="selectedLeaf && selectedLeaf.image" class="apex-ctl__img" :class="ui.thumbnail" :src="selectedLeaf.image" alt="" />
+        <ApexIcon v-else-if="selectedLeaf && selectedLeaf.icon" :name="selectedLeaf.icon" class="apex-ctl__icon" :class="ui.icon" />
+        <ApexIcon v-else-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" :class="ui.icon" />
+        <span v-if="filled" class="apex-ctl__value" :class="ui.value">{{ displayValue }}</span>
+        <span v-else class="apex-ctl__ph" :class="ui.placeholder">{{ placeholder || t('apexui.select') }}</span>
+        <ApexIcon v-if="loading" name="progress_activity" spin class="apex-ctl__icon" :class="ui.icon" />
+        <button v-if="clearable && filled && !disabled" type="button" class="apex-ctl__btn" :class="ui.button"
                 :aria-label="t('apexui.clear')" @click.stop="emit('update:modelValue', null)">
           <ApexIcon name="close" :size="17" />
         </button>
         <ApexIcon v-if="statusGlyph" :name="statusGlyph" class="apex-ctl__status" :size="18" />
-        <ApexIcon name="keyboard_arrow_down" class="apex-ctl__icon apex-ctl__chev" :size="19" :data-open="open" />
+        <ApexIcon name="keyboard_arrow_down" class="apex-ctl__icon apex-ctl__chev" :class="ui.chevron" :size="19" :data-open="open" />
       </div>
 
-      <div v-if="open" class="apex-cascade" :id="listId" role="tree">
-        <div v-for="(list, level) in panels" :key="level" class="apex-pop apex-cascade__panel" role="group">
-          <p v-if="level === 0 && heading" class="apex-cascade__heading">{{ heading }}</p>
-          <button v-for="(o, i) in list" :key="String(o.value ?? o.label)" type="button" class="apex-pop__opt"
+      <div v-if="open" class="apex-cascade" :class="ui.cascade" :id="listId" role="tree">
+        <div v-for="(list, level) in panels" :key="level" class="apex-pop apex-cascade__panel" :class="ui.column" role="group">
+          <p v-if="level === 0 && heading" class="apex-cascade__heading" :class="ui.heading">{{ heading }}</p>
+          <button v-for="(o, i) in list" :key="String(o.value ?? o.label)" type="button" class="apex-pop__opt" :class="ui.option"
                   role="treeitem" :aria-expanded="!isLeaf(o) ? (branch[level] === i) : undefined"
                   :aria-selected="isLeaf(o) && o.value === modelValue"
                   :data-active="active[0] === level && active[1] === i ? 'true' : 'false'"
                   :disabled="o.disabled"
                   @mouseenter="enter(level, i)" @click="choose(level, i)">
-            <img v-if="o.image" class="apex-pop__img" :src="o.image" alt="" />
+            <img v-if="o.image" class="apex-pop__img" :class="ui.thumbnail" :src="o.image" alt="" />
             <ApexIcon v-else-if="o.icon" :name="o.icon" :size="18" />
             <span>
               {{ o.label }}
-              <span v-if="o.help" class="apex-pop__help">{{ o.help }}</span>
+              <span v-if="o.help" class="apex-pop__help" :class="ui.optionHelp">{{ o.help }}</span>
             </span>
-            <ApexIcon v-if="!isLeaf(o)" name="chevron_right" class="apex-pop__tick" />
-            <ApexIcon v-else-if="o.value === modelValue" name="check" class="apex-pop__tick" />
+            <ApexIcon v-if="!isLeaf(o)" name="chevron_right" class="apex-pop__tick" :class="ui.tick" />
+            <ApexIcon v-else-if="o.value === modelValue" name="check" class="apex-pop__tick" :class="ui.tick" />
           </button>
-          <p v-if="!list.length" class="apex-pop__empty">{{ t('apexui.noResults') }}</p>
-          <button v-if="level === 0 && footerAction" type="button" class="apex-cascade__footer" @click="emit('action')">
+          <p v-if="!list.length" class="apex-pop__empty" :class="ui.empty">{{ t('apexui.noResults') }}</p>
+          <button v-if="level === 0 && footerAction" type="button" class="apex-cascade__footer" :class="ui.footer" @click="emit('action')">
             <ApexIcon v-if="footerAction.icon" :name="footerAction.icon" :size="17" />
             {{ footerAction.label }}
           </button>

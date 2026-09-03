@@ -102,51 +102,51 @@ function onKey(e: KeyboardEvent) {
 </script>
 
 <template>
-  <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, invalid }">
-    <div class="apex-listbox" :data-disabled="disabled ? 'true' : 'false'">
-      <div v-if="filter" class="apex-pop__filter">
+  <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, invalid, ui }">
+    <div class="apex-listbox" :class="ui.control" :data-disabled="disabled ? 'true' : 'false'">
+      <div v-if="filter" class="apex-pop__filter" :class="ui.filter">
         <ApexIcon name="search" />
         <input type="text" :value="query" :placeholder="filterPlaceholder || t('apexui.search')"
                :aria-label="t('apexui.search')" autocomplete="off" :disabled="disabled"
                @input="query = ($event.target as HTMLInputElement).value; active = 0" @keydown="onKey" />
-        <button v-if="query" type="button" class="apex-ctl__btn" :aria-label="t('apexui.clear')" @click="query = ''">
+        <button v-if="query" type="button" class="apex-ctl__btn" :class="ui.button" :aria-label="t('apexui.clear')" @click="query = ''">
           <ApexIcon name="close" :size="16" />
         </button>
       </div>
 
-      <button v-if="toggleAll && many && !query" type="button" class="apex-pop__all" :disabled="disabled"
+      <button v-if="toggleAll && many && !query" type="button" class="apex-pop__all" :class="ui.selectAll" :disabled="disabled"
               @click="toggleEverything">
         {{ allSelected ? t('apexui.clear') : t('apexui.select') }}
         <span>{{ selected.length }} / {{ allOptions.length }}</span>
       </button>
 
-      <ul class="apex-listbox__list" :id="listId" role="listbox" :tabindex="disabled ? -1 : 0"
+      <ul class="apex-listbox__list" :class="ui.list" :id="listId" role="listbox" :tabindex="disabled ? -1 : 0"
           :aria-multiselectable="many || undefined" :aria-describedby="describedBy"
           :aria-invalid="invalid || undefined" :aria-label="labelPlacement === 'hidden' ? label : undefined"
           :style="{ maxHeight: scrollHeight + 'px' }" @keydown="onKey">
         <template v-for="(g, gi) in filtered" :key="gi">
-          <li v-if="g.label" class="apex-listbox__group" role="presentation">
+          <li v-if="g.label" class="apex-listbox__group" :class="ui.group" role="presentation">
             <ApexIcon v-if="g.icon" :name="g.icon" :size="16" />{{ g.label }}
           </li>
-          <li v-for="o in g.items" :key="String(o.value)" class="apex-listbox__opt" role="option"
+          <li v-for="o in g.items" :key="String(o.value)" class="apex-listbox__opt" :class="ui.option" role="option"
               :aria-selected="isSelected(o)" :aria-disabled="o.disabled || undefined"
               :data-selected="isSelected(o) ? 'true' : 'false'"
               :data-active="flat.indexOf(o) === active ? 'true' : 'false'"
               :data-disabled="(o.disabled || (atMax && !isSelected(o))) ? 'true' : 'false'"
               @click="pick(o)" @mouseenter="active = flat.indexOf(o)">
-            <span v-if="checkbox" class="apex-cb__box" :data-on="isSelected(o)" aria-hidden="true">
+            <span v-if="checkbox" class="apex-cb__box" :class="ui.checkbox" :data-on="isSelected(o)" aria-hidden="true">
               <ApexIcon v-if="isSelected(o)" name="check" :size="14" />
             </span>
-            <img v-if="o.image" class="apex-pop__img" :src="o.image" alt="" />
+            <img v-if="o.image" class="apex-pop__img" :class="ui.thumbnail" :src="o.image" alt="" />
             <ApexIcon v-else-if="o.icon" :name="o.icon" :size="18" />
             <span class="apex-listbox__txt">
               <slot name="option" :option="o">{{ o.label }}</slot>
-              <span v-if="o.help" class="apex-pop__help">{{ o.help }}</span>
+              <span v-if="o.help" class="apex-pop__help" :class="ui.optionHelp">{{ o.help }}</span>
             </span>
-            <ApexIcon v-if="!checkbox && isSelected(o)" name="check" class="apex-pop__tick" />
+            <ApexIcon v-if="!checkbox && isSelected(o)" name="check" class="apex-pop__tick" :class="ui.tick" />
           </li>
         </template>
-        <li v-if="!flat.length" class="apex-pop__empty" role="presentation">
+        <li v-if="!flat.length" class="apex-pop__empty" :class="ui.empty" role="presentation">
           {{ emptyMessage || t('apexui.noResults') }}
         </li>
       </ul>
