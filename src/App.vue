@@ -175,8 +175,14 @@ const rulesQty = ref(3);
 /** One value per arc so the three knobs move independently. */
 const arcDemo = reactive<Record<number, number>>({ 180: 30, 270: 55, 360: 80 });
 
-/** The Add New demo: the row emits, and the page shows what it emitted. */
-const addNewDemo = ref<string | null>(null);
+/**
+ * The Add New demos. One section serves both choosers, so everything here is
+ * keyed by control: a multiselect's model is an array, a select's is a scalar,
+ * and sharing one ref would break whichever page it was not shaped for.
+ */
+const isMulti = computed(() => entry.value.id === 'multiselect');
+
+const addNewDemo = reactive<Record<string, unknown>>({ select: null, multiselect: [] });
 const addNewSeen = ref('');
 const onDemoAddNew = (p: { query: string }) => {
   addNewSeen.value = `add-new { query: "${p.query}" }`;
@@ -191,7 +197,7 @@ const localities = ref([
   { value: 'valletta', label: 'Valletta' },
   { value: 'mosta', label: 'Mosta' },
 ]);
-const locality = ref<string | null>(null);
+const locality = reactive<Record<string, unknown>>({ select: null, multiselect: [] });
 const localityLog = ref<string[]>([]);
 
 function createLocality({ query }: { query: string }) {
@@ -203,7 +209,9 @@ function createLocality({ query }: { query: string }) {
       const rec = data as { value: string; label: string } | undefined;
       if (!rec) { localityLog.value.unshift('dismissed — nothing added'); return; }
       localities.value.push(rec);   // the page owns the list…
-      locality.value = rec.value;   // …and the value
+      // …and the value, appended or assigned to suit the control.
+      if (isMulti.value) locality.multiselect = [...(locality.multiselect as unknown[]), rec.value];
+      else locality.select = rec.value;
       localityLog.value.unshift(`added "${rec.label}" and selected it`);
     },
   });
@@ -1177,14 +1185,15 @@ async function copyUsage() {
           <div class="grid grid--2">
             <div class="cell">
               <span class="cell__tag">Nothing typed</span>
-              <ApexSelect v-model="addNewDemo" :options="ZONE_OPTIONS" label="Zone"
-                          add-new filter placeholder="Choose a zone"
-                          @add-new="onDemoAddNew" />
+              <component :is="entry.name" v-model="addNewDemo[entry.id]"
+                         :options="ZONE_OPTIONS" label="Zone"
+                         add-new filter placeholder="Choose a zone"
+                         @add-new="onDemoAddNew" />
             </div>
             <div class="cell">
               <span class="cell__tag">Permission denied — the row is hidden</span>
-              <ApexSelect :options="ZONE_OPTIONS" label="Zone" add-new
-                          :can-add-new="false" placeholder="Choose a zone" />
+              <component :is="entry.name" :options="ZONE_OPTIONS" label="Zone" add-new
+                         :can-add-new="false" placeholder="Choose a zone" />
             </div>
           </div>
           <p v-if="addNewSeen" class="note">
@@ -1197,7 +1206,7 @@ async function copyUsage() {
             what it creates. It takes a plain function and is tied to no authorisation
             library.
           </p>
-          <div class="usage"><pre><code>{{ ADD_NEW_PERMISSION }}</code></pre></div>
+          <div class="usage"><pre><code>{{ ADD_NEW_PERMISSION(entry.name) }}</code></pre></div>
 
           <h3>Opening a form in a dialog</h3>
           <p class="note">
@@ -1210,9 +1219,10 @@ async function copyUsage() {
           <div class="grid grid--2">
             <div class="cell">
               <span class="cell__tag">Try it</span>
-              <ApexSelect v-model="locality" :options="localities" label="Locality"
-                          placeholder="Choose a locality" filter add-new
-                          resource="localities" @add-new="createLocality" />
+              <component :is="entry.name" v-model="locality[entry.id]"
+                         :options="localities" label="Locality"
+                         placeholder="Choose a locality" filter add-new
+                         resource="localities" @add-new="createLocality" />
             </div>
             <div class="cell">
               <span class="cell__tag">What happened</span>
@@ -1222,14 +1232,14 @@ async function copyUsage() {
               </ul>
             </div>
           </div>
-          <div class="usage"><pre><code>{{ ADD_NEW_MODAL }}</code></pre></div>
+          <div class="usage"><pre><code>{{ ADD_NEW_MODAL(entry.name, isMulti) }}</code></pre></div>
 
           <h3>Cascaded — a chooser inside the form it opened</h3>
           <p class="note">
             No extra work: <code>useApexDialog</code> keeps a stack, so a second form
             opened from the first sits above it and closes on its own.
           </p>
-          <div class="usage"><pre><code>{{ ADD_NEW_CASCADED }}</code></pre></div>
+          <div class="usage"><pre><code>{{ ADD_NEW_CASCADED(entry.name) }}</code></pre></div>
         </template>
 
         <!-- Every field control gets a Customising section. The shared surface is

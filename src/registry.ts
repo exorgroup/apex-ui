@@ -659,7 +659,7 @@ export const BUTTON_FAMILY = ['button', 'splitbutton', 'speeddial', 'buttongroup
  * One block, shown on ApexSelect and ApexMultiselect alike, because the API
  * and the flows are identical on both.
  */
-export const ADD_NEW_PERMISSION = `// main.ts — register the resolver once and every chooser is gated.
+export const ADD_NEW_PERMISSION = (Ctl: string) => `// main.ts — register the resolver once and every chooser is gated.
 // It is tied to no authorisation library: return a boolean however you like.
 app.use(ApexUI, {
   canCreate: (resource) => permissions.value[resource]?.includes('create') ?? false,
@@ -675,19 +675,19 @@ const allowed = ['localities', 'venues'];
 app.use(ApexUI, { canCreate: (r) => allowed.includes(r) });
 
 <!-- Then a control only names what it creates. -->
-<ApexSelect v-model="locality" :options="localities" add-new resource="localities" />
+<${Ctl} v-model="locality" :options="localities" add-new resource="localities" />
 
 <!-- canAddNew overrides the resolver, in either direction. Useful for a
      screen-specific rule the resolver cannot know about. -->
-<ApexSelect v-model="locality" :options="localities" add-new :can-add-new="form.editable" />
+<${Ctl} v-model="locality" :options="localities" add-new :can-add-new="form.editable" />
 
 /* Denied means the row is hidden, not disabled: a greyed-out "Add new"
    still advertises a feature the user cannot have. And this is UX only —
    the endpoint that creates the record must authorise the request itself. */`;
 
-export const ADD_NEW_MODAL = `<!-- The control emits and steps back. It never mutates the list or the
+export const ADD_NEW_MODAL = (Ctl: string, multi: boolean) => `<!-- The control emits and steps back. It never mutates the list or the
      value, so the same handler covers a dialog, a route or an inline form. -->
-<ApexSelect v-model="locality" :options="localities" add-new resource="localities"
+<${Ctl} v-model="locality" :options="localities" add-new resource="localities"
   filter @add-new="createLocality" />
 
 <script setup>
@@ -707,7 +707,9 @@ function createLocality({ query }) {
     onClose: ({ data }) => {
       if (!data) return;               // dismissed
       localities.value.push(data);     // the app owns the list…
-      locality.value = data.value;     // …and the value
+      ${multi
+        ? 'locality.value = [...locality.value, data.value];  // …and the value'
+        : 'locality.value = data.value;     // …and the value'}
     },
   });
 }
@@ -732,7 +734,7 @@ async function save() {
    which is the reason to prefer the dialog. */
 function createLocality() { router.visit('/localities/create'); }`;
 
-export const ADD_NEW_CASCADED = `<!-- Cascaded: the form opened from a select contains a select, and that one
+export const ADD_NEW_CASCADED = (Ctl: string) => `<!-- Cascaded: the form opened from a select contains a select, and that one
      offers Add New too. Nothing extra is needed — useApexDialog holds a
      stack, so each dialog sits above the one that opened it and closes
      independently. -->
@@ -742,7 +744,7 @@ export const ADD_NEW_CASCADED = `<!-- Cascaded: the form opened from a select co
   <ApexInput v-model="form.label" label="Locality" />
 
   <!-- …and this one can create a country without leaving the form. -->
-  <ApexSelect v-model="form.country" :options="countries" label="Country"
+  <${Ctl} v-model="form.country" :options="countries" label="Country"
     add-new resource="countries" filter @add-new="createCountry" />
 </template>
 
