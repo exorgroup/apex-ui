@@ -11,6 +11,8 @@ import {
   SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
 import type { DocEntry, DocPage } from './registry';
+import { useApexDialog } from '@exorgroup/apex-ui';
+import LocalityForm from './demos/LocalityForm.vue';
 
 const current = ref('input');
 const theme = ref<'light' | 'dark'>('dark');
@@ -179,6 +181,33 @@ const addNewSeen = ref('');
 const onDemoAddNew = (p: { query: string }) => {
   addNewSeen.value = `add-new { query: "${p.query}" }`;
 };
+
+/**
+ * The working demo. Everything below is what an application would write:
+ * the page owns the list and the value, and the dialog hands a record back.
+ */
+const dialog = useApexDialog();
+const localities = ref([
+  { value: 'valletta', label: 'Valletta' },
+  { value: 'mosta', label: 'Mosta' },
+]);
+const locality = ref<string | null>(null);
+const localityLog = ref<string[]>([]);
+
+function createLocality({ query }: { query: string }) {
+  localityLog.value.unshift(`add-new fired with query "${query}"`);
+  dialog.open(LocalityForm, {
+    props: { header: 'New locality', width: '430px', modal: true },
+    contentProps: { name: query },
+    onClose: ({ data }) => {
+      const rec = data as { value: string; label: string } | undefined;
+      if (!rec) { localityLog.value.unshift('dismissed — nothing added'); return; }
+      localities.value.push(rec);   // the page owns the list…
+      locality.value = rec.value;   // …and the value
+      localityLog.value.unshift(`added "${rec.label}" and selected it`);
+    },
+  });
+}
 
 /** ApexField demos: the bare shell, and the two restyled inputs. */
 const fieldValue = ref('8080');
@@ -1171,6 +1200,28 @@ async function copyUsage() {
           <div class="usage"><pre><code>{{ ADD_NEW_PERMISSION }}</code></pre></div>
 
           <h3>Opening a form in a dialog</h3>
+          <p class="note">
+            Working, not quoted. Type something that is not in the list, use the row,
+            fill the form and save — the record joins the list and is selected. The
+            form also carries a country chooser with an Add new of its own, so saving
+            a country from in there opens a second dialog above the first: that is the
+            cascaded case, and it needs no extra code.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">Try it</span>
+              <ApexSelect v-model="locality" :options="localities" label="Locality"
+                          placeholder="Choose a locality" filter add-new
+                          resource="localities" @add-new="createLocality" />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">What happened</span>
+              <p v-if="!localityLog.length" class="note">Nothing yet.</p>
+              <ul v-else class="demo-log">
+                <li v-for="(line, i) in localityLog.slice(0, 5)" :key="i">{{ line }}</li>
+              </ul>
+            </div>
+          </div>
           <div class="usage"><pre><code>{{ ADD_NEW_MODAL }}</code></pre></div>
 
           <h3>Cascaded — a chooser inside the form it opened</h3>
@@ -1343,4 +1394,6 @@ async function copyUsage() {
       </div>
     </main>
   </div>
+  <!-- Renders every dialog opened through useApexDialog. -->
+  <ApexDynamicDialog />
 </template>

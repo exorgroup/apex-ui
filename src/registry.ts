@@ -716,12 +716,13 @@ function createLocality({ query }) {
 <!-- LocalityForm.vue — a small form that hands its record back. -->
 <script setup>
 const props = defineProps({ name: String });
-const dialogRef = inject('dialogRef');
+const dialogRef = inject('dialogRef');   // plain object, not a ref
 const form = reactive({ label: props.name ?? '', code: '' });
 
 async function save() {
   const saved = await api.post('/localities', form);
-  dialogRef.value.close({ value: saved.id, label: saved.name });
+  /* dialogRef is a plain object, not a ref — no .value. */
+  dialogRef.close({ value: saved.id, label: saved.name });
 }
 <\/script>
 
