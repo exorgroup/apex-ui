@@ -615,6 +615,22 @@ export const BUTTON_FAMILY = ['button', 'splitbutton', 'speeddial', 'buttongroup
 
 /** Per-control customisation: [ui key, part, variables it responds to]. */
 export const OWN_PARTS: Record<string, string[][]> = {
+  datepicker: [
+    ['calendar', '.apex-cal', '--apex-cal-bg, --apex-cal-border, --apex-cal-radius, --apex-cal-shadow'],
+    ['nav', '.apex-cal__nav', 'the prev/next buttons are .apex-ctl__btn inside it'],
+    ['title', '.apex-cal__title', '--apex-cal-nav-fg, --apex-cal-nav-hover-bg, --apex-cal-nav-hover-fg'],
+    ['months', '.apex-cal__months', 'the row of columns — layout only'],
+    ['month', '.apex-cal__month', 'one column — layout only'],
+    ['monthLabel', '.apex-cal__mlabel', '--apex-cal-month-fg (shown once numberOfMonths is above one)'],
+    ['grid', '.apex-cal__grid', 'the seven columns — layout only'],
+    ['weekday', '.apex-cal__wd', '--apex-cal-wd-fg'],
+    ['day', '.apex-cal__day', '--apex-cal-day-fg, --apex-cal-day-radius, --apex-cal-day-hover-bg, --apex-cal-day-selected-bg, --apex-cal-day-selected-fg, --apex-cal-day-today-ring, --apex-cal-day-outside-fg, --apex-cal-day-range-bg'],
+    ['pick', '.apex-cal__pick', '--apex-cal-pick-fg, --apex-cal-pick-hover-bg, --apex-cal-pick-selected-bg, --apex-cal-pick-selected-fg (month and year grids)'],
+    ['time', '.apex-cal__time', '--apex-cal-time-border, --apex-cal-time-fg, --apex-cal-time-font'],
+    ['spin', '.apex-cal__spin', '--apex-cal-spin-fg, --apex-cal-spin-hover-bg, --apex-cal-spin-hover-fg'],
+    ['meridiem', '.apex-cal__mer', '--apex-cal-mer-bg, --apex-cal-mer-fg, --apex-cal-mer-border, --apex-cal-mer-hover'],
+    ['bar', '.apex-cal__bar', '--apex-cal-bar-border, --apex-cal-bar-fg, --apex-cal-bar-hover-bg'],
+  ],
   textarea: [
     ['counter', '.apex-ctl__counter', '--apex-counter-fg'],
   ],
@@ -683,6 +699,46 @@ export const OWN_PARTS: Record<string, string[][]> = {
 };
 
 export const SNIP_OWN: Record<string, string> = {
+  datepicker: `<!-- Twelve props cover the popover and every state a day can be in.
+     They are sugar over --apex-cal-*, so this and the CSS below do the
+     same thing. -->
+<ApexDatePicker v-model="when" label="Campaign start" show-icon
+  calendar-background="#101820" calendar-border-color="#243040"
+  calendar-radius="14px" calendar-shadow="0 10px 34px #0009"
+  day-color="#E8EEF7" day-hover-background="#1D2735" day-radius="10px"
+  day-selected-background="#7AA2F7" day-selected-color="#0B0F14"
+  day-today-ring="#3B4A61" day-outside-color="#5A6B7D"
+  day-range-background="#16202C" />
+
+/* Set daySelectedColor whenever you set daySelectedBackground. A selected
+   day's text is #fff by default, which a light background leaves
+   unreadable — that was the one part of the calendar with no way in. */
+
+/* The other twenty-two variables have no prop. They are the calendar's
+   chrome — title and nav, the month and year grids, the time spinners,
+   the meridiem toggle, the Today/Clear bar — which usually wants to
+   follow the theme rather than be set per instance. Reach them by
+   scoping a class of your own. */
+.booking-cal {
+  --apex-cal-nav-hover-fg: #7AA2F7;
+  --apex-cal-wd-fg: #6B7789;
+  --apex-cal-pick-selected-bg: #7AA2F7;
+  --apex-cal-pick-selected-fg: #0B0F14;
+  --apex-cal-time-border: #243040;
+  --apex-cal-spin-hover-fg: #7AA2F7;
+  --apex-cal-mer-bg: #16202C;
+  --apex-cal-bar-fg: #7AA2F7;
+}
+
+<!-- ui puts your class on any part. The keys below are the calendar's own;
+     control, input, icon and button reach the box, as on every field. -->
+<ApexDatePicker v-model="when" label="Campaign start"
+  :ui="{ calendar: 'booking-cal', day: 'booking-day', bar: 'booking-bar' }" />
+
+/* The prev/next arrows are .apex-ctl__btn, the field's own class, so they
+   are reached through nav rather than through button — which means the
+   box's buttons and the calendar's never restyle each other. */
+.booking-nav .apex-ctl__btn { color: #7AA2F7; }`,
   textarea: `<ApexTextarea v-model="notes" label="Description" counter :maxlength="240"
   :ui="{ counter: 'my-counter' }" />
 
