@@ -8,7 +8,12 @@ import {
   BUTTON_FAMILY, DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
   OWN_PARTS, SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_OWN, SNIP_PROPS, SNIP_TONE,
   SNIP_UI, SPLIT_MODEL,
-  SCROLL_IN_PANEL_SNIPPET, SCROLL_VARIANTS, SCROLL_WIDE, TBAR_LINKS, TBAR_MARKS,
+  SCROLL_IN_PANEL_SNIPPET, SCROLL_VARIANTS, AUTOMOBILES, TBAR_LINKS, TBAR_MARKS,
+  TAB_ITEMS, TAB_MANY, TAB_VARIANTS, TAB_PLACEMENTS, TAB_ONE_DISABLED, TAB_BADGED,
+  STEP_ITEMS, STEP_PIPELINE, STEP_PLANS,
+  SPLIT_MAILS, SPLIT_PAIR, SPLIT_THIRDS, SPLIT_COLLAPSIBLE, SPLIT_NESTED,
+  SPLIT_EVENTS, SPLIT_STATEFUL, SPLIT_NAV, PANEL_REPEAT, LEGEND_ALIGNS,
+  FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
@@ -378,6 +383,82 @@ const vert3 = ref(75);
 
 /** The search box in the toolbar's centre region. */
 const tbarQuery = ref('');
+
+/* --- ApexScrollArea demos ------------------------------------------ */
+
+/** Reported by @scroll, so the vertical example shows a live number. */
+const saPos = ref(0);
+function onSaScroll(p: { top: number }) { saPos.value = Math.round(p.top); }
+
+/* --- ApexTabs demos ------------------------------------------------ */
+
+/* The tabs carry no `value`, so the model is the 1-based index — the same
+   number as the panel slot, which is what makes "Go to Payment" readable. */
+const tabCtl = ref<string | number>(1);
+const tabActive = ref<string | number>(1);
+const tabLog = ref('');
+const tabForm = reactive({ username: 'john.doe', email: '' });
+
+/** Which lazy panels have been built. Starts with the one that opens first. */
+const tabLazySeen = ref<Array<string | number>>([1]);
+
+function onTabChange(p: { value: string | number; previous: string | number }) {
+  tabLog.value = `tab-change to ${p.value} (from ${p.previous})`;
+}
+
+/* Records first visits from the CHANGE EVENT, never from render: a method
+   called in an interpolation that mutates reactive state re-triggers the very
+   render that read it, looping until Vue's recursive-update cap. */
+function onLazyVisit(p: { value: string | number }) {
+  if (!tabLazySeen.value.includes(p.value)) tabLazySeen.value = [...tabLazySeen.value, p.value];
+}
+
+/* --- ApexSteps demos ----------------------------------------------- */
+
+const stStep = ref<string | number>(1);
+const stLinear = ref<string | number>(1);
+const stLog = ref('');
+const stForm = reactive({ email: '', plan: 'studio' });
+
+function onStChange(p: { value: string | number; previous: string | number }) {
+  stLog.value = `step-change → ${p.previous} to ${p.value}`;
+}
+function onStFinish(p: { index: number }) {
+  stLog.value = `finish on step ${p.index + 1}`;
+}
+
+/* A linear stepper reads `incomplete` off the CURRENT step, so the gate is data
+   rather than a handler that has to veto navigation after the fact. */
+const linearSteps = computed(() => [
+  { label: 'Account', icon: 'person', incomplete: !stForm.email },
+  { label: 'Payment', icon: 'credit_card' },
+  { label: 'Confirm', icon: 'task_alt' },
+]);
+
+/* --- ApexSplitter demos -------------------------------------------- */
+
+const spSizes = ref([30, 70]);
+const spNavSizes = ref([32, 68]);
+const spLog = ref('');
+const mailOpen = ref(0);
+
+function onSpResize(p: { sizes: number[] }, phase: string) {
+  spLog.value = `${phase} → ${p.sizes.map((n) => `${Math.round(n)}%`).join(' / ')}`;
+}
+function onSpCollapse(p: { index: number }) {
+  spLog.value = `collapse panel ${p.index + 1}`;
+}
+
+/* --- ApexPanel / ApexFieldset / ApexCard / ApexAccordion demos ----- */
+
+/** Both `collapsed` models, driven from a button outside the container. */
+const pnShut = ref(false);
+const fsShut = ref(false);
+
+/** The accordion's three models: multiple, single controlled, and dynamic. */
+const acMulti = ref<Array<string | number>>(['about', 'plan']);
+const acCtl = ref<string | number>('secure');
+const acOpen = ref<string | number>('about');
 
 /* --- ApexInput-only sections ------------------------------------- */
 
@@ -1624,117 +1705,968 @@ async function copyUsage() {
           </div>
         </template>
 
+        <template v-if="entry.id === 'tabs'">
+          <h2>Basic and dynamic</h2>
+          <p class="note">
+            One <code>tabs</code> array and one <code>panel-<em>n</em></code> slot
+            each. Because the tabs are data, labels and panels stay in sync — the
+            second example builds both from a list.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexTabs :tabs="TAB_ITEMS" bordered>
+              <template #panel-1><p class="note">Update your personal information.</p></template>
+              <template #panel-2><p class="note">Manage your subscription plan.</p></template>
+              <template #panel-3><p class="note">Customise how the app behaves.</p></template>
+            </ApexTabs>
+            <ApexTabs :tabs="TAB_MANY.slice(0, 3)" bordered>
+              <template v-for="n in 3" #[`panel-${n}`]="{ tab }" :key="n">
+                <p class="note"><strong>{{ tab.label }}</strong> — panel {{ n }} of a list-driven set.</p>
+              </template>
+            </ApexTabs>
+          </div>
+
+          <h2>Controlled</h2>
+          <p class="note">
+            <code>v-model</code> puts the active tab in your hands, so anything can move it.
+          </p>
+          <div style="margin-top:12px">
+            <div class="iconstrip" style="margin-block-end:14px">
+              <ApexButton size="sm" @click="tabCtl = 2">Go to Payment</ApexButton>
+              <code style="font-size:12px">value: {{ tabCtl }}</code>
+            </div>
+            <ApexTabs v-model="tabCtl" :tabs="TAB_ITEMS" bordered>
+              <template #panel-1><p class="note">Account panel.</p></template>
+              <template #panel-2><p class="note">Payment panel — reached from outside the component.</p></template>
+              <template #panel-3><p class="note">Preferences panel.</p></template>
+            </ApexTabs>
+          </div>
+
+          <h2>Scrollable</h2>
+          <p class="note">
+            A long strip scrolls, and the previous and next controls appear only
+            while there is somewhere to go — the component measures its own overflow.
+          </p>
+          <div style="max-width:520px;margin-top:12px">
+            <ApexTabs :tabs="TAB_MANY" bordered>
+              <template v-for="n in 10" #[`panel-${n}`]="{ tab }" :key="n">
+                <p class="note">{{ tab.label }}</p>
+              </template>
+            </ApexTabs>
+          </div>
+
+          <h2>Select on focus</h2>
+          <p class="note">
+            By default arrow keys move focus and Enter or Space activates. With
+            <code>selectOnFocus</code> the tab activates as focus lands on it.
+            Disabled tabs are skipped either way.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell">
+              <span class="cell__tag">default — focus, then Enter</span>
+              <ApexTabs :tabs="TAB_ITEMS">
+                <template v-for="n in 3" #[`panel-${n}`]="{ tab }" :key="n"><p class="note">{{ tab.label }}</p></template>
+              </ApexTabs>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">select-on-focus</span>
+              <ApexTabs :tabs="TAB_ITEMS" select-on-focus>
+                <template v-for="n in 3" #[`panel-${n}`]="{ tab }" :key="n"><p class="note">{{ tab.label }}</p></template>
+              </ApexTabs>
+            </div>
+          </div>
+
+          <h2>Lazy</h2>
+          <p class="note">
+            By default every panel renders and inactive ones are hidden.
+            <code>lazy</code> defers a panel until its tab is first shown, which
+            matters when a panel holds something expensive.
+            <code>unmountInactive</code> goes further and discards it on the way
+            out, so it re-initialises each visit.
+          </p>
+          <div style="margin-top:12px">
+            <ApexTabs :tabs="TAB_ITEMS" lazy bordered @tab-change="onLazyVisit">
+              <template #panel-1><p class="note">Rendered immediately — it is the active tab.</p></template>
+              <template #panel-2><p class="note">Built the first time you opened this tab.</p></template>
+              <template #panel-3><p class="note">Same here.</p></template>
+            </ApexTabs>
+          </div>
+          <p class="note" style="margin-top:8px">
+            Panels built so far: <code>{{ tabLazySeen.length }}</code> of 3 — open a
+            tab you have not visited to see it rise.
+          </p>
+
+          <h2>Disabled</h2>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexTabs :tabs="TAB_ONE_DISABLED" bordered>
+              <template #panel-1><p class="note">Arrow keys skip the blocked tab entirely.</p></template>
+              <template #panel-3><p class="note">Third panel.</p></template>
+            </ApexTabs>
+            <ApexTabs :tabs="TAB_ITEMS" disabled bordered>
+              <template #panel-1><p class="note">The whole strip is inert.</p></template>
+            </ApexTabs>
+          </div>
+
+          <h2>Variants and placement</h2>
+          <p class="note">
+            The indicator is one element positioned from the active tab's measured
+            box, so it slides between tabs on every edge and in every variant.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div v-for="v in TAB_VARIANTS" :key="v" class="cell">
+              <span class="cell__tag">variant="{{ v }}"</span>
+              <ApexTabs :tabs="TAB_ITEMS" :variant="v">
+                <template v-for="n in 3" #[`panel-${n}`]="{ tab }" :key="n"><p class="note">{{ tab.label }}</p></template>
+              </ApexTabs>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">fill align="center"</span>
+              <ApexTabs :tabs="TAB_ITEMS" variant="pill" fill>
+                <template v-for="n in 3" #[`panel-${n}`]="{ tab }" :key="n"><p class="note">{{ tab.label }}</p></template>
+              </ApexTabs>
+            </div>
+          </div>
+          <div class="grid grid--2" style="margin-top:18px">
+            <div v-for="p in TAB_PLACEMENTS" :key="p" class="cell">
+              <span class="cell__tag">placement="{{ p }}"</span>
+              <ApexTabs :tabs="TAB_ITEMS" :placement="p" strip-width="140px">
+                <template v-for="n in 3" #[`panel-${n}`]="{ tab }" :key="n"><p class="note">{{ tab.label }}</p></template>
+              </ApexTabs>
+            </div>
+          </div>
+
+          <h2>Badges and custom indicator</h2>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell">
+              <span class="cell__tag">badge + badgeSeverity</span>
+              <ApexTabs :tabs="TAB_BADGED">
+                <template v-for="n in 3" #[`panel-${n}`]="{ tab }" :key="n"><p class="note">{{ tab.label }}</p></template>
+              </ApexTabs>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">indicator-color + active-color, thick radius</span>
+              <ApexTabs :tabs="TAB_ITEMS" indicator-color="#C24A06" active-color="#C24A06"
+                        strip-background="#FFF1E5" radius="12px">
+                <template v-for="n in 3" #[`panel-${n}`]="{ tab }" :key="n"><p class="note">{{ tab.label }}</p></template>
+              </ApexTabs>
+            </div>
+          </div>
+
+          <h2>Template</h2>
+          <p class="note">
+            A <code>tab-<em>n</em></code> slot replaces a tab's contents, and panels
+            take any markup — here real controls from the kit.
+          </p>
+          <div class="cell" style="max-width:460px;margin-top:12px">
+            <ApexTabs :tabs="TAB_ITEMS" align="center">
+              <template #tab-2="{ tab, active }">
+                <ApexIcon :name="tab.icon" :size="17" />
+                <span>{{ tab.label }}</span>
+                <span class="apex-tabs__badge" :data-tone="active ? 'primary' : 'neutral'">New</span>
+              </template>
+              <template #panel-1>
+                <div style="display:flex;flex-direction:column;gap:14px">
+                  <ApexInput v-model="tabForm.username" label="Username" leading-icon="person" />
+                  <ApexInput v-model="tabForm.email" label="Email" type="email" leading-icon="mail" />
+                  <ApexButton icon="check" style="align-self:flex-start">Save changes</ApexButton>
+                </div>
+              </template>
+              <template #panel-2><p class="note">Payment details.</p></template>
+              <template #panel-3><p class="note">Preferences.</p></template>
+            </ApexTabs>
+          </div>
+
+          <h2>Tab menu</h2>
+          <p class="note">
+            <code>tabsOnly</code> drops the panels, leaving a nav strip to pair with
+            a <code>router-view</code>.
+          </p>
+          <div style="margin-top:12px">
+            <ApexTabs v-model="tabActive" :tabs="TAB_ITEMS" tabs-only @tab-change="onTabChange" />
+            <div class="cell" style="margin-top:14px">
+              <p class="note" style="margin:0">
+                Your route component renders here. Last event: <code>{{ tabLog || 'none yet' }}</code>
+              </p>
+            </div>
+          </div>
+        </template>
+
+        <template v-if="entry.id === 'steps'">
+          <h2>Horizontal</h2>
+          <p class="note">
+            Give it a <code>steps</code> array and one <code>panel-<em>n</em></code>
+            slot per step. Each panel slot receives
+            <code>{ step, index, back, next }</code>, so your own buttons can drive
+            the flow.
+          </p>
+          <div class="cell" style="margin-top:12px">
+            <ApexSteps :steps="STEP_ITEMS">
+              <template #panel-1="{ next }">
+                <div class="st-pane">
+                  <ApexInput v-model="stForm.email" label="Email address" type="email" leading-icon="mail" />
+                  <ApexButton icon="arrow_forward" icon-pos="right" @click="next">Continue</ApexButton>
+                </div>
+              </template>
+              <template #panel-2="{ back, next }">
+                <div class="st-pane">
+                  <ApexRadioGroup v-model="stForm.plan" label="Plan" card :options="STEP_PLANS" />
+                  <div class="iconstrip">
+                    <ApexButton severity="secondary" variant="text" icon="arrow_back" @click="back">Back</ApexButton>
+                    <ApexButton icon="arrow_forward" icon-pos="right" @click="next">Continue</ApexButton>
+                  </div>
+                </div>
+              </template>
+              <template #panel-3="{ back }">
+                <div class="st-pane">
+                  <p class="note">
+                    <strong>{{ stForm.email || 'No email yet' }}</strong> on the
+                    <strong>{{ stForm.plan }}</strong> plan.
+                  </p>
+                  <div class="iconstrip">
+                    <ApexButton severity="secondary" variant="text" icon="arrow_back" @click="back">Back</ApexButton>
+                    <ApexButton severity="success" icon="check">Submit</ApexButton>
+                  </div>
+                </div>
+              </template>
+            </ApexSteps>
+          </div>
+
+          <h2>Vertical</h2>
+          <p class="note">
+            Each panel sits under its own header, so the two interleave and the rail
+            runs down the marker column.
+          </p>
+          <div class="cell" style="max-width:520px;margin-top:12px">
+            <ApexSteps :steps="STEP_ITEMS" orientation="vertical" show-nav>
+              <template #panel-1><p class="note">Tell us who you are. Nothing here is shared.</p></template>
+              <template #panel-2><p class="note">Choose how you would like to pay.</p></template>
+              <template #panel-3><p class="note">Check everything over, then submit.</p></template>
+            </ApexSteps>
+          </div>
+
+          <h2>Linear</h2>
+          <p class="note">
+            With <code>linear</code>, only the current step, those behind it, and the
+            next unblocked one are reachable. A step marks itself
+            <code>incomplete</code> to hold the flow — the gate is data, not a handler
+            that vetoes navigation after the fact. Enter an email to unlock step&nbsp;2.
+          </p>
+          <div class="cell" style="margin-top:12px">
+            <ApexSteps v-model="stLinear" :steps="linearSteps" linear show-nav>
+              <template #panel-1>
+                <ApexInput v-model="stForm.email" label="Email address" type="email" leading-icon="mail"
+                           help="Required before you can continue." style="max-width:320px" />
+              </template>
+              <template #panel-2><p class="note">Payment details go here.</p></template>
+              <template #panel-3><p class="note">All done — submit when ready.</p></template>
+            </ApexSteps>
+          </div>
+
+          <h2>Steps only</h2>
+          <p class="note">
+            <code>stepsOnly</code> drops the panels, leaving a progress indicator you
+            can place anywhere.
+          </p>
+          <div class="cell" style="margin-top:12px;display:flex;flex-direction:column;gap:22px">
+            <ApexSteps :model-value="2" :steps="STEP_ITEMS" steps-only />
+            <ApexSteps :model-value="3" :steps="STEP_ITEMS" steps-only size="sm" complete-color="#0B5FFF" />
+            <ApexSteps :model-value="2" :steps="STEP_PIPELINE" steps-only hide-connector />
+          </div>
+
+          <h2>Template</h2>
+          <p class="note">
+            A <code>step-<em>n</em></code> slot replaces a header outright, receiving
+            <code>{ step, index, active, complete }</code>. The <code>as</code> prop
+            chooses what the header renders as — a <code>button</code> is focusable and
+            clickable, a <code>div</code> is inert.
+          </p>
+          <div class="cell" style="margin-top:12px">
+            <ApexSteps :model-value="2" :steps="STEP_ITEMS">
+              <template v-for="n in 3" #[`step-${n}`]="{ step, active, complete }" :key="n">
+                <span class="st-chip" :data-on="active" :data-done="complete">
+                  <ApexIcon :name="complete ? 'check_circle' : step.icon" :size="18" />
+                  {{ step.label }}
+                </span>
+              </template>
+              <template #panel-2><p class="note">Custom headers, standard panels.</p></template>
+            </ApexSteps>
+          </div>
+
+          <h2>Events</h2>
+          <div class="cell" style="margin-top:12px">
+            <ApexSteps v-model="stStep" :steps="STEP_ITEMS" show-nav
+                       @step-change="onStChange" @finish="onStFinish">
+              <template #panel-1><p class="note">Move between steps and watch the log.</p></template>
+              <template #panel-2><p class="note">Still watching.</p></template>
+              <template #panel-3><p class="note">Next here fires <code>finish</code> instead of advancing.</p></template>
+            </ApexSteps>
+          </div>
+          <p class="note" style="margin-top:8px">
+            Last event: <code>{{ stLog || 'none yet' }}</code> · bound value <code>{{ stStep }}</code>
+          </p>
+
+          <h2>Sizes and colours</h2>
+          <div class="cell" style="margin-top:12px;display:flex;flex-direction:column;gap:22px">
+            <ApexSteps v-for="s in SIZES" :key="s" :model-value="2" :steps="STEP_ITEMS" steps-only :size="s" />
+            <ApexSteps :model-value="2" :steps="STEP_ITEMS" steps-only active-color="#C24A06"
+                       complete-color="#7C3AED" connector-color="#FFDEC2" :marker-size="40" />
+          </div>
+        </template>
+
+        <template v-if="entry.id === 'splitter'">
+          <h2>Basic and vertical</h2>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexSplitter :panels="SPLIT_PAIR" height="200px">
+              <template #panel-1><span class="sp-cell">1</span></template>
+              <template #panel-2><span class="sp-cell">2</span></template>
+            </ApexSplitter>
+            <ApexSplitter :panels="SPLIT_PAIR" layout="vertical" height="200px">
+              <template #panel-1><span class="sp-cell">1</span></template>
+              <template #panel-2><span class="sp-cell">2</span></template>
+            </ApexSplitter>
+          </div>
+
+          <h2>Sizes, minimum and maximum</h2>
+          <p class="note">
+            Initial sizes come from each panel's <code>size</code>; anything unset
+            splits the remainder evenly. <code>minSize</code> and <code>maxSize</code>
+            bound a panel during a drag.
+          </p>
+          <div style="margin-top:12px">
+            <ApexSplitter :panels="SPLIT_THIRDS" height="180px">
+              <template #panel-1="{ size }"><span class="sp-cell">25<em>min 15 · max 40 · now {{ Math.round(size) }}%</em></span></template>
+              <template #panel-2="{ size }"><span class="sp-cell">50<em>{{ Math.round(size) }}%</em></span></template>
+              <template #panel-3="{ size }"><span class="sp-cell">25<em>min 10 · {{ Math.round(size) }}%</em></span></template>
+            </ApexSplitter>
+          </div>
+
+          <h2>Collapsible</h2>
+          <p class="note">
+            A <code>collapsible</code> panel snaps to <code>collapsedSize</code> once
+            dragged past halfway between that and its minimum. From the keyboard it
+            collapses as soon as it reaches the minimum.
+          </p>
+          <div style="margin-top:12px">
+            <ApexSplitter :panels="SPLIT_COLLAPSIBLE" height="180px">
+              <template #panel-1="{ size }">
+                <span class="sp-cell">{{ size <= 5 ? '▸' : 'Sidebar' }}<em v-if="size > 5">drag me left</em></span>
+              </template>
+              <template #panel-2><span class="sp-cell">Content</span></template>
+            </ApexSplitter>
+          </div>
+
+          <h2>Nested</h2>
+          <div style="margin-top:12px">
+            <ApexSplitter :panels="SPLIT_NESTED" height="240px">
+              <template #panel-1><span class="sp-cell">1</span></template>
+              <template #panel-2>
+                <ApexSplitter :panels="SPLIT_PAIR" layout="vertical" :bordered="false" height="100%">
+                  <template #panel-1><span class="sp-cell">2</span></template>
+                  <template #panel-2>
+                    <ApexSplitter :panels="SPLIT_PAIR" :bordered="false" height="100%">
+                      <template #panel-1><span class="sp-cell">3</span></template>
+                      <template #panel-2><span class="sp-cell">4</span></template>
+                    </ApexSplitter>
+                  </template>
+                </ApexSplitter>
+              </template>
+            </ApexSplitter>
+          </div>
+
+          <h2>Resize events</h2>
+          <div style="margin-top:12px">
+            <ApexSplitter v-model:sizes="spSizes" :panels="SPLIT_EVENTS" height="170px"
+                          @resizestart="onSpResize($event, 'resizestart')"
+                          @resize="onSpResize($event, 'resize')"
+                          @resizeend="onSpResize($event, 'resizeend')"
+                          @collapse="onSpCollapse">
+              <template #panel-1="{ size }"><span class="sp-cell">A<em>{{ Math.round(size) }}%</em></span></template>
+              <template #panel-2="{ size }"><span class="sp-cell">B<em>{{ Math.round(size) }}%</em></span></template>
+            </ApexSplitter>
+          </div>
+          <p class="note" style="margin-top:8px">
+            Last event: <code>{{ spLog || 'none yet' }}</code> · bound sizes
+            <code>[{{ spSizes.map((n) => Math.round(n)).join(', ') }}]</code>
+          </p>
+
+          <h2>Stateful</h2>
+          <p class="note">
+            Give it a <code>stateKey</code> and the layout survives a reload with no
+            bookkeeping. Drag this one, then refresh the page.
+          </p>
+          <div style="margin-top:12px">
+            <ApexSplitter :panels="SPLIT_STATEFUL" state-key="apex-demo-splitter" height="150px">
+              <template #panel-1="{ size }"><span class="sp-cell">Persisted<em>{{ Math.round(size) }}%</em></span></template>
+              <template #panel-2><span class="sp-cell">Reload to check</span></template>
+            </ApexSplitter>
+          </div>
+
+          <h2>Disabled and custom</h2>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexSplitter :panels="SPLIT_PAIR" height="160px" disabled>
+              <template #panel-1><span class="sp-cell">Locked</span></template>
+              <template #panel-2><span class="sp-cell">Locked</span></template>
+            </ApexSplitter>
+            <ApexSplitter :panels="SPLIT_PAIR" height="160px" :gutter-size="14" radius="16px"
+                          gutter-color="#EAF2FF" gutter-hover-color="#A6C5FF" border-color="#0B5FFF">
+              <template #gutter><span class="sp-bar"></span></template>
+              <template #panel-1><span class="sp-cell" style="color:#0B5FFF">Custom gutter</span></template>
+              <template #panel-2><span class="sp-cell">Drag the bar</span></template>
+            </ApexSplitter>
+          </div>
+
+          <h2>Advanced</h2>
+          <p class="note">
+            A collapsible navigation pane, a custom gutter handle and a viewport that
+            adapts to the current sizes — the list switches to a compact form once its
+            width drops below 28%.
+          </p>
+          <div style="margin-top:12px">
+            <ApexSplitter v-model:sizes="spNavSizes" :panels="SPLIT_NAV" height="320px" :gutter-size="8">
+              <template #gutter><span class="sp-handle"><ApexIcon name="drag_indicator" :size="14" /></span></template>
+              <template #panel-1="{ size }">
+                <ApexScrollArea height="100%" variant="hover" padding="6px">
+                  <button v-for="(m, i) in SPLIT_MAILS" :key="i" type="button" class="sp-mail"
+                          :data-compact="size < 28" :data-on="mailOpen === i" @click="mailOpen = i">
+                    <ApexAvatar :label="m.from" auto-color :size="size < 28 ? 'sm' : 'md'" />
+                    <span v-if="size >= 28" class="sp-mail__text">
+                      <strong>{{ m.from }}<em>{{ m.time }}</em></strong>
+                      <span>{{ m.subject }}</span>
+                    </span>
+                  </button>
+                </ApexScrollArea>
+              </template>
+              <template #panel-2>
+                <div class="sp-read">
+                  <h4>{{ SPLIT_MAILS[mailOpen].subject }}</h4>
+                  <p class="sp-read__meta">{{ SPLIT_MAILS[mailOpen].from }} · {{ SPLIT_MAILS[mailOpen].time }}</p>
+                  <p>{{ SPLIT_MAILS[mailOpen].body }}</p>
+                </div>
+              </template>
+            </ApexSplitter>
+          </div>
+        </template>
+
+        <template v-if="entry.id === 'panel'">
+          <h2>Basic</h2>
+          <p class="note">A header bar, a body, and optionally a footer.</p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexPanel header="Rotation summary" icon="playlist_play">
+              Three playlists across twelve displays. The morning loop starts at 06:00.
+            </ApexPanel>
+            <ApexPanel header="Storage" subheader="Media library" icon="folder" shadow="sm">
+              <ApexProgressBar :value="68" show-value severity="auto" label="Storage used" />
+              <p class="note" style="margin-top:12px">6.8 GB of 10 GB used.</p>
+            </ApexPanel>
+          </div>
+
+          <h2>Toggleable</h2>
+          <p class="note">
+            <code>toggleable</code> adds a toggle to the header bar;
+            <code>togglePosition</code> puts it before the title or at the end.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexPanel header="At the end" icon="tv" toggleable>
+              The default — the toggle sits opposite the title.
+            </ApexPanel>
+            <ApexPanel header="At the start" toggleable toggle-position="start">
+              Reads more like a disclosure row.
+            </ApexPanel>
+          </div>
+
+          <h2>Controlled</h2>
+          <div style="max-width:400px;margin-top:12px">
+            <div class="iconstrip" style="margin-block-end:14px">
+              <ApexButton size="sm" severity="secondary" variant="outlined"
+                          :icon="pnShut ? 'unfold_more' : 'unfold_less'"
+                          @click="pnShut = !pnShut">{{ pnShut ? 'Expand' : 'Collapse' }}</ApexButton>
+              <code style="font-size:12px">collapsed: {{ pnShut }}</code>
+            </div>
+            <ApexPanel v-model:collapsed="pnShut" header="Scheduling" icon="calendar_month" toggleable>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <ApexDatePicker :model-value="null" label="Start date" show-icon />
+                <ApexSegmented model-value="daily" label="Repeat" :options="PANEL_REPEAT" />
+              </div>
+            </ApexPanel>
+          </div>
+
+          <h2>Indicator</h2>
+          <p class="note">
+            The <code>toggleicon</code> slot receives <code>collapsed</code>, or render
+            one glyph and let CSS rotate it from the button's
+            <code>aria-expanded</code>.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexPanel header="Two glyphs" toggleable>
+              <template #toggleicon="{ collapsed }">
+                <ApexIcon :name="collapsed ? 'add_circle' : 'remove_circle'" :size="19" fill
+                          :style="{ color: collapsed ? undefined : 'var(--accent-primary)' }" />
+              </template>
+              Swapped from the context value.
+            </ApexPanel>
+            <ApexPanel header="One glyph, rotated by CSS" toggleable>
+              <template #toggleicon>
+                <ApexIcon name="expand_more" :size="20" data-pn-rotate />
+              </template>
+              The chevron turns from <code>aria-expanded</code>.
+            </ApexPanel>
+          </div>
+
+          <h2>Header and footer templates</h2>
+          <p class="note">
+            The <code>header</code> slot replaces the title block, <code>icons</code>
+            adds actions at the end of the bar, and <code>footer</code> sits below the body.
+          </p>
+          <div style="max-width:440px;margin-top:12px">
+            <ApexPanel toggleable shadow="sm">
+              <template #header>
+                <ApexAvatar label="A. Borg" auto-color size="sm" />
+                <span class="apex-pn__titles">
+                  <h3 class="apex-pn__title">A. Borg</h3>
+                  <p class="apex-pn__sub">Founder &amp; CEO · last seen 12 minutes ago</p>
+                </span>
+              </template>
+              <template #icons>
+                <ApexButton size="sm" severity="secondary" variant="text" icon="mail" icon-only label="Message" />
+                <ApexButton size="sm" severity="secondary" variant="text" icon="more_vert" icon-only label="More" />
+              </template>
+              Owns fourteen displays across three sites, and the morning rotation playlist.
+              <template #footer>
+                <ApexButton size="sm" icon="person">View profile</ApexButton>
+                <ApexButton size="sm" severity="secondary" variant="outlined">Permissions</ApexButton>
+              </template>
+            </ApexPanel>
+          </div>
+
+          <h2>Sizes, colours and flush</h2>
+          <div class="grid grid--3" style="margin-top:12px">
+            <ApexPanel v-for="s in SIZES" :key="s" :header="'Size ' + s" :size="s" toggleable>
+              Padding and title scale together.
+            </ApexPanel>
+          </div>
+          <div class="grid grid--2" style="margin-top:18px">
+            <ApexPanel header="Tinted header" icon="palette" header-background="#0F141C" header-color="#ECEFF4"
+                       border-color="#2A3447" radius="14px" toggleable>
+              A dark bar over a light body — set both header colours together.
+            </ApexPanel>
+            <ApexPanel header="Flush, no divider" flush :bordered="false" background="var(--bg-subtle)">
+              For sectioning a page without drawing more boxes.
+            </ApexPanel>
+          </div>
+        </template>
+
+        <template v-if="entry.id === 'fieldset'">
+          <h2>Basic</h2>
+          <p class="note">
+            A <code>legend</code> plus content. Because it is a real
+            <code>&lt;fieldset&gt;</code>, screen readers announce the group name with
+            each control inside it.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexFieldset legend="Shipping address">
+              <div class="fs-grid">
+                <span><em>Name</em>Jane Cooper</span>
+                <span><em>Phone</em>(415) 555-0132</span>
+                <span style="grid-column:1/-1"><em>Address</em>1234 Elm Street, Apt 5B<br />San Francisco, CA 94102</span>
+              </div>
+            </ApexFieldset>
+            <ApexFieldset legend="Display settings" icon="tv">
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <ApexInput model-value="Lobby totem" label="Name" />
+                <ApexSwitch :model-value="true" label="Proof of play" />
+              </div>
+            </ApexFieldset>
+          </div>
+
+          <h2>Toggleable</h2>
+          <p class="note">
+            <code>toggleable</code> turns the legend into a button that collapses the content.
+          </p>
+          <div style="max-width:340px;margin-top:12px">
+            <ApexFieldset legend="Invoice #1024" toggleable>
+              <div class="fs-rows">
+                <span>Design service<em>€120.00</em></span>
+                <span>Hosting<em>€30.00</em></span>
+                <span data-total>Total<em>€150.00</em></span>
+              </div>
+            </ApexFieldset>
+          </div>
+
+          <h2>Controlled</h2>
+          <p class="note">
+            <code>collapsed</code> is bindable, so the state is yours to read, persist or set.
+          </p>
+          <div style="max-width:340px;margin-top:12px">
+            <div class="iconstrip" style="margin-block-end:14px">
+              <ApexButton size="sm" severity="secondary" variant="outlined"
+                          :icon="fsShut ? 'unfold_more' : 'unfold_less'"
+                          @click="fsShut = !fsShut">{{ fsShut ? 'Expand' : 'Collapse' }}</ApexButton>
+              <code style="font-size:12px">collapsed: {{ fsShut }}</code>
+            </div>
+            <ApexFieldset v-model:collapsed="fsShut" legend="Advanced options" toggleable>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <ApexNumber :model-value="24" label="Rotation interval" unit="sec" />
+                <ApexSelect model-value="split" label="Zone layout" :options="ZONE_OPTIONS" />
+              </div>
+            </ApexFieldset>
+          </div>
+
+          <h2>Indicator</h2>
+          <p class="note">
+            The <code>toggleicon</code> slot receives <code>collapsed</code>, so it can
+            swap glyphs — or render one glyph and let CSS rotate it from the button's
+            <code>aria-expanded</code> state.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexFieldset legend="Two glyphs" toggleable>
+              <template #toggleicon="{ collapsed }">
+                <ApexIcon :name="collapsed ? 'visibility' : 'visibility_off'" :size="17" />
+              </template>
+              Swapped from the <code>collapsed</code> context value.
+            </ApexFieldset>
+            <ApexFieldset legend="One glyph, rotated by CSS" toggleable>
+              <template #toggleicon>
+                <ApexIcon name="chevron_right" :size="18" data-fs-rotate />
+              </template>
+              The chevron turns from the button's <code>aria-expanded</code> attribute.
+            </ApexFieldset>
+          </div>
+
+          <h2>Alignment, sizes and colours</h2>
+          <div class="grid grid--3" style="margin-top:12px">
+            <ApexFieldset v-for="a in LEGEND_ALIGNS" :key="a" :legend="'Legend ' + a" :legend-align="a">
+              Aligned to the {{ a }} of the border.
+            </ApexFieldset>
+          </div>
+          <div class="grid grid--3" style="margin-top:18px">
+            <ApexFieldset v-for="s in SIZES" :key="s" :legend="'Size ' + s" :size="s">
+              Padding and type scale together.
+            </ApexFieldset>
+          </div>
+          <div class="grid grid--2" style="margin-top:18px">
+            <ApexFieldset legend="Tinted panel" icon="palette" background="#EAF2FF"
+                          border-color="#A6C5FF" legend-background="#EAF2FF" legend-color="#073C9F" radius="14px">
+              Set <code>legendBackground</code> to match the panel, so the legend sits on
+              it cleanly.
+            </ApexFieldset>
+            <ApexFieldset legend="Borderless group" :bordered="false" toggleable>
+              Useful for sectioning a long form without drawing more boxes.
+            </ApexFieldset>
+          </div>
+
+          <h2>Disabled</h2>
+          <p class="note">
+            A disabled fieldset disables every control inside it — that is native
+            behaviour, not something the component reimplements.
+          </p>
+          <div style="max-width:340px;margin-top:12px">
+            <ApexFieldset legend="Billing (locked)" icon="lock" disabled>
+              <div style="display:flex;flex-direction:column;gap:12px">
+                <ApexInput model-value="ACME Ltd" label="Company" />
+                <ApexButton size="sm">Save</ApexButton>
+              </div>
+            </ApexFieldset>
+          </div>
+        </template>
+
+        <template v-if="entry.id === 'card'">
+          <h2>Basic</h2>
+          <p class="note">A title, a subtitle, body content and a footer — all optional.</p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <ApexCard title="Morning rotation" subtitle="6 displays · Northern Harbour">
+              Plays the ambient loop and menu boards between 06:00 and 11:00.
+              <template #footer>
+                <ApexButton size="sm" icon="play_arrow">Preview</ApexButton>
+                <ApexButton size="sm" severity="secondary" variant="outlined">Schedule</ApexButton>
+              </template>
+            </ApexCard>
+            <ApexCard title="No footer, no border" :bordered="false" shadow="none" background="var(--bg-subtle)">
+              A quiet card for grouping content without competing with the page.
+            </ApexCard>
+          </div>
+
+          <h2>With media</h2>
+          <div class="grid grid--3" style="margin-top:12px">
+            <ApexCard v-for="p in CARD_MEDIA" :key="p"
+                      :image="`/heroes/${p}.png`" image-height="120px"
+                      :title="p.replace('-', ' ')" subtitle="In service" hoverable>
+              Placeholder art, not a photograph.
+            </ApexCard>
+          </div>
+
+          <h2>Advanced header — media plus an overlaid avatar</h2>
+          <p class="note">
+            The <code>media</code> slot takes over the top region, so an avatar can
+            straddle the edge.
+          </p>
+          <div style="max-width:340px;margin-top:12px">
+            <ApexCard>
+              <template #media>
+                <div class="cd-hero">
+                  <!-- Bound rather than literal: a literal src is compiled into an import,
+                       which resolves against the build root instead of public/. -->
+                  <img :src="'/heroes/menu-board.png'" alt="" />
+                  <ApexAvatar label="Sakura Market" initials="SM" size="xl" ring auto-color class="cd-hero__av" />
+                </div>
+              </template>
+              <template #header>
+                <h3 class="apex-cd__title" style="margin-block-start:26px">Sakura Fresh Market</h3>
+                <div class="iconstrip" style="gap:6px;margin-block-start:8px">
+                  <span class="apex-dt__badge" data-tone="info">Daily</span>
+                  <span class="apex-dt__badge" data-tone="success">Premium</span>
+                </div>
+              </template>
+              Fresh local produce, snacks and daily essentials — all in one place.
+              <ApexRating :model-value="4.5" :stars="5" allow-half readonly :star-size="17" show-value
+                          style="margin-top:12px" />
+              <template #footer>
+                <ApexButton size="sm" severity="secondary" variant="outlined" icon="call">Call us</ApexButton>
+                <ApexButton size="sm" icon="language">Visit site</ApexButton>
+              </template>
+            </ApexCard>
+          </div>
+
+          <h2>As a form container</h2>
+          <div style="max-width:380px;margin-top:12px">
+            <ApexCard title="Pair a display" subtitle="Enter the code shown on screen">
+              <div style="display:flex;flex-direction:column;gap:14px">
+                <ApexInput model-value="" label="Display name" placeholder="Lobby totem" leading-icon="tv" />
+                <ApexOtp model-value="482" label="Pairing code" :length="6" integer-only />
+                <ApexSwitch :model-value="true" label="Start on the morning rotation" />
+              </div>
+              <template #footer>
+                <ApexButton size="sm" icon="link">Pair</ApexButton>
+                <ApexButton size="sm" severity="secondary" variant="text">Cancel</ApexButton>
+              </template>
+            </ApexCard>
+          </div>
+
+          <h2>Horizontal and clickable</h2>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:12px;max-width:520px">
+            <ApexCard horizontal image="/heroes/kiosk-27-square.png" title="Kiosk 27&quot;"
+                      subtitle="Msida · awaiting install" hoverable>
+              Delivered on 18 August. Needs a wall bracket before it can be paired.
+            </ApexCard>
+            <ApexCard clickable hoverable title="Open the playlist editor"
+                      subtitle="A whole card as one target" shadow="md" />
+          </div>
+        </template>
+
+        <template v-if="entry.id === 'accordion'">
+          <h2>Basic and multiple</h2>
+          <p class="note">
+            One panel at a time by default; <code>multiple</code> lets several stay open
+            and switches the model to an array.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell">
+              <span class="cell__tag">single</span>
+              <ApexAccordion v-model:value="acOpen" :items="FAQ_PANELS" />
+              <p class="note" style="margin-top:10px">Open: <code>{{ acOpen || 'none' }}</code></p>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">multiple</span>
+              <ApexAccordion v-model:value="acMulti" :items="FAQ_PANELS" multiple />
+              <p class="note" style="margin-top:10px">Open: <code>{{ acMulti.join(', ') || 'none' }}</code></p>
+            </div>
+          </div>
+
+          <h2>Controlled</h2>
+          <p class="note">The value is bindable, so any UI can drive it.</p>
+          <div class="cell" style="margin-top:12px">
+            <div class="iconstrip" style="margin-block-end:16px">
+              <ApexButton v-for="p in FAQ_PANELS.slice(0, 3)" :key="p.value" size="sm"
+                          :severity="acCtl === p.value ? 'primary' : 'secondary'"
+                          :variant="acCtl === p.value ? 'solid' : 'outlined'"
+                          @click="acCtl = p.value">{{ p.header.slice(0, 18) }}</ApexButton>
+              <ApexButton size="sm" severity="danger" variant="text" icon="close" @click="acCtl = ''">Close all</ApexButton>
+            </div>
+            <ApexAccordion v-model:value="acCtl" :items="FAQ_PANELS" />
+          </div>
+
+          <h2>Indicator and trigger</h2>
+          <p class="note">
+            The <code>toggleicon</code> slot receives <code>active</code>, so it can swap
+            glyphs — or render one glyph and let CSS animate it from the header's
+            <code>data-p</code> attribute.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell">
+              <span class="cell__tag">two glyphs from `active`</span>
+              <ApexAccordion :items="FAQ_PANELS.slice(0, 3)" toggle-position="start">
+                <template #toggleicon="{ active }">
+                  <ApexIcon :name="active ? 'remove_circle' : 'add_circle'" :size="20"
+                            :style="{ color: active ? 'var(--accent-primary)' : undefined }" fill />
+                </template>
+              </ApexAccordion>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">one glyph, rotated by CSS</span>
+              <ApexAccordion :items="FAQ_PANELS.slice(0, 3)">
+                <template #toggleicon>
+                  <ApexIcon name="chevron_right" :size="20" data-ac-rotate />
+                </template>
+              </ApexAccordion>
+            </div>
+          </div>
+
+          <h2>Rich headers and content</h2>
+          <div class="cell" style="margin-top:12px">
+            <ApexAccordion :items="FAQ_PANELS" multiple gap="10px">
+              <template #header="{ panel, active }">
+                <span class="ac-head">
+                  <strong>{{ panel.header }}</strong>
+                  <em>{{ active ? 'Showing details' : 'Tap to read' }}</em>
+                </span>
+              </template>
+              <template #content="{ panel }">
+                <p class="note" style="margin:0 0 12px">{{ panel.content }}</p>
+                <div class="iconstrip">
+                  <ApexButton size="sm" icon="open_in_new" severity="secondary" variant="outlined">Read more</ApexButton>
+                  <ApexButton size="sm" icon="thumb_up" severity="success" variant="text">Helpful</ApexButton>
+                </div>
+              </template>
+            </ApexAccordion>
+          </div>
+
+          <h2>Disabled, sizes and separated cards</h2>
+          <p class="note">
+            A panel with <code>disabled</code> cannot be opened and is skipped by
+            keyboard navigation. A <code>gap</code> turns the joined stack into
+            separated cards.
+          </p>
+          <div class="grid grid--3" style="margin-top:12px">
+            <div v-for="s in SIZES" :key="s" class="cell">
+              <span class="cell__tag">size="{{ s }}"</span>
+              <ApexAccordion :items="FAQ_PANELS.slice(0, 3)" :size="s" />
+            </div>
+          </div>
+          <div style="margin-top:18px">
+            <span class="cell__tag">gap="12px" — separated cards, radius and colours</span>
+            <ApexAccordion :items="FAQ_PANELS" gap="12px" radius="14px" border-color="#A6C5FF"
+                           header-background="#EAF2FF" active-background="#0B5FFF" active-color="#FFFFFF"
+                           toggle-position="start" />
+          </div>
+
+          <h2>Dynamic panels and lazy content</h2>
+          <p class="note">
+            Panels are just data, so a dynamic accordion is a mapped array. With
+            <code>lazy</code>, a body is built the first time its panel opens and kept
+            afterwards.
+          </p>
+          <div class="cell" style="margin-top:12px">
+            <ApexAccordion :items="FAQ_ZONES" lazy multiple />
+          </div>
+
+          <h2>Keyboard</h2>
+          <p class="note">
+            Focus a header: <strong>↑ ↓</strong> move between headers and skip disabled
+            ones, <strong>Home</strong> and <strong>End</strong> jump,
+            <strong>Space</strong> or <strong>Enter</strong> toggles the panel.
+          </p>
+        </template>
+
         <!-- A scrollbar cannot be judged from a code block: you have to scroll
              it. Every example here is live. -->
         <template v-if="entry.id === 'scrollarea'">
-          <h2>Axes</h2>
+          <h2>Vertical</h2>
           <p class="note">
-            Each axis gets a bar only when its content actually overflows, so a box
-            that fits shows nothing. Scrolling stays native throughout — wheel,
-            trackpad, keyboard, touch and scroll-anchoring all behave normally.
+            Give it a height and the bar appears only if the content overflows. Scroll
+            position is reported by <code>@scroll</code>: <code>{{ saPos }}px</code>.
           </p>
-          <div class="grid grid--3">
-            <div class="cell">
-              <span class="cell__tag">Vertical</span>
-              <ApexScrollArea height="150px">
-                <p v-for="n in 10" :key="n" class="note">Row {{ n }} of ten.</p>
-              </ApexScrollArea>
-            </div>
-            <div class="cell">
-              <span class="cell__tag">Horizontal</span>
-              <ApexScrollArea height="150px">
-                <div style="inline-size:640px">
-                  <p class="note">This block is 640px wide inside a narrower box.</p>
-                  <ApexSegmented :model-value="'a'" :options="SCROLL_WIDE" />
-                </div>
-              </ApexScrollArea>
-            </div>
-            <div class="cell">
-              <span class="cell__tag">Both axes</span>
-              <ApexScrollArea height="150px">
-                <div style="inline-size:640px">
-                  <p v-for="n in 10" :key="n" class="note">Row {{ n }} — wide and tall at once.</p>
-                </div>
-              </ApexScrollArea>
-            </div>
+          <div style="max-width:280px;margin-top:12px">
+            <ApexScrollArea height="220px" padding="4px" @scroll="onSaScroll">
+              <div class="sa-list">
+                <span v-for="c in AUTOMOBILES" :key="c.label">{{ c.label }}<em>({{ c.value }})</em></span>
+              </div>
+            </ApexScrollArea>
           </div>
-          <p class="note">
-            With both axes live the bars shorten so they do not meet in the corner.
-          </p>
+
+          <h2>Horizontal</h2>
+          <div style="margin-top:12px">
+            <ApexScrollArea padding="4px">
+              <div class="sa-row">
+                <span v-for="c in AUTOMOBILES" :key="c.label">{{ c.label }}</span>
+              </div>
+            </ApexScrollArea>
+          </div>
+
+          <h2>Both axes</h2>
+          <p class="note">Each bar appears independently, and the corner stays clear.</p>
+          <div style="margin-top:12px">
+            <ApexScrollArea height="200px" padding="4px">
+              <div class="sa-grid">
+                <span v-for="n in 60" :key="n">Cell {{ n }}</span>
+              </div>
+            </ApexScrollArea>
+          </div>
 
           <h2>Scroll fade</h2>
           <p class="note">
-            <code>mask</code> fades whichever edges still have content beyond them —
-            top and bottom here, and it appears and disappears as you reach each end.
-            It is the honest signal that a list continues, which a scrollbar alone
-            does not give on a touch device.
+            <code>mask</code> fades whichever edges can still be scrolled, so the fade
+            clears when you reach an end.
           </p>
-          <div class="grid grid--2">
+          <div class="grid grid--2" style="margin-top:12px">
             <div class="cell">
-              <span class="cell__tag">mask</span>
-              <ApexScrollArea height="150px" mask>
-                <p v-for="n in 10" :key="n" class="note">Row {{ n }} — scroll to see the fade change.</p>
+              <span class="cell__tag">mask, vertical</span>
+              <ApexScrollArea height="200px" mask padding="4px">
+                <div class="sa-list">
+                  <span v-for="c in AUTOMOBILES" :key="c.label">{{ c.label }}<em>({{ c.value }})</em></span>
+                </div>
               </ApexScrollArea>
             </div>
             <div class="cell">
-              <span class="cell__tag">without it</span>
-              <ApexScrollArea height="150px">
-                <p v-for="n in 10" :key="n" class="note">Row {{ n }} — hard edges.</p>
+              <span class="cell__tag">mask, both axes</span>
+              <ApexScrollArea height="200px" mask padding="4px">
+                <div class="sa-grid">
+                  <span v-for="n in 80" :key="n">Cell {{ n }}</span>
+                </div>
               </ApexScrollArea>
             </div>
           </div>
 
           <h2>Variants</h2>
-          <p class="note">
-            When the bars are shown. <code>hidden</code> still scrolls — it removes
-            the bars, not the behaviour — which is what you want inside something
-            that already signals its own overflow.
-          </p>
-          <div class="grid grid--3">
+          <div class="grid grid--3" style="margin-top:12px">
             <div v-for="v in SCROLL_VARIANTS" :key="v" class="cell">
               <span class="cell__tag">variant="{{ v }}"</span>
-              <ApexScrollArea height="140px" :variant="v">
-                <p v-for="n in 8" :key="n" class="note">Row {{ n }}.</p>
+              <ApexScrollArea height="150px" :variant="v" padding="4px">
+                <div class="sa-list">
+                  <span v-for="c in AUTOMOBILES" :key="c.label">{{ c.label }}</span>
+                </div>
               </ApexScrollArea>
             </div>
           </div>
 
           <h2>Custom bars</h2>
-          <p class="note">
-            Thickness, colours and corner, by prop or by variable — the props set
-            the variables, so the two cannot disagree.
-          </p>
-          <div class="grid grid--2">
+          <div class="grid grid--3" style="margin-top:12px">
             <div class="cell">
-              <span class="cell__tag">thick, rounded, tinted</span>
-              <ApexScrollArea height="150px" variant="always" :scrollbar-size="12"
-                              thumb-color="#7AA2F7" thumb-hover-color="#A3BFFA"
-                              track-color="#101820" thumb-radius="6px">
-                <p v-for="n in 10" :key="n" class="note">Row {{ n }}.</p>
+              <span class="cell__tag">thick, square, tinted track</span>
+              <ApexScrollArea height="170px" :scrollbar-size="14" thumb-radius="2px"
+                              thumb-color="#0B5FFF" thumb-hover-color="#073C9F" track-color="#EAF2FF" padding="4px">
+                <div class="sa-list"><span v-for="c in AUTOMOBILES" :key="c.label">{{ c.label }}</span></div>
               </ApexScrollArea>
             </div>
             <div class="cell">
               <span class="cell__tag">hairline</span>
-              <ApexScrollArea height="150px" variant="always" :scrollbar-size="4" thumb-radius="2px">
-                <p v-for="n in 10" :key="n" class="note">Row {{ n }}.</p>
+              <ApexScrollArea height="170px" :scrollbar-size="3" thumb-color="#0F141C" padding="4px">
+                <div class="sa-list"><span v-for="c in AUTOMOBILES" :key="c.label">{{ c.label }}</span></div>
+              </ApexScrollArea>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">green, always visible</span>
+              <ApexScrollArea height="170px" variant="always" :scrollbar-size="10"
+                              thumb-color="#137C4A" track-color="#E7F8EE" padding="4px">
+                <div class="sa-list"><span v-for="c in AUTOMOBILES" :key="c.label">{{ c.label }}</span></div>
               </ApexScrollArea>
             </div>
           </div>
 
           <h2>Inside a panel</h2>
-          <p class="note">
-            The common case: a panel of fixed height whose body scrolls. Give the
-            panel <code>flush</code> so its padding does not stack with the scroll
-            area's, and put the padding on the scroll area instead — otherwise the
-            content is inset twice and the bar sits away from the edge.
-          </p>
-          <div class="cell cell--solo">
-            <span class="cell__tag">flush panel + padded scroll area</span>
-            <ApexPanel header="Recent bookings" subheader="Last 24 hours" icon="receipt_long" flush>
-              <ApexScrollArea max-height="200px" padding="14px" mask>
-                <p v-for="n in 12" :key="n" class="note">
-                  Booking #{{ 1040 + n }} — 2 × Stalls, €44.00
-                </p>
+          <div style="max-width:340px;margin-top:12px">
+            <ApexPanel header="Automobiles" subheader="15 makes" icon="directions_car" toggleable>
+              <ApexScrollArea max-height="180px" mask variant="hover">
+                <div class="sa-list">
+                  <span v-for="c in AUTOMOBILES" :key="c.label">{{ c.label }}<em>({{ c.value }})</em></span>
+                </div>
               </ApexScrollArea>
             </ApexPanel>
           </div>

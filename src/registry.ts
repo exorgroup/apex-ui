@@ -90,9 +90,110 @@ export const SWITCH_LABELS_SNIPPET = `<!-- Both words are rendered into one grid
 
 <ApexSwitch v-model="live" on-label="ON" off-label="OFF" :ui="{ control: 'live-switch' }" />`;
 
+/* --- The container examples, ported from the gallery ---------------- */
+
+/** The three tabs every ApexTabs example uses, so the panels line up. */
+export const TAB_ITEMS = [
+  { label: 'Account Info', icon: 'person' },
+  { label: 'Payment', icon: 'credit_card', badge: 'New', badgeSeverity: 'primary' },
+  { label: 'Preferences', icon: 'settings' },
+];
+
+/** Ten tabs, which is more than the strip can hold — the scrollable example. */
+export const TAB_MANY = [
+  'Overview', 'Displays', 'Playlists', 'Schedules', 'Reports',
+  'Proof of play', 'Billing', 'Team', 'Integrations', 'Audit log',
+].map((label) => ({ label }));
+
+export const TAB_VARIANTS = ['underline', 'pill', 'enclosed'] as const;
+export const TAB_PLACEMENTS = ['top', 'bottom', 'left', 'right'] as const;
+
+/** One disabled tab in the middle, to show the arrow keys stepping over it. */
+export const TAB_ONE_DISABLED = [
+  { label: 'Active' }, { label: 'Blocked', disabled: true }, { label: 'Also fine' },
+];
+
+export const TAB_BADGED = [
+  { label: 'Inbox', icon: 'inbox', badge: 12, badgeSeverity: 'primary' },
+  { label: 'Flagged', icon: 'flag', badge: 3, badgeSeverity: 'danger' },
+  { label: 'Archive', icon: 'archive', badge: 0 },
+];
+
 /** The toolbar's navigation-bar example: link labels, then the wrap example's. */
 export const TBAR_LINKS = ['Products', 'Solutions', 'Resources', 'Pricing'];
 export const TBAR_MARKS = ['Bold', 'Italic', 'Underline'];
+
+/** The three steps every ApexSteps example walks through. */
+export const STEP_ITEMS = [
+  { label: 'Account', subtitle: 'Your details', icon: 'person' },
+  { label: 'Payment', subtitle: 'Card or invoice', icon: 'credit_card' },
+  { label: 'Confirm', subtitle: 'Review and submit', icon: 'task_alt' },
+];
+
+/** A publishing flow, for the connector-less indicator. */
+export const STEP_PIPELINE = [
+  { label: 'Draft' }, { label: 'Review' }, { label: 'Scheduled' }, { label: 'Live' },
+];
+
+export const STEP_PLANS = [
+  { value: 'free', label: 'Free', help: '1 display' },
+  { value: 'studio', label: 'Studio', help: '10 displays' },
+];
+
+/** Five messages for the splitter's advanced mail-client example. */
+export const SPLIT_MAILS = [
+  { from: 'A. Borg', time: '10:24', subject: 'Q1 marketing report', body: 'Please review the campaign metrics before Friday.' },
+  { from: 'L. Rossi', time: '09:15', subject: 'Design system update', body: 'The new tokens are ready for review.' },
+  { from: 'K. Weber', time: 'Yesterday', subject: 'Sprint retrospective', body: 'Notes from yesterday, key actions inside.' },
+  { from: 'S. de Vries', time: 'Yesterday', subject: 'Server migration plan', body: 'Migration to the new cloud starts Monday.' },
+  { from: 'M. Dubois', time: 'Monday', subject: 'New component release', body: 'Version 4.0 of the library is available.' },
+];
+
+export const SPLIT_PAIR = [{}, {}];
+export const SPLIT_THIRDS = [{ size: 25, minSize: 15, maxSize: 40 }, { size: 50 }, { size: 25, minSize: 10 }];
+export const SPLIT_COLLAPSIBLE = [{ size: 30, minSize: 18, collapsible: true, collapsedSize: 4 }, {}];
+export const SPLIT_NESTED = [{ size: 25, minSize: 10 }, { size: 75 }];
+export const SPLIT_EVENTS = [{ minSize: 15 }, { minSize: 15 }];
+export const SPLIT_STATEFUL = [{ size: 40 }, { size: 60 }];
+export const SPLIT_NAV = [
+  { size: 32, minSize: 18, maxSize: 50, collapsible: true, collapsedSize: 0 }, {},
+];
+
+export const PANEL_REPEAT = [
+  { value: 'daily', label: 'Daily' }, { value: 'weekly', label: 'Weekly' },
+];
+
+export const LEGEND_ALIGNS = ['start', 'center', 'end'] as const;
+
+/** The accordion's four panels. One is disabled, to show keys skipping it. */
+export const FAQ_PANELS = [
+  { value: 'about', header: 'What is APEX Pando?', icon: 'help',
+    content: 'A digital signage platform: schedule playlists, pair displays and report on every playback.' },
+  { value: 'secure', header: 'Is my data secure?', icon: 'lock',
+    content: 'Everything is encrypted in transit and at rest, and proof-of-play logs are retained for seven years.' },
+  { value: 'plan', header: 'Can I change plan later?', icon: 'sync_alt', badge: 'New',
+    content: 'Yes — upgrade or downgrade at any time from account settings. Changes apply on the next billing cycle.' },
+  { value: 'support', header: 'How do I reach support?', icon: 'support_agent', disabled: true,
+    content: 'Enterprise plans include a named contact.' },
+];
+
+/** Built from a list, which is the point of the dynamic-panels example. */
+export const FAQ_ZONES = [1, 2, 3, 4, 5].map((i) => ({
+  value: `z${i}`,
+  header: `Zone ${i}`,
+  icon: 'grid_view',
+  content: `Zone ${i} plays the default loop between 08:00 and 20:00.`,
+}));
+
+/** The three product shots the card's media examples use. */
+export const CARD_MEDIA = ['totem-43', 'wall-55', 'menu-board'];
+
+/** Fifteen makes with a count each — the ScrollArea's list content. */
+export const AUTOMOBILES = [
+  ['Audi', 200], ['BMW', 350], ['Mercedes-Benz', 420], ['Volkswagen', 510], ['Toyota', 610],
+  ['Honda', 280], ['Hyundai', 390], ['Kia', 260], ['Ford', 470], ['Renault', 530],
+  ['Peugeot', 310], ['Volvo', 180], ['Skoda', 240], ['Seat', 150], ['Fiat', 130],
+].map(([label, value]) => ({ label: label as string, value: value as number }));
 
 export const SCROLL_VARIANTS = ['auto', 'hover', 'scroll', 'always', 'hidden'] as const;
 
