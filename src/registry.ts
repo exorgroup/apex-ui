@@ -2555,6 +2555,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'extremes', type: 'bool' }, { key: 'checkbox', type: 'bool' },
       { key: 'multiple', type: 'bool' }, { key: 'filter', type: 'bool' },
       { key: 'noDrag', type: 'bool' }, { key: 'scrollHeight', type: 'number' },
+      { key: 'filterPlaceholder', type: 'text' },
       { key: 'disabled', type: 'bool' },
     ],
     props: [
@@ -2942,7 +2943,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'label', type: 'text' }, { key: 'inline', type: 'bool' },
       { key: 'columns', type: 'number' }, { key: 'card', type: 'bool' },
       { key: 'toggleAll', type: 'bool' }, { key: 'max', type: 'number' },
-      { key: 'disabled', type: 'bool' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
     ],
     props: [
       ['modelValue', 'unknown[]', '[]', 'The chosen values'],
@@ -3013,10 +3014,12 @@ export const ENTRIES: DocEntry[] = [
       { key: 'label', type: 'text' },
       { key: 'onLabel', type: 'text' }, { key: 'offLabel', type: 'text' },
       { key: 'labelPlacement', type: 'select', options: ['after', 'before'] },
+      { key: 'help', type: 'text' },
       { key: 'disabled', type: 'bool' },
     ],
     props: [
       ['modelValue', 'boolean', 'false', 'v-model'],
+      ['labelPlacement', 'ApexLabelPlacement', "'after'", 'Overridden default'],
       ['onLabel / offLabel', 'string', '—', 'Words inside the track. Keep them short'],
     ],
     events: [['update:modelValue', 'boolean'], ['change', 'boolean']],
@@ -3061,6 +3064,8 @@ export const ENTRIES: DocEntry[] = [
       { key: 'label', type: 'text' }, { key: 'multiple', type: 'bool' },
       { key: 'block', type: 'bool' }, { key: 'vertical', type: 'bool' },
       { key: 'detached', type: 'bool' }, { key: 'iconOnly', type: 'bool' },
+      { key: 'color', type: 'color' }, { key: 'textColor', type: 'color' },
+      { key: 'mutedColor', type: 'color' },
       { key: 'allowEmpty', type: 'bool' }, { key: 'disabled', type: 'bool' },
     ],
     props: [
@@ -3082,10 +3087,13 @@ export const ENTRIES: DocEntry[] = [
     model: false,
     base: { label: 'Bookings', onLabel: 'Live', offLabel: 'Paused', onIcon: 'play_arrow', offIcon: 'pause' },
     controls: [
+      { key: 'label', type: 'text' },
       { key: 'onLabel', type: 'text' }, { key: 'offLabel', type: 'text' },
       { key: 'onIcon', type: 'text' }, { key: 'offIcon', type: 'text' },
       { key: 'variant', type: 'select', options: ['solid', 'outline'] },
-      { key: 'block', type: 'bool' }, { key: 'disabled', type: 'bool' },
+      { key: 'block', type: 'bool' },
+      { key: 'onColor', type: 'color' }, { key: 'onTextColor', type: 'color' },
+      { key: 'disabled', type: 'bool' },
     ],
     props: [
       ['modelValue', 'boolean', 'false', 'v-model'],
@@ -3109,7 +3117,8 @@ export const ENTRIES: DocEntry[] = [
       { key: 'shape', type: 'select', options: ['star', 'triangle', 'dot', 'square'] },
       { key: 'variant', type: 'select', options: ['filled', 'outline'] },
       { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
-      { key: 'starSize', type: 'number' }, { key: 'color', type: 'color' },
+      { key: 'starSize', type: 'number' }, { key: 'icon', type: 'text' },
+      { key: 'color', type: 'color' },
       { key: 'cancel', type: 'bool' }, { key: 'showValue', type: 'bool' },
       { key: 'readonly', type: 'bool' }, { key: 'disabled', type: 'bool' },
     ],

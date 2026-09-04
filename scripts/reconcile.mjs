@@ -200,7 +200,12 @@ export function controlKeys(block) {
  * both do), so every match accumulates.
  */
 export function headings(src, id) {
-  const gate = new RegExp(`<(\\w+)([^>]*?v-if="[^"]*entry\\.id\\s*===?\\s*'${id}'[^"]*")`, 'g');
+  /* Our App.vue renders foundations pages in a separate branch keyed on
+     `page!.id` rather than `entry.id`. Matching only the latter made the
+     Conditional-formatting and Validation examples look absent when they
+     were on the page all along. */
+  const gate = new RegExp(
+    `<(\\w+)([^>]*?v-if="[^"]*(?:entry|page)!?\\.id\\s*===?\\s*'${id}'[^"]*")`, 'g');
   const found = [];
   for (const m of src.matchAll(gate)) {
     const tag = m[1];
@@ -234,19 +239,48 @@ export function headings(src, id) {
 // ---------------------------------------------------------------- diffing
 
 const key = (row) => (row[0] || '').trim();
+
+/**
+ * The names one row documents.
+ *
+ * Both files fold related entries into a single row — "icon / trailingIcon",
+ * "href / target", "panel-1, panel-2, …" — but not always the same ones. A
+ * row keyed on its whole first cell therefore makes "block / vertical" look
+ * like neither `block` nor `vertical`, and the tool reports two props as
+ * missing when both are documented. Acting on that would have duplicated
+ * rows that already existed. So compare the names a row covers, not the
+ * literal cell.
+ */
+function names(row) {
+  return key(row)
+    .split(/\s*[/,]\s*/)
+    .map((n) => n.trim())
+    .filter((n) => n && n !== '…' && !n.includes('…'));
+}
 /* Collapse runs of whitespace: the two files wrap their long descriptions at
    different columns, and a line break is not a documentation difference. */
 const rest = (row) => row.slice(1).map((c) => c.trim().replace(/\s+/g, ' ')).join(' | ');
 
 function diff(mine, theirs) {
-  const mineBy = new Map(mine.map((r) => [key(r), r]));
-  const theirsBy = new Map(theirs.map((r) => [key(r), r]));
+  const index = (list) => {
+    const m = new Map();
+    for (const row of list) for (const n of names(row)) if (!m.has(n)) m.set(n, row);
+    return m;
+  };
+  const mineBy = index(mine);
+  const theirsBy = index(theirs);
+
   return {
-    missing: theirs.filter((r) => !mineBy.has(key(r))).map(key),
-    extra: mine.filter((r) => !theirsBy.has(key(r))).map(key),
-    changed: theirs
-      .filter((r) => mineBy.has(key(r)) && rest(mineBy.get(key(r))) !== rest(r))
-      .map((r) => ({ name: key(r), gallery: rest(r), ours: rest(mineBy.get(key(r))) })),
+    missing: [...theirsBy.keys()].filter((n) => !mineBy.has(n)),
+    extra: [...mineBy.keys()].filter((n) => !theirsBy.has(n)),
+    /* Only compare descriptions where both sides document the name in a row
+       covering the same set, otherwise a merged row is diffed against a split
+       one and every such pair reads as changed. */
+    changed: [...theirsBy.entries()]
+      .filter(([n, r]) => mineBy.has(n)
+        && key(mineBy.get(n)) === key(r)
+        && rest(mineBy.get(n)) !== rest(r))
+      .map(([n, r]) => ({ name: n, gallery: rest(r), ours: rest(mineBy.get(n)) })),
   };
 }
 

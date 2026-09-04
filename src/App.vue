@@ -36,6 +36,24 @@ const model = reactive<Record<string, unknown>>({});
 const orderSelection = ref<unknown[]>(['interval']);
 
 /**
+ * A fixed list for the ApexOrderList examples below the playground. They each
+ * demonstrate one arrangement, so they need a stable list of their own rather
+ * than the playground's, which the reader is busy reordering.
+ */
+const RUNNING_ORDER = [
+  { value: 'doors', label: 'Doors open', help: '19:00' },
+  { value: 'support', label: 'Support act', help: '19:45' },
+  { value: 'interval', label: 'Interval', help: '20:30' },
+  { value: 'headline', label: 'Headline set', help: '21:00' },
+];
+
+/** The playground's current order, numbered, for the "Selected" section. */
+const runningOrderText = computed(() => {
+  const rows = (model.orderlist ?? []) as { label?: string }[];
+  return rows.map((o, i) => `${i + 1}. ${o.label}`).join('\n');
+});
+
+/**
  * Live prop overrides from the playground rail, per control. Kept apart from
  * `base` so "reset" is just clearing this, and so the other sections on the page
  * keep rendering the baseline rather than following the rail.
@@ -1169,7 +1187,7 @@ async function copyUsage() {
 
         <!-- ApexButton: the full vocabulary, one section per axis. -->
         <template v-if="entry.id === 'button'">
-          <h2>Severity \u00d7 variant</h2>
+          <h2>Severity × variant</h2>
           <div class="card stack">
             <div v-for="v in ['solid', 'outlined', 'text', 'link']" :key="v" class="sev-row">
               <span class="cell__tag sev-row__tag">{{ v }}</span>
@@ -1569,6 +1587,49 @@ async function copyUsage() {
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. Ordering is the whole point of the
+             control, so each example varies one thing about how the rows are
+             moved: where the controls sit, how they line up, and what happens
+             when the checkboxes or the dragging are taken away. -->
+        <template v-if="entry.id === 'orderlist'">
+          <h2>Selected</h2>
+          <p class="note">The live playground above writes back to both models. Current order:</p>
+          <pre class="doc-pre">{{ runningOrderText }}</pre>
+          <p class="note">Selection: <code>{{ JSON.stringify(orderSelection) }}</code></p>
+
+          <h2>Control placement</h2>
+          <div class="grid grid--2">
+            <div v-for="c in ['start', 'end', 'top', 'none']" :key="c" class="cell">
+              <span class="cell__tag">controls="{{ c }}"</span>
+              <ApexOrderList :model-value="RUNNING_ORDER" :controls="c" :scroll-height="200" />
+            </div>
+          </div>
+
+          <h2>Control alignment</h2>
+          <div class="grid grid--3">
+            <div v-for="a in ['start', 'center', 'end']" :key="a" class="cell">
+              <span class="cell__tag">controls-align="{{ a }}"</span>
+              <ApexOrderList :model-value="RUNNING_ORDER" :controls-align="a" :scroll-height="200" />
+            </div>
+          </div>
+
+          <h2>Without checkboxes</h2>
+          <p class="note">
+            Plain click selects one row; Cmd or Ctrl-click adds to the selection when
+            <code>multiple</code> is on.
+          </p>
+          <div class="cell cell--solo">
+            <span class="cell__tag">multiple</span>
+            <ApexOrderList :model-value="RUNNING_ORDER" multiple :scroll-height="200" />
+          </div>
+
+          <h2>Buttons only</h2>
+          <div class="cell cell--solo">
+            <span class="cell__tag">no-drag</span>
+            <ApexOrderList :model-value="RUNNING_ORDER" checkbox no-drag :scroll-height="200" />
           </div>
         </template>
 
