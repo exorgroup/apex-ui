@@ -908,6 +908,59 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['addNew', '.apex-pop__add', '--apex-pop-add-bg, --apex-pop-add-border, --apex-pop-add-fg, --apex-pop-add-hover-bg, --apex-pop-add-icon — one per open column'],
     ['option / tick / empty', '.apex-pop__opt, .apex-pop__tick, .apex-pop__empty', 'shared — all on ApexField. The tick doubles as the branch arrow'],
   ],
+  radio: [
+    ['control', '.apex-radio', 'the row, when the radio stands alone; inside a group it is `option` instead'],
+    ['dot', '.apex-radio__dot', '--apex-radio-size, --apex-radio-border, --apex-radio-on, --apex-radio-on-width, --apex-radio-focus-ring'],
+    ['lead', '.apex-radio__lead', 'the label row beside the dot — was an inline style until this round'],
+    ['text', '.apex-radio__txt', 'label and hint stacked'],
+    ['optionHelp', '.apex-radio__help', '--apex-radio-help-fg, --apex-radio-help-fs'],
+    ['thumbnail', '.apex-radio__img', "the option's image"],
+    ['— (card)', '.apex-radio--card', '--apex-radio-card-bg, --apex-radio-card-border, --apex-radio-card-radius, --apex-radio-card-hover-border, --apex-radio-card-on-border, --apex-radio-card-on-bg'],
+  ],
+  radiogroup: [
+    ['group', '.apex-radios', '--apex-radios-gap; --apex-radio-cols when `columns` is set'],
+    ['option', '.apex-radio', 'one row — every ApexRadio key above applies, since the rows are ApexRadio'],
+    ['dot / lead / text / optionHelp', '.apex-radio__*', 'passed straight through to each row'],
+  ],
+  checkbox: [
+    ['control', '.apex-cb', 'the row, when the checkbox stands alone; inside a group it is `option`'],
+    ['checkbox', '.apex-cb__box', '--apex-cb-size, --apex-cb-radius, --apex-cb-border, --apex-cb-bg, --apex-cb-on-bg, --apex-cb-tick — shared with every control that draws a tick box'],
+    ['lead', '.apex-cb__lead', 'the label row beside the box'],
+    ['text', '.apex-cb__txt', 'label and hint stacked'],
+    ['optionHelp', '.apex-cb__help', '--apex-cb-help-fg'],
+    ['— (card)', '.apex-cb--card', '--apex-cb-card-bg, --apex-cb-card-border, --apex-cb-card-radius, --apex-cb-card-hover-border, --apex-cb-card-on-border, --apex-cb-card-on-bg'],
+  ],
+  checkboxgroup: [
+    ['group', '.apex-checks', '--apex-checks-gap; --apex-check-cols when `columns` is set'],
+    ['selectAll', '.apex-checks__all', '--apex-checks-all-fg — the select-all / clear-all link'],
+    ['option', '.apex-cb', 'one row — every ApexCheckbox key above applies, since the rows are ApexCheckbox'],
+  ],
+  switch: [
+    ['control', '.apex-switch', '--apex-switch-off-bg, --apex-switch-on-bg — the track in each state'],
+    ['handle', '.apex-switch i', '--apex-switch-knob'],
+    ['text', '.apex-switch__text', '--apex-switch-on-fg, --apex-switch-off-fg — the words inside the track. Both are rendered into one grid cell, so the track sizes to the longer and never reflows as it toggles'],
+  ],
+  segmented: [
+    ['control', '.apex-seg', '--apex-seg-bg, --apex-seg-border, --apex-seg-radius'],
+    ['option', '.apex-seg__btn', '--apex-seg-fg, --apex-seg-btn-radius, --apex-seg-hover-fg, --apex-seg-on-bg, --apex-seg-on-fg, --apex-seg-on-ring'],
+  ],
+  selectbutton: [
+    ['control', '.apex-sb', '--apex-sb-bg, --apex-sb-border, --apex-sb-radius'],
+    ['option', '.apex-sb__btn', '--apex-sb-muted, --apex-sb-hover-bg, --apex-sb-hover-fg, --apex-sb-color, --apex-sb-text, --apex-sb-focus-ring'],
+    ['— (help)', '.apex-sb__help', "the second line under a button's label"],
+    ['— (image)', '.apex-sb__img', "an option's image"],
+  ],
+  togglebutton: [
+    ['control', '.apex-tb', 'off: --apex-tb-bg, --apex-tb-fg, --apex-tb-border, --apex-tb-radius, --apex-tb-hover-fg, --apex-tb-hover-border. On: --apex-tb-on, --apex-tb-on-text'],
+  ],
+  rating: [
+    ['control', '.apex-rating', '--apex-rating-size, --apex-rating-gap'],
+    ['option', '.apex-rating__star', 'one star — the box the two glyphs sit in'],
+    ['range', '.apex-rating__bg', '--apex-rating-empty — the unfilled glyph underneath'],
+    ['fill', '.apex-rating__fill', '--apex-rating-color — the filled glyph, clipped to the value'],
+    ['button', '.apex-rating__cancel', '--apex-rating-cancel-fg, --apex-rating-cancel-hover-fg, --apex-rating-cancel-hover-bg'],
+    ['value', '.apex-rating__value', '--apex-rating-value-fg, --apex-rating-value-fs'],
+  ],
   treeselect: [
     ['branch', '.apex-tree__branch', 'a node and everything under it — layout only'],
     ['option', '.apex-tree__row', '--apex-tree-row-fg, --apex-tree-row-radius, --apex-tree-row-pad, --apex-tree-row-fs, --apex-tree-row-hover-bg, --apex-tree-row-selected-bg, --apex-tree-row-selected-fg'],
@@ -1047,6 +1100,162 @@ export const OWN_PARTS: Record<string, string[][]> = {
 };
 
 export const SNIP_OWN: Record<string, string> = {
+  radio: `/* The dot and the card are this control's own; the label, message and
+   tone come from the shared field surface. */
+.plan-radio {
+  --apex-radio-size: 20px;
+  --apex-radio-border: #3A4657;
+  --apex-radio-on: #7AA2F7;
+  --apex-radio-help-fg: #6B7789;
+  /* The card variant, for choose-one-of-these layouts. */
+  --apex-radio-card-bg: #101820;
+  --apex-radio-card-border: #243040;
+  --apex-radio-card-on-border: #7AA2F7;
+  --apex-radio-card-on-bg: #16202C;
+}
+
+<ApexRadio v-model="plan" value="pro" label="Pro" name="plan" card
+  :ui="{ control: 'plan-radio', dot: 'plan-dot' }" />
+
+/* A group passes its ui straight down, so one map dresses every row. Inside
+   a group a row is "option", not "control" — the group is the control. */
+<ApexRadioGroup v-model="plan" :options="PLANS" label="Plan" card
+  :ui="{ group: 'plan-list', option: 'plan-radio', dot: 'plan-dot' }" />`,
+
+  radiogroup: `/* The rows ARE ApexRadio, so everything on that page applies here and the
+   ui map is passed straight through. The group owns only the layout. */
+.plan-list {
+  --apex-radios-gap: 12px;
+  /* Set by the "columns" prop; set it yourself to vary by breakpoint. */
+  --apex-radio-cols: 2;
+}
+
+<ApexRadioGroup v-model="plan" :options="PLANS" label="Plan" :columns="2"
+  :ui="{ group: 'plan-list', option: 'plan-radio', dot: 'plan-dot' }" />`,
+
+  checkbox: `/* The tick box is shared with Listbox, OrderList, Multiselect and Tree, so
+   --apex-cb-* dresses all of them at once. Scope it if you mean only this. */
+.terms-check {
+  --apex-cb-size: 20px;
+  --apex-cb-radius: 6px;
+  --apex-cb-border: #3A4657;
+  --apex-cb-on-bg: #7AA2F7;
+  /* Set the tick whenever you set a light on-bg, or it disappears. */
+  --apex-cb-tick: #0F141C;
+}
+
+<ApexCheckbox v-model="agreed" label="I agree" hint="Required to continue"
+  :ui="{ control: 'terms-check', checkbox: 'terms-box' }" />
+
+/* indeterminate is the mixed state for a parent box. Visual only — clicking
+   still checks, because a parent should resolve its children, not cycle. */
+<ApexCheckbox v-model="allOn" :indeterminate="someOn" label="Select all" />`,
+
+  checkboxgroup: `/* The rows ARE ApexCheckbox, so that page's keys apply and the ui map is
+   passed straight down. The group owns the layout and the select-all row. */
+.roles-list {
+  --apex-checks-gap: 10px;
+  --apex-check-cols: 2;
+  --apex-checks-all-fg: #7AA2F7;
+}
+
+<ApexCheckboxGroup v-model="roles" :options="ROLES" label="Roles" toggle-all
+  :columns="2" :ui="{ group: 'roles-list', selectAll: 'roles-all', option: 'roles-row' }" />
+
+/* max caps the selection by disabling the rows that are not chosen, rather
+   than accepting the click and silently dropping it. */
+<ApexCheckboxGroup v-model="roles" :options="ROLES" :max="2" />`,
+
+  switch: `.live-switch {
+  --apex-switch-off-bg: #3A4657;
+  --apex-switch-on-bg: #137C4A;
+  --apex-switch-knob: #fff;
+}
+
+<ApexSwitch v-model="live" label="Accepting bookings"
+  :ui="{ control: 'live-switch', handle: 'live-knob' }" />
+
+/* onLabel / offLabel put the state inside the track. Both words are rendered
+   into one grid cell with the inactive one hidden but still taking up space,
+   so the track sizes to the longer of the two and toggling never changes its
+   width. Keep them short — this is a switch, not a button. */
+<ApexSwitch v-model="live" on-label="ON" off-label="OFF" label="Accepting bookings" />
+
+/* The off word takes --fg-default rather than white, because the off track is
+   --border-strong and the two flip together with the theme. Override both if
+   you set a track colour of your own. */
+.live-switch { --apex-switch-off-fg: #0F141C; --apex-switch-on-fg: #fff; }`,
+
+  segmented: `.view-seg {
+  --apex-seg-bg: #0B1017;
+  --apex-seg-border: #243040;
+  --apex-seg-fg: #6B7789;
+  --apex-seg-on-bg: #1D2735;
+  --apex-seg-on-fg: #7AA2F7;
+  /* The hairline around the chosen segment. */
+  --apex-seg-on-ring: #2C3A4D;
+}
+
+<ApexSegmented v-model="view" :options="VIEWS" label="View"
+  :ui="{ control: 'view-seg', option: 'view-seg-btn' }" />
+
+/* Or without a stylesheet: */
+<ApexSegmented v-model="view" :options="VIEWS"
+  selected-background="#1D2735" selected-color="#7AA2F7" />`,
+
+  selectbutton: `.range-sb {
+  --apex-sb-bg: #101820;
+  --apex-sb-border: #243040;
+  --apex-sb-muted: #6B7789;
+  --apex-sb-hover-bg: #1D2735;
+  --apex-sb-color: #7AA2F7;      /* the chosen button */
+  --apex-sb-text: #0F141C;       /* its label — set both, or it may not read */
+}
+
+<ApexSelectButton v-model="range" :options="RANGES" label="Range"
+  :ui="{ control: 'range-sb', option: 'range-sb-btn' }" />
+
+/* multiple turns the radiogroup into a set of independent toggles, and the
+   model becomes an array. */
+<ApexSelectButton v-model="days" :options="DAYS" multiple block />`,
+
+  togglebutton: `.live-tb {
+  /* Off. */
+  --apex-tb-bg: #101820;
+  --apex-tb-fg: #6B7789;
+  --apex-tb-border: #243040;
+  --apex-tb-hover-fg: #E8EEF7;
+  /* On. Set both — the label sits on the fill. */
+  --apex-tb-on: #137C4A;
+  --apex-tb-on-text: #fff;
+}
+
+<ApexToggleButton v-model="live" on-label="Live" off-label="Paused"
+  on-icon="play_arrow" off-icon="pause" :ui="{ control: 'live-tb' }" />
+
+/* variant="outline" keeps the on state transparent with a coloured ring,
+   for when a filled button would shout too loudly in a toolbar. */
+<ApexToggleButton v-model="live" variant="outline" on-label="Live" off-label="Paused" />`,
+
+  rating: `.score-rating {
+  --apex-rating-size: 30px;
+  --apex-rating-gap: 5px;
+  --apex-rating-color: #C24A06;   /* filled */
+  --apex-rating-empty: #243040;   /* unfilled — set it whenever you set the fill */
+  --apex-rating-value-fg: #6B7789;
+  --apex-rating-cancel-hover-fg: #C41E1E;
+}
+
+<ApexRating v-model="score" label="Rating" :stars="5" allow-half cancel show-value
+  :ui="{ control: 'score-rating', option: 'score-star', fill: 'score-fill' }" />
+
+/* Or with props, no stylesheet: */
+<ApexRating v-model="score" :star-size="30" color="#C24A06" empty-color="#243040" />
+
+/* shape swaps the glyph without touching the behaviour — star, triangle, dot
+   or square — and icon/emptyIcon override it with any two glyph names. */
+<ApexRating v-model="score" shape="dot" :stars="3" />`,
+
   treeselect: `<!-- The overlay is a plain .apex-pop, so the shared variables dress it.
      Only the rows, the chevron and the indent are this control's own. -->
 .locality-tree {
@@ -1971,6 +2180,233 @@ export const ENTRIES: DocEntry[] = [
       ['add-new', '{ query }'],
     ],
     slots: [['item', 'Custom row content; receives { item, index }']],
+  },
+  {
+    id: 'checkbox', name: 'ApexCheckbox', group: 'Choice',
+    blurb: 'One box. Binary by default; give it a `value` and several boxes share one array model. `indeterminate` draws the mixed state for a parent box — visual only, since clicking a parent should resolve its children rather than cycle through three states.',
+    model: true,
+    base: { label: 'I agree to the terms', hint: 'Required before checkout' },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'hint', type: 'text' },
+      { key: 'labelPlacement', type: 'select', options: ['after', 'before'] },
+      { key: 'card', type: 'bool' }, { key: 'indeterminate', type: 'bool' },
+      { key: 'icon', type: 'text' }, { key: 'required', type: 'bool' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'boolean | unknown[]', 'false', 'A boolean on its own; an array when `value` is given'],
+      ['value', 'unknown', '—', 'Given, the box toggles this inside a modelValue array'],
+      ['indeterminate', 'boolean', 'false', 'The mixed state. Visual only — clicking still checks'],
+      ['card', 'boolean', 'false', 'Bordered choice card'],
+      ['hint', 'string', '—', 'Second line under the label'],
+      ['icon / image', 'string', '—', 'Before the label'],
+      ['labelPlacement', "'after' | 'before'", "'after'", 'Which side of the box the label sits. A checkbox always draws its own label, so the other placements do not apply'],
+    ],
+    events: [['update:modelValue', 'boolean | value[]'], ['change', 'boolean']],
+    slots: [['default', 'Replaces the label, for links inside it']],
+  },
+  {
+    id: 'checkboxgroup', name: 'ApexCheckboxGroup', group: 'Choice',
+    blurb: 'Boxes generated from a list, with the chosen values as an array. The rows are ApexCheckbox, so anything on that page applies here. `max` caps the selection by disabling the rows that are not chosen, rather than accepting the click and dropping it.',
+    model: ['events.view', 'events.edit'],
+    base: {
+      label: 'Permissions', toggleAll: true,
+      options: [
+        { value: 'events.view', label: 'View events', help: 'Read-only access' },
+        { value: 'events.edit', label: 'Edit events', help: 'Create and amend' },
+        { value: 'events.delete', label: 'Delete events', help: 'Irreversible' },
+        { value: 'reports.all', label: 'All reports', disabled: true, help: 'Admin only' },
+      ],
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'inline', type: 'bool' },
+      { key: 'columns', type: 'number' }, { key: 'card', type: 'bool' },
+      { key: 'toggleAll', type: 'bool' }, { key: 'max', type: 'number' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'unknown[]', '[]', 'The chosen values'],
+      ['options', 'ApexOption[] | string[]', '[]', 'Strings, or objects with icon, image, help and disabled'],
+      ['inline', 'boolean', 'false', 'Lay the boxes out in a row'],
+      ['columns', 'number', '—', 'Fixed column count instead of one per row'],
+      ['card', 'boolean', 'false', 'Bordered choice cards'],
+      ['toggleAll', 'boolean', 'false', 'Select all / clear all above the list'],
+      ['max', 'number', '—', 'Cap the number of selections'],
+    ],
+    events: [['update:modelValue', 'value[]'], ['change', '—']],
+    slots: [['option', 'Custom row content; receives { option }']],
+  },
+  {
+    id: 'radio', name: 'ApexRadio', group: 'Choice',
+    blurb: 'One radio. Usually you want ApexRadioGroup, which generates these from a list; reach for this when the layout is yours — radios in table cells, or spread across a form. Every radio sharing a model must share `name`, or the browser will not treat them as one group.',
+    model: 'pro',
+    base: { label: 'Pro', value: 'pro', name: 'plan-demo', hint: 'Ten events a month' },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'hint', type: 'text' },
+      { key: 'card', type: 'bool' }, { key: 'icon', type: 'text' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'unknown', '—', 'The chosen value, shared with the others in the group'],
+      ['value', 'unknown', '—', 'What this one contributes when chosen'],
+      ['name', 'string', 'generated', 'The shared group name. Falls back to a generated one so a lone radio still groups'],
+      ['card', 'boolean', 'false', 'Bordered choice card'],
+      ['hint', 'string', '—', 'Second line under the label'],
+      ['bare', 'boolean', 'false', 'No field shell — set by ApexRadioGroup for its rows, since the group has already drawn one'],
+    ],
+    events: [['update:modelValue', 'value'], ['change', 'value']],
+    slots: [['default', 'Replaces the label']],
+  },
+  {
+    id: 'radiogroup', name: 'ApexRadioGroup', group: 'Choice',
+    blurb: 'Radios generated from a list, stacked, inline or in columns. The rows are ApexRadio, so the markup for a radio lives in one place and anything on that page applies here.',
+    model: 'pro',
+    base: {
+      label: 'Plan', card: true,
+      options: [
+        { value: 'free', label: 'Free', help: 'One event, no fees' },
+        { value: 'pro', label: 'Pro', help: 'Ten events a month' },
+        { value: 'max', label: 'Unlimited', help: 'Talk to us' },
+      ],
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'card', type: 'bool' },
+      { key: 'inline', type: 'bool' }, { key: 'columns', type: 'number' },
+      { key: 'required', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'unknown', '—', 'The chosen value'],
+      ['options', 'ApexOption[] | string[]', '[]', 'Strings, or objects with icon, image, help and disabled'],
+      ['card', 'boolean', 'false', 'Each option as a bordered choice card'],
+      ['inline', 'boolean', 'false', 'Lay them out in a row'],
+      ['columns', 'number', '—', 'Fixed column count'],
+    ],
+    events: [['update:modelValue', 'value'], ['change', 'value']],
+    slots: [['option', 'Custom row content; receives { option }']],
+  },
+  {
+    id: 'switch', name: 'ApexSwitch', group: 'Choice',
+    blurb: 'A checkbox in switch form, for a setting that takes effect at once. `onLabel` and `offLabel` put the state inside the track — both words are rendered into one grid cell, so the track sizes to the longer of the two and toggling never changes its width.',
+    model: true,
+    base: { label: 'Accepting bookings' },
+    controls: [
+      { key: 'label', type: 'text' },
+      { key: 'onLabel', type: 'text' }, { key: 'offLabel', type: 'text' },
+      { key: 'labelPlacement', type: 'select', options: ['after', 'before'] },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'boolean', 'false', 'v-model'],
+      ['onLabel / offLabel', 'string', '—', 'Words inside the track. Keep them short'],
+    ],
+    events: [['update:modelValue', 'boolean'], ['change', 'boolean']],
+  },
+  {
+    id: 'segmented', name: 'ApexSegmented', group: 'Choice',
+    blurb: 'A radiogroup styled as one bar, for switching a view. Arrow keys move the selection and carry focus with it. This is the simple case on purpose — ApexSelectButton is the same idea with multiple choice, detached buttons, vertical stacking, icon-only mode and per-option colours.',
+    model: 'week',
+    base: {
+      label: 'View',
+      options: [
+        { value: 'day', label: 'Day', icon: 'calendar_view_day' },
+        { value: 'week', label: 'Week', icon: 'calendar_view_week' },
+        { value: 'month', label: 'Month', icon: 'calendar_view_month' },
+      ],
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'block', type: 'bool' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'unknown', '—', 'The chosen value'],
+      ['options', 'ApexOption[] | string[]', '[]', 'Strings, or objects with icon and disabled'],
+      ['block', 'boolean', 'false', 'Full width, equal segments'],
+    ],
+    events: [['update:modelValue', 'value'], ['change', 'value']],
+    slots: [['option', 'Custom segment content; receives { option }']],
+  },
+  {
+    id: 'selectbutton', name: 'ApexSelectButton', group: 'Choice',
+    blurb: 'A row of buttons acting as one control. Single choice is a radiogroup; `multiple` turns it into independent toggles and the model becomes an array. Same options shape as the selects.',
+    model: 'card',
+    base: {
+      label: 'Payment method',
+      options: [
+        { value: 'card', label: 'Card', icon: 'credit_card', help: 'Visa, Mastercard' },
+        { value: 'cash', label: 'Cash', icon: 'payments', help: 'Door sales only' },
+        { value: 'comp', label: 'Complimentary', icon: 'card_giftcard' },
+      ],
+    },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'multiple', type: 'bool' },
+      { key: 'block', type: 'bool' }, { key: 'vertical', type: 'bool' },
+      { key: 'detached', type: 'bool' }, { key: 'iconOnly', type: 'bool' },
+      { key: 'allowEmpty', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'unknown | unknown[]', '—', 'An array once multiple is on'],
+      ['options', 'ApexOption[] | string[]', '[]', 'Strings, or objects with icon, image, help and disabled'],
+      ['multiple', 'boolean', 'false', 'Independent toggles rather than one choice'],
+      ['block / vertical', 'boolean', 'false', 'Full width; stacked'],
+      ['detached', 'boolean', 'false', 'Separate buttons with a gap instead of one joined bar'],
+      ['allowEmpty', 'boolean', 'true', 'Re-clicking the chosen one clears it'],
+      ['iconOnly', 'boolean', 'false', 'Labels move to the tooltip and the accessible name'],
+      ['color / textColor / mutedColor', 'string', '—', 'The chosen button, its label, and the unchosen labels'],
+    ],
+    events: [['update:modelValue', 'value | value[]'], ['change', '—']],
+    slots: [['option', 'Custom button content; receives { option }']],
+  },
+  {
+    id: 'togglebutton', name: 'ApexToggleButton', group: 'Choice',
+    blurb: 'A single button holding a boolean, with its own label, icon and colour per state. It sits between ApexSwitch — a settings row — and ApexSelectButton, which is a choice among several.',
+    model: false,
+    base: { label: 'Bookings', onLabel: 'Live', offLabel: 'Paused', onIcon: 'play_arrow', offIcon: 'pause' },
+    controls: [
+      { key: 'onLabel', type: 'text' }, { key: 'offLabel', type: 'text' },
+      { key: 'onIcon', type: 'text' }, { key: 'offIcon', type: 'text' },
+      { key: 'variant', type: 'select', options: ['solid', 'outline'] },
+      { key: 'block', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'boolean', 'false', 'v-model'],
+      ['onLabel / offLabel', 'string', '—', 'Label per state; falls back to `label`'],
+      ['onIcon / offIcon', 'string', '—', 'Icon per state'],
+      ['variant', "'solid' | 'outline'", "'solid'", 'Outlined while on, instead of filled'],
+      ['onColor / onTextColor', 'string', '—', 'The on state'],
+      ['block', 'boolean', 'false', 'Full width'],
+    ],
+    events: [['update:modelValue', 'boolean'], ['change', 'boolean']],
+    slots: [['default', 'Custom content; receives { on }']],
+  },
+  {
+    id: 'rating', name: 'ApexRating', group: 'Choice',
+    blurb: 'Star selection with half stars, any star count, four preset shapes or your own glyphs, an optional clear button and a read-only display mode. Arrow keys step by one, or by a half when allowHalf is on.',
+    model: 3.5,
+    base: { label: 'Rating', stars: 5, allowHalf: true, cancel: true, showValue: true },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'stars', type: 'number' },
+      { key: 'allowHalf', type: 'bool' },
+      { key: 'shape', type: 'select', options: ['star', 'triangle', 'dot', 'square'] },
+      { key: 'variant', type: 'select', options: ['filled', 'outline'] },
+      { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'starSize', type: 'number' }, { key: 'color', type: 'color' },
+      { key: 'cancel', type: 'bool' }, { key: 'showValue', type: 'bool' },
+      { key: 'readonly', type: 'bool' }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'number | null', '—', 'v-model; null when cleared'],
+      ['stars', 'number', '5', 'How many'],
+      ['allowHalf', 'boolean', 'false', 'Half-star selection, by which half of a star you point at'],
+      ['shape', "'star' | 'triangle' | 'dot' | 'square'", "'star'", 'Preset glyph; ignored when `icon` is given'],
+      ['icon / emptyIcon', 'string', '—', 'Your own glyphs for the two states'],
+      ['variant', "'filled' | 'outline'", "'filled'", 'Solid glyphs or outlined'],
+      ['orientation', "'horizontal' | 'vertical'", "'horizontal'", ''],
+      ['starSize', 'number', '—', 'Star size in pixels; defaults to the field size'],
+      ['color', 'string', '—', 'Filled colour; defaults to the warning accent'],
+      ['cancel', 'boolean', 'false', 'A × that clears the value'],
+      ['showValue', 'boolean', 'false', 'Text beside the stars'],
+    ],
+    events: [['update:modelValue', 'number | null'], ['change', 'number | null']],
   },
   {
     id: 'datepicker', name: 'ApexDatePicker', group: 'Dates',
