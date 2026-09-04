@@ -7,6 +7,7 @@
  * percentages and always sum to 100, and can be bound, persisted, or left alone.
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { ApexContainerProps } from '../types';
 
 export interface SplitterPanel {
   /** Percentage of the splitter this panel starts at. */
@@ -19,7 +20,7 @@ export interface SplitterPanel {
   key?: string | number;
 }
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   panels?: SplitterPanel[];
   /** Percentages, one per panel. Bindable. */
   sizes?: number[];
@@ -212,24 +213,24 @@ defineExpose({ sizes: current, reset: () => commit(defaults(), 0, 'resizeend') }
 </script>
 
 <template>
-  <div ref="root" class="apex-sp" :style="rootStyle" :data-layout="layout"
+  <div ref="root" class="apex-sp" :class="ui?.root" :style="rootStyle" :data-layout="layout"
        :data-bordered="bordered ? 'true' : 'false'" :data-disabled="disabled ? 'true' : 'false'"
        :data-dragging="drag ? 'true' : 'false'">
     <template v-for="(panel, i) in list" :key="panel.key ?? i">
-      <div class="apex-sp__panel" :style="panelStyle(i)" :data-index="i">
+      <div class="apex-sp__panel" :class="ui?.panel" :style="panelStyle(i)" :data-index="i">
         <slot :name="`panel-${i + 1}`" :size="current[i]" :index="i">
           <slot :size="current[i]" :index="i" />
         </slot>
       </div>
 
-      <div v-if="i < count - 1" class="apex-sp__gutter" role="separator" tabindex="0"
+      <div v-if="i < count - 1" class="apex-sp__gutter" :class="ui?.gutter" role="separator" tabindex="0"
            :aria-orientation="horizontal ? 'vertical' : 'horizontal'"
            :aria-valuenow="Math.round(current[i])" :aria-valuemin="0" :aria-valuemax="100"
            :aria-label="`Resize panel ${i + 1}`" :aria-disabled="disabled || undefined"
            @pointerdown="onDown(i, $event)" @pointermove="onMove" @pointerup="onUp"
            @pointercancel="onUp" @keydown="onKey(i, $event)">
         <slot name="gutter" :index="i">
-          <span v-if="showHandle" class="apex-sp__grip"></span>
+          <span v-if="showHandle" class="apex-sp__grip" :class="ui?.grip"></span>
         </slot>
       </div>
     </template>

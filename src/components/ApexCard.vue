@@ -6,8 +6,9 @@
  * are props so a plain card needs no markup at all.
  */
 import { computed } from 'vue';
+import type { ApexContainerProps } from '../types';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   title?: string;
   subtitle?: string;
   /** Media across the top of the card. */
@@ -46,27 +47,27 @@ const rootStyle = computed(() => {
 </script>
 
 <template>
-  <component :is="tag" class="apex-cd" :style="rootStyle" :href="href"
+  <component :is="tag" class="apex-cd" :class="ui?.root" :style="rootStyle" :href="href"
              :type="tag === 'button' ? 'button' : undefined"
              :data-bordered="bordered ? 'true' : 'false'" :data-shadow="shadow"
              :data-hoverable="(hoverable || clickable || !!href) ? 'true' : 'false'"
              :data-horizontal="horizontal ? 'true' : 'false'"
              @click="(clickable || href) && emit('click', $event)">
-    <div v-if="image || $slots.media" class="apex-cd__media">
+    <div v-if="image || $slots.media" class="apex-cd__media" :class="ui?.media">
       <slot name="media">
         <img :src="image" :alt="imageAlt || ''" />
       </slot>
     </div>
 
-    <header v-if="title || subtitle || $slots.header" class="apex-cd__head">
+    <header v-if="title || subtitle || $slots.header" class="apex-cd__head" :class="ui?.head">
       <slot name="header">
-        <h3 v-if="title" class="apex-cd__title">{{ title }}</h3>
-        <p v-if="subtitle" class="apex-cd__sub">{{ subtitle }}</p>
+        <h3 v-if="title" class="apex-cd__title" :class="ui?.title">{{ title }}</h3>
+        <p v-if="subtitle" class="apex-cd__sub" :class="ui?.sub">{{ subtitle }}</p>
       </slot>
     </header>
 
-    <div v-if="$slots.default" class="apex-cd__body"><slot /></div>
+    <div v-if="$slots.default" class="apex-cd__body" :class="ui?.body"><slot /></div>
 
-    <footer v-if="$slots.footer" class="apex-cd__foot"><slot name="footer" /></footer>
+    <footer v-if="$slots.footer" class="apex-cd__foot" :class="ui?.foot"><slot name="footer" /></footer>
   </component>
 </template>

@@ -271,6 +271,87 @@ export interface ApexButtonClasses {
   menuSeparator?: string;
 }
 
+/**
+ * Your own classes, per part of a container — ApexToolbar, ApexTabs, ApexSteps,
+ * ApexSplitter, ApexScrollArea, ApexPanel, ApexFieldset, ApexCard and
+ * ApexAccordion.
+ *
+ * The third such map, after ApexFieldClasses and ApexButtonClasses, because a
+ * container is neither: it has no value, no label/message line and no tone —
+ * it has a header, a body and things inside it.
+ *
+ * The keys below are the parts that recur across three or more of the nine;
+ * everything after them belongs to one or two controls and is ignored by the
+ * rest, exactly as ApexFieldClasses handles its own long tail. A key names the
+ * part's ROLE, not its class — `head` reaches ApexAccordion's `__header` as
+ * readily as ApexCard's `__head`.
+ */
+export interface ApexContainerClasses {
+  /** The outermost element. */
+  root?: string;
+  /** The header row, and the two lines of text in it. */
+  head?: string;
+  title?: string;
+  sub?: string;
+  /** The content area, and the footer where the control has one. */
+  body?: string;
+  foot?: string;
+  /** The collapse/expand button and its chevron. */
+  toggle?: string;
+  icon?: string;
+  /** A section within: a tab's panel, a step's panel, a splitter pane, an
+      accordion item. */
+  panel?: string;
+  /** Text identifying a part — a tab's label, a step's label, a legend's. */
+  label?: string;
+
+  /* Parts belonging to one or two of the nine. Ignored by the others. */
+  /** ApexToolbar — one of the start / center / end regions. */
+  region?: string;
+  /** ApexTabs — the strip and its scroller, one tab, the count beside a
+      label, the moving indicator, and the panel area below. */
+  striparea?: string;
+  scroll?: string;
+  strip?: string;
+  tab?: string;
+  badge?: string;
+  bar?: string;
+  panels?: string;
+  /** ApexSteps — one step, its numbered marker, the text beside it, the line
+      joining them, and the nav bar beneath. */
+  item?: string;
+  marker?: string;
+  text?: string;
+  rail?: string;
+  nav?: string;
+  list?: string;
+  /** ApexSplitter — the draggable divider and the grip drawn on it. */
+  gutter?: string;
+  grip?: string;
+  /** ApexScrollArea — the clipping box and the content inside it. The
+      scrollbar is `bar` and its handle is `thumb`. */
+  viewport?: string;
+  content?: string;
+  thumb?: string;
+  /** ApexFieldset — the legend that straddles the border. */
+  legend?: string;
+  /** ApexCard — the image band above the header. */
+  media?: string;
+  /** ApexAccordion — the element wrapping one item's header. */
+  heading?: string;
+  inner?: string;
+}
+
+/**
+ * What every container accepts. Deliberately small: a container has no value
+ * and no validation, so this is the class map and nothing else — each control
+ * declares its own appearance props, which are already in place.
+ */
+export interface ApexContainerProps {
+  /** Your own class on any part. See ApexContainerClasses. */
+  ui?: ApexContainerClasses;
+}
+
 export interface ApexFieldProps {
   label?: string;
   labelIcon?: string;

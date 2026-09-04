@@ -8,6 +8,7 @@
  * measured box, so it animates and needs no per-tab bookkeeping.
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import type { ApexContainerProps } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
 export interface TabItem {
@@ -23,7 +24,7 @@ export interface TabItem {
   lazy?: boolean;
 }
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   tabs?: TabItem[];
   /** The active tab's `value`. Bindable. */
   modelValue?: string | number;
@@ -185,7 +186,10 @@ onBeforeUnmount(() => { ro?.disconnect(); ro = null; });
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {
-    '--apex-tabs-pos': bar.value.pos + 'px',
+    /* Runtime geometry, not a theming knob: the component rewrites these on
+     every tab change so the indicator can slide to the active tab. They are
+     deliberately absent from the customisation tables. */
+  '--apex-tabs-pos': bar.value.pos + 'px',
     '--apex-tabs-size': bar.value.size + 'px',
   };
   if (props.activeColor) s['--apex-tabs-active'] = props.activeColor;
@@ -203,17 +207,17 @@ defineExpose({ select, measure, activeIndex });
 </script>
 
 <template>
-  <div class="apex-tabs" :style="rootStyle" :data-placement="placement" :data-size="size"
+  <div class="apex-tabs" :class="ui?.root" :style="rootStyle" :data-placement="placement" :data-size="size"
        :data-variant="variant" :data-fill="fill ? 'true' : 'false'" :data-align="align"
        :data-bordered="bordered ? 'true' : 'false'" :data-disabled="disabled ? 'true' : 'false'"
        :data-vertical="vertical ? 'true' : 'false'">
-    <div class="apex-tabs__striparea">
-      <button v-if="overflow.before" type="button" class="apex-tabs__scroll" data-dir="before"
+    <div class="apex-tabs__striparea" :class="ui?.striparea">
+      <button v-if="overflow.before" type="button" class="apex-tabs__scroll" :class="ui?.scroll" data-dir="before"
               :aria-label="vertical ? 'Scroll up' : 'Scroll back'" @click="scrollStrip(-1)">
         <ApexIcon :name="vertical ? 'keyboard_arrow_up' : 'chevron_left'" :size="18" />
       </button>
 
-      <div ref="strip" class="apex-tabs__strip" role="tablist"
+      <div ref="strip" class="apex-tabs__strip" :class="ui?.strip" role="tablist"
            :aria-orientation="vertical ? 'vertical' : 'horizontal'" @scroll="schedule">
         <button v-for="(tab, i) in list" :key="valueOf(tab, i)" ref="buttons" type="button"
                 class="apex-tabs__tab" role="tab" :data-on="i === activeIndex"
@@ -222,23 +226,23 @@ defineExpose({ select, measure, activeIndex });
                 @click="select(i)" @keydown="onKey(i, $event)">
           <slot :name="`tab-${i + 1}`" :tab="tab" :index="i" :active="i === activeIndex">
             <ApexIcon v-if="tab.icon" :name="tab.icon" :size="17" />
-            <span class="apex-tabs__label">{{ tab.label }}</span>
-            <span v-if="tab.badge !== undefined" class="apex-tabs__badge"
+            <span class="apex-tabs__label" :class="ui?.label">{{ tab.label }}</span>
+            <span v-if="tab.badge !== undefined" class="apex-tabs__badge" :class="ui?.badge"
                   :data-tone="tab.badgeSeverity || 'neutral'">{{ tab.badge }}</span>
           </slot>
         </button>
 
-        <span class="apex-tabs__bar" aria-hidden="true"></span>
+        <span class="apex-tabs__bar" :class="ui?.bar" aria-hidden="true"></span>
       </div>
 
-      <button v-if="overflow.after" type="button" class="apex-tabs__scroll" data-dir="after"
+      <button v-if="overflow.after" type="button" class="apex-tabs__scroll" :class="ui?.scroll" data-dir="after"
               :aria-label="vertical ? 'Scroll down' : 'Scroll forward'" @click="scrollStrip(1)">
         <ApexIcon :name="vertical ? 'keyboard_arrow_down' : 'chevron_right'" :size="18" />
       </button>
     </div>
 
-    <div v-if="!tabsOnly" class="apex-tabs__panels">
-      <div v-for="(tab, i) in list" :key="valueOf(tab, i)" class="apex-tabs__panel"
+    <div v-if="!tabsOnly" class="apex-tabs__panels" :class="ui?.panels">
+      <div v-for="(tab, i) in list" :key="valueOf(tab, i)" class="apex-tabs__panel" :class="ui?.panel"
            role="tabpanel" :hidden="i !== activeIndex">
         <slot v-if="shouldRender(tab, i)" :name="`panel-${i + 1}`" :tab="tab" :index="i"
               :active="i === activeIndex" />

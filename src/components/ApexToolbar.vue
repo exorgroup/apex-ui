@@ -9,8 +9,9 @@
  * bar it scrolls, so content stays reachable and the regions never overlap.
  */
 import { computed } from 'vue';
+import type { ApexContainerProps } from '../types';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   size?: 'sm' | 'md' | 'lg';
   /** Gap between items within a region. */
   gap?: string;
@@ -42,16 +43,16 @@ const rootStyle = computed(() => {
 </script>
 
 <template>
-  <div class="apex-tbar" :style="rootStyle" :data-size="size" :data-wrap="wrap ? 'true' : 'false'"
+  <div class="apex-tbar" :class="ui?.root" :style="rootStyle" :data-size="size" :data-wrap="wrap ? 'true' : 'false'"
        :data-bordered="bordered ? 'true' : 'false'" :data-raised="raised ? 'true' : 'false'"
        :data-sticky="sticky ? 'true' : 'false'" role="toolbar">
-    <div v-if="$slots.start" class="apex-tbar__region" data-region="start">
+    <div v-if="$slots.start" class="apex-tbar__region" :class="ui?.region" data-region="start">
       <slot name="start" />
     </div>
-    <div v-if="$slots.center" class="apex-tbar__region" data-region="center">
+    <div v-if="$slots.center" class="apex-tbar__region" :class="ui?.region" data-region="center">
       <slot name="center" />
     </div>
-    <div v-if="$slots.end" class="apex-tbar__region" data-region="end">
+    <div v-if="$slots.end" class="apex-tbar__region" :class="ui?.region" data-region="end">
       <slot name="end" />
     </div>
     <slot />

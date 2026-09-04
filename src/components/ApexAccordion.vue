@@ -7,6 +7,7 @@
  * `content` and `toggleicon` slots cover per-panel customisation.
  */
 import { computed, ref } from 'vue';
+import type { ApexContainerProps } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
 export interface AccordionPanel {
@@ -20,7 +21,7 @@ export interface AccordionPanel {
   data?: unknown;
 }
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   items?: AccordionPanel[];
   /** The open panel, or panels when `multiple`. Bindable. */
   value?: string | number | Array<string | number> | null;
@@ -139,33 +140,33 @@ defineExpose({ toggle, isOpen });
 </script>
 
 <template>
-  <div class="apex-ac" :style="rootStyle" :data-size="size" :data-toggle="togglePosition"
+  <div class="apex-ac" :class="ui?.root" :style="rootStyle" :data-size="size" :data-toggle="togglePosition"
        :data-separated="gap ? 'true' : 'false'" :data-bordered="bordered ? 'true' : 'false'">
-    <section v-for="(panel, i) in panels" :key="panel.value" class="apex-ac__panel"
+    <section v-for="(panel, i) in panels" :key="panel.value" class="apex-ac__panel" :class="ui?.panel"
              :data-open="isOpen(panel) ? 'true' : 'false'"
              :data-disabled="panel.disabled ? 'true' : 'false'">
-      <h3 class="apex-ac__heading">
-        <button ref="headers" type="button" class="apex-ac__header" :id="`${panelId(panel)}-h`"
+      <h3 class="apex-ac__heading" :class="ui?.heading">
+        <button ref="headers" type="button" class="apex-ac__header" :class="ui?.head" :id="`${panelId(panel)}-h`"
                 :aria-expanded="isOpen(panel)" :aria-controls="panelId(panel)"
                 :aria-disabled="panel.disabled || undefined" :disabled="panel.disabled"
                 :data-p="isOpen(panel) ? 'active' : 'inactive'"
                 @click="toggle(panel)" @keydown="onKey(i, panel, $event)">
-          <span class="apex-ac__toggle">
+          <span class="apex-ac__toggle" :class="ui?.toggle">
             <slot name="toggleicon" :panel="panel" :active="isOpen(panel)">
               <ApexIcon :name="isOpen(panel) ? collapseIcon : expandIcon" :size="20" />
             </slot>
           </span>
-          <ApexIcon v-if="panel.icon" :name="panel.icon" class="apex-ac__icon" :size="18" />
-          <span class="apex-ac__title">
+          <ApexIcon v-if="panel.icon" :name="panel.icon" class="apex-ac__icon" :class="ui?.icon" :size="18" />
+          <span class="apex-ac__title" :class="ui?.title">
             <slot name="header" :panel="panel" :active="isOpen(panel)" :index="i">{{ panel.header }}</slot>
           </span>
-          <span v-if="panel.badge != null" class="apex-dt__badge" data-tone="neutral">{{ panel.badge }}</span>
+          <span v-if="panel.badge != null" class="apex-dt__badge" :class="ui?.badge" data-tone="neutral">{{ panel.badge }}</span>
         </button>
       </h3>
 
-      <div class="apex-ac__body" :id="panelId(panel)" role="region"
+      <div class="apex-ac__body" :class="ui?.body" :id="panelId(panel)" role="region"
            :aria-labelledby="`${panelId(panel)}-h`" :hidden="!isOpen(panel)">
-        <div v-if="shouldRender(panel)" class="apex-ac__inner">
+        <div v-if="shouldRender(panel)" class="apex-ac__inner" :class="ui?.inner">
           <slot name="content" :panel="panel" :active="isOpen(panel)" :index="i">
             <slot :panel="panel" :index="i">{{ panel.content }}</slot>
           </slot>

@@ -11,6 +11,7 @@
  * component works as a bare progress indicator.
  */
 import { computed, ref, watch } from 'vue';
+import type { ApexContainerProps } from '../types';
 import ApexIcon from './ApexIcon.vue';
 import ApexButton from './ApexButton.vue';
 
@@ -27,7 +28,7 @@ export interface StepsStep {
   incomplete?: boolean;
 }
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   steps?: StepsStep[];
   /** The active step's `value`. Bindable. */
   modelValue?: string | number;
@@ -149,14 +150,14 @@ defineExpose({ goTo, back, next, activeIndex });
 </script>
 
 <template>
-  <div class="apex-st" :style="rootStyle" :data-orientation="orientation" :data-size="size"
+  <div class="apex-st" :class="ui?.root" :style="rootStyle" :data-orientation="orientation" :data-size="size"
        :data-linear="linear ? 'true' : 'false'" :data-connector="hideConnector ? 'false' : 'true'"
        :data-disabled="disabled ? 'true' : 'false'">
     <!-- vertical keeps each panel with its own header, so the two interleave -->
     <template v-if="orientation === 'vertical'">
-      <div v-for="(step, i) in list" :key="valueOf(step, i)" class="apex-st__item"
+      <div v-for="(step, i) in list" :key="valueOf(step, i)" class="apex-st__item" :class="ui?.item"
            :data-state="stateOf(step, i)">
-        <component :is="as" ref="headers" class="apex-st__head"
+        <component :is="as" ref="headers" class="apex-st__head" :class="ui?.head"
                    :type="as === 'button' ? 'button' : undefined"
                    :disabled="as === 'button' && !isReachable(step, i) ? true : undefined"
                    :aria-current="i === activeIndex ? 'step' : undefined"
@@ -165,23 +166,23 @@ defineExpose({ goTo, back, next, activeIndex });
                    @click="goTo(i)" @keydown="onKey(i, $event)">
           <slot :name="`step-${i + 1}`" :step="step" :index="i" :active="i === activeIndex"
                 :complete="isComplete(step, i)" :go-to="() => goTo(i)">
-            <span class="apex-st__marker">
+            <span class="apex-st__marker" :class="ui?.marker">
               <ApexIcon v-if="showComplete && isComplete(step, i)" :name="completeIcon" :size="16" />
               <ApexIcon v-else-if="step.icon" :name="step.icon" :size="17" />
               <template v-else>{{ i + 1 }}</template>
             </span>
-            <span class="apex-st__text">
-              <span class="apex-st__label">{{ step.label }}</span>
-              <span v-if="step.subtitle" class="apex-st__sub">{{ step.subtitle }}</span>
+            <span class="apex-st__text" :class="ui?.text">
+              <span class="apex-st__label" :class="ui?.label">{{ step.label }}</span>
+              <span v-if="step.subtitle" class="apex-st__sub" :class="ui?.sub">{{ step.subtitle }}</span>
             </span>
           </slot>
-          <span v-if="!hideConnector && i < list.length - 1" class="apex-st__rail" aria-hidden="true"></span>
+          <span v-if="!hideConnector && i < list.length - 1" class="apex-st__rail" :class="ui?.rail" aria-hidden="true"></span>
         </component>
 
-        <div v-if="!stepsOnly" class="apex-st__body" :data-open="i === activeIndex">
-          <div v-if="i === activeIndex" class="apex-st__panel">
+        <div v-if="!stepsOnly" class="apex-st__body" :class="ui?.body" :data-open="i === activeIndex">
+          <div v-if="i === activeIndex" class="apex-st__panel" :class="ui?.panel">
             <slot :name="`panel-${i + 1}`" :step="step" :index="i" :back="back" :next="next" />
-            <div v-if="showNav" class="apex-st__nav">
+            <div v-if="showNav" class="apex-st__nav" :class="ui?.nav">
               <ApexButton :disabled="i === 0" variant="ghost" @click="back">{{ backLabel }}</ApexButton>
               <ApexButton @click="next">{{ i === list.length - 1 ? finishLabel : nextLabel }}</ApexButton>
             </div>
@@ -191,10 +192,10 @@ defineExpose({ goTo, back, next, activeIndex });
     </template>
 
     <template v-else>
-      <div class="apex-st__list" role="tablist" :aria-orientation="orientation">
-        <div v-for="(step, i) in list" :key="valueOf(step, i)" class="apex-st__item"
+      <div class="apex-st__list" :class="ui?.list" role="tablist" :aria-orientation="orientation">
+        <div v-for="(step, i) in list" :key="valueOf(step, i)" class="apex-st__item" :class="ui?.item"
              :data-state="stateOf(step, i)">
-          <component :is="as" ref="headers" class="apex-st__head"
+          <component :is="as" ref="headers" class="apex-st__head" :class="ui?.head"
                      :type="as === 'button' ? 'button' : undefined"
                      :disabled="as === 'button' && !isReachable(step, i) ? true : undefined"
                      :aria-current="i === activeIndex ? 'step' : undefined"
@@ -203,24 +204,24 @@ defineExpose({ goTo, back, next, activeIndex });
                      @click="goTo(i)" @keydown="onKey(i, $event)">
             <slot :name="`step-${i + 1}`" :step="step" :index="i" :active="i === activeIndex"
                   :complete="isComplete(step, i)" :go-to="() => goTo(i)">
-              <span class="apex-st__marker">
+              <span class="apex-st__marker" :class="ui?.marker">
                 <ApexIcon v-if="showComplete && isComplete(step, i)" :name="completeIcon" :size="16" />
                 <ApexIcon v-else-if="step.icon" :name="step.icon" :size="17" />
                 <template v-else>{{ i + 1 }}</template>
               </span>
-              <span class="apex-st__text">
-                <span class="apex-st__label">{{ step.label }}</span>
-                <span v-if="step.subtitle" class="apex-st__sub">{{ step.subtitle }}</span>
+              <span class="apex-st__text" :class="ui?.text">
+                <span class="apex-st__label" :class="ui?.label">{{ step.label }}</span>
+                <span v-if="step.subtitle" class="apex-st__sub" :class="ui?.sub">{{ step.subtitle }}</span>
               </span>
             </slot>
           </component>
         </div>
       </div>
 
-      <div v-if="!stepsOnly" class="apex-st__panel">
+      <div v-if="!stepsOnly" class="apex-st__panel" :class="ui?.panel">
         <slot :name="`panel-${activeIndex + 1}`" :step="list[activeIndex]" :index="activeIndex"
               :back="back" :next="next" />
-        <div v-if="showNav" class="apex-st__nav">
+        <div v-if="showNav" class="apex-st__nav" :class="ui?.nav">
           <ApexButton :disabled="activeIndex === 0" variant="ghost" @click="back">{{ backLabel }}</ApexButton>
           <ApexButton @click="next">{{ activeIndex === list.length - 1 ? finishLabel : nextLabel }}</ApexButton>
         </div>

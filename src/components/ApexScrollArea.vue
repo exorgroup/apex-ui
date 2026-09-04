@@ -7,8 +7,9 @@
  * is measured, so it tracks content that changes size.
  */
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import type { ApexContainerProps } from '../types';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   /** Fixed height, or use maxHeight to grow until a limit. */
   height?: string;
   maxHeight?: string;
@@ -177,19 +178,19 @@ defineExpose({ viewport, measure, scrollTo: (o: ScrollToOptions) => viewport.val
 </script>
 
 <template>
-  <div class="apex-sa" :style="rootStyle" :data-variant="variant"
+  <div class="apex-sa" :class="ui?.root" :style="rootStyle" :data-variant="variant"
        :data-bars="barsVisible ? 'true' : 'false'" :data-dragging="drag ? 'true' : 'false'"
        :data-mask="mask ? 'true' : 'false'"
        :data-both="scrollable.y && scrollable.x ? 'true' : 'false'"
        :data-fade-top="edges.top ? 'true' : 'false'" :data-fade-bottom="edges.bottom ? 'true' : 'false'"
        :data-fade-left="edges.left ? 'true' : 'false'" :data-fade-right="edges.right ? 'true' : 'false'">
-    <div ref="viewport" :id="viewportId" class="apex-sa__viewport" tabindex="0" @scroll="onScroll">
-      <div class="apex-sa__content"><slot /></div>
+    <div ref="viewport" :id="viewportId" class="apex-sa__viewport" :class="ui?.viewport" tabindex="0" @scroll="onScroll">
+      <div class="apex-sa__content" :class="ui?.content"><slot /></div>
     </div>
 
-    <div v-if="scrollable.y && variant !== 'hidden'" ref="yBar" class="apex-sa__bar" data-axis="y"
+    <div v-if="scrollable.y && variant !== 'hidden'" ref="yBar" class="apex-sa__bar" :class="ui?.bar" data-axis="y"
          @mousedown="pageTo('y', $event)">
-      <span class="apex-sa__thumb" role="scrollbar" aria-orientation="vertical"
+      <span class="apex-sa__thumb" :class="ui?.thumb" role="scrollbar" aria-orientation="vertical"
             :aria-controls="viewportId" :aria-valuemin="0" :aria-valuemax="100"
             :aria-valuenow="position.y" :aria-label="'Vertical scrollbar'"
             :style="{ blockSize: thumb.ySize + 'px', transform: `translateY(${thumb.yPos}px)` }"
@@ -197,9 +198,9 @@ defineExpose({ viewport, measure, scrollTo: (o: ScrollToOptions) => viewport.val
             @pointercancel="endDrag"></span>
     </div>
 
-    <div v-if="scrollable.x && variant !== 'hidden'" ref="xBar" class="apex-sa__bar" data-axis="x"
+    <div v-if="scrollable.x && variant !== 'hidden'" ref="xBar" class="apex-sa__bar" :class="ui?.bar" data-axis="x"
          @mousedown="pageTo('x', $event)">
-      <span class="apex-sa__thumb" role="scrollbar" aria-orientation="horizontal"
+      <span class="apex-sa__thumb" :class="ui?.thumb" role="scrollbar" aria-orientation="horizontal"
             :aria-controls="viewportId" :aria-valuemin="0" :aria-valuemax="100"
             :aria-valuenow="position.x" :aria-label="'Horizontal scrollbar'"
             :style="{ inlineSize: thumb.xSize + 'px', transform: `translateX(${thumb.xPos}px)` }"

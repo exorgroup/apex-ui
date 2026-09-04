@@ -5,9 +5,10 @@
  * assistive technology as well as visually.
  */
 import { computed, ref } from 'vue';
+import type { ApexContainerProps } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   legend?: string;
   icon?: string;
   /** Allow the content to collapse. */
@@ -62,26 +63,26 @@ const rootStyle = computed(() => {
 </script>
 
 <template>
-  <fieldset class="apex-fs" :style="rootStyle" :data-size="size" :data-align="legendAlign"
+  <fieldset class="apex-fs" :class="ui?.root" :style="rootStyle" :data-size="size" :data-align="legendAlign"
             :data-bordered="bordered ? 'true' : 'false'" :data-collapsed="shut ? 'true' : 'false'"
             :disabled="disabled">
-    <legend class="apex-fs__legend">
-      <component :is="toggleable ? 'button' : 'span'" class="apex-fs__label"
+    <legend class="apex-fs__legend" :class="ui?.legend">
+      <component :is="toggleable ? 'button' : 'span'" class="apex-fs__label" :class="ui?.label"
                  :type="toggleable ? 'button' : undefined"
                  :aria-expanded="toggleable ? !shut : undefined"
                  :disabled="toggleable && disabled ? true : undefined"
                  @click="toggle">
-        <span v-if="toggleable" class="apex-fs__toggle">
+        <span v-if="toggleable" class="apex-fs__toggle" :class="ui?.toggle">
           <slot name="toggleicon" :collapsed="shut">
             <ApexIcon :name="shut ? expandIcon : collapseIcon" :size="17" />
           </slot>
         </span>
-        <ApexIcon v-if="icon" :name="icon" class="apex-fs__icon" :size="17" />
+        <ApexIcon v-if="icon" :name="icon" class="apex-fs__icon" :class="ui?.icon" :size="17" />
         <slot name="legend">{{ legend }}</slot>
       </component>
     </legend>
 
-    <div class="apex-fs__body" :hidden="shut">
+    <div class="apex-fs__body" :class="ui?.body" :hidden="shut">
       <slot />
     </div>
   </fieldset>

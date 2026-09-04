@@ -6,9 +6,10 @@
  * has a full header bar that can also carry actions, and a footer.
  */
 import { computed, ref } from 'vue';
+import type { ApexContainerProps } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexContainerProps & {
   header?: string;
   subheader?: string;
   icon?: string;
@@ -68,11 +69,11 @@ const hasHeader = computed(() => !!(props.header || props.subheader || props.ico
 </script>
 
 <template>
-  <section class="apex-pn" :style="rootStyle" :data-size="size" :data-shadow="shadow"
+  <section class="apex-pn" :class="ui?.root" :style="rootStyle" :data-size="size" :data-shadow="shadow"
            :data-bordered="bordered ? 'true' : 'false'" :data-collapsed="shut ? 'true' : 'false'"
            :data-flush="flush ? 'true' : 'false'" :data-toggle="togglePosition">
-    <header v-if="hasHeader || $slots.header || $slots.icons" class="apex-pn__head">
-      <button v-if="toggleable" type="button" class="apex-pn__toggle" :aria-expanded="!shut"
+    <header v-if="hasHeader || $slots.header || $slots.icons" class="apex-pn__head" :class="ui?.head">
+      <button v-if="toggleable" type="button" class="apex-pn__toggle" :class="ui?.toggle" :aria-expanded="!shut"
               :aria-label="shut ? 'Expand' : 'Collapse'" @click="toggle">
         <slot name="toggleicon" :collapsed="shut">
           <ApexIcon :name="shut ? expandIcon : collapseIcon" :size="19" />
@@ -80,18 +81,18 @@ const hasHeader = computed(() => !!(props.header || props.subheader || props.ico
       </button>
 
       <slot name="header">
-        <ApexIcon v-if="icon" :name="icon" class="apex-pn__icon" :size="19" />
+        <ApexIcon v-if="icon" :name="icon" class="apex-pn__icon" :class="ui?.icon" :size="19" />
         <span class="apex-pn__titles">
-          <h3 v-if="header" class="apex-pn__title">{{ header }}</h3>
-          <p v-if="subheader" class="apex-pn__sub">{{ subheader }}</p>
+          <h3 v-if="header" class="apex-pn__title" :class="ui?.title">{{ header }}</h3>
+          <p v-if="subheader" class="apex-pn__sub" :class="ui?.sub">{{ subheader }}</p>
         </span>
       </slot>
 
       <span v-if="$slots.icons" class="apex-pn__actions"><slot name="icons" /></span>
     </header>
 
-    <div class="apex-pn__body" :hidden="shut"><slot /></div>
+    <div class="apex-pn__body" :class="ui?.body" :hidden="shut"><slot /></div>
 
-    <footer v-if="$slots.footer" class="apex-pn__foot" :hidden="shut"><slot name="footer" /></footer>
+    <footer v-if="$slots.footer" class="apex-pn__foot" :class="ui?.foot" :hidden="shut"><slot name="footer" /></footer>
   </section>
 </template>
