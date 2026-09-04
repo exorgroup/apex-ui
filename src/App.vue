@@ -8,6 +8,7 @@ import {
   BUTTON_FAMILY, DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
   OWN_PARTS, SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_OWN, SNIP_PROPS, SNIP_TONE,
   SNIP_UI, SPLIT_MODEL,
+  SCROLL_IN_PANEL_SNIPPET, SCROLL_VARIANTS, SCROLL_WIDE,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
@@ -718,6 +719,22 @@ async function copyUsage() {
             <tbody>
               <tr v-for="r in entry.slots" :key="r[0]">
                 <td class="mono">{{ r[0] }}</td><td class="mono t">{{ r[1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+
+        <!-- What a template ref gets you, where the control offers one. -->
+        <template v-if="entry.exposed">
+          <h2>Exposed</h2>
+          <p class="note">
+            Available on a template ref, for the cases props cannot reach.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>Name</th><th>What it does</th></tr></thead>
+            <tbody>
+              <tr v-for="r in entry.exposed" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td>{{ r[1] }}</td>
               </tr>
             </tbody>
           </table>
@@ -1467,6 +1484,123 @@ async function copyUsage() {
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
           </div>
+        </template>
+
+        <!-- A scrollbar cannot be judged from a code block: you have to scroll
+             it. Every example here is live. -->
+        <template v-if="entry.id === 'scrollarea'">
+          <h2>Axes</h2>
+          <p class="note">
+            Each axis gets a bar only when its content actually overflows, so a box
+            that fits shows nothing. Scrolling stays native throughout — wheel,
+            trackpad, keyboard, touch and scroll-anchoring all behave normally.
+          </p>
+          <div class="grid grid--3">
+            <div class="cell">
+              <span class="cell__tag">Vertical</span>
+              <ApexScrollArea height="150px">
+                <p v-for="n in 10" :key="n" class="note">Row {{ n }} of ten.</p>
+              </ApexScrollArea>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">Horizontal</span>
+              <ApexScrollArea height="150px">
+                <div style="inline-size:640px">
+                  <p class="note">This block is 640px wide inside a narrower box.</p>
+                  <ApexSegmented :model-value="'a'" :options="SCROLL_WIDE" />
+                </div>
+              </ApexScrollArea>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">Both axes</span>
+              <ApexScrollArea height="150px">
+                <div style="inline-size:640px">
+                  <p v-for="n in 10" :key="n" class="note">Row {{ n }} — wide and tall at once.</p>
+                </div>
+              </ApexScrollArea>
+            </div>
+          </div>
+          <p class="note">
+            With both axes live the bars shorten so they do not meet in the corner.
+          </p>
+
+          <h2>Scroll fade</h2>
+          <p class="note">
+            <code>mask</code> fades whichever edges still have content beyond them —
+            top and bottom here, and it appears and disappears as you reach each end.
+            It is the honest signal that a list continues, which a scrollbar alone
+            does not give on a touch device.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">mask</span>
+              <ApexScrollArea height="150px" mask>
+                <p v-for="n in 10" :key="n" class="note">Row {{ n }} — scroll to see the fade change.</p>
+              </ApexScrollArea>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">without it</span>
+              <ApexScrollArea height="150px">
+                <p v-for="n in 10" :key="n" class="note">Row {{ n }} — hard edges.</p>
+              </ApexScrollArea>
+            </div>
+          </div>
+
+          <h2>Variants</h2>
+          <p class="note">
+            When the bars are shown. <code>hidden</code> still scrolls — it removes
+            the bars, not the behaviour — which is what you want inside something
+            that already signals its own overflow.
+          </p>
+          <div class="grid grid--3">
+            <div v-for="v in SCROLL_VARIANTS" :key="v" class="cell">
+              <span class="cell__tag">variant="{{ v }}"</span>
+              <ApexScrollArea height="140px" :variant="v">
+                <p v-for="n in 8" :key="n" class="note">Row {{ n }}.</p>
+              </ApexScrollArea>
+            </div>
+          </div>
+
+          <h2>Custom bars</h2>
+          <p class="note">
+            Thickness, colours and corner, by prop or by variable — the props set
+            the variables, so the two cannot disagree.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">thick, rounded, tinted</span>
+              <ApexScrollArea height="150px" variant="always" :scrollbar-size="12"
+                              thumb-color="#7AA2F7" thumb-hover-color="#A3BFFA"
+                              track-color="#101820" thumb-radius="6px">
+                <p v-for="n in 10" :key="n" class="note">Row {{ n }}.</p>
+              </ApexScrollArea>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">hairline</span>
+              <ApexScrollArea height="150px" variant="always" :scrollbar-size="4" thumb-radius="2px">
+                <p v-for="n in 10" :key="n" class="note">Row {{ n }}.</p>
+              </ApexScrollArea>
+            </div>
+          </div>
+
+          <h2>Inside a panel</h2>
+          <p class="note">
+            The common case: a panel of fixed height whose body scrolls. Give the
+            panel <code>flush</code> so its padding does not stack with the scroll
+            area's, and put the padding on the scroll area instead — otherwise the
+            content is inset twice and the bar sits away from the edge.
+          </p>
+          <div class="cell cell--solo">
+            <span class="cell__tag">flush panel + padded scroll area</span>
+            <ApexPanel header="Recent bookings" subheader="Last 24 hours" icon="receipt_long" flush>
+              <ApexScrollArea max-height="200px" padding="14px" mask>
+                <p v-for="n in 12" :key="n" class="note">
+                  Booking #{{ 1040 + n }} — 2 × Stalls, €44.00
+                </p>
+              </ApexScrollArea>
+            </ApexPanel>
+          </div>
+          <div class="usage"><pre><code>{{ SCROLL_IN_PANEL_SNIPPET }}</code></pre></div>
         </template>
 
         <!-- The words in the track are the one switch feature you have to

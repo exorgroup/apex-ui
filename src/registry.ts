@@ -38,6 +38,8 @@ export interface DocEntry {
   props: string[][];
   events: string[][];
   slots?: string[][];
+  /** [name, what it does] — what defineExpose offers, where a control has one. */
+  exposed?: string[][];
 }
 
 /**
@@ -87,6 +89,26 @@ export const SWITCH_LABELS_SNIPPET = `<!-- Both words are rendered into one grid
 }
 
 <ApexSwitch v-model="live" on-label="ON" off-label="OFF" :ui="{ control: 'live-switch' }" />`;
+
+export const SCROLL_VARIANTS = ['auto', 'hover', 'scroll', 'always', 'hidden'] as const;
+
+/** Wide content for the horizontal-axis example. */
+export const SCROLL_WIDE = [
+  { value: 'a', label: 'Doors open' }, { value: 'b', label: 'Support act' },
+  { value: 'c', label: 'Interval' }, { value: 'd', label: 'Headline set' },
+];
+
+export const SCROLL_IN_PANEL_SNIPPET = `<!-- flush removes the panel's body padding so it does not stack with the
+     scroll area's. Put the padding on the scroll area instead: the bar then
+     sits at the panel's edge rather than floating inside a second inset. -->
+<ApexPanel header="Recent bookings" flush>
+  <ApexScrollArea max-height="200px" padding="14px" mask>
+    <p v-for="b in bookings" :key="b.id">…</p>
+  </ApexScrollArea>
+</ApexPanel>
+
+/* Give the scroll area maxHeight rather than height, and a short list keeps
+   the panel short instead of leaving a gap under it. */`;
 
 /** The eight colour roles ApexButton and friends share. */
 export const SEVERITIES = [
@@ -1280,12 +1302,22 @@ export const SNIP_OWN: Record<string, string> = {
   --apex-scroll-radius: 6px;
 }
 
-<ApexScrollArea max-height="320px" fade :ui="{ root: 'log-scroll', thumb: 'log-thumb' }">
+<ApexScrollArea max-height="320px" mask :ui="{ root: 'log-scroll', thumb: 'log-thumb' }">
   …
 </ApexScrollArea>
 
+/* Or with props, no stylesheet — every variable above has one: */
+<ApexScrollArea max-height="320px" :scrollbar-size="10"
+  thumb-color="#2C3A4D" thumb-hover-color="#3A4657"
+  track-color="#101820" thumb-radius="6px" />
+
 /* Leave height and maxHeight unset and the box sizes to its content — the
-   variables fall back to auto, so nothing is capped until you say so. */`,
+   variables fall back to auto, so nothing is capped until you say so. */
+
+/* The viewport is exposed, for the times a ref is the only way: */
+const area = ref();
+area.value.scrollTo({ top: 0, behavior: 'smooth' });
+area.value.measure();   // after content the ResizeObserver cannot see`,
 
   panel: `.fees-panel {
   --apex-panel-bg: #101820;
@@ -2544,23 +2576,31 @@ export const ENTRIES: DocEntry[] = [
   },
   {
     id: 'scrollarea', name: 'ApexScrollArea', group: 'Layout', noField: true, demo: 'container',
-    blurb: 'A box that scrolls with a styled bar instead of the browser’s. Sizes to its content unless you cap it, and can fade the edges to signal there is more.',
-    base: { height: '180px' },
+    blurb: 'A box that scrolls with styled bars instead of the browser’s. Scrolling itself stays native — wheel, trackpad, keyboard, touch and scroll-anchoring all behave normally; only the bars are drawn by the component, and the thumb is measured so it tracks content that changes size.',
+    base: { height: '180px', variant: 'auto' },
     controls: [
+      { key: 'variant', type: 'select', options: ['auto', 'hover', 'scroll', 'always', 'hidden'] },
       { key: 'height', type: 'text' }, { key: 'maxHeight', type: 'text' },
       { key: 'width', type: 'text' }, { key: 'padding', type: 'text' },
-      { key: 'size', type: 'number' }, { key: 'fade', type: 'bool' },
-      { key: 'thumbColor', type: 'color' }, { key: 'trackColor', type: 'color' },
+      { key: 'mask', type: 'bool' }, { key: 'scrollbarSize', type: 'number' },
+      { key: 'thumbColor', type: 'color' }, { key: 'thumbHoverColor', type: 'color' },
+      { key: 'trackColor', type: 'color' }, { key: 'thumbRadius', type: 'text' },
     ],
     props: [
+      ['variant', "'auto' | 'hover' | 'scroll' | 'always' | 'hidden'", "'auto'", 'auto — bars only while the axis can scroll · hover — as auto but faded until hovered · scroll — visible only while scrolling · always — never hidden · hidden — no bars, scrolling still works'],
       ['height / maxHeight / width', 'string', 'auto', 'Unset means size to content'],
       ['padding', 'string', '—', 'Inside the viewport'],
-      ['size', 'number', '—', 'Scrollbar thickness in pixels'],
-      ['fade', 'boolean', 'false', 'Fade the edges where content continues'],
-      ['thumbColor / trackColor', 'string', '—', 'Over --apex-scroll-*'],
+      ['mask', 'boolean', 'false', 'Gradient fade at whichever edges have more content beyond them'],
+      ['scrollbarSize', 'number', '8', 'Bar thickness in pixels'],
+      ['thumbColor / thumbHoverColor / trackColor / thumbRadius', 'string', '—', 'Over --apex-scroll-*'],
     ],
-    events: [['scroll', 'the native event']],
+    events: [['scroll', '{ top, left }']],
     slots: [['default', 'The scrolling content']],
+    exposed: [
+      ['viewport', 'The scrolling element itself'],
+      ['measure()', 'Re-measure after changing content the ResizeObserver cannot see'],
+      ['scrollTo(options)', 'Forwards to the viewport'],
+    ],
   },
   {
     id: 'panel', name: 'ApexPanel', group: 'Layout', noField: true, demo: 'container',
