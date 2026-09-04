@@ -59,6 +59,27 @@ describe('the ported gallery examples are on the page', () => {
   const EXPECTED: Record<string, string[]> = {
     ApexToolbar: ['Basic', 'Sizes and chrome', 'Centred content',
       'Custom — navigation bar', 'Sticky and wrapping'],
+    ApexTabs: ['Basic and dynamic', 'Controlled', 'Scrollable', 'Select on focus',
+      'Lazy', 'Disabled', 'Variants and placement', 'Badges and custom indicator',
+      'Template', 'Tab menu'],
+    ApexSteps: ['Horizontal', 'Vertical', 'Linear', 'Steps only', 'Template',
+      'Events', 'Sizes and colours'],
+    ApexSplitter: ['Basic and vertical', 'Sizes, minimum and maximum', 'Collapsible',
+      'Nested', 'Resize events', 'Stateful', 'Disabled and custom', 'Advanced'],
+    ApexPanel: ['Basic', 'Toggleable', 'Controlled', 'Indicator',
+      'Header and footer templates', 'Sizes, colours and flush'],
+    ApexFieldset: ['Basic', 'Toggleable', 'Controlled', 'Indicator',
+      'Alignment, sizes and colours', 'Disabled'],
+    ApexCard: ['Basic', 'With media', 'Advanced header — media plus an overlaid avatar',
+      'As a form container', 'Horizontal and clickable'],
+    ApexAccordion: ['Basic and multiple', 'Controlled', 'Indicator and trigger',
+      'Rich headers and content', 'Disabled, sizes and separated cards',
+      'Dynamic panels and lazy content', 'Keyboard'],
+    ApexScrollArea: ['Vertical', 'Horizontal', 'Both axes', 'Scroll fade',
+      'Variants', 'Custom bars', 'Inside a panel'],
+    ApexInput: ['Autocomplete', 'Icon slots', 'Affixes and transforms'],
+    ApexButton: ['Raised', 'Rounded and icon-only', 'Icon position', 'Badge', 'Link',
+      'Sizes and states'],
   };
 
   it.each(Object.entries(EXPECTED))('%s', async (name, headings) => {
