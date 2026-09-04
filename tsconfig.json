@@ -14,5 +14,13 @@
     "outDir": "dist",
     "types": ["vitest/globals", "vite/client"]
   },
-  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.vue", "tests/**/*.ts"],
+
+  /* The page-render spec mounts the docs app, and importing its .vue files
+     would drag them into this program — where they report the docs repo's own
+     errors, chiefly that @exorgroup/apex-ui ships no declarations yet. That is
+     the distribution work, deliberately left until last. The spec still runs
+     under vitest, which does not typecheck; excluding it keeps this typecheck
+     about the library. Revisit once dist/index.d.ts exists. */
+  "exclude": ["tests/zz-docs-pages.spec.ts"]
 }
