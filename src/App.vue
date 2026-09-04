@@ -14,6 +14,7 @@ import {
   SPLIT_MAILS, SPLIT_PAIR, SPLIT_THIRDS, SPLIT_COLLAPSIBLE, SPLIT_NESTED,
   SPLIT_EVENTS, SPLIT_STATEFUL, SPLIT_NAV, PANEL_REPEAT, LEGEND_ALIGNS,
   FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
+  BDG_SEVERITIES, BDG_COUNT, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
@@ -31,6 +32,22 @@ const copied = ref(false);
 
 /** v-model per control, so switching away and back keeps what you typed. */
 const model = reactive<Record<string, unknown>>({});
+
+/** ApexChip's second model — a selectable chip is a two-state control. */
+const chipSelected = ref(false);
+
+/** The removable-chip example needs a list it can actually remove from, and
+    a way back once it is empty. */
+const chipTags = ref([...CHIP_TAGS]);
+
+/** The multi-choice example. `remove`-style events give the answer back to
+    the page, so the page is what holds the selection. */
+const chipPicked = ref<string[]>(['Music', 'Travel']);
+function toggleChip(label: string) {
+  chipPicked.value = chipPicked.value.includes(label)
+    ? chipPicked.value.filter((x) => x !== label)
+    : [...chipPicked.value, label];
+}
 
 /** ApexOrderList's second model — the rows its move buttons act on. */
 const orderSelection = ref<unknown[]>(['interval']);
@@ -643,7 +660,19 @@ async function copyUsage() {
             <div class="stage__inner">
               <!-- A control without a field shell needs its own stage treatment: no
                    v-model, and in some cases slot content or room to fan out. -->
-              <component v-if="entry.demo === 'icon'" :is="entry.name" v-bind="live" />
+              <!-- "plain" is the whole treatment for a control that renders
+                   from its props: ApexIcon, ApexBadge, ApexAvatar. -->
+              <component v-if="entry.demo === 'plain'" :is="entry.name" v-bind="live" />
+
+              <!-- A chip carries a second model. Its selected state is what
+                   `clickable` exists for, so binding it is the difference
+                   between a demo you can press and a picture of one. -->
+              <ApexChip
+                v-else-if="entry.demo === 'chip'"
+                v-bind="live"
+                v-model:selected="chipSelected"
+                @remove="actionLog = 'remove'"
+              />
 
               <ApexButton v-else-if="entry.demo === 'button'" v-bind="live">
                 {{ live.label || 'Save changes' }}
@@ -839,6 +868,25 @@ async function copyUsage() {
             <tbody>
               <tr v-for="r in entry.exposed" :key="r[0]">
                 <td class="mono">{{ r[0] }}</td><td>{{ r[1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+
+        <!-- Some controls come with a companion the props table cannot
+             describe: a wrapper, an imperative service, a set of helper
+             classes. The gallery gives each its own titled table, and 23 of
+             its entries use one — ApexBadge's is ApexOverlayBadge. Without
+             this block that half of the API silently disappears on import. -->
+        <template v-if="entry.serviceRows">
+          <h2>{{ entry.serviceTitle || 'Service options' }}</h2>
+          <table class="doc-table">
+            <thead><tr><th>Name</th><th>Type</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr v-for="r in entry.serviceRows" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td>
+                <td class="mono t">{{ r[1] }}</td>
+                <td>{{ r[2] }}</td>
               </tr>
             </tbody>
           </table>
@@ -1587,6 +1635,273 @@ async function copyUsage() {
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. An avatar's job is to be recognisable at
+             a glance in a list, so the examples build up from what it shows to
+             how a whole set of them reads together. -->
+        <template v-if="entry.id === 'avatar'">
+          <h2>Content</h2>
+          <p class="note">
+            An image if there is one, otherwise initials from the label, otherwise an icon —
+            so a partial dataset still renders sensibly.
+          </p>
+          <div class="card iconstrip">
+            <ApexAvatar image="/heroes/totem-43.png" label="Totem" size="lg" />
+            <ApexAvatar label="A. Borg" size="lg" auto-color />
+            <ApexAvatar initials="AP" size="lg" />
+            <ApexAvatar icon="storefront" size="lg" />
+            <ApexAvatar size="lg" />
+          </div>
+
+          <h2>Sizes and shapes</h2>
+          <div class="card stack">
+            <div v-for="sh in ['circle', 'rounded', 'square']" :key="sh" class="iconstrip">
+              <span class="cell__tag bdg-row__tag">{{ sh }}</span>
+              <ApexAvatar
+                v-for="sz in ['xs', 'sm', 'md', 'lg', 'xl']"
+                :key="sz"
+                label="L. Rossi"
+                :size="sz"
+                :shape="sh"
+                auto-color
+              />
+            </div>
+          </div>
+
+          <h2>Auto colour</h2>
+          <p class="note">
+            A stable hue derived from the label, so the same person keeps the same colour
+            across every screen — no palette assignment per row.
+          </p>
+          <div class="card iconstrip">
+            <ApexAvatar v-for="p in CREW" :key="p.label" :label="p.label" auto-color size="lg" />
+          </div>
+
+          <h2>Status</h2>
+          <div class="card iconstrip">
+            <ApexAvatar
+              v-for="s in ['online', 'busy', 'away', 'offline']"
+              :key="s"
+              label="K. Weber"
+              auto-color
+              size="lg"
+              :status="s"
+            />
+            <ApexAvatar label="Custom" auto-color size="lg" status="#7C3AED" status-position="top-end" />
+          </div>
+
+          <h2>Badge</h2>
+          <p class="note">
+            A count or short text pinned to a corner. It is a pill rather than a dot, so it
+            sizes from its own content and holds two digits without clipping. Put it opposite
+            the status dot and both show.
+          </p>
+          <div class="card iconstrip bdg-overlays">
+            <ApexAvatar label="A. Borg" auto-color size="lg" badge="3" />
+            <ApexAvatar label="L. Rossi" auto-color size="lg" badge="12" badge-severity="primary" />
+            <ApexAvatar label="K. Weber" auto-color size="lg" badge="99+" badge-severity="warn" />
+            <ApexAvatar label="M. Sant" auto-color size="lg" badge="New" badge-severity="success" badge-position="bottom-end" />
+            <ApexAvatar image="/heroes/totem-43.png" size="lg" badge="4" badge-severity="contrast" />
+            <ApexAvatar label="J. Camilleri" auto-color size="lg" badge="2" status="online" />
+          </div>
+
+          <h2>Groups</h2>
+          <p class="note">
+            <code>ApexAvatarGroup</code> overlaps a set and collapses the overflow into a counter.
+          </p>
+          <div class="card stack av-stack">
+            <ApexAvatarGroup :people="CREW" auto-color />
+            <ApexAvatarGroup :people="CREW" :max="4" auto-color size="lg" />
+            <ApexAvatarGroup :people="CREW" :max="3" auto-color shape="rounded" size="sm" overlap="6px" />
+          </div>
+
+          <h2>Template</h2>
+          <p class="note">
+            The default slot overlays content inside the avatar, and the group's slot takes
+            ApexAvatar children directly when the set is not uniform.
+          </p>
+          <div class="card stack av-stack">
+            <ApexAvatarGroup>
+              <ApexAvatar label="A. Borg" auto-color ring />
+              <ApexAvatar image="/heroes/totem-43.png" ring />
+              <ApexAvatar icon="storefront" ring background="var(--accent-primary)" color="#FFF" />
+              <ApexAvatar label="+8" initials="+8" ring background="var(--fg-default)" color="var(--bg-surface)" />
+            </ApexAvatarGroup>
+            <div class="iconstrip bdg-overlays">
+              <ApexAvatar label="Live" auto-color size="xl">
+                <span class="av-tag">LIVE</span>
+              </ApexAvatar>
+              <ApexAvatar background="var(--bg-muted)" size="xl">
+                <ApexIcon name="add" :size="26" class="av-add" />
+              </ApexAvatar>
+            </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. Chips only make sense in groups, so
+             every example here is a row of them rather than one specimen. -->
+        <template v-if="entry.id === 'chip'">
+          <h2>Basic</h2>
+          <p class="note">
+            A label, optionally with an icon and a remove control. <code>remove</code> is an
+            event rather than the chip deleting itself — the list owns its own data.
+          </p>
+          <div class="card iconstrip">
+            <ApexChip
+              v-for="t in chipTags"
+              :key="t"
+              :label="t"
+              removable
+              @remove="chipTags = chipTags.filter((x) => x !== t)"
+            />
+            <ApexButton
+              v-if="chipTags.length < 4"
+              size="sm"
+              variant="text"
+              icon="refresh"
+              @click="chipTags = CHIP_TAGS.slice()"
+            >Reset</ApexButton>
+          </div>
+
+          <h2>Severity and variant</h2>
+          <div class="card stack">
+            <div v-for="v in ['subtle', 'solid', 'outlined']" :key="v" class="iconstrip">
+              <span class="cell__tag bdg-row__tag">{{ v }}</span>
+              <ApexChip v-for="s in CHIP_SEVERITIES" :key="s" :label="s" :severity="s" :variant="v" />
+            </div>
+          </div>
+
+          <h2>Sizes, icons and images</h2>
+          <div class="card stack">
+            <div class="iconstrip">
+              <ApexChip v-for="s in ['sm', 'md', 'lg']" :key="s" :size="s" label="Northern Harbour" icon="place" removable />
+            </div>
+            <div class="iconstrip">
+              <ApexChip label="Verified" icon="verified" severity="success" />
+              <ApexChip label="Scheduled" icon="schedule" trailing-icon="chevron_right" severity="primary" clickable />
+              <ApexChip label="Amy Elsner" image="/heroes/totem-43.png" removable />
+              <ApexChip label="A. Borg" removable>
+                <template #leading>
+                  <ApexAvatar label="A. Borg" size="xs" auto-color class="chip-lead-avatar" />
+                </template>
+                A. Borg
+              </ApexChip>
+            </div>
+          </div>
+
+          <h2>Selectable</h2>
+          <p class="note">
+            <code>clickable</code> turns the chip into a button — hover and press feedback,
+            keyboard reachable, <code>aria-pressed</code>. With <code>v-model:selected</code> a
+            row of them is a multi-choice field, and <code>selectedIcon</code> swaps the glyph
+            while selected.
+          </p>
+          <div class="card">
+            <strong class="chip-ask">What are you interested in?</strong>
+            <p class="note chip-ask__hint">You can select multiple answers.</p>
+            <div class="iconstrip chip-wrap">
+              <ApexChip
+                v-for="c in CHIP_INTERESTS"
+                :key="c.label"
+                :label="c.label"
+                :icon="c.icon"
+                selected-icon="check_circle"
+                clickable
+                severity="primary"
+                :selected="chipPicked.includes(c.label)"
+                @update:selected="toggleChip(c.label)"
+              />
+            </div>
+            <p class="note">Selected: <code>{{ chipPicked.join(', ') || 'none' }}</code></p>
+          </div>
+
+          <h2>Styling and states</h2>
+          <div class="card iconstrip">
+            <ApexChip label="Squared" icon="crop_square" radius="6px" />
+            <ApexChip label="Custom" background="#6D4AC4" color="#FFF" removable />
+            <ApexChip label="Custom selected" clickable selected selected-background="#0E8C86" selected-color="#FFF" />
+            <ApexChip label="Fixed width truncates a long label" width="170px" removable />
+            <ApexChip label="Disabled" icon="block" disabled removable />
+            <ApexChip label="Disabled clickable" clickable disabled />
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. A badge is mostly about shape and
+             placement, so each example varies one of those. -->
+        <template v-if="entry.id === 'badge'">
+          <h2>Basic</h2>
+          <p class="note">
+            On its own it is an inline marker. Note the shape: one digit is a circle,
+            longer values grow into a pill.
+          </p>
+          <div class="card iconstrip">
+            <ApexBadge value="2" />
+            <ApexBadge value="12" />
+            <ApexBadge value="99+" />
+            <ApexBadge value="New" severity="success" />
+            <ApexBadge dot severity="danger" />
+            <span class="note">Inline in a sentence <ApexBadge value="3" severity="danger" /> beside text.</span>
+          </div>
+
+          <h2>Severity</h2>
+          <div class="card stack">
+            <div v-for="v in ['solid', 'outlined', 'subtle']" :key="v" class="iconstrip">
+              <span class="cell__tag bdg-row__tag">{{ v }}</span>
+              <ApexBadge v-for="s in BDG_SEVERITIES" :key="s" :value="BDG_COUNT[s]" :severity="s" :variant="v" />
+            </div>
+            <div class="iconstrip">
+              <span class="cell__tag bdg-row__tag">custom</span>
+              <ApexBadge value="7" background="#6D4AC4" />
+              <ApexBadge value="7" background="#0E8C86" radius="6px" />
+              <ApexBadge value="7" background="transparent" color="#B4531C" border-color="#B4531C" />
+            </div>
+          </div>
+
+          <h2>Size</h2>
+          <div class="card iconstrip">
+            <ApexBadge v-for="s in ['sm', 'md', 'lg', 'xl']" :key="s" :value="8" :size="s" />
+            <ApexBadge :value="8" :size="44" />
+            <ApexBadge v-for="s in ['sm', 'md', 'lg']" :key="'d' + s" dot :size="s" severity="success" />
+          </div>
+
+          <h2>Overlay</h2>
+          <p class="note">
+            <code>ApexOverlayBadge</code> wraps any content and pins the badge to a corner.
+            Because it is a wrapper rather than a prop, the host does not need to know about
+            badges at all.
+          </p>
+          <div class="card iconstrip bdg-overlays">
+            <ApexOverlayBadge value="4">
+              <ApexIcon name="notifications" :size="26" />
+            </ApexOverlayBadge>
+            <ApexOverlayBadge value="12" severity="primary">
+              <ApexButton icon="inbox" severity="secondary" variant="outlined">Inbox</ApexButton>
+            </ApexOverlayBadge>
+            <ApexOverlayBadge dot severity="success">
+              <ApexAvatar label="A. Borg" auto-color size="lg" />
+            </ApexOverlayBadge>
+            <ApexOverlayBadge value="9" position="bottom-end" severity="warn">
+              <ApexAvatar image="/heroes/totem-43.png" size="lg" shape="rounded" />
+            </ApexOverlayBadge>
+            <ApexOverlayBadge value="Beta" severity="contrast" position="top-start" size="sm">
+              <ApexCard title="Playlists" subtitle="6 active" class="bdg-card">
+                Rotation across the harbour.
+              </ApexCard>
+            </ApexOverlayBadge>
+          </div>
+
+          <h2>Button</h2>
+          <p class="note">
+            Buttons carry their own badge inline through <code>badge</code> and
+            <code>badgeSeverity</code>, so no wrapper is needed for the common case.
+          </p>
+          <div class="card iconstrip">
+            <ApexButton badge="8">Notifications</ApexButton>
+            <ApexButton badge="3" badge-severity="danger" severity="secondary" variant="outlined">Alerts</ApexButton>
+            <ApexButton badge="12" badge-severity="success" variant="text">Approvals</ApexButton>
+            <ApexButton icon="mail" badge="5" aria-label="Messages" />
           </div>
         </template>
 

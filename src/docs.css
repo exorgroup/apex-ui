@@ -368,3 +368,33 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
   padding: 10px; border: 1px solid var(--border-subtle); border-radius: var(--r-sm);
   font-size: 12.5px; background: var(--bg-surface);
 }
+
+/* ── Utilities: badge, chip, avatar ───────────────────────────────────── */
+
+/* The label down the left of a variant row, so the rows line up. */
+.bdg-row__tag { min-inline-size: 70px; margin: 0; }
+
+/* Overlaid badges sit outside their host's box, so these rows need more
+   breathing room than the default strip gap. */
+.bdg-overlays { gap: 26px; }
+.bdg-card { inline-size: 190px; }
+
+/* An avatar used as a chip's leading slot bleeds to the chip's edge. */
+.chip-lead-avatar { margin-inline-start: -6px; }
+
+.chip-ask { font-size: 15px; }
+.chip-ask__hint { margin: 4px 0 12px; }
+.chip-wrap { gap: 8px; flex-wrap: wrap; }
+
+/* Avatar groups are inline-size elements; left-align them rather than
+   letting the flex column stretch them across the card. */
+.av-stack { align-items: flex-start; gap: 18px; }
+
+/* Overlay content inside an avatar — the "LIVE" flag on the template example. */
+.av-tag {
+  position: absolute; inset-block-end: -2px; inset-inline: auto;
+  padding: 2px 7px; border-radius: var(--r-full);
+  background: var(--accent-danger); color: #FFF;
+  font-size: 9.5px; font-weight: 700; letter-spacing: .08em;
+}
+.av-add { color: var(--fg-subtle); }

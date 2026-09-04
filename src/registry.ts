@@ -28,8 +28,11 @@ export interface DocEntry {
   /**
    * How the live stage renders this one. Omitted means the default: the
    * component with v-model and the playground props.
+   *
+   * `plain` is for a control that renders from its props and has no model at
+   * all — ApexIcon, ApexBadge, ApexAvatar.
    */
-  demo?: 'icon' | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container';
+  demo?: 'plain' | 'chip' | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -40,6 +43,19 @@ export interface DocEntry {
   slots?: string[][];
   /** [name, what it does] — what defineExpose offers, where a control has one. */
   exposed?: string[][];
+  /**
+   * Closing text for the usage snippet, where the default `/>` is wrong —
+   * a self-closing tag for a control that takes no children, or the closing
+   * tag plus slot markup for one that does.
+   */
+  tail?: string;
+  /**
+   * A companion the props table cannot describe: a wrapper, an imperative
+   * service, a set of helper classes. ApexBadge's is ApexOverlayBadge.
+   * [name, type, notes]
+   */
+  serviceTitle?: string;
+  serviceRows?: string[][];
 }
 
 /**
@@ -187,6 +203,50 @@ export const FAQ_ZONES = [1, 2, 3, 4, 5].map((i) => ({
 
 /** The three product shots the card's media examples use. */
 export const CARD_MEDIA = ['totem-43', 'wall-55', 'menu-board'];
+
+/** Seven people for the avatar examples. Only the first three carry a status,
+    so the group examples show both states without looking uniform. */
+export const CREW = [
+  { label: 'A. Borg', status: 'online' },
+  { label: 'L. Rossi', status: 'busy' },
+  { label: 'K. Weber', status: 'away' },
+  { label: 'S. de Vries' },
+  { label: 'M. Dubois' },
+  { label: 'C. Ruiz' },
+  { label: 'J. Camilleri' },
+];
+
+/** The removable-chip demo's starting tags, kept here so the Reset button has
+    something to restore them from. */
+export const CHIP_TAGS = ['Rotation A', 'Menu boards', 'Sliema', 'Evening loop'];
+
+/** ApexChip's severities — the badge set plus `neutral`, its default. */
+export const CHIP_SEVERITIES = [
+  'neutral', 'primary', 'secondary', 'success', 'warn', 'danger', 'info', 'contrast',
+] as const;
+
+/** Twelve options for the selectable-chip example: enough to wrap onto more
+    than one row, which is where a chip group earns its keep. */
+export const CHIP_INTERESTS = [
+  { label: 'Music', icon: 'music_note' }, { label: 'Movies', icon: 'movie' },
+  { label: 'Travel', icon: 'flight' }, { label: 'Food', icon: 'restaurant' },
+  { label: 'Sports', icon: 'sports_soccer' }, { label: 'Gaming', icon: 'sports_esports' },
+  { label: 'Reading', icon: 'menu_book' }, { label: 'Photography', icon: 'photo_camera' },
+  { label: 'Fitness', icon: 'fitness_center' }, { label: 'Technology', icon: 'memory' },
+  { label: 'Art', icon: 'palette' }, { label: 'Nature', icon: 'park' },
+];
+
+/** ApexBadge's own severities — not the field set: it has `warn`, no
+    `warning`, and neither `help` nor a plain `info` ordering. */
+export const BDG_SEVERITIES = [
+  'primary', 'secondary', 'success', 'warn', 'danger', 'info', 'contrast',
+] as const;
+
+/** A different count per severity, so the severity row does not read as one
+    repeated number. */
+export const BDG_COUNT: Record<string, number> = {
+  primary: 2, secondary: 5, success: 8, warn: 3, danger: 9, info: 4, contrast: 7,
+};
 
 /** Fifteen makes with a count each — the ScrollArea's list content. */
 export const AUTOMOBILES = [
@@ -2057,7 +2117,7 @@ function createRegion({ path }) {
 export const ENTRIES: DocEntry[] = [
   {
     id: 'icon', name: 'ApexIcon', group: 'Foundations',
-    demo: 'icon',
+    demo: 'plain',
     blurb: 'Material Symbols rendered as a ligature span. Size, weight, fill and a spin state are props; weight follows the surrounding text unless you pin it. Every other control renders icons through this one, so swapping icon sets is a single plugin option.',
     noField: true,
     base: { name: 'settings', size: 28 },
@@ -3324,5 +3384,127 @@ export const ENTRIES: DocEntry[] = [
     ],
     events: [],
     slots: [['default', 'The ApexButtons']],
+  },
+
+  /* Utilities — the small markers. Each renders from its props, so the stage
+     is `plain`; ApexChip is the exception, because a selectable chip has a
+     second model and a demo you cannot press is not a demo. */
+  {
+    id: 'badge', name: 'ApexBadge', group: 'Utilities',
+    blurb: 'A small count or status marker. Sized from its own content with a circular minimum, so a single digit is a circle and a longer value grows into a pill rather than being clipped. ApexOverlayBadge pins one to the corner of whatever it wraps — a wrapper rather than a prop on every component, so any element can carry a badge and the badge keeps its own props instead of each host re-declaring them.',
+    noField: true, demo: 'plain',
+    tail: ' />',
+    base: { value: '8', severity: 'primary', size: 'md', variant: 'solid' },
+    controls: [
+      { key: 'value', type: 'text' },
+      { key: 'severity', type: 'select', options: ['primary', 'secondary', 'success', 'warn', 'danger', 'info', 'contrast'] },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg', 'xl'] },
+      { key: 'variant', type: 'select', options: ['solid', 'outlined', 'subtle'] },
+      { key: 'dot', type: 'bool' },
+      { key: 'radius', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'color', type: 'color' },
+      { key: 'borderColor', type: 'color' },
+    ],
+    props: [
+      ['value', 'string | number', '—', 'Also settable as the default slot'],
+      ['severity', "'primary' | 'secondary' | 'success' | 'warn' | 'danger' | 'info' | 'contrast'", "'primary'", ''],
+      ['size', "'sm' | 'md' | 'lg' | 'xl' | number", "'md'", 'A number is pixels; the text scales with it'],
+      ['dot', 'boolean', 'false', 'Drops the value for the “something changed” case'],
+      ['variant', "'solid' | 'outlined' | 'subtle'", "'solid'", ''],
+      ['background / color / borderColor / radius', 'string', 'per severity', ''],
+    ],
+    events: [],
+    slots: [['default', 'The value']],
+    serviceTitle: 'ApexOverlayBadge',
+    serviceRows: [
+      ['position', "'top-end' | 'top-start' | 'bottom-end' | 'bottom-start'", 'Which corner of the host it sits on'],
+      ['ring / ringColor', 'boolean / string', 'A ring separating the badge from a busy host — on by default'],
+      ['value, severity, size, dot, variant, background, color, borderColor, radius', 'passthrough', 'Handed to the badge inside'],
+      ['default slot', 'the host', 'Anything: an icon, an avatar, a button, a card'],
+      ['badge slot', 'the badge', 'Replaces the value when it needs markup'],
+      ['ApexButton badge / badgeSeverity', 'inline', 'Buttons carry their own badge without the wrapper'],
+    ],
+  },
+  {
+    id: 'chip', name: 'ApexChip', group: 'Utilities',
+    blurb: 'A compact entity: a label with an optional icon, image or avatar, and an optional remove action. A selectable chip renders as a button and a plain one as a span — a chip that answers a click has to be keyboard reachable, and a chip that only labels something should not be a tab stop. The remove control is always its own button, so it stays separately reachable inside a selectable chip.',
+    noField: true, demo: 'chip',
+    tail: ' />',
+    base: { label: 'Northern Harbour', icon: 'place', severity: 'neutral', variant: 'subtle', size: 'md', removable: true },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'icon', type: 'text' }, { key: 'trailingIcon', type: 'text' },
+      { key: 'severity', type: 'select', options: ['neutral', 'primary', 'secondary', 'success', 'warn', 'danger', 'info', 'contrast'] },
+      { key: 'variant', type: 'select', options: ['solid', 'subtle', 'outlined'] },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'removable', type: 'bool' }, { key: 'clickable', type: 'bool' },
+      { key: 'selected', type: 'bool' }, { key: 'disabled', type: 'bool' },
+      { key: 'radius', type: 'text' }, { key: 'width', type: 'text' },
+      { key: 'padding', type: 'text' }, { key: 'gap', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'color', type: 'color' },
+      { key: 'borderColor', type: 'color' }, { key: 'hoverBackground', type: 'color' },
+      { key: 'selectedBackground', type: 'color' }, { key: 'selectedColor', type: 'color' },
+    ],
+    props: [
+      ['label', 'string', '—', 'Also settable as the default slot'],
+      ['icon / trailingIcon', 'string', '—', 'Leading and trailing glyphs'],
+      ['image / imageAlt', 'string', '—', 'An image at the leading edge, bleeding to the chip’s edge so it reads as an avatar rather than an icon inside padding'],
+      ['severity', "'neutral' | 'primary' | 'secondary' | 'success' | 'warn' | 'danger' | 'info' | 'contrast'", "'neutral'", ''],
+      ['variant', "'solid' | 'subtle' | 'outlined'", "'subtle'", ''],
+      ['size', "'sm' | 'md' | 'lg'", "'md'", ''],
+      ['removable / removeIcon', 'boolean / string', "false / 'close'", 'Adds the remove control, which emits remove rather than removing itself — the list owns its own data'],
+      ['clickable', 'boolean', 'false', 'Makes the chip a control: hover and press states, keyboard reachable, aria-pressed'],
+      ['selected / selectedIcon', 'boolean / string', 'false / —', 'v-model:selected — for a chip acting as a filter or multi-choice option; selectedIcon replaces the leading icon while selected'],
+      ['disabled', 'boolean', 'false', ''],
+      ['radius / width / padding / gap', 'string', 'pill / auto / tokens', 'A radius squares off the pill'],
+      ['background / color / borderColor / hoverBackground / selectedBackground / selectedColor', 'string', 'per severity', ''],
+    ],
+    events: [
+      ['click', 'MouseEvent'],
+      ['remove', 'MouseEvent — the remove control was pressed'],
+      ['update:selected', 'boolean — clickable chips only'],
+    ],
+    slots: [
+      ['default', 'The label'],
+      ['leading', 'Replaces the icon or image — an avatar, a colour swatch, a spinner'],
+    ],
+  },
+  {
+    id: 'avatar', name: 'ApexAvatar', group: 'Utilities',
+    blurb: 'A person or entity in a fixed square: an image, initials or an icon, with an optional status dot. Initials colour themselves from the label, so a list of people is legible without any per-row configuration.',
+    noField: true, demo: 'plain',
+    tail: ' />',
+    base: { label: 'A. Borg', size: 'lg', autoColor: true, status: 'online' },
+    controls: [
+      { key: 'label', type: 'text' }, { key: 'initials', type: 'text' }, { key: 'icon', type: 'text' },
+      { key: 'shape', type: 'select', options: ['circle', 'rounded', 'square'] },
+      { key: 'size', type: 'select', options: ['xs', 'sm', 'md', 'lg', 'xl'] },
+      { key: 'autoColor', type: 'bool' },
+      { key: 'background', type: 'color' }, { key: 'color', type: 'color' },
+      { key: 'ring', type: 'bool' }, { key: 'ringColor', type: 'color' },
+      { key: 'status', type: 'select', options: ['', 'online', 'busy', 'away', 'offline'] },
+      { key: 'statusPosition', type: 'select', options: ['bottom-end', 'bottom-start', 'top-end', 'top-start'] },
+      { key: 'badge', type: 'text' },
+      { key: 'badgeSeverity', type: 'select', options: ['primary', 'success', 'warn', 'danger', 'info', 'secondary', 'contrast'] },
+      { key: 'badgePosition', type: 'select', options: ['top-end', 'top-start', 'bottom-end', 'bottom-start'] },
+      { key: 'badgeBackground', type: 'color' }, { key: 'badgeColor', type: 'color' },
+    ],
+    props: [
+      ['image', 'string', '—', 'Falls back to label initials, then icon, then a person glyph'],
+      ['label / initials', 'string', '—', 'Initials derive from the label unless set explicitly'],
+      ['icon', 'string', '—', 'Shown when there is no image or label'],
+      ['shape', "'circle' | 'rounded' | 'square'", "'circle'", ''],
+      ['size', "'xs' | 'sm' | 'md' | 'lg' | 'xl' | number", "'md'", 'A number is pixels; text and icon scale with it'],
+      ['autoColor', 'boolean', 'false', 'Tint the initials from the label — the same person keeps the same colour'],
+      ['background / color', 'string', 'tokens', 'Explicit colours, overriding autoColor'],
+      ['ring / ringColor', 'boolean / string', 'false / surface', 'Ring for stacking on busy backgrounds'],
+      ['status', 'online | busy | away | offline | CSS colour', '—', 'Status dot'],
+      ['statusPosition', "'bottom-end' | 'bottom-start' | 'top-end' | 'top-start'", "'bottom-end'", ''],
+      ['badge', 'string | number', '—', 'A count or short text pinned to a corner. A pill rather than a dot, so it sizes from its own content and holds two digits without clipping'],
+      ['badgeSeverity', "'primary' | 'success' | 'warn' | 'danger' | 'info' | 'secondary' | 'contrast'", "'danger'", ''],
+      ['badgePosition', "'top-end' | 'top-start' | 'bottom-end' | 'bottom-start'", "'top-end'", 'Put it opposite the status dot to show both'],
+      ['badgeBackground / badgeColor', 'string', 'per severity', ''],
+    ],
+    events: [],
+    slots: [['default', 'Overlay content inside the avatar, e.g. a badge']],
   },
 ];

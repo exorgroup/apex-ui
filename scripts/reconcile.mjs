@@ -329,6 +329,10 @@ function main() {
       props: diff(rows(ourBlock, 'props'), rows(theirBlock, 'props')),
       events: diff(rows(ourBlock, 'events'), rows(theirBlock, 'events')),
       slots: diff(rows(ourBlock, 'slots'), rows(theirBlock, 'slots')),
+      /* The companion table — a wrapper, a service, a set of helper classes.
+         Half of ApexBadge's API is ApexOverlayBadge's rows, and nothing else
+         here would notice them going missing. */
+      service: diff(rows(ourBlock, 'serviceRows'), rows(theirBlock, 'serviceRows')),
       controls: diffList(controlKeys(ourBlock), controlKeys(theirBlock)),
       sections: diffList(headings(ourApp, id), headings(galleryHtml, theirId)),
     };
