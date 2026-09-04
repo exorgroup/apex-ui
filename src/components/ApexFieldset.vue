@@ -32,6 +32,9 @@ const props = withDefaults(defineProps<ApexContainerProps & {
 }>(), {
   toggleable: false, legendAlign: 'start', size: 'md', bordered: true,
   expandIcon: 'add', collapseIcon: 'remove',
+  /* Absent boolean props are cast to false, not undefined — see ApexPanel.
+     Without this the uncontrolled fallback below is unreachable. */
+  collapsed: undefined,
 });
 
 const emit = defineEmits<{

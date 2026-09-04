@@ -37,6 +37,12 @@ const props = withDefaults(defineProps<ApexContainerProps & {
 }>(), {
   toggleable: false, togglePosition: 'end', size: 'md', bordered: true, shadow: 'none',
   expandIcon: 'keyboard_arrow_down', collapseIcon: 'keyboard_arrow_up',
+  /* Vue casts an ABSENT boolean prop to false, never undefined. Without this,
+     `collapsed` reads false when nobody passed it, the check below always takes
+     the controlled branch, and the local state is never consulted — so an
+     uncontrolled panel cannot be toggled at all. Declaring it undefined keeps
+     the prop genuinely tri-state: unset, true, or false. */
+  collapsed: undefined,
 });
 
 const emit = defineEmits<{

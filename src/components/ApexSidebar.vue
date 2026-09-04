@@ -37,6 +37,10 @@ const props = withDefaults(defineProps<{
 }>(), {
   id: 'primary', variant: 'sidebar', collapsible: 'icon', side: 'left',
   width: '260px', iconWidth: '58px', zIndex: 40,
+  /* Absent boolean props are cast to false, never undefined — see ApexPanel.
+     Here that was worse than a dead fallback: `props.open ?? true` read false,
+     so a sidebar nobody controlled opened closed, and the watcher pinned it. */
+  open: undefined,
 });
 
 const emit = defineEmits<{ (e: 'update:open', v: boolean): void }>();
