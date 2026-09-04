@@ -6,8 +6,9 @@
  * accordion is a v-for over your own data with no wrapper markup. `header`,
  * `content` and `toggleicon` slots cover per-panel customisation.
  */
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import type { ApexContainerProps } from '../types';
+import { useCollapseDoors } from '../core/collapseDoor';
 import ApexIcon from './ApexIcon.vue';
 
 export interface AccordionPanel {
@@ -68,6 +69,20 @@ const openSet = computed<Array<string | number>>(() => {
   return Array.isArray(v) ? v : [v];
 });
 const isOpen = (panel: AccordionPanel) => openSet.value.includes(panel.value);
+
+/* The same rolling collapse ApexPanel uses, one door per panel — see
+   core/collapseDoor. Watching the open SET rather than the click means every
+   route into a change animates alike: the header, the keyboard, an external
+   v-model, and the panel a single-open accordion closes in order to open
+   another. */
+const doors = useCollapseDoors<string | number>();
+
+watch(openSet, (now, before) => {
+  const was = new Set(before ?? []);
+  const is = new Set(now);
+  now.filter((k) => !was.has(k)).forEach((k) => doors.open(k, false));
+  (before ?? []).filter((k) => !is.has(k)).forEach((k) => doors.open(k, true));
+});
 
 /** Panels that have ever been opened, so lazy content stays mounted afterwards. */
 const seen = ref<Set<string | number>>(new Set());
@@ -164,8 +179,9 @@ defineExpose({ toggle, isOpen });
         </button>
       </h3>
 
-      <div class="apex-ac__body" :class="ui?.body" :id="panelId(panel)" role="region"
-           :aria-labelledby="`${panelId(panel)}-h`" :hidden="!isOpen(panel)">
+      <div :ref="(el) => doors.setEl(panel.value, el as HTMLElement | null)"
+           class="apex-ac__body" :class="ui?.body" :id="panelId(panel)" role="region"
+           :aria-labelledby="`${panelId(panel)}-h`" :hidden="!isOpen(panel) && !doors.animating(panel.value)">
         <div v-if="shouldRender(panel)" class="apex-ac__inner" :class="ui?.inner">
           <slot name="content" :panel="panel" :active="isOpen(panel)" :index="i">
             <slot :panel="panel" :index="i">{{ panel.content }}</slot>
