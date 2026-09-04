@@ -14,7 +14,7 @@ import {
   SPLIT_MAILS, SPLIT_PAIR, SPLIT_THIRDS, SPLIT_COLLAPSIBLE, SPLIT_NESTED,
   SPLIT_EVENTS, SPLIT_STATEFUL, SPLIT_NAV, PANEL_REPEAT, LEGEND_ALIGNS,
   FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
-  BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
+  BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
@@ -32,6 +32,55 @@ const copied = ref(false);
 
 /** v-model per control, so switching away and back keeps what you typed. */
 const model = reactive<Record<string, unknown>>({});
+
+/* ── ApexInplace ─────────────────────────────────────────────────────── */
+
+/** The playground's open state and the value its editor edits. */
+const inpStage = ref(false);
+const inpStageValue = ref('John Doe');
+
+/** The Basic example: two independent fields, each with its own open state. */
+const inpBasic = ref(false);
+const inpName = ref('');
+const inpEmailOpen = ref(false);
+const inpEmail = ref('ada@example.com');
+
+/** Controlled: the buttons below the field drive it. */
+const inpCtl = ref(false);
+const inpImage = ref(false);
+
+/**
+ * Lazy: the content is not rendered until the display is clicked, so `open`
+ * is a usable place to fetch. `keepAlive` keeps it mounted afterwards, which
+ * is why the fetch counter stops climbing on a reopen — that counter is the
+ * only way to see the difference.
+ */
+const inpLazy = ref(false);
+const inpLoading = ref(false);
+const inpFetches = ref(0);
+const inpRows = ref<Record<string, unknown>[]>([]);
+let inpTimer: ReturnType<typeof setTimeout> | undefined;
+function loadInplaceRows() {
+  if (inpRows.value.length) return;   // keepAlive means one fetch, not one per open
+  inpFetches.value += 1;
+  inpLoading.value = true;
+  inpTimer = setTimeout(() => {
+    inpRows.value = INP_ROWS;
+    inpLoading.value = false;
+  }, 700);
+}
+
+/* ── ApexBlockUI ─────────────────────────────────────────────────────── */
+
+const blkStage = ref(false);
+const blkBasic = ref(false);
+const blkField = ref('');
+const blkTimed = ref(false);
+const blkStyled = ref(false);
+const blkDoc = ref(false);
+const blkLog = ref('');
+
+onBeforeUnmount(() => clearTimeout(inpTimer));
 
 /**
  * The determinate spinner's Run button. A spinner that only ever shows a
@@ -689,6 +738,40 @@ async function copyUsage() {
               <!-- "plain" is the whole treatment for a control that renders
                    from its props: ApexIcon, ApexBadge, ApexAvatar. -->
               <component v-if="entry.demo === 'plain'" :is="entry.name" v-bind="live" />
+
+              <!-- An Inplace is two states, and only the closed one shows
+                   without content to swap to. -->
+              <ApexInplace
+                v-else-if="entry.demo === 'inplace'"
+                v-bind="live"
+                v-model:active="inpStage"
+              >
+                <template #content>
+                  <ApexInput v-model="inpStageValue" placeholder="Enter name" class="inp-stage__field" />
+                </template>
+              </ApexInplace>
+
+              <!-- BlockUI covers something, so the stage supplies the thing to
+                   cover and the button that blocks it. The rail's `duration`
+                   releases it; a block with no way out is a trapped page. -->
+              <div v-else-if="entry.demo === 'block'" class="blk-stage">
+                <ApexButton size="sm" @click="blkStage = true">Block</ApexButton>
+                <ApexBlockUI v-model:blocked="blkStage" v-bind="live" class="blk-stage__ui">
+                  <ApexCard title="Account settings" subtitle="Manage your workspace preferences">
+                    Update your profile, configure notifications and control privacy.
+                  </ApexCard>
+                </ApexBlockUI>
+              </div>
+
+              <!-- ScrollTop needs something to scroll. Binding it to this
+                   scroller rather than the window keeps the playground's
+                   button inside the stage instead of floating over the docs. -->
+              <div v-else-if="entry.demo === 'scrolltop'" class="st-scroller st-stage">
+                <p v-for="n in 12" :key="n" class="st-para">
+                  Paragraph {{ n }}. Scroll this panel to bring the button in.
+                </p>
+                <ApexScrollTop target="parent" v-bind="live" />
+              </div>
 
               <!-- A meter is nothing without measurements, so the stage
                    supplies them rather than expecting the rail to. Its
@@ -1674,6 +1757,371 @@ async function copyUsage() {
             <div v-for="a in [180, 270, 360]" :key="a" class="cell dial-cell">
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
+            </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. An Inplace is two states, so every
+             example is about what the second one contains. -->
+        <template v-if="entry.id === 'inplace'">
+          <h2>Basic</h2>
+          <p class="note">
+            A <code>display</code> slot for the value and a <code>content</code> slot for its
+            editor. Clicking the display swaps them; the first field in the content is focused
+            automatically, so typing can start straight away.
+          </p>
+          <div class="card inp-card">
+            <strong class="inp-title">Profile</strong>
+            <div>
+              <span class="cell__tag">Name</span>
+              <ApexInplace v-model:active="inpBasic" :display="inpName || 'John Doe'" outlined width="100%">
+                <template #content="{ close }">
+                  <ApexInput v-model="inpName" placeholder="Enter name" class="inp-field" />
+                  <ApexButton size="sm" icon="check" severity="success" variant="text" aria-label="Save" @click="close()" />
+                  <ApexButton size="sm" icon="close" severity="danger" variant="text" aria-label="Cancel" @click="inpName = ''; close()" />
+                </template>
+              </ApexInplace>
+            </div>
+            <div>
+              <span class="cell__tag">Email</span>
+              <ApexInplace v-model:active="inpEmailOpen" :display="inpEmail" outlined width="100%" closable>
+                <template #content>
+                  <ApexInput v-model="inpEmail" class="inp-field" />
+                </template>
+              </ApexInplace>
+            </div>
+          </div>
+
+          <h2>Controlled</h2>
+          <p class="note">
+            <code>v-model:active</code> is two-way, so the state can be driven from outside —
+            here the buttons below the field open and close it.
+          </p>
+          <div class="card inp-narrow">
+            <span class="cell__tag">Name</span>
+            <ApexInplace v-model:active="inpCtl" :display="inpName || 'John Doe'" width="100%">
+              <template #content>
+                <ApexInput v-model="inpName" placeholder="Enter name" class="inp-field" />
+              </template>
+            </ApexInplace>
+            <div class="iconstrip inp-actions">
+              <ApexButton size="sm" severity="secondary" variant="outlined" class="inp-actions__btn" @click="inpCtl = !inpCtl">
+                {{ inpCtl ? 'Cancel' : 'Edit name' }}
+              </ApexButton>
+              <ApexButton v-if="inpCtl" size="sm" class="inp-actions__btn" @click="inpCtl = false">Save</ApexButton>
+            </div>
+          </div>
+
+          <h2>Image</h2>
+          <p class="note">
+            The content is not limited to fields — anything can go inside, including media that
+            should not load until asked for.
+          </p>
+          <div class="card inp-wide">
+            <ApexInplace v-model:active="inpImage" display="View photo" display-icon="image" outlined closable>
+              <template #content>
+                <div class="inp-photo">Placeholder image</div>
+              </template>
+            </ApexInplace>
+          </div>
+
+          <h2>Lazy</h2>
+          <p class="note">
+            Content is only rendered once opened, so the <code>open</code> event is a usable
+            place to fetch: the table below has no rows until the display is clicked.
+            <code>keepAlive</code> keeps it mounted afterwards so a reopen does not re-fetch.
+          </p>
+          <div class="card">
+            <ApexInplace
+              v-model:active="inpLazy"
+              display="View data"
+              display-icon="table"
+              outlined
+              keep-alive
+              closable
+              @open="loadInplaceRows"
+            >
+              <template #content>
+                <div class="inp-lazy">
+                  <ApexBlockUI :blocked="inpLoading" message="Loading…" radius="10px">
+                    <ApexDataTable :value="inpRows" :columns="INP_COLUMNS" size="sm" />
+                  </ApexBlockUI>
+                </div>
+              </template>
+            </ApexInplace>
+            <p class="note">Fetches: <code>{{ inpFetches }}</code></p>
+          </div>
+
+          <h2>Styling and states</h2>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">outlined, tinted hover</span>
+              <ApexInplace
+                display="Click to edit"
+                display-icon="edit"
+                outlined
+                hover-background="color-mix(in oklch, var(--accent-primary) 12%, transparent)"
+                hover-color="var(--accent-primary)"
+                radius="10px"
+              >
+                <template #content="{ close }">
+                  <ApexInput model-value="Editing" class="inp-field" />
+                  <ApexButton size="sm" icon="check" aria-label="Save" @click="close()" />
+                </template>
+              </ApexInplace>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">filled display, padded content</span>
+              <ApexInplace
+                display="Filled display"
+                background="var(--bg-muted)"
+                padding="10px 14px"
+                radius="999px"
+                content-background="var(--bg-muted)"
+                content-padding="10px"
+                closable
+              >
+                <template #content><ApexInput model-value="Editing" class="inp-field" /></template>
+              </ApexInplace>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">no hover feedback</span>
+              <ApexInplace display="Looks static, still opens" :hoverable="false" closable>
+                <template #content><ApexInput model-value="Editing" class="inp-field" /></template>
+              </ApexInplace>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">disabled</span>
+              <ApexInplace display="Read only" display-icon="lock" outlined disabled>
+                <template #content><ApexInput model-value="Editing" class="inp-field" /></template>
+              </ApexInplace>
+            </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. Every block here can be released: by a
+             button, by its own duration, or by clicking the cover. A demo that
+             can strand the reader is not a demo. -->
+        <template v-if="entry.id === 'blockui'">
+          <h2>Basic</h2>
+          <p class="note">
+            The content to block goes inside; <code>v-model:blocked</code> controls it. The
+            cover intercepts clicks and focus, so tabbing cannot reach the panel underneath
+            either.
+          </p>
+          <div class="iconstrip">
+            <ApexButton size="sm" :icon="blkBasic ? 'lock_open' : 'lock'" @click="blkBasic = !blkBasic">
+              {{ blkBasic ? 'Unblock' : 'Block' }}
+            </ApexButton>
+          </div>
+          <ApexBlockUI v-model:blocked="blkBasic" class="blk-narrow">
+            <ApexCard title="Account settings" subtitle="Manage your workspace preferences">
+              Update your profile, configure notifications and control privacy. Block the panel
+              to prevent changes while your settings are being saved.
+              <template #footer>
+                <ApexButton size="sm">Save</ApexButton>
+                <ApexInput v-model="blkField" placeholder="Try tabbing here" class="blk-field" />
+              </template>
+            </ApexCard>
+          </ApexBlockUI>
+
+          <h2>Timed release</h2>
+          <p class="note">
+            <code>duration</code> releases the block by itself, with <code>showTimer</code>
+            drawing the countdown along the cover's edge. A block waiting on a request that may
+            never answer otherwise leaves the user stuck, so the timeout belongs to the block
+            rather than each caller's own <code>setTimeout</code>. <code>timeout</code> fires
+            when the clock ran out rather than a caller releasing it.
+          </p>
+          <div class="iconstrip">
+            <ApexButton size="sm" @click="blkTimed = true">Block for 3 seconds</ApexButton>
+            <ApexButton size="sm" severity="secondary" variant="outlined" @click="blkTimed = false">Release now</ApexButton>
+          </div>
+          <ApexBlockUI
+            v-model:blocked="blkTimed"
+            :duration="3000"
+            show-timer
+            message="Saving…"
+            blur
+            class="blk-narrow"
+            @timeout="blkLog = 'released by the timer'"
+            @unblock="blkLog = blkLog || 'released by the caller'"
+          >
+            <ApexCard title="Billing" subtitle="Card ending 4242">Charges are settled nightly.</ApexCard>
+          </ApexBlockUI>
+          <p class="note">
+            Last release: <code>{{ blkLog || 'none yet' }}</code>
+            <ApexButton size="sm" variant="text" @click="blkLog = ''">Clear</ApexButton>
+          </p>
+
+          <h2>Styling</h2>
+          <p class="note">
+            Cover colour, opacity, blur and corners, plus what shows on it — spinner, icon,
+            message, or your own markup through the <code>content</code> slot.
+          </p>
+          <div class="iconstrip">
+            <ApexSwitch v-model="blkStyled" label="Block all four" />
+          </div>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">light cover, heavy blur</span>
+              <ApexBlockUI
+                :blocked="blkStyled"
+                background="#FFFFFF"
+                :opacity="0.55"
+                :blur="6"
+                content-color="var(--fg-default)"
+                message="Loading…"
+                radius="14px"
+              >
+                <div class="blk-panel">Panel content</div>
+              </ApexBlockUI>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">icon instead of a spinner</span>
+              <ApexBlockUI :blocked="blkStyled" icon="lock" message="Read only" background="#1B2430" :opacity="0.62" radius="14px">
+                <div class="blk-panel">Panel content</div>
+              </ApexBlockUI>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">passthrough — dims only</span>
+              <ApexBlockUI :blocked="blkStyled" passthrough :spinner="false" :opacity="0.3" radius="14px">
+                <div class="blk-panel">Still clickable</div>
+              </ApexBlockUI>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">custom content, click to dismiss</span>
+              <ApexBlockUI
+                :blocked="blkStyled"
+                dismissable
+                background="var(--accent-primary)"
+                :opacity="0.9"
+                radius="14px"
+                @unblock="blkStyled = false"
+              >
+                <div class="blk-panel">Panel content</div>
+                <template #content>
+                  <div class="blk-custom">
+                    <ApexIcon name="touch_app" :size="26" />
+                    <strong class="blk-custom__text">Click anywhere to release</strong>
+                  </div>
+                </template>
+              </ApexBlockUI>
+            </div>
+          </div>
+
+          <h2>Document</h2>
+          <p class="note">
+            <code>fullScreen</code> blocks the whole document rather than any one element, and
+            holds the page still while it is up. Pair it with <code>duration</code> so a stuck
+            request cannot trap the user — this one releases itself after two seconds, and the
+            cover is dismissable as well.
+          </p>
+          <div class="iconstrip">
+            <ApexButton size="sm" @click="blkDoc = true">Block the document for 2 seconds</ApexButton>
+          </div>
+          <ApexBlockUI
+            v-model:blocked="blkDoc"
+            full-screen
+            dismissable
+            :duration="2000"
+            show-timer
+            blur
+            message="Publishing to 6 displays…"
+          />
+        </template>
+
+        <!-- Ported from the gallery. Every example binds to its own scroller
+             rather than the window, so the buttons stay inside their panels
+             instead of stacking in the corner of the docs page. -->
+        <template v-if="entry.id === 'scrolltop'">
+          <h2>Basic</h2>
+          <p class="note">
+            With no <code>target</code> it watches the window and pins itself to the viewport.
+            Scroll this page down and it appears in the bottom-right corner — the one on this
+            page also shows the reading-progress ring.
+          </p>
+          <ApexScrollTop :threshold="240" show-progress progress-color="var(--accent-primary)" />
+
+          <h2>Target element</h2>
+          <p class="note">
+            <code>target="parent"</code> binds it to the nearest scrolling ancestor. The button
+            is placed from that scroller's own frame and sits just below it, in space reserved
+            outside the scroller — the gap lands under the text, and nothing can scroll behind
+            the button. A selector works too, for a scroller elsewhere in the page.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">target="parent"</span>
+              <div class="st-scroller">
+                <p v-for="n in 10" :key="n" class="st-para">
+                  Paragraph {{ n }}. Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                  sed do eiusmod tempor incididunt ut labore.
+                </p>
+                <ApexScrollTop target="parent" :threshold="80" offset="14px" />
+              </div>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">with a progress ring</span>
+              <div class="st-scroller">
+                <p v-for="n in 10" :key="n" class="st-para">
+                  Paragraph {{ n }}. Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                  sed do eiusmod tempor incididunt ut labore.
+                </p>
+                <ApexScrollTop
+                  target="parent"
+                  :threshold="60"
+                  offset="14px"
+                  show-progress
+                  progress-color="var(--accent-success)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <h2>Styling and placement</h2>
+          <p class="note">
+            Size, corners, colours, hover colours and the corner it sits in. A
+            <code>label</code> turns the circle into a pill, and <code>hoverLift</code> off
+            keeps it still.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">pill with a label, bottom-start</span>
+              <div class="st-scroller">
+                <p v-for="n in 10" :key="n" class="st-para">Paragraph {{ n }}. Scroll to reveal the button.</p>
+                <ApexScrollTop
+                  target="parent"
+                  :threshold="60"
+                  offset="14px"
+                  position="bottom-start"
+                  label="Back to top"
+                  background="var(--accent-primary)"
+                  color="#FFF"
+                  hover-background="oklch(0.42 0.19 258)"
+                />
+              </div>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">squared, outlined, centred, no lift</span>
+              <div class="st-scroller">
+                <p v-for="n in 10" :key="n" class="st-para">Paragraph {{ n }}. Scroll to reveal the button.</p>
+                <ApexScrollTop
+                  target="parent"
+                  :threshold="60"
+                  offset="14px"
+                  position="bottom-center"
+                  :hover-lift="false"
+                  size="36px"
+                  radius="8px"
+                  icon="keyboard_arrow_up"
+                  background="var(--bg-elevated)"
+                  color="var(--fg-default)"
+                  border-color="var(--border-default)"
+                  hover-background="var(--bg-muted)"
+                  shadow="var(--shadow-md)"
+                />
+              </div>
             </div>
           </div>
         </template>

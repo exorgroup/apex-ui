@@ -32,8 +32,8 @@ export interface DocEntry {
    * `plain` is for a control that renders from its props and has no model at
    * all — ApexIcon, ApexBadge, ApexAvatar.
    */
-  demo?: 'plain' | 'chip' | 'meter' | 'button' | 'split' | 'dial' | 'group' | 'field'
-    | 'order' | 'container';
+  demo?: 'plain' | 'chip' | 'meter' | 'inplace' | 'block' | 'scrolltop'
+    | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -214,6 +214,24 @@ export const MTR_DISK = [
   { label: 'Apps', value: 14 }, { label: 'Messages', value: 12 },
   { label: 'Media', value: 8 }, { label: 'System', value: 12 },
   { label: 'Documents', value: 6 }, { label: 'Cache', value: 11 },
+];
+
+/** The lazy-loaded table inside ApexInplace. Four columns and a handful of
+    rows: enough to look like real content arriving, small enough that the
+    point is the fetch rather than the table. */
+export const INP_COLUMNS = [
+  { field: 'code', header: 'Code' },
+  { field: 'name', header: 'Name' },
+  { field: 'category', header: 'Category' },
+  { field: 'quantity', header: 'Quantity' },
+];
+
+export const INP_ROWS = [
+  { code: 'f230fh', name: 'Bamboo Watch', category: 'Accessories', quantity: 24 },
+  { code: 'nvklal', name: 'Black Watch', category: 'Accessories', quantity: 61 },
+  { code: 'zz21cz', name: 'Blue Band', category: 'Fitness', quantity: 2 },
+  { code: '244wgerg', name: 'Blue T-Shirt', category: 'Clothing', quantity: 25 },
+  { code: 'h456wer53', name: 'Bracelet', category: 'Accessories', quantity: 73 },
 ];
 
 /** One item per colour notation the component accepts — oklch, hex, rgb —
@@ -3645,5 +3663,122 @@ export const ENTRIES: DocEntry[] = [
       ['label', 'Replaces the label list; receives { items, total }. It fills the same region as the built-in list, so labelPosition still places it'],
       ['meter', 'Replaces one segment; receives { item, index, percent, color }'],
     ],
+  },
+  {
+    id: 'inplace', name: 'ApexInplace', group: 'Utilities',
+    blurb: 'Shows a value and swaps to its editor when clicked. The display half is a button rather than a clickable div, so the swap is reachable by keyboard and announced as an action. Content is only rendered once opened, which is what makes the open event a usable place to fetch — a lazy table inside a closed Inplace costs nothing until it is asked for.',
+    noField: true, demo: 'inplace',
+    lead: ['v-model:active="active"', 'display="John Doe"'],
+    tail: '>\n  <template #content="{ close }">…</template>\n</ApexInplace>',
+    base: { display: 'John Doe', displayIcon: 'edit', outlined: true, closable: true, hoverable: true },
+    controls: [
+      { key: 'display', type: 'text' }, { key: 'displayIcon', type: 'text' },
+      { key: 'outlined', type: 'bool' }, { key: 'hoverable', type: 'bool' },
+      { key: 'closable', type: 'bool' }, { key: 'autoFocus', type: 'bool' },
+      { key: 'disabled', type: 'bool' }, { key: 'keepAlive', type: 'bool' },
+      { key: 'width', type: 'text' }, { key: 'padding', type: 'text' },
+      { key: 'radius', type: 'text' }, { key: 'contentPadding', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'color', type: 'color' },
+      { key: 'borderColor', type: 'color' },
+      { key: 'hoverBackground', type: 'color' }, { key: 'hoverColor', type: 'color' },
+      { key: 'contentBackground', type: 'color' },
+    ],
+    props: [
+      ['active', 'boolean', 'false', 'v-model:active — two-way, so a caller can open and close it too'],
+      ['display / displayIcon', 'string', '—', 'The closed state when the display slot is not used'],
+      ['closable / closeIcon', 'boolean / string', "false / 'close'", 'A close control at the content’s trailing edge, for content that has no buttons of its own'],
+      ['autoFocus', 'boolean', 'true', 'Focus the first field in the content when it opens'],
+      ['keepAlive', 'boolean', 'false', 'Keep the content mounted after the first open, so a fetched table is not re-created on every reopen'],
+      ['disabled', 'boolean', 'false', 'The display stops responding'],
+      ['hoverable / hoverBackground / hoverColor', 'boolean / string / string', 'true / tokens', 'Hover feedback on the closed state — off for a display that should look static'],
+      ['outlined', 'boolean', 'false', 'A dashed outline hinting that the closed value is editable'],
+      ['width / padding / radius', 'string', 'tokens', ''],
+      ['background / color / borderColor', 'string', 'tokens', 'The closed state'],
+      ['contentBackground / contentPadding', 'string', 'transparent / 0', 'The open state'],
+    ],
+    events: [
+      ['update:active', 'boolean'],
+      ['open', '— the display was activated; fetch here'],
+      ['close', '—'],
+    ],
+    slots: [
+      ['display', 'The closed state; receives { open }'],
+      ['content', 'The open state; receives { close, active } — anything: a field, an image, a table'],
+    ],
+    serviceTitle: 'Methods',
+    serviceRows: [['open() / close()', 'void', 'Drive it from outside without binding active']],
+  },
+  {
+    id: 'blockui', name: 'ApexBlockUI', group: 'Utilities',
+    blurb: 'Covers its content, or the whole document, while something is in flight. An overlay inside a positioned wrapper rather than pointer-events on the content: the cover intercepts clicks and keyboard focus, so a blocked panel cannot be tabbed into — which pointer-events alone would still allow.',
+    noField: true, demo: 'block',
+    lead: ['v-model:blocked="blocked"'],
+    tail: '>\n  …\n</ApexBlockUI>',
+    base: { spinner: true, message: 'Saving…', duration: 2500, showTimer: true, blur: true },
+    controls: [
+      { key: 'message', type: 'text' },
+      { key: 'spinner', type: 'bool' }, { key: 'icon', type: 'text' },
+      { key: 'duration', type: 'number' }, { key: 'showTimer', type: 'bool' },
+      { key: 'fullScreen', type: 'bool' }, { key: 'dismissable', type: 'bool' },
+      { key: 'passthrough', type: 'bool' },
+      { key: 'blur', type: 'bool' }, { key: 'opacity', type: 'number' },
+      { key: 'radius', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'contentColor', type: 'color' },
+    ],
+    props: [
+      ['blocked', 'boolean', 'false', 'v-model:blocked — bindable, so the auto-release reports back'],
+      ['duration', 'number', '—', 'Releases the block by itself after this many milliseconds. A block waiting on a request that may never answer otherwise leaves the user stuck with no way out, so the timeout belongs to the block rather than each caller’s own setTimeout'],
+      ['showTimer', 'boolean', 'false', 'A countdown bar along the cover’s edge while a duration runs'],
+      ['fullScreen', 'boolean', 'false', 'Blocks the whole document instead of the content'],
+      ['lockScroll', 'boolean', 'true', 'Stops the page scrolling while the document is blocked'],
+      ['dismissable', 'boolean', 'false', 'Releases when the cover is clicked'],
+      ['passthrough', 'boolean', 'false', 'Dims without intercepting — a purely visual block'],
+      ['background / opacity / blur / radius', 'string / number / boolean | number | string / string', 'near-black / 0.42 / false', 'The cover. blur takes true for 3px, or a radius'],
+      ['spinner / icon / message / contentColor', 'boolean / string / string / string', 'true / — / — / white', 'What shows on the cover; an icon replaces the spinner'],
+      ['zIndex', 'number', '1250', 'Full-screen stack order'],
+    ],
+    events: [
+      ['update:blocked', 'boolean'],
+      ['block / unblock', '—'],
+      ['timeout', '— the duration ran out, rather than a caller releasing it'],
+    ],
+    slots: [
+      ['default', 'The content being blocked — ignored in fullScreen, which covers the document'],
+      ['content', 'Replaces the spinner and message on the cover'],
+    ],
+  },
+  {
+    id: 'scrolltop', name: 'ApexScrollTop', group: 'Utilities',
+    blurb: 'A button that appears past a scroll threshold and returns to the top. Against the window it is fixed to a viewport corner; inside a scroller it is fixed to coordinates measured from that scroller’s frame, with a reserved strip at the scroller’s block end so the content ends above it. The scroll read is rAF-throttled, because scroll fires far more often than a threshold can be crossed.',
+    noField: true, demo: 'scrolltop',
+    tail: ' />',
+    base: { threshold: 120, position: 'bottom-end', size: '42px', showProgress: true, hoverLift: true },
+    controls: [
+      { key: 'threshold', type: 'number' },
+      { key: 'position', type: 'select', options: ['bottom-end', 'bottom-start', 'bottom-center'] },
+      { key: 'icon', type: 'text' }, { key: 'label', type: 'text' },
+      { key: 'behavior', type: 'select', options: ['smooth', 'auto'] },
+      { key: 'showProgress', type: 'bool' }, { key: 'hoverLift', type: 'bool' },
+      { key: 'size', type: 'text' }, { key: 'offset', type: 'text' }, { key: 'radius', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'color', type: 'color' },
+      { key: 'borderColor', type: 'color' },
+      { key: 'hoverBackground', type: 'color' }, { key: 'hoverColor', type: 'color' },
+      { key: 'progressColor', type: 'color' },
+    ],
+    props: [
+      ['target', "'window' | 'parent' | selector", "'window'", 'parent binds to the nearest scrolling ancestor; a selector binds to any scroller. Inside one, the button is placed from that scroller’s measured frame and sits just below it, with the space reserved outside the scroller — so the gap is under the text and no text can ever pass behind the button'],
+      ['threshold', 'number', '200', 'Scroll distance before it appears'],
+      ['icon / label', 'string', "'arrow_upward' / —", 'A label turns the circle into a pill'],
+      ['behavior', "'smooth' | 'auto'", "'smooth'", ''],
+      ['position / offset', "'bottom-end' | 'bottom-start' | 'bottom-center' / string", "'bottom-end' / '24px'", 'Corner and inset within the band — all three placements work inside a scroller as well as against the window'],
+      ['showProgress / progressColor', 'boolean / string', 'false / currentColor', 'A ring showing how far down the scroller you are — a conic gradient tracking a custom property, so a scroll is one style write and no extra element'],
+      ['hoverLift', 'boolean', 'true', 'Lifts on hover; off for a button that should sit still'],
+      ['size / radius / background / color / borderColor / shadow', 'string', 'tokens', ''],
+      ['hoverBackground / hoverColor', 'string', 'same as resting', ''],
+      ['ariaLabel', 'string', "'Scroll to top'", ''],
+      ['zIndex', 'number', '1150', ''],
+    ],
+    events: [['click', '— the button was pressed']],
+    slots: [['default', 'Replaces the icon and label entirely']],
   },
 ];
