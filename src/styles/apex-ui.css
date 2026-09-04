@@ -410,10 +410,30 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-switch[aria-checked="true"] i{inset-inline-start:calc(100% - 22px)}
 .apex-switch[data-size="sm"][aria-checked="true"] i{inset-inline-start:calc(100% - 18px)}
 .apex-switch[data-size="lg"][aria-checked="true"] i{inset-inline-start:calc(100% - 27px)}
+/* Labelled switch. The track stops being a fixed width and grows to fit its
+   text; the padding leaves room for the knob on whichever side it currently
+   sits, so the word is never underneath it. */
+.apex-switch[data-labelled="true"]{display:inline-grid;align-items:center;inline-size:auto;min-inline-size:44px;padding-inline:31px 12px}
+.apex-switch[data-labelled="true"][data-on="true"]{padding-inline:12px 31px}
+.apex-switch[data-labelled="true"][data-size="sm"]{min-inline-size:36px;padding-inline:25px 10px}
+.apex-switch[data-labelled="true"][data-size="sm"][data-on="true"]{padding-inline:10px 25px}
+.apex-switch[data-labelled="true"][data-size="lg"]{min-inline-size:52px;padding-inline:38px 14px}
+.apex-switch[data-labelled="true"][data-size="lg"][data-on="true"]{padding-inline:14px 38px}
+/* Both words in one grid cell: the track measures the wider of the two, so
+   toggling changes the text but never the width. */
+.apex-switch__text{display:grid;font-size:11px;font-weight:700;line-height:1;text-align:center}
+.apex-switch__on,.apex-switch__off{grid-area:1/1;transition:opacity var(--dur-fast)}
+.apex-switch__on{color:#fff}
+/* The off track is --border-strong, which flips with the theme — so does
+   --fg-default, which is why it reads in both. White would not. */
+.apex-switch__off{color:var(--fg-default)}
+.apex-switch[data-on="false"] .apex-switch__on{opacity:0}
+.apex-switch[data-on="true"] .apex-switch__off{opacity:0}
 
 /* ─── radio group ──────────────────────────────────────── */
 .apex-radios{display:grid;gap:8px}
 .apex-radios[data-inline="true"]{grid-auto-flow:column;grid-auto-columns:max-content;gap:18px}
+.apex-radios[data-cols]{grid-template-columns:repeat(var(--apex-radio-cols,2),minmax(0,1fr));grid-auto-flow:row}
 .apex-radio{display:flex;align-items:flex-start;gap:10px;padding:0;cursor:pointer;font-size:var(--apex-ctl-fs);color:var(--fg-default)}
 .apex-radio--card{padding:12px 14px;border:1px solid var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);transition:border-color var(--dur-fast),background var(--dur-fast)}
 .apex-radio--card:hover{border-color:var(--border-strong)}
@@ -423,6 +443,10 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-radio input{position:absolute;opacity:0;inline-size:1px;block-size:1px}
 .apex-radio input:focus-visible+.apex-radio__dot{box-shadow:var(--focus-ring)}
 .apex-radio__txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+/* Was an inline style on the element, which put it beyond the reach of both
+   the ui classes and the variables. */
+.apex-radio__lead{display:inline-flex;align-items:center;gap:6px;font-weight:500}
+.apex-radio__img{inline-size:20px;block-size:20px;border-radius:var(--r-xs);object-fit:cover;flex:0 0 auto}
 .apex-radio__help{font-size:12.5px;color:var(--fg-subtle);line-height:1.45}
 .apex-radio[data-disabled="true"]{opacity:.5;cursor:not-allowed}
 

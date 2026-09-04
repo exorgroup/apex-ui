@@ -124,7 +124,8 @@ export interface ApexFieldClasses {
   range?: string;
   valueArc?: string;
   text?: string;
-  /** ApexSlider — the rail, the filled portion, a handle, the value bubble. */
+  /** ApexSlider — the rail, the filled portion, a handle, the value bubble.
+      ApexSwitch reuses `track` for its bar and `handle` for its knob. */
   track?: string;
   fill?: string;
   handle?: string;
@@ -204,6 +205,11 @@ export interface ApexFieldClasses {
   moveButton?: string;
   grip?: string;
   index?: string;
+  /** ApexRadio and ApexRadioGroup — the dot, and the label row beside it. A
+      whole radio row is `option` and the wrapper is `group`, as in the
+      checkbox group. */
+  dot?: string;
+  lead?: string;
 }
 
 /**

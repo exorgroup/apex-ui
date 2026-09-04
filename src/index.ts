@@ -45,6 +45,7 @@ import ApexCheckbox from './components/ApexCheckbox.vue';
 import ApexCheckboxGroup from './components/ApexCheckboxGroup.vue';
 import ApexSwitch from './components/ApexSwitch.vue';
 import ApexSegmented from './components/ApexSegmented.vue';
+import ApexRadio from './components/ApexRadio.vue';
 import ApexRadioGroup from './components/ApexRadioGroup.vue';
 import ApexButton from './components/ApexButton.vue';
 import ApexButtonGroup from './components/ApexButtonGroup.vue';
@@ -152,6 +153,7 @@ export const components = {
   CheckboxGroup: ApexCheckboxGroup,
   Switch: ApexSwitch,
   Segmented: ApexSegmented,
+  Radio: ApexRadio,
   RadioGroup: ApexRadioGroup,
   Button: ApexButton,
   ButtonGroup: ApexButtonGroup,
@@ -259,7 +261,7 @@ export const ApexUI: Plugin = {
 export default ApexUI;
 export {
   ApexIcon, ApexField, ApexInput, ApexTextarea, ApexNumber, ApexStepper,
-  ApexSelect, ApexMultiselect, ApexCascadeSelect, ApexDatePicker, ApexColorPicker, ApexOtp, ApexPassword, ApexTags, ApexKnob, ApexListbox, ApexOrderList, ApexRating, ApexSelectButton, ApexSlider, ApexToggleButton, ApexTreeSelect, ApexCheckbox, ApexCheckboxGroup, ApexSwitch, ApexSegmented, ApexRadioGroup,
+  ApexSelect, ApexMultiselect, ApexCascadeSelect, ApexDatePicker, ApexColorPicker, ApexOtp, ApexPassword, ApexTags, ApexKnob, ApexListbox, ApexOrderList, ApexRating, ApexSelectButton, ApexSlider, ApexToggleButton, ApexTreeSelect, ApexCheckbox, ApexCheckboxGroup, ApexSwitch, ApexSegmented, ApexRadio, ApexRadioGroup,
   ApexDrawer, ApexDynamicDialog, ApexPopover, ApexFileUpload, ApexBreadcrumb, ApexContextMenu, ApexDock, ApexMegaMenu, ApexMenu, ApexMenubar, ApexTieredMenu, ApexMessage, ApexToast, ApexCarousel, ApexCarouselContent, ApexCarouselItem,
   ApexCarouselNav, ApexCarouselControls, ApexCarouselIndicators,
   ApexCompare, ApexCompareItem, ApexGallery, ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger,
