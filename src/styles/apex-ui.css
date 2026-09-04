@@ -111,12 +111,12 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 
 /* ─── multiselect ──────────────────────────────────────── */
 .apex-ctl--multi{flex-wrap:wrap;gap:6px;padding-block:7px;min-height:var(--apex-ctl-h)}
-.apex-chip{display:inline-flex;align-items:center;gap:5px;padding-block:4px;padding-inline:10px 6px;background:var(--apex-chip-bg,var(--bg-subtle));border:1px solid var(--apex-chip-border,var(--border-default));border-radius:var(--apex-chip-radius,var(--r-full));font-size:12.5px;font-weight:500;white-space:nowrap;color:var(--apex-chip-fg,var(--fg-default))}
-.apex-chip button{display:grid;place-items:center;border:0;background:transparent;color:var(--apex-chip-remove,var(--fg-subtle));cursor:pointer;padding:0;border-radius:var(--r-full);--apex-icon-size:15px}
-.apex-chip button:hover{color:var(--apex-chip-remove-hover,var(--accent-danger))}
+.apex-chip{display:inline-flex;align-items:center;gap:5px;padding-block:4px;padding-inline:10px 6px;background:var(--apex-token-bg,var(--bg-subtle));border:1px solid var(--apex-token-border,var(--border-default));border-radius:var(--apex-token-radius,var(--r-full));font-size:12.5px;font-weight:500;white-space:nowrap;color:var(--apex-token-fg,var(--fg-default))}
+.apex-chip button{display:grid;place-items:center;border:0;background:transparent;color:var(--apex-token-remove,var(--fg-subtle));cursor:pointer;padding:0;border-radius:var(--r-full);--apex-icon-size:15px}
+.apex-chip button:hover{color:var(--apex-token-remove-hover,var(--accent-danger))}
 .apex-ctl__ph{color:var(--apex-ctl-placeholder,var(--fg-subtle));font-size:var(--apex-ctl-fs);flex:1 1 auto}
 .apex-chip__img{inline-size:15px;block-size:15px;border-radius:2px;object-fit:cover}
-.apex-chip--more{background:var(--apex-chip-more-bg,var(--bg-muted));font-weight:600;padding-inline:10px;color:var(--apex-chip-more-fg,var(--fg-muted))}
+.apex-chip--more{background:var(--apex-token-more-bg,var(--bg-muted));font-weight:600;padding-inline:10px;color:var(--apex-token-more-fg,var(--fg-muted))}
 .apex-pop__all{display:flex;align-items:center;justify-content:space-between;width:100%;padding-block:7px;padding-inline:10px;margin-block-end:3px;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--apex-pop-all-fg,var(--accent-primary));border-radius:var(--apex-opt-radius,var(--r-sm));cursor:pointer;border-block-end:1px solid var(--apex-pop-all-border,var(--border-subtle))}
 .apex-pop__all:hover{background:var(--apex-pop-all-hover-bg,var(--bg-muted))}
 .apex-pop__all span{color:var(--apex-pop-all-count-fg,var(--fg-subtle));font-weight:500;font-family:var(--font-mono);font-size:11px}
@@ -1409,55 +1409,55 @@ background:currentColor;opacity:.85;transform-origin:left center}
 .apex-blk-fade-enter-from,.apex-blk-fade-leave-to{opacity:0}
 
 /* ─── chip ─────────────────────────────────────────────── */
-.apex-chp{--chp-size:30px;--chp-fs:13px;--chp-pad:0 11px;--chp-gap:6px;
---chp-ink:var(--fg-default);--chp-bg:var(--bg-muted);--chp-fg:var(--fg-default);
---chp-border:transparent;--chp-hover:color-mix(in oklch,var(--chp-ink) 14%,transparent);
---chp-sel-bg:var(--chp-ink);--chp-sel-fg:var(--bg-surface);
-display:inline-flex;align-items:center;gap:var(--chp-gap);max-inline-size:100%;
-block-size:var(--chp-size);padding:var(--chp-pad);border:1px solid var(--chp-border);
-border-radius:var(--r-full);background:var(--chp-bg);color:var(--chp-fg);
-font-family:var(--font-sans);font-size:var(--chp-fs);font-weight:500;line-height:1;
+.apex-chp{--apex-chip-size:30px;--apex-chip-fs:13px;--apex-chip-pad:0 11px;--apex-chip-gap:6px;
+--apex-chip-ink:var(--fg-default);--apex-chip-bg:var(--bg-muted);--apex-chip-fg:var(--fg-default);
+--apex-chip-border:transparent;--apex-chip-hover:color-mix(in oklch,var(--apex-chip-ink) 14%,transparent);
+--apex-chip-sel-bg:var(--apex-chip-ink);--apex-chip-sel-fg:var(--bg-surface);
+display:inline-flex;align-items:center;gap:var(--apex-chip-gap);max-inline-size:100%;
+block-size:var(--apex-chip-size);padding:var(--apex-chip-pad);border:1px solid var(--apex-chip-border);
+border-radius:var(--r-full);background:var(--apex-chip-bg);color:var(--apex-chip-fg);
+font-family:var(--font-sans);font-size:var(--apex-chip-fs);font-weight:500;line-height:1;
 white-space:nowrap;vertical-align:middle}
-.apex-chp[data-size="sm"]{--chp-size:24px;--chp-fs:12px;--chp-pad:0 9px;--chp-gap:5px}
-.apex-chp[data-size="lg"]{--chp-size:38px;--chp-fs:14.5px;--chp-pad:0 15px;--chp-gap:8px}
-.apex-chp[data-severity="neutral"]{--chp-ink:var(--fg-default)}
-.apex-chp[data-severity="primary"]{--chp-ink:var(--accent-primary)}
-.apex-chp[data-severity="secondary"]{--chp-ink:var(--fg-subtle)}
-.apex-chp[data-severity="success"]{--chp-ink:var(--accent-success)}
-.apex-chp[data-severity="warn"]{--chp-ink:var(--accent-warning)}
-.apex-chp[data-severity="danger"]{--chp-ink:var(--accent-danger)}
-.apex-chp[data-severity="info"]{--chp-ink:var(--accent-info,var(--accent-primary))}
-.apex-chp[data-severity="contrast"]{--chp-ink:var(--fg-default)}
-.apex-chp[data-variant="solid"]{--chp-bg:var(--chp-ink);--chp-fg:var(--bg-surface)}
+.apex-chp[data-size="sm"]{--apex-chip-size:24px;--apex-chip-fs:12px;--apex-chip-pad:0 9px;--apex-chip-gap:5px}
+.apex-chp[data-size="lg"]{--apex-chip-size:38px;--apex-chip-fs:14.5px;--apex-chip-pad:0 15px;--apex-chip-gap:8px}
+.apex-chp[data-severity="neutral"]{--apex-chip-ink:var(--fg-default)}
+.apex-chp[data-severity="primary"]{--apex-chip-ink:var(--accent-primary)}
+.apex-chp[data-severity="secondary"]{--apex-chip-ink:var(--fg-subtle)}
+.apex-chp[data-severity="success"]{--apex-chip-ink:var(--accent-success)}
+.apex-chp[data-severity="warn"]{--apex-chip-ink:var(--accent-warning)}
+.apex-chp[data-severity="danger"]{--apex-chip-ink:var(--accent-danger)}
+.apex-chp[data-severity="info"]{--apex-chip-ink:var(--accent-info,var(--accent-primary))}
+.apex-chp[data-severity="contrast"]{--apex-chip-ink:var(--fg-default)}
+.apex-chp[data-variant="solid"]{--apex-chip-bg:var(--apex-chip-ink);--apex-chip-fg:var(--bg-surface)}
 /* the tinted variants darken the ink: an accent at full strength over its own
    12% tint sits just under 4.5:1 at 13px */
-.apex-chp[data-variant="subtle"]{--chp-bg:color-mix(in oklch,var(--chp-ink) 12%,transparent);
---chp-fg:color-mix(in oklch,var(--chp-ink) 84%,#000)}
-.apex-chp[data-variant="outlined"]{--chp-bg:transparent;
---chp-border:color-mix(in oklch,var(--chp-ink) 42%,transparent);
---chp-fg:color-mix(in oklch,var(--chp-ink) 84%,#000)}
+.apex-chp[data-variant="subtle"]{--apex-chip-bg:color-mix(in oklch,var(--apex-chip-ink) 12%,transparent);
+--apex-chip-fg:color-mix(in oklch,var(--apex-chip-ink) 84%,#000)}
+.apex-chp[data-variant="outlined"]{--apex-chip-bg:transparent;
+--apex-chip-border:color-mix(in oklch,var(--apex-chip-ink) 42%,transparent);
+--apex-chip-fg:color-mix(in oklch,var(--apex-chip-ink) 84%,#000)}
 /* only a clickable chip gets hover and press feedback: an affordance on a chip
    that does nothing is a lie */
 .apex-chp[data-clickable="true"]{cursor:pointer;transition:background var(--dur-fast) var(--ease-out),
 color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out)}
-.apex-chp[data-clickable="true"]:hover:not([data-disabled="true"]){background:var(--chp-hover)}
+.apex-chp[data-clickable="true"]:hover:not([data-disabled="true"]){background:var(--apex-chip-hover)}
 .apex-chp[data-clickable="true"]:active:not([data-disabled="true"]){scale:.97}
 .apex-chp[data-clickable="true"]:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 /* two attributes, so a per-severity or per-variant default cannot out-rank it */
-.apex-chp[data-selected="true"][data-severity]{--chp-bg:var(--chp-sel-bg);--chp-fg:var(--chp-sel-fg);
---chp-border:transparent;--chp-hover:var(--chp-sel-bg)}
+.apex-chp[data-selected="true"][data-severity]{--apex-chip-bg:var(--apex-chip-sel-bg);--apex-chip-fg:var(--apex-chip-sel-fg);
+--apex-chip-border:transparent;--apex-chip-hover:var(--apex-chip-sel-bg)}
 .apex-chp[data-disabled="true"]{opacity:.5;cursor:default}
 .apex-chp__label{overflow:hidden;text-overflow:ellipsis}
-.apex-chp__icon{--apex-icon-size:calc(var(--chp-fs) + 3px);flex:0 0 auto}
+.apex-chp__icon{--apex-icon-size:calc(var(--apex-chip-fs) + 3px);flex:0 0 auto}
 /* the image bleeds to the chip's edge, which is what makes it read as an avatar
    rather than an icon sitting inside padding */
-.apex-chp__img{flex:0 0 auto;inline-size:calc(var(--chp-size) - 2px);block-size:calc(var(--chp-size) - 2px);
-margin-inline-start:calc(-1 * (var(--chp-size) / 5));border-radius:var(--r-full);object-fit:cover;display:block}
+.apex-chp__img{flex:0 0 auto;inline-size:calc(var(--apex-chip-size) - 2px);block-size:calc(var(--apex-chip-size) - 2px);
+margin-inline-start:calc(-1 * (var(--apex-chip-size) / 5));border-radius:var(--r-full);object-fit:cover;display:block}
 .apex-chp__x{display:grid;place-items:center;flex:0 0 auto;
-inline-size:calc(var(--chp-fs) + 6px);block-size:calc(var(--chp-fs) + 6px);
-margin-inline-end:calc(var(--chp-fs) / -4);padding:0;border:0;border-radius:var(--r-full);
+inline-size:calc(var(--apex-chip-fs) + 6px);block-size:calc(var(--apex-chip-fs) + 6px);
+margin-inline-end:calc(var(--apex-chip-fs) / -4);padding:0;border:0;border-radius:var(--r-full);
 background:transparent;color:inherit;opacity:.62;cursor:pointer}
-.apex-chp__x .apex-icon{--apex-icon-size:calc(var(--chp-fs) + 1px)}
+.apex-chp__x .apex-icon{--apex-icon-size:calc(var(--apex-chip-fs) + 1px)}
 .apex-chp__x:hover:not(:disabled){opacity:1;background:color-mix(in oklch,currentColor 20%,transparent)}
 .apex-chp__x:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-chp__x:disabled{cursor:default}

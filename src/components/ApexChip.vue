@@ -73,16 +73,16 @@ function onRemove(e: MouseEvent) {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (props.background) s['--chp-bg'] = props.background;
-  if (props.color) s['--chp-fg'] = props.color;
-  if (props.borderColor) s['--chp-border'] = props.borderColor;
-  if (props.hoverBackground) s['--chp-hover'] = props.hoverBackground;
-  if (props.selectedBackground) s['--chp-sel-bg'] = props.selectedBackground;
-  if (props.selectedColor) s['--chp-sel-fg'] = props.selectedColor;
+  if (props.background) s['--apex-chip-bg'] = props.background;
+  if (props.color) s['--apex-chip-fg'] = props.color;
+  if (props.borderColor) s['--apex-chip-border'] = props.borderColor;
+  if (props.hoverBackground) s['--apex-chip-hover'] = props.hoverBackground;
+  if (props.selectedBackground) s['--apex-chip-sel-bg'] = props.selectedBackground;
+  if (props.selectedColor) s['--apex-chip-sel-fg'] = props.selectedColor;
   if (props.radius) s.borderRadius = props.radius;
   if (props.width) s.inlineSize = props.width;
-  if (props.padding) s['--chp-pad'] = props.padding;
-  if (props.gap) s['--chp-gap'] = props.gap;
+  if (props.padding) s['--apex-chip-pad'] = props.padding;
+  if (props.gap) s['--apex-chip-gap'] = props.gap;
   return s;
 });
 </script>
