@@ -79,6 +79,11 @@ describe('the ported gallery examples are on the page', () => {
       'Variants', 'Custom bars', 'Inside a panel'],
     ApexOrderList: ['Selected', 'Control placement', 'Control alignment',
       'Without checkboxes', 'Buttons only'],
+    ApexBadge: ['Basic', 'Severity', 'Size', 'Overlay', 'Button'],
+    ApexChip: ['Basic', 'Severity and variant', 'Sizes, icons and images', 'Selectable',
+      'Styling and states'],
+    ApexAvatar: ['Content', 'Sizes and shapes', 'Auto colour', 'Status', 'Badge', 'Groups',
+      'Template'],
     ApexInput: ['Autocomplete', 'Icon slots', 'Affixes and transforms'],
     /* "Severity × variant" carries a real multiplication sign. It was once
        written as the six characters of its escape, which Vue renders
