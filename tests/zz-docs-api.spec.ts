@@ -106,3 +106,43 @@ describe('every playground control edits a real prop', () => {
     expect(missing, `${name} has playground controls for props it does not declare`).toEqual([]);
   });
 });
+
+/** Event names a component actually emits, read from its defineEmits block. */
+function declaredEmits(name: string): Set<string> {
+  const file = sourceOf(name);
+  if (file === undefined) throw new Error(`no source for ${name}`);
+  const block = (file.match(/defineEmits<([\s\S]*?)>\(\)/) || [])[1] ?? '';
+  return new Set([...block.matchAll(/'([^']+)'/g)].map((m) => m[1]));
+}
+
+describe('every event the docs name is emitted by the component', () => {
+  /* Two pages had already named an event that does not exist: ApexSteps
+     documented `change` where the component emits `step-change`, and
+     ApexSplitter listed three of five with payloads that did not match.
+     A wrong event name is invisible to every other check — the page renders,
+     the build passes, and the handler simply never fires. */
+  it.each(CONTROLS.filter((e) => e.events?.length).map((e) => [e.name, e] as const))('%s', (name, entry) => {
+    let emitted: Set<string>;
+    try {
+      emitted = declaredEmits(name);
+    } catch {
+      return;
+    }
+    /* No defineEmits block means the component forwards native events by
+       attribute fallthrough — ApexButton documents `click`, which the
+       underlying <button> fires without the component declaring anything.
+       That is unverifiable here rather than wrong, so it is skipped. */
+    if (!emitted.size) return;
+
+    /* Event names carry ':' and '-' — update:modelValue, step-change — which
+       the prop splitter rejects, so they need their own. */
+    const eventNamesIn = (cell: string) =>
+      cell.split('/').map((s) => s.trim())
+        .filter((s) => /^[a-zA-Z][\w:-]*$/.test(s));
+
+    const claimed = (entry.events ?? []).flatMap((row) => eventNamesIn(row[0]));
+    expect(claimed.length, `${name} has event rows but no parsable names`).toBeGreaterThan(0);
+    const missing = claimed.filter((ev) => !emitted.has(ev));
+    expect(missing, `${name} documents events it does not emit`).toEqual([]);
+  });
+});
