@@ -136,3 +136,27 @@ describe('the appearance props still reach the element after the rename', () => 
     });
   });
 });
+
+
+/* The connector was rendered only in the vertical branch, where the stylesheet
+   hides it — so horizontal steps had no line between markers at all, and the
+   markup in vertical was inert. It is drawn where the CSS styles it. */
+describe('ApexSteps connector', () => {
+  const THREE = [{ label: 'One' }, { label: 'Two' }, { label: 'Three' }];
+
+  it('renders a rail between horizontal steps, but not after the last', () => {
+    const w = mount(ApexSteps, { props: { steps: THREE, orientation: 'horizontal' } });
+    expect(w.findAll('.apex-st__rail')).toHaveLength(THREE.length - 1);
+  });
+
+  it('hideConnector removes it', () => {
+    const w = mount(ApexSteps, { props: { steps: THREE, orientation: 'horizontal', hideConnector: true } });
+    expect(w.findAll('.apex-st__rail')).toHaveLength(0);
+  });
+
+  it('vertical draws its own rail from the item, so it renders no rail span', () => {
+    const w = mount(ApexSteps, { props: { steps: THREE, orientation: 'vertical' } });
+    expect(w.findAll('.apex-st__rail')).toHaveLength(0);
+    expect(w.find('.apex-st').attributes('data-connector')).toBe('true');
+  });
+});

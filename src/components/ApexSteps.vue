@@ -176,7 +176,6 @@ defineExpose({ goTo, back, next, activeIndex });
               <span v-if="step.subtitle" class="apex-st__sub" :class="ui?.sub">{{ step.subtitle }}</span>
             </span>
           </slot>
-          <span v-if="!hideConnector && i < list.length - 1" class="apex-st__rail" :class="ui?.rail" aria-hidden="true"></span>
         </component>
 
         <div v-if="!stepsOnly" class="apex-st__body" :class="ui?.body" :data-open="i === activeIndex">
@@ -214,6 +213,12 @@ defineExpose({ goTo, back, next, activeIndex });
                 <span v-if="step.subtitle" class="apex-st__sub" :class="ui?.sub">{{ step.subtitle }}</span>
               </span>
             </slot>
+            <!-- The connector belongs here, not in the vertical branch: vertical
+                 draws its rail with an ::after on the item, and hides this one.
+                 As a flex sibling of the header content it starts where the
+                 content actually ends, whatever the marker size or label length. -->
+            <span v-if="!hideConnector && i < list.length - 1" class="apex-st__rail"
+                  :class="ui?.rail" aria-hidden="true"></span>
           </component>
         </div>
       </div>
