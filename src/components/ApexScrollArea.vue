@@ -157,15 +157,15 @@ onBeforeUnmount(() => {
 });
 
 const rootStyle = computed(() => {
-  const s: Record<string, string> = { '--sa-size': props.scrollbarSize + 'px' };
-  if (props.height) s['--sa-h'] = props.height;
-  if (props.maxHeight) s['--sa-max-h'] = props.maxHeight;
-  if (props.width) s['--sa-w'] = props.width;
-  if (props.thumbColor) s['--sa-thumb'] = props.thumbColor;
-  if (props.thumbHoverColor) s['--sa-thumb-hover'] = props.thumbHoverColor;
-  if (props.trackColor) s['--sa-track'] = props.trackColor;
-  if (props.thumbRadius) s['--sa-radius'] = props.thumbRadius;
-  if (props.padding) s['--sa-pad'] = props.padding;
+  const s: Record<string, string> = { '--apex-scroll-size': props.scrollbarSize + 'px' };
+  if (props.height) s['--apex-scroll-h'] = props.height;
+  if (props.maxHeight) s['--apex-scroll-max-h'] = props.maxHeight;
+  if (props.width) s['--apex-scroll-w'] = props.width;
+  if (props.thumbColor) s['--apex-scroll-thumb'] = props.thumbColor;
+  if (props.thumbHoverColor) s['--apex-scroll-thumb-hover'] = props.thumbHoverColor;
+  if (props.trackColor) s['--apex-scroll-track'] = props.trackColor;
+  if (props.thumbRadius) s['--apex-scroll-radius'] = props.thumbRadius;
+  if (props.padding) s['--apex-scroll-pad'] = props.padding;
   return s;
 });
 const barsVisible = computed(() => {

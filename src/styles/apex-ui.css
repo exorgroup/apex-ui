@@ -1999,14 +1999,14 @@ font:inherit;font-size:12.5px;cursor:pointer;text-align:start}
 .apex-dt__colreset:hover{color:var(--fg-default)}
 
 /* ─── toolbar ──────────────────────────────────────────── */
-.apex-tbar{--tbar-bg:var(--bg-surface);--tbar-border:var(--border-default);--tbar-fg:var(--fg-default);
---tbar-radius:var(--r-md);--tbar-pad:10px 12px;--tbar-gap:8px;
+.apex-tbar{--apex-toolbar-bg:var(--bg-surface);--apex-toolbar-border:var(--border-default);--apex-toolbar-fg:var(--fg-default);
+--apex-toolbar-radius:var(--r-md);--apex-toolbar-pad:10px 12px;--apex-toolbar-gap:8px;
 position:relative;display:flex;align-items:center;gap:14px;min-width:0;overflow-x:auto;scrollbar-width:thin;
-padding:var(--tbar-pad);background:var(--tbar-bg);color:var(--tbar-fg);border-radius:var(--tbar-radius);
+padding:var(--apex-toolbar-pad);background:var(--apex-toolbar-bg);color:var(--apex-toolbar-fg);border-radius:var(--apex-toolbar-radius);
 font-family:var(--font-sans)}
-.apex-tbar[data-size="sm"]{--tbar-pad:7px 9px;--tbar-gap:6px}
-.apex-tbar[data-size="lg"]{--tbar-pad:14px 18px;--tbar-gap:10px}
-.apex-tbar[data-bordered="true"]{border:1px solid var(--tbar-border)}
+.apex-tbar[data-size="sm"]{--apex-toolbar-pad:7px 9px;--apex-toolbar-gap:6px}
+.apex-tbar[data-size="lg"]{--apex-toolbar-pad:14px 18px;--apex-toolbar-gap:10px}
+.apex-tbar[data-bordered="true"]{border:1px solid var(--apex-toolbar-border)}
 .apex-tbar[data-raised="true"]{border-color:transparent;box-shadow:var(--shadow-sm)}
 .apex-tbar[data-wrap="true"]{flex-wrap:wrap;overflow:visible}
 .apex-tbar[data-sticky="true"]{position:sticky;inset-block-start:0;z-index:20}
@@ -2015,7 +2015,7 @@ font-family:var(--font-sans)}
    box collapse while its non-shrinkable children kept their natural size, painting
    over the next region. min-content instead, and the BAR scrolls when the regions
    together exceed it — the element's own shadow is not clipped by its own overflow. */
-.apex-tbar__region{display:flex;align-items:center;gap:var(--tbar-gap);min-inline-size:min-content}
+.apex-tbar__region{display:flex;align-items:center;gap:var(--apex-toolbar-gap);min-inline-size:min-content}
 /* start and end grow EQUALLY from a zero basis, which is what puts the centre region
    on the midpoint — growth on start alone would absorb all the free space and shove
    the other two against the trailing edge. justify-content keeps the end region's
@@ -2025,16 +2025,16 @@ font-family:var(--font-sans)}
 .apex-tbar__region[data-region="end"]{flex:1 0 0;justify-content:flex-end}
 
 /* ─── tabs ─────────────────────────────────────────────── */
-.apex-tabs{--tabs-active:var(--accent-primary);--tabs-indicator:var(--tabs-active);--tabs-fg:var(--fg-muted);
---tabs-strip-bg:transparent;--tabs-border:var(--border-default);--tabs-radius:var(--r-md);--tabs-pad:18px;
---tabs-strip-w:180px;--tabs-fs:14px;--tabs-tab-y:11px;--tabs-tab-x:16px;
+.apex-tabs{--apex-tabs-active:var(--accent-primary);--apex-tabs-indicator:var(--apex-tabs-active);--apex-tabs-fg:var(--fg-muted);
+--apex-tabs-strip-bg:transparent;--apex-tabs-border:var(--border-default);--apex-tabs-radius:var(--r-md);--apex-tabs-pad:18px;
+--apex-tabs-strip-w:180px;--apex-tabs-fs:14px;--apex-tabs-tab-y:11px;--apex-tabs-tab-x:16px;
 display:flex;flex-direction:column;min-width:0;font-family:var(--font-sans);color:var(--fg-default)}
-.apex-tabs[data-size="sm"]{--tabs-fs:13px;--tabs-tab-y:8px;--tabs-tab-x:12px;--tabs-pad:14px}
-.apex-tabs[data-size="lg"]{--tabs-fs:15.5px;--tabs-tab-y:14px;--tabs-tab-x:20px;--tabs-pad:24px}
+.apex-tabs[data-size="sm"]{--apex-tabs-fs:13px;--apex-tabs-tab-y:8px;--apex-tabs-tab-x:12px;--apex-tabs-pad:14px}
+.apex-tabs[data-size="lg"]{--apex-tabs-fs:15.5px;--apex-tabs-tab-y:14px;--apex-tabs-tab-x:20px;--apex-tabs-pad:24px}
 .apex-tabs[data-placement="bottom"]{flex-direction:column-reverse}
 .apex-tabs[data-placement="left"]{flex-direction:row}
 .apex-tabs[data-placement="right"]{flex-direction:row-reverse}
-.apex-tabs[data-bordered="true"]{border:1px solid var(--tabs-border);border-radius:var(--tabs-radius);overflow:hidden}
+.apex-tabs[data-bordered="true"]{border:1px solid var(--apex-tabs-border);border-radius:var(--apex-tabs-radius);overflow:hidden}
 .apex-tabs[data-disabled="true"]{opacity:.6}
 
 /* strip */
@@ -2042,8 +2042,8 @@ display:flex;flex-direction:column;min-width:0;font-family:var(--font-sans);colo
    container: as a flex item with flex-basis:auto in a column container, the strip
    area's inline size is otherwise content-derived, and min-inline-size:0 cannot help
    because nothing is constraining the maximum. */
-.apex-tabs__striparea{display:flex;align-items:center;inline-size:100%;min-inline-size:0;flex:0 0 auto;background:var(--tabs-strip-bg)}
-.apex-tabs[data-vertical="true"] .apex-tabs__striparea{flex-direction:column;flex:0 0 var(--tabs-strip-w);inline-size:var(--tabs-strip-w);align-items:stretch}
+.apex-tabs__striparea{display:flex;align-items:center;inline-size:100%;min-inline-size:0;flex:0 0 auto;background:var(--apex-tabs-strip-bg)}
+.apex-tabs[data-vertical="true"] .apex-tabs__striparea{flex-direction:column;flex:0 0 var(--apex-tabs-strip-w);inline-size:var(--apex-tabs-strip-w);align-items:stretch}
 .apex-tabs__strip{position:relative;display:flex;min-inline-size:0;overflow:auto;scrollbar-width:none;flex:1 1 auto}
 .apex-tabs__strip::-webkit-scrollbar{display:none}
 .apex-tabs[data-vertical="true"] .apex-tabs__strip{flex-direction:column;overflow-x:hidden}
@@ -2052,14 +2052,14 @@ display:flex;flex-direction:column;min-width:0;font-family:var(--font-sans);colo
 .apex-tabs[data-fill="true"] .apex-tabs__tab{flex:1 1 0}
 
 .apex-tabs__tab{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;
-padding-block:var(--tabs-tab-y);padding-inline:var(--tabs-tab-x);border:0;background:transparent;
-font:inherit;font-size:var(--tabs-fs);font-weight:600;letter-spacing:-.005em;color:var(--tabs-fg);
+padding-block:var(--apex-tabs-tab-y);padding-inline:var(--apex-tabs-tab-x);border:0;background:transparent;
+font:inherit;font-size:var(--apex-tabs-fs);font-weight:600;letter-spacing:-.005em;color:var(--apex-tabs-fg);
 cursor:pointer;white-space:nowrap;position:relative;transition:color var(--dur-fast),background var(--dur-fast)}
 .apex-tabs[data-vertical="true"] .apex-tabs__tab{justify-content:flex-start;text-align:start}
 .apex-tabs__tab:hover:not(:disabled){color:var(--fg-default)}
 .apex-tabs__tab:disabled{opacity:.45;cursor:not-allowed}
-.apex-tabs__tab:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--tabs-active);border-radius:var(--r-sm)}
-.apex-tabs__tab[data-on="true"]{color:var(--tabs-active)}
+.apex-tabs__tab:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--apex-tabs-active);border-radius:var(--r-sm)}
+.apex-tabs__tab[data-on="true"]{color:var(--apex-tabs-active)}
 .apex-tabs__label{min-width:0;overflow:hidden;text-overflow:ellipsis}
 
 /* the badge reuses the data-table badge tones */
@@ -2074,28 +2074,28 @@ font-size:10.5px;font-weight:700;letter-spacing:0}
 
 /* One indicator for the whole strip, driven by the measured active box — it slides
    between tabs instead of every tab owning its own bar. */
-.apex-tabs__bar{position:absolute;background:var(--tabs-indicator);pointer-events:none;
+.apex-tabs__bar{position:absolute;background:var(--apex-tabs-indicator);pointer-events:none;
 transition:inset-inline-start var(--dur-mid) var(--ease-out),inset-block-start var(--dur-mid) var(--ease-out),
 inline-size var(--dur-mid) var(--ease-out),block-size var(--dur-mid) var(--ease-out)}
-.apex-tabs[data-variant="underline"] .apex-tabs__bar{inset-block-end:0;inset-inline-start:var(--tabs-pos);inline-size:var(--tabs-size);block-size:2px;border-radius:2px 2px 0 0}
+.apex-tabs[data-variant="underline"] .apex-tabs__bar{inset-block-end:0;inset-inline-start:var(--apex-tabs-pos);inline-size:var(--apex-tabs-size);block-size:2px;border-radius:2px 2px 0 0}
 .apex-tabs[data-placement="bottom"][data-variant="underline"] .apex-tabs__bar{inset-block-end:auto;inset-block-start:0;border-radius:0 0 2px 2px}
-.apex-tabs[data-vertical="true"][data-variant="underline"] .apex-tabs__bar{inset-block-start:var(--tabs-pos);block-size:var(--tabs-size);inline-size:2px;inset-inline-start:auto;inset-inline-end:0;border-radius:2px 0 0 2px}
+.apex-tabs[data-vertical="true"][data-variant="underline"] .apex-tabs__bar{inset-block-start:var(--apex-tabs-pos);block-size:var(--apex-tabs-size);inline-size:2px;inset-inline-start:auto;inset-inline-end:0;border-radius:2px 0 0 2px}
 .apex-tabs[data-placement="right"][data-variant="underline"] .apex-tabs__bar{inset-inline-end:auto;inset-inline-start:0;border-radius:0 2px 2px 0}
-.apex-tabs[data-variant="pill"] .apex-tabs__bar{inset-block:4px;inset-inline-start:var(--tabs-pos);inline-size:var(--tabs-size);border-radius:var(--r-sm);z-index:0}
-.apex-tabs[data-vertical="true"][data-variant="pill"] .apex-tabs__bar{inset-inline:4px;inset-block-start:var(--tabs-pos);block-size:var(--tabs-size)}
+.apex-tabs[data-variant="pill"] .apex-tabs__bar{inset-block:4px;inset-inline-start:var(--apex-tabs-pos);inline-size:var(--apex-tabs-size);border-radius:var(--r-sm);z-index:0}
+.apex-tabs[data-vertical="true"][data-variant="pill"] .apex-tabs__bar{inset-inline:4px;inset-block-start:var(--apex-tabs-pos);block-size:var(--apex-tabs-size)}
 .apex-tabs[data-variant="enclosed"] .apex-tabs__bar{display:none}
 
 /* strip chrome per variant */
-.apex-tabs[data-variant="underline"] .apex-tabs__strip{box-shadow:inset 0 -1px 0 0 var(--tabs-border)}
-.apex-tabs[data-placement="bottom"][data-variant="underline"] .apex-tabs__strip{box-shadow:inset 0 1px 0 0 var(--tabs-border)}
-.apex-tabs[data-vertical="true"][data-variant="underline"] .apex-tabs__strip{box-shadow:inset -1px 0 0 0 var(--tabs-border)}
-.apex-tabs[data-placement="right"][data-variant="underline"] .apex-tabs__strip{box-shadow:inset 1px 0 0 0 var(--tabs-border)}
-.apex-tabs[data-variant="pill"] .apex-tabs__strip{padding:4px;background:var(--bg-subtle);border-radius:calc(var(--tabs-radius) + 2px);gap:2px}
+.apex-tabs[data-variant="underline"] .apex-tabs__strip{box-shadow:inset 0 -1px 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-placement="bottom"][data-variant="underline"] .apex-tabs__strip{box-shadow:inset 0 1px 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-vertical="true"][data-variant="underline"] .apex-tabs__strip{box-shadow:inset -1px 0 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-placement="right"][data-variant="underline"] .apex-tabs__strip{box-shadow:inset 1px 0 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-variant="pill"] .apex-tabs__strip{padding:4px;background:var(--bg-subtle);border-radius:calc(var(--apex-tabs-radius) + 2px);gap:2px}
 .apex-tabs[data-variant="pill"] .apex-tabs__tab{position:relative;z-index:1;border-radius:var(--r-sm)}
 .apex-tabs[data-variant="pill"] .apex-tabs__tab[data-on="true"]{color:#fff}
-.apex-tabs[data-variant="enclosed"] .apex-tabs__strip{gap:3px;box-shadow:inset 0 -1px 0 0 var(--tabs-border)}
-.apex-tabs[data-variant="enclosed"] .apex-tabs__tab{border:1px solid transparent;border-block-end:0;border-radius:var(--tabs-radius) var(--tabs-radius) 0 0;margin-block-end:-1px}
-.apex-tabs[data-variant="enclosed"] .apex-tabs__tab[data-on="true"]{border-color:var(--tabs-border);background:var(--bg-surface)}
+.apex-tabs[data-variant="enclosed"] .apex-tabs__strip{gap:3px;box-shadow:inset 0 -1px 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-variant="enclosed"] .apex-tabs__tab{border:1px solid transparent;border-block-end:0;border-radius:var(--apex-tabs-radius) var(--apex-tabs-radius) 0 0;margin-block-end:-1px}
+.apex-tabs[data-variant="enclosed"] .apex-tabs__tab[data-on="true"]{border-color:var(--apex-tabs-border);background:var(--bg-surface)}
 
 /* overflow controls appear only when the strip actually overflows */
 .apex-tabs__scroll{display:grid;place-items:center;flex:0 0 auto;inline-size:30px;block-size:30px;
@@ -2105,7 +2105,7 @@ border:0;background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;paddi
 .apex-tabs[data-vertical="true"] .apex-tabs__scroll{inline-size:100%;block-size:24px}
 
 .apex-tabs__panels{flex:1 1 auto;min-width:0;min-height:0}
-.apex-tabs__panel{padding:var(--tabs-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0}
+.apex-tabs__panel{padding:var(--apex-tabs-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0}
 .apex-tabs__panel[hidden]{display:none}
 .apex-tabs__panel>p:first-child{margin-block-start:0}
 .apex-tabs__panel>p:last-child{margin-block-end:0}
@@ -2215,10 +2215,10 @@ display:inline-flex;align-items:center;justify-content:center;gap:7px;position:r
 .apex-btngroup[data-size="lg"] > .apex-btn[data-icon-only="true"]{inline-size:50px;padding-inline:0}
 
 /* ─── stepper ──────────────────────────────────────────── */
-.apex-st{--st-active:var(--accent-primary);--st-complete:var(--accent-success);--st-line:var(--border-default);
---st-marker:34px;--st-fs:13.5px;display:flex;flex-direction:column;gap:20px;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
-.apex-st[data-size="sm"]{--st-marker:28px;--st-fs:12.5px}
-.apex-st[data-size="lg"]{--st-marker:42px;--st-fs:15px}
+.apex-st{--apex-steps-active:var(--accent-primary);--apex-steps-complete:var(--accent-success);--apex-steps-line:var(--border-default);
+--apex-steps-marker:34px;--apex-steps-fs:13.5px;display:flex;flex-direction:column;gap:20px;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
+.apex-st[data-size="sm"]{--apex-steps-marker:28px;--apex-steps-fs:12.5px}
+.apex-st[data-size="lg"]{--apex-steps-marker:42px;--apex-steps-fs:15px}
 .apex-st[data-orientation="vertical"]{gap:0}
 .apex-st[data-disabled="true"]{opacity:.6}
 
@@ -2235,19 +2235,19 @@ button.apex-st__head:disabled{cursor:not-allowed;opacity:.5}
 .apex-st__head:focus-visible{outline:none}
 .apex-st__head:focus-visible .apex-st__marker{box-shadow:var(--focus-ring)}
 
-.apex-st__marker{display:grid;place-items:center;inline-size:var(--st-marker);block-size:var(--st-marker);flex:0 0 auto;
+.apex-st__marker{display:grid;place-items:center;inline-size:var(--apex-steps-marker);block-size:var(--apex-steps-marker);flex:0 0 auto;
 border-radius:var(--r-full);border:1.5px solid var(--border-default);background:var(--bg-surface);
-font-size:calc(var(--st-fs) - .5px);font-weight:700;color:var(--fg-subtle);
+font-size:calc(var(--apex-steps-fs) - .5px);font-weight:700;color:var(--fg-subtle);
 transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast)}
 .apex-st__text{display:flex;flex-direction:column;gap:1px;min-width:0;flex:0 1 auto}
-.apex-st__label{font-size:var(--st-fs);font-weight:600;letter-spacing:-.005em;color:var(--fg-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apex-st__label{font-size:var(--apex-steps-fs);font-weight:600;letter-spacing:-.005em;color:var(--fg-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .apex-st__sub{font-size:11.5px;color:var(--fg-subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-.apex-st__item[data-state="active"] .apex-st__marker{border-color:var(--st-active);background:var(--st-active);color:#fff}
+.apex-st__item[data-state="active"] .apex-st__marker{border-color:var(--apex-steps-active);background:var(--apex-steps-active);color:#fff}
 .apex-st__item[data-state="active"] .apex-st__label{color:var(--fg-default)}
-.apex-st__item[data-state="complete"] .apex-st__marker{border-color:var(--st-complete);background:color-mix(in srgb,var(--st-complete) 14%,transparent);color:var(--st-complete)}
+.apex-st__item[data-state="complete"] .apex-st__marker{border-color:var(--apex-steps-complete);background:color-mix(in srgb,var(--apex-steps-complete) 14%,transparent);color:var(--apex-steps-complete)}
 .apex-st__item[data-state="complete"] .apex-st__label{color:var(--fg-default)}
-button.apex-st__head:not(:disabled):hover .apex-st__marker{border-color:var(--st-active)}
+button.apex-st__head:not(:disabled):hover .apex-st__marker{border-color:var(--apex-steps-active)}
 
 /* The head renders as a <button>, which sizes to fit-content and would otherwise
    ignore its flex-item parent and spill into the next step. Pinning it to 100% of
@@ -2259,43 +2259,43 @@ button.apex-st__head:not(:disabled):hover .apex-st__marker{border-color:var(--st
 /* The connector is a flex sibling of the header content, not an absolutely-positioned
    pseudo-element at a guessed marker offset — so it always begins where the content
    actually ends, whether that is a 34px marker, a long label, or a custom chip. */
-.apex-st__rail{flex:1 1 auto;min-inline-size:24px;block-size:0;border-block-start:1.5px solid var(--st-line);
+.apex-st__rail{flex:1 1 auto;min-inline-size:24px;block-size:0;border-block-start:1.5px solid var(--apex-steps-line);
 margin-inline-start:12px;align-self:center}
 .apex-st[data-orientation="vertical"] .apex-st__rail{display:none}
-.apex-st__item[data-state="complete"] .apex-st__rail{border-block-start-color:var(--st-complete)}
+.apex-st__item[data-state="complete"] .apex-st__rail{border-block-start-color:var(--apex-steps-complete)}
 
 /* vertical: header and panel interleave, the rail runs down the marker column */
 .apex-st[data-orientation="vertical"]>.apex-st__item{position:relative;display:flex;flex-direction:column}
 .apex-st[data-orientation="vertical"][data-connector="true"]>.apex-st__item:not(:last-child)::after{
-content:"";position:absolute;inset-block-start:calc(var(--st-marker) + 6px);inset-block-end:6px;
-inset-inline-start:calc(var(--st-marker) / 2 - 1px);inline-size:0;border-inline-start:1.5px solid var(--st-line)}
-.apex-st[data-orientation="vertical"]>.apex-st__item[data-state="complete"]::after{border-inline-start-color:var(--st-complete)}
+content:"";position:absolute;inset-block-start:calc(var(--apex-steps-marker) + 6px);inset-block-end:6px;
+inset-inline-start:calc(var(--apex-steps-marker) / 2 - 1px);inline-size:0;border-inline-start:1.5px solid var(--apex-steps-line)}
+.apex-st[data-orientation="vertical"]>.apex-st__item[data-state="complete"]::after{border-inline-start-color:var(--apex-steps-complete)}
 .apex-st[data-orientation="vertical"] .apex-st__head{padding-block:8px}
 .apex-st__body{overflow:hidden}
-.apex-st[data-orientation="vertical"] .apex-st__panel{padding-inline-start:calc(var(--st-marker) + 10px);padding-block:2px 14px}
+.apex-st[data-orientation="vertical"] .apex-st__panel{padding-inline-start:calc(var(--apex-steps-marker) + 10px);padding-block:2px 14px}
 
 .apex-st__panel{min-width:0;font-size:14px;line-height:1.6;color:var(--fg-muted)}
 .apex-st__panel>p:first-child{margin-block-start:0}
 .apex-st__nav{display:flex;gap:10px;justify-content:space-between;margin-block-start:18px}
 
 /* ─── splitter ─────────────────────────────────────────── */
-.apex-sp{--sp-gutter:6px;--sp-border:var(--border-default);--sp-radius:var(--r-md);
---sp-gutter-bg:var(--bg-subtle);--sp-gutter-hover:color-mix(in srgb,var(--accent-primary) 22%,transparent);
-display:flex;block-size:var(--sp-h,260px);min-width:0;font-family:var(--font-sans);border-radius:var(--sp-radius);overflow:hidden}
+.apex-sp{--apex-splitter-gutter:6px;--apex-splitter-border:var(--border-default);--apex-splitter-radius:var(--r-md);
+--apex-splitter-gutter-bg:var(--bg-subtle);--apex-splitter-gutter-hover:color-mix(in srgb,var(--accent-primary) 22%,transparent);
+display:flex;block-size:var(--apex-splitter-h,260px);min-width:0;font-family:var(--font-sans);border-radius:var(--apex-splitter-radius);overflow:hidden}
 .apex-sp[data-layout="vertical"]{flex-direction:column}
-.apex-sp[data-bordered="true"]{border:1px solid var(--sp-border);background:var(--bg-surface)}
+.apex-sp[data-bordered="true"]{border:1px solid var(--apex-splitter-border);background:var(--bg-surface)}
 .apex-sp[data-disabled="true"] .apex-sp__gutter{opacity:.45;pointer-events:none}
 /* a drag must not select text or hand the pointer to the panels underneath */
 .apex-sp[data-dragging="true"]{user-select:none}
 .apex-sp[data-dragging="true"] .apex-sp__panel{pointer-events:none}
 
 .apex-sp__panel{flex:0 1 auto;min-inline-size:0;min-block-size:0;overflow:auto;display:flex;flex-direction:column}
-.apex-sp__gutter{flex:0 0 var(--sp-gutter);display:grid;place-items:center;background:var(--sp-gutter-bg);
+.apex-sp__gutter{flex:0 0 var(--apex-splitter-gutter);display:grid;place-items:center;background:var(--apex-splitter-gutter-bg);
 border:0;padding:0;position:relative;transition:background var(--dur-fast);touch-action:none}
 .apex-sp[data-layout="horizontal"]>.apex-sp__gutter{cursor:col-resize}
 .apex-sp[data-layout="vertical"]>.apex-sp__gutter{cursor:row-resize}
-.apex-sp__gutter:hover,.apex-sp[data-dragging="true"] .apex-sp__gutter:active{background:var(--sp-gutter-hover)}
-.apex-sp__gutter:focus-visible{outline:none;background:var(--sp-gutter-hover);box-shadow:inset 0 0 0 2px var(--accent-primary)}
+.apex-sp__gutter:hover,.apex-sp[data-dragging="true"] .apex-sp__gutter:active{background:var(--apex-splitter-gutter-hover)}
+.apex-sp__gutter:focus-visible{outline:none;background:var(--apex-splitter-gutter-hover);box-shadow:inset 0 0 0 2px var(--accent-primary)}
 /* the grip is a short bar across the gutter, in whichever axis it divides */
 .apex-sp__grip{background:var(--border-strong);border-radius:var(--r-full);pointer-events:none}
 .apex-sp[data-layout="horizontal"]>.apex-sp__gutter>.apex-sp__grip{inline-size:2px;block-size:26px}
@@ -2303,56 +2303,56 @@ border:0;padding:0;position:relative;transition:background var(--dur-fast);touch
 .apex-sp__gutter:hover .apex-sp__grip{background:var(--accent-primary)}
 
 /* ─── scroll area ──────────────────────────────────────── */
-.apex-sa{--sa-size:8px;--sa-track:transparent;--sa-thumb:var(--border-strong);--sa-thumb-hover:var(--fg-subtle);--sa-radius:var(--r-full);--sa-pad:0px;--sa-fade:28px;
-position:relative;min-width:0;inline-size:var(--sa-w,auto);font-family:var(--font-sans)}
-.apex-sa__viewport{block-size:var(--sa-h,auto);max-block-size:var(--sa-max-h,none);overflow:auto;outline:none;
+.apex-sa{--apex-scroll-size:8px;--apex-scroll-track:transparent;--apex-scroll-thumb:var(--border-strong);--apex-scroll-thumb-hover:var(--fg-subtle);--apex-scroll-radius:var(--r-full);--apex-scroll-pad:0px;--apex-scroll-fade:28px;
+position:relative;min-width:0;inline-size:var(--apex-scroll-w,auto);font-family:var(--font-sans)}
+.apex-sa__viewport{block-size:var(--apex-scroll-h,auto);max-block-size:var(--apex-scroll-max-h,none);overflow:auto;outline:none;
 scrollbar-width:none;-ms-overflow-style:none}
 .apex-sa__viewport::-webkit-scrollbar{display:none}
 .apex-sa__viewport:focus-visible{box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--accent-primary) 45%,transparent);border-radius:var(--r-sm)}
-.apex-sa__content{padding:var(--sa-pad);min-inline-size:min-content}
+.apex-sa__content{padding:var(--apex-scroll-pad);min-inline-size:min-content}
 
 /* the bars sit over the viewport, so they never take layout space */
-.apex-sa__bar{position:absolute;background:var(--sa-track);border-radius:var(--sa-radius);opacity:1;transition:opacity var(--dur-mid);z-index:2;touch-action:none}
-.apex-sa__bar[data-axis="y"]{inset-block:2px;inset-inline-end:2px;inline-size:var(--sa-size)}
-.apex-sa__bar[data-axis="x"]{inset-inline:2px;inset-block-end:2px;block-size:var(--sa-size)}
+.apex-sa__bar{position:absolute;background:var(--apex-scroll-track);border-radius:var(--apex-scroll-radius);opacity:1;transition:opacity var(--dur-mid);z-index:2;touch-action:none}
+.apex-sa__bar[data-axis="y"]{inset-block:2px;inset-inline-end:2px;inline-size:var(--apex-scroll-size)}
+.apex-sa__bar[data-axis="x"]{inset-inline:2px;inset-block-end:2px;block-size:var(--apex-scroll-size)}
 /* with both axes present each bar stops short of the other, leaving the corner clear */
-.apex-sa[data-both="true"] .apex-sa__bar[data-axis="y"]{inset-block-end:calc(var(--sa-size) + 4px)}
-.apex-sa[data-both="true"] .apex-sa__bar[data-axis="x"]{inset-inline-end:calc(var(--sa-size) + 4px)}
+.apex-sa[data-both="true"] .apex-sa__bar[data-axis="y"]{inset-block-end:calc(var(--apex-scroll-size) + 4px)}
+.apex-sa[data-both="true"] .apex-sa__bar[data-axis="x"]{inset-inline-end:calc(var(--apex-scroll-size) + 4px)}
 .apex-sa[data-bars="false"] .apex-sa__bar{opacity:0;pointer-events:none}
 .apex-sa[data-variant="hover"] .apex-sa__bar{opacity:0}
 .apex-sa[data-variant="hover"]:hover .apex-sa__bar,.apex-sa[data-variant="hover"]:focus-within .apex-sa__bar,.apex-sa[data-variant="hover"][data-dragging="true"] .apex-sa__bar{opacity:1}
-.apex-sa__thumb{position:absolute;inset-inline:0;inset-block-start:0;display:block;background:var(--sa-thumb);border-radius:var(--sa-radius);cursor:default;transition:background var(--dur-fast)}
+.apex-sa__thumb{position:absolute;inset-inline:0;inset-block-start:0;display:block;background:var(--apex-scroll-thumb);border-radius:var(--apex-scroll-radius);cursor:default;transition:background var(--dur-fast)}
 .apex-sa__bar[data-axis="x"] .apex-sa__thumb{inset-block:0;inset-inline-start:0;inset-inline-end:auto}
-.apex-sa__thumb:hover,.apex-sa[data-dragging="true"] .apex-sa__thumb{background:var(--sa-thumb-hover)}
+.apex-sa__thumb:hover,.apex-sa[data-dragging="true"] .apex-sa__thumb{background:var(--apex-scroll-thumb-hover)}
 
 /* Edge fades. Composed from four gradients so a corner can fade on both axes; each
    one collapses to a no-op when that edge is not scrollable. */
 .apex-sa[data-mask="true"] .apex-sa__viewport{
-  --sa-m-top:0px;--sa-m-bottom:0px;--sa-m-left:0px;--sa-m-right:0px;
-  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--sa-m-top)),linear-gradient(to top,transparent 0,#000 var(--sa-m-bottom)),linear-gradient(to right,transparent 0,#000 var(--sa-m-left)),linear-gradient(to left,transparent 0,#000 var(--sa-m-right));
-  mask-image:linear-gradient(to bottom,transparent 0,#000 var(--sa-m-top)),linear-gradient(to top,transparent 0,#000 var(--sa-m-bottom)),linear-gradient(to right,transparent 0,#000 var(--sa-m-left)),linear-gradient(to left,transparent 0,#000 var(--sa-m-right));
+  --apex-scroll-m-top:0px;--apex-scroll-m-bottom:0px;--apex-scroll-m-left:0px;--apex-scroll-m-right:0px;
+  -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 var(--apex-scroll-m-top)),linear-gradient(to top,transparent 0,#000 var(--apex-scroll-m-bottom)),linear-gradient(to right,transparent 0,#000 var(--apex-scroll-m-left)),linear-gradient(to left,transparent 0,#000 var(--apex-scroll-m-right));
+  mask-image:linear-gradient(to bottom,transparent 0,#000 var(--apex-scroll-m-top)),linear-gradient(to top,transparent 0,#000 var(--apex-scroll-m-bottom)),linear-gradient(to right,transparent 0,#000 var(--apex-scroll-m-left)),linear-gradient(to left,transparent 0,#000 var(--apex-scroll-m-right));
   -webkit-mask-composite:source-in;mask-composite:intersect}
-.apex-sa[data-mask="true"][data-fade-top="true"] .apex-sa__viewport{--sa-m-top:var(--sa-fade)}
-.apex-sa[data-mask="true"][data-fade-bottom="true"] .apex-sa__viewport{--sa-m-bottom:var(--sa-fade)}
-.apex-sa[data-mask="true"][data-fade-left="true"] .apex-sa__viewport{--sa-m-left:var(--sa-fade)}
-.apex-sa[data-mask="true"][data-fade-right="true"] .apex-sa__viewport{--sa-m-right:var(--sa-fade)}
+.apex-sa[data-mask="true"][data-fade-top="true"] .apex-sa__viewport{--apex-scroll-m-top:var(--apex-scroll-fade)}
+.apex-sa[data-mask="true"][data-fade-bottom="true"] .apex-sa__viewport{--apex-scroll-m-bottom:var(--apex-scroll-fade)}
+.apex-sa[data-mask="true"][data-fade-left="true"] .apex-sa__viewport{--apex-scroll-m-left:var(--apex-scroll-fade)}
+.apex-sa[data-mask="true"][data-fade-right="true"] .apex-sa__viewport{--apex-scroll-m-right:var(--apex-scroll-fade)}
 
 /* ─── panel ────────────────────────────────────────────── */
-.apex-pn{--pn-border:var(--border-subtle);--pn-radius:var(--r-lg);--pn-pad:18px;--pn-bg:var(--bg-surface);
---pn-head-bg:var(--bg-surface);--pn-head-fg:var(--fg-default);--pn-fs:16px;
-display:flex;flex-direction:column;min-width:0;background:var(--pn-bg);border-radius:var(--pn-radius);
+.apex-pn{--apex-panel-border:var(--border-subtle);--apex-panel-radius:var(--r-lg);--apex-panel-pad:18px;--apex-panel-bg:var(--bg-surface);
+--apex-panel-head-bg:var(--bg-surface);--apex-panel-head-fg:var(--fg-default);--apex-panel-fs:16px;
+display:flex;flex-direction:column;min-width:0;background:var(--apex-panel-bg);border-radius:var(--apex-panel-radius);
 font-family:var(--font-sans);color:var(--fg-default);overflow:hidden}
-.apex-pn[data-size="sm"]{--pn-pad:13px;--pn-fs:14.5px}
-.apex-pn[data-size="lg"]{--pn-pad:24px;--pn-fs:18px}
-.apex-pn[data-bordered="true"]{border:1px solid var(--pn-border)}
+.apex-pn[data-size="sm"]{--apex-panel-pad:13px;--apex-panel-fs:14.5px}
+.apex-pn[data-size="lg"]{--apex-panel-pad:24px;--apex-panel-fs:18px}
+.apex-pn[data-bordered="true"]{border:1px solid var(--apex-panel-border)}
 .apex-pn[data-shadow="sm"]{box-shadow:var(--shadow-xs)}
 .apex-pn[data-shadow="md"]{box-shadow:var(--shadow-sm)}
 
-.apex-pn__head{display:flex;align-items:center;gap:11px;padding:calc(var(--pn-pad) * 0.75) var(--pn-pad);background:var(--pn-head-bg);color:var(--pn-head-fg);border-block-end:1px solid var(--pn-border)}
+.apex-pn__head{display:flex;align-items:center;gap:11px;padding:calc(var(--apex-panel-pad) * 0.75) var(--apex-panel-pad);background:var(--apex-panel-head-bg);color:var(--apex-panel-head-fg);border-block-end:1px solid var(--apex-panel-border)}
 .apex-pn[data-flush="true"] .apex-pn__head{border-block-end-color:transparent}
 .apex-pn[data-collapsed="true"] .apex-pn__head{border-block-end-color:transparent}
 .apex-pn__titles{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 auto}
-.apex-pn__title{margin:0;font-size:var(--pn-fs);font-weight:600;letter-spacing:-.02em}
+.apex-pn__title{margin:0;font-size:var(--apex-panel-fs);font-weight:600;letter-spacing:-.02em}
 .apex-pn__sub{margin:0;font-size:12.5px;color:var(--fg-subtle);line-height:1.45}
 .apex-pn__icon{color:var(--fg-subtle);flex:0 0 auto}
 .apex-pn__actions{display:flex;align-items:center;gap:6px;flex:0 0 auto;margin-inline-start:auto}
@@ -2365,26 +2365,26 @@ font-family:var(--font-sans);color:var(--fg-default);overflow:hidden}
 .apex-pn__toggle [data-pn-rotate]{transition:transform var(--dur-mid) var(--ease-out)}
 .apex-pn__toggle[aria-expanded="true"] [data-pn-rotate]{transform:rotate(180deg)}
 
-.apex-pn__body{padding:var(--pn-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0;flex:1 1 auto}
+.apex-pn__body{padding:var(--apex-panel-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0;flex:1 1 auto}
 .apex-pn__body>p:first-child{margin-block-start:0}
 .apex-pn__body>p:last-child{margin-block-end:0}
-.apex-pn__foot{padding:calc(var(--pn-pad) * 0.75) var(--pn-pad);border-block-start:1px solid var(--pn-border);background:var(--pn-head-bg);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.apex-pn__foot{padding:calc(var(--apex-panel-pad) * 0.75) var(--apex-panel-pad);border-block-start:1px solid var(--apex-panel-border);background:var(--apex-panel-head-bg);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
 /* ─── fieldset ─────────────────────────────────────────── */
-.apex-fs{--fs-border:var(--border-default);--fs-radius:var(--r-md);--fs-pad:16px;--fs-bg:transparent;
---fs-legend-bg:var(--bg-surface);--fs-legend-fg:var(--fg-default);--fs-fs:14px;
-margin:0;padding:0 var(--fs-pad) var(--fs-pad);border:1px solid var(--fs-border);border-radius:var(--fs-radius);
-background:var(--fs-bg);font-family:var(--font-sans);color:var(--fg-default);min-width:0}
-.apex-fs[data-size="sm"]{--fs-pad:12px;--fs-fs:13px}
-.apex-fs[data-size="lg"]{--fs-pad:22px;--fs-fs:15px}
+.apex-fs{--apex-fieldset-border:var(--border-default);--apex-fieldset-radius:var(--r-md);--apex-fieldset-pad:16px;--apex-fieldset-bg:transparent;
+--apex-fieldset-legend-bg:var(--bg-surface);--apex-fieldset-legend-fg:var(--fg-default);--apex-fieldset-fs:14px;
+margin:0;padding:0 var(--apex-fieldset-pad) var(--apex-fieldset-pad);border:1px solid var(--apex-fieldset-border);border-radius:var(--apex-fieldset-radius);
+background:var(--apex-fieldset-bg);font-family:var(--font-sans);color:var(--fg-default);min-width:0}
+.apex-fs[data-size="sm"]{--apex-fieldset-pad:12px;--apex-fieldset-fs:13px}
+.apex-fs[data-size="lg"]{--apex-fieldset-pad:22px;--apex-fieldset-fs:15px}
 .apex-fs[data-bordered="false"]{border-color:transparent;padding-inline:0}
 /* a collapsed fieldset keeps its legend but drops the body's share of the padding */
 .apex-fs[data-collapsed="true"]{padding-block-end:0}
 
-.apex-fs__legend{padding:0;margin-inline:calc(-1 * var(--fs-pad) + 8px);max-inline-size:none}
+.apex-fs__legend{padding:0;margin-inline:calc(-1 * var(--apex-fieldset-pad) + 8px);max-inline-size:none}
 .apex-fs[data-align="center"] .apex-fs__legend{margin-inline:auto}
 .apex-fs[data-align="end"] .apex-fs__legend{margin-inline-start:auto;margin-inline-end:8px}
-.apex-fs__label{display:inline-flex;align-items:center;gap:7px;padding:2px 8px;border:0;background:var(--fs-legend-bg);color:var(--fs-legend-fg);font:inherit;font-size:var(--fs-fs);font-weight:600;letter-spacing:-.005em;border-radius:var(--r-sm)}
+.apex-fs__label{display:inline-flex;align-items:center;gap:7px;padding:2px 8px;border:0;background:var(--apex-fieldset-legend-bg);color:var(--apex-fieldset-legend-fg);font:inherit;font-size:var(--apex-fieldset-fs);font-weight:600;letter-spacing:-.005em;border-radius:var(--r-sm)}
 button.apex-fs__label{cursor:pointer;transition:color var(--dur-fast)}
 button.apex-fs__label:hover{color:var(--accent-primary)}
 button.apex-fs__label:focus-visible{outline:none;box-shadow:var(--focus-ring)}
@@ -2395,7 +2395,7 @@ button.apex-fs__label:hover .apex-fs__toggle{color:inherit}
 .apex-fs__toggle [data-fs-rotate]{transition:transform var(--dur-mid) var(--ease-out)}
 .apex-fs__label[aria-expanded="true"] .apex-fs__toggle [data-fs-rotate]{transform:rotate(90deg)}
 .apex-fs__icon{color:var(--fg-subtle)}
-.apex-fs__body{padding-block-start:var(--fs-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0}
+.apex-fs__body{padding-block-start:var(--apex-fieldset-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0}
 .apex-fs__body>p:first-child{margin-block-start:0}
 .apex-fs__body>p:last-child{margin-block-end:0}
 
@@ -2448,10 +2448,10 @@ box-shadow:0 0 0 2px var(--av-ring)}
 .apex-avg>*:hover{z-index:2}
 
 /* ─── card ─────────────────────────────────────────────── */
-.apex-cd{--cd-radius:var(--r-lg);--cd-pad:18px;--cd-bg:var(--bg-surface);--cd-border:var(--border-subtle);--cd-media-h:auto;
-display:flex;flex-direction:column;min-width:0;background:var(--cd-bg);border-radius:var(--cd-radius);
+.apex-cd{--apex-card-radius:var(--r-lg);--apex-card-pad:18px;--apex-card-bg:var(--bg-surface);--apex-card-border:var(--border-subtle);--apex-card-media-h:auto;
+display:flex;flex-direction:column;min-width:0;background:var(--apex-card-bg);border-radius:var(--apex-card-radius);
 font-family:var(--font-sans);color:var(--fg-default);text-align:start;overflow:hidden;text-decoration:none}
-.apex-cd[data-bordered="true"]{border:1px solid var(--cd-border)}
+.apex-cd[data-bordered="true"]{border:1px solid var(--apex-card-border)}
 .apex-cd[data-shadow="none"]{box-shadow:none}
 .apex-cd[data-shadow="sm"]{box-shadow:var(--shadow-xs)}
 .apex-cd[data-shadow="md"]{box-shadow:var(--shadow-sm)}
@@ -2461,44 +2461,44 @@ button.apex-cd,a.apex-cd{cursor:pointer;font:inherit;padding:0;appearance:none}
 .apex-cd[data-hoverable="true"]:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--border-default)}
 .apex-cd:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-cd__media{position:relative;line-height:0}
-.apex-cd__media img{inline-size:100%;block-size:var(--cd-media-h);max-block-size:none;object-fit:cover;display:block}
-.apex-cd__head{padding:var(--cd-pad) var(--cd-pad) 0}
+.apex-cd__media img{inline-size:100%;block-size:var(--apex-card-media-h);max-block-size:none;object-fit:cover;display:block}
+.apex-cd__head{padding:var(--apex-card-pad) var(--apex-card-pad) 0}
 .apex-cd__title{margin:0;font-size:17px;font-weight:600;letter-spacing:-.02em}
 .apex-cd__sub{margin:4px 0 0;font-size:13px;color:var(--fg-subtle);line-height:1.5}
-.apex-cd__body{padding:var(--cd-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0;flex:1 1 auto}
+.apex-cd__body{padding:var(--apex-card-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0;flex:1 1 auto}
 .apex-cd__head+.apex-cd__body{padding-block-start:14px}
 .apex-cd__body>p:first-child{margin-block-start:0}
 .apex-cd__body>p:last-child{margin-block-end:0}
-.apex-cd__foot{padding:0 var(--cd-pad) var(--cd-pad);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.apex-cd__foot{padding:0 var(--apex-card-pad) var(--apex-card-pad);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .apex-cd[data-horizontal="true"]{flex-direction:row;align-items:stretch}
 .apex-cd[data-horizontal="true"] .apex-cd__media{flex:0 0 38%;max-inline-size:220px}
 .apex-cd[data-horizontal="true"] .apex-cd__media img{block-size:100%}
 .apex-cd[data-horizontal="true"]>:not(.apex-cd__media){flex:1 1 auto}
 
 /* ─── accordion ────────────────────────────────────────── */
-.apex-ac{--ac-border:var(--border-default);--ac-radius:var(--r-md);--ac-head-bg:var(--bg-surface);--ac-head-fg:var(--fg-default);
---ac-active-bg:var(--bg-subtle);--ac-active-fg:var(--fg-default);--ac-body-bg:var(--bg-surface);--ac-gap:0px;
---ac-pad-y:13px;--ac-pad-x:16px;--ac-fs:14.5px;
-display:flex;flex-direction:column;gap:var(--ac-gap);font-family:var(--font-sans);min-width:0}
-.apex-ac[data-size="sm"]{--ac-pad-y:10px;--ac-pad-x:13px;--ac-fs:13.5px}
-.apex-ac[data-size="lg"]{--ac-pad-y:16px;--ac-pad-x:20px;--ac-fs:15.5px}
+.apex-ac{--apex-accordion-border:var(--border-default);--apex-accordion-radius:var(--r-md);--apex-accordion-head-bg:var(--bg-surface);--apex-accordion-head-fg:var(--fg-default);
+--apex-accordion-active-bg:var(--bg-subtle);--apex-accordion-active-fg:var(--fg-default);--apex-accordion-body-bg:var(--bg-surface);--apex-accordion-gap:0px;
+--apex-accordion-pad-y:13px;--apex-accordion-pad-x:16px;--apex-accordion-fs:14.5px;
+display:flex;flex-direction:column;gap:var(--apex-accordion-gap);font-family:var(--font-sans);min-width:0}
+.apex-ac[data-size="sm"]{--apex-accordion-pad-y:10px;--apex-accordion-pad-x:13px;--apex-accordion-fs:13.5px}
+.apex-ac[data-size="lg"]{--apex-accordion-pad-y:16px;--apex-accordion-pad-x:20px;--apex-accordion-fs:15.5px}
 
-.apex-ac__panel{min-width:0;background:var(--ac-body-bg)}
+.apex-ac__panel{min-width:0;background:var(--apex-accordion-body-bg)}
 /* joined stack: one border round the group, hairlines between panels */
-.apex-ac[data-bordered="true"][data-separated="false"] .apex-ac__panel{border:1px solid var(--ac-border);border-block-end:0}
-.apex-ac[data-bordered="true"][data-separated="false"] .apex-ac__panel:last-child{border-block-end:1px solid var(--ac-border)}
-.apex-ac[data-bordered="true"][data-separated="false"] .apex-ac__panel:first-child{border-start-start-radius:var(--ac-radius);border-start-end-radius:var(--ac-radius)}
-.apex-ac[data-bordered="true"][data-separated="false"] .apex-ac__panel:last-child{border-end-start-radius:var(--ac-radius);border-end-end-radius:var(--ac-radius)}
+.apex-ac[data-bordered="true"][data-separated="false"] .apex-ac__panel{border:1px solid var(--apex-accordion-border);border-block-end:0}
+.apex-ac[data-bordered="true"][data-separated="false"] .apex-ac__panel:last-child{border-block-end:1px solid var(--apex-accordion-border)}
+.apex-ac[data-bordered="true"][data-separated="false"] .apex-ac__panel:first-child{border-start-start-radius:var(--apex-accordion-radius);border-start-end-radius:var(--apex-accordion-radius)}
+.apex-ac[data-bordered="true"][data-separated="false"] .apex-ac__panel:last-child{border-end-start-radius:var(--apex-accordion-radius);border-end-end-radius:var(--apex-accordion-radius)}
 /* separated: each panel is its own card */
-.apex-ac[data-separated="true"] .apex-ac__panel{border:1px solid var(--ac-border);border-radius:var(--ac-radius);overflow:hidden}
-.apex-ac[data-bordered="false"] .apex-ac__panel{border:0;border-block-end:1px solid var(--ac-border)}
+.apex-ac[data-separated="true"] .apex-ac__panel{border:1px solid var(--apex-accordion-border);border-radius:var(--apex-accordion-radius);overflow:hidden}
+.apex-ac[data-bordered="false"] .apex-ac__panel{border:0;border-block-end:1px solid var(--apex-accordion-border)}
 .apex-ac[data-bordered="false"] .apex-ac__panel:last-child{border-block-end:0}
 
 .apex-ac__heading{margin:0;font:inherit}
-.apex-ac__header{display:flex;align-items:center;gap:11px;inline-size:100%;padding:var(--ac-pad-y) var(--ac-pad-x);border:0;background:var(--ac-head-bg);color:var(--ac-head-fg);font:inherit;font-size:var(--ac-fs);font-weight:600;letter-spacing:-.005em;text-align:start;cursor:pointer;transition:background var(--dur-fast),color var(--dur-fast)}
-.apex-ac__header:hover:not(:disabled){background:var(--ac-active-bg)}
+.apex-ac__header{display:flex;align-items:center;gap:11px;inline-size:100%;padding:var(--apex-accordion-pad-y) var(--apex-accordion-pad-x);border:0;background:var(--apex-accordion-head-bg);color:var(--apex-accordion-head-fg);font:inherit;font-size:var(--apex-accordion-fs);font-weight:600;letter-spacing:-.005em;text-align:start;cursor:pointer;transition:background var(--dur-fast),color var(--dur-fast)}
+.apex-ac__header:hover:not(:disabled){background:var(--apex-accordion-active-bg)}
 .apex-ac__header:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--accent-primary)}
-.apex-ac__panel[data-open="true"] .apex-ac__header{background:var(--ac-active-bg);color:var(--ac-active-fg)}
+.apex-ac__panel[data-open="true"] .apex-ac__header{background:var(--apex-accordion-active-bg);color:var(--apex-accordion-active-fg)}
 .apex-ac__panel[data-disabled="true"]{opacity:.55}
 .apex-ac__panel[data-disabled="true"] .apex-ac__header{cursor:not-allowed}
 .apex-ac__title{flex:1 1 auto;min-width:0}
@@ -2513,9 +2513,9 @@ display:flex;flex-direction:column;gap:var(--ac-gap);font-family:var(--font-sans
 .apex-ac__toggle [data-ac-rotate]{transition:transform var(--dur-mid) var(--ease-out)}
 .apex-ac__header[data-p="active"] .apex-ac__toggle [data-ac-rotate]{transform:rotate(180deg)}
 
-.apex-ac__body{background:var(--ac-body-bg);border-block-start:1px solid transparent}
-.apex-ac__panel[data-open="true"] .apex-ac__body{border-block-start-color:var(--ac-border)}
-.apex-ac__inner{padding:var(--ac-pad-y) var(--ac-pad-x);font-size:14px;line-height:1.6;color:var(--fg-muted)}
+.apex-ac__body{background:var(--apex-accordion-body-bg);border-block-start:1px solid transparent}
+.apex-ac__panel[data-open="true"] .apex-ac__body{border-block-start-color:var(--apex-accordion-border)}
+.apex-ac__inner{padding:var(--apex-accordion-pad-y) var(--apex-accordion-pad-x);font-size:14px;line-height:1.6;color:var(--fg-muted)}
 .apex-ac__inner>p:first-child{margin-block-start:0}
 .apex-ac__inner>p:last-child{margin-block-end:0}
 

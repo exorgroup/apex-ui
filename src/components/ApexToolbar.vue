@@ -31,12 +31,12 @@ const props = withDefaults(defineProps<{
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (props.gap) s['--tbar-gap'] = props.gap;
-  if (props.background) s['--tbar-bg'] = props.background;
-  if (props.borderColor) s['--tbar-border'] = props.borderColor;
-  if (props.color) s['--tbar-fg'] = props.color;
-  if (props.radius) s['--tbar-radius'] = props.radius;
-  if (props.padding) s['--tbar-pad'] = props.padding;
+  if (props.gap) s['--apex-toolbar-gap'] = props.gap;
+  if (props.background) s['--apex-toolbar-bg'] = props.background;
+  if (props.borderColor) s['--apex-toolbar-border'] = props.borderColor;
+  if (props.color) s['--apex-toolbar-fg'] = props.color;
+  if (props.radius) s['--apex-toolbar-radius'] = props.radius;
+  if (props.padding) s['--apex-toolbar-pad'] = props.padding;
   return s;
 });
 </script>

@@ -185,17 +185,17 @@ onBeforeUnmount(() => { ro?.disconnect(); ro = null; });
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {
-    '--tabs-pos': bar.value.pos + 'px',
-    '--tabs-size': bar.value.size + 'px',
+    '--apex-tabs-pos': bar.value.pos + 'px',
+    '--apex-tabs-size': bar.value.size + 'px',
   };
-  if (props.activeColor) s['--tabs-active'] = props.activeColor;
-  if (props.indicatorColor) s['--tabs-indicator'] = props.indicatorColor;
-  if (props.tabColor) s['--tabs-fg'] = props.tabColor;
-  if (props.stripBackground) s['--tabs-strip-bg'] = props.stripBackground;
-  if (props.borderColor) s['--tabs-border'] = props.borderColor;
-  if (props.radius) s['--tabs-radius'] = props.radius;
-  if (props.padding) s['--tabs-pad'] = props.padding;
-  if (props.stripWidth) s['--tabs-strip-w'] = props.stripWidth;
+  if (props.activeColor) s['--apex-tabs-active'] = props.activeColor;
+  if (props.indicatorColor) s['--apex-tabs-indicator'] = props.indicatorColor;
+  if (props.tabColor) s['--apex-tabs-fg'] = props.tabColor;
+  if (props.stripBackground) s['--apex-tabs-strip-bg'] = props.stripBackground;
+  if (props.borderColor) s['--apex-tabs-border'] = props.borderColor;
+  if (props.radius) s['--apex-tabs-radius'] = props.radius;
+  if (props.padding) s['--apex-tabs-pad'] = props.padding;
+  if (props.stripWidth) s['--apex-tabs-strip-w'] = props.stripWidth;
   return s;
 });
 

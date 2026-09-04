@@ -51,12 +51,12 @@ function toggle() {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (props.radius) s['--fs-radius'] = props.radius;
-  if (props.padding) s['--fs-pad'] = props.padding;
-  if (props.background) s['--fs-bg'] = props.background;
-  if (props.borderColor) s['--fs-border'] = props.borderColor;
-  if (props.legendBackground) s['--fs-legend-bg'] = props.legendBackground;
-  if (props.legendColor) s['--fs-legend-fg'] = props.legendColor;
+  if (props.radius) s['--apex-fieldset-radius'] = props.radius;
+  if (props.padding) s['--apex-fieldset-pad'] = props.padding;
+  if (props.background) s['--apex-fieldset-bg'] = props.background;
+  if (props.borderColor) s['--apex-fieldset-border'] = props.borderColor;
+  if (props.legendBackground) s['--apex-fieldset-legend-bg'] = props.legendBackground;
+  if (props.legendColor) s['--apex-fieldset-legend-fg'] = props.legendColor;
   return s;
 });
 </script>

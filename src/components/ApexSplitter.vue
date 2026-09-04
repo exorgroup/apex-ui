@@ -196,12 +196,12 @@ function onKey(index: number, e: KeyboardEvent) {
 }
 
 const rootStyle = computed(() => {
-  const s: Record<string, string> = { '--sp-gutter': props.gutterSize + 'px' };
-  if (props.height) s['--sp-h'] = props.height;
-  if (props.radius) s['--sp-radius'] = props.radius;
-  if (props.borderColor) s['--sp-border'] = props.borderColor;
-  if (props.gutterColor) s['--sp-gutter-bg'] = props.gutterColor;
-  if (props.gutterHoverColor) s['--sp-gutter-hover'] = props.gutterHoverColor;
+  const s: Record<string, string> = { '--apex-splitter-gutter': props.gutterSize + 'px' };
+  if (props.height) s['--apex-splitter-h'] = props.height;
+  if (props.radius) s['--apex-splitter-radius'] = props.radius;
+  if (props.borderColor) s['--apex-splitter-border'] = props.borderColor;
+  if (props.gutterColor) s['--apex-splitter-gutter-bg'] = props.gutterColor;
+  if (props.gutterHoverColor) s['--apex-splitter-gutter-hover'] = props.gutterHoverColor;
   return s;
 });
 const panelStyle = (i: number) => ({ flexBasis: current.value[i] + '%' });

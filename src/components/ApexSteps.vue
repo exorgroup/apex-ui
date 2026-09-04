@@ -136,10 +136,10 @@ watch(() => props.steps, () => {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (props.activeColor) s['--st-active'] = props.activeColor;
-  if (props.completeColor) s['--st-complete'] = props.completeColor;
-  if (props.connectorColor) s['--st-line'] = props.connectorColor;
-  if (props.markerSize) s['--st-marker'] = props.markerSize + 'px';
+  if (props.activeColor) s['--apex-steps-active'] = props.activeColor;
+  if (props.completeColor) s['--apex-steps-complete'] = props.completeColor;
+  if (props.connectorColor) s['--apex-steps-line'] = props.connectorColor;
+  if (props.markerSize) s['--apex-steps-marker'] = props.markerSize + 'px';
   return s;
 });
 const stateOf = (step: StepsStep, i: number) =>

@@ -56,12 +56,12 @@ function toggle() {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (props.radius) s['--pn-radius'] = props.radius;
-  if (props.padding) s['--pn-pad'] = props.padding;
-  if (props.background) s['--pn-bg'] = props.background;
-  if (props.borderColor) s['--pn-border'] = props.borderColor;
-  if (props.headerBackground) s['--pn-head-bg'] = props.headerBackground;
-  if (props.headerColor) s['--pn-head-fg'] = props.headerColor;
+  if (props.radius) s['--apex-panel-radius'] = props.radius;
+  if (props.padding) s['--apex-panel-pad'] = props.padding;
+  if (props.background) s['--apex-panel-bg'] = props.background;
+  if (props.borderColor) s['--apex-panel-border'] = props.borderColor;
+  if (props.headerBackground) s['--apex-panel-head-bg'] = props.headerBackground;
+  if (props.headerColor) s['--apex-panel-head-fg'] = props.headerColor;
   return s;
 });
 const hasHeader = computed(() => !!(props.header || props.subheader || props.icon || props.toggleable));

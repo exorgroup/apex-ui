@@ -124,14 +124,14 @@ function onKey(i: number, panel: AccordionPanel, e: KeyboardEvent) {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (props.gap) s['--ac-gap'] = props.gap;
-  if (props.headerBackground) s['--ac-head-bg'] = props.headerBackground;
-  if (props.headerColor) s['--ac-head-fg'] = props.headerColor;
-  if (props.activeBackground) s['--ac-active-bg'] = props.activeBackground;
-  if (props.activeColor) s['--ac-active-fg'] = props.activeColor;
-  if (props.contentBackground) s['--ac-body-bg'] = props.contentBackground;
-  if (props.borderColor) s['--ac-border'] = props.borderColor;
-  if (props.radius) s['--ac-radius'] = props.radius;
+  if (props.gap) s['--apex-accordion-gap'] = props.gap;
+  if (props.headerBackground) s['--apex-accordion-head-bg'] = props.headerBackground;
+  if (props.headerColor) s['--apex-accordion-head-fg'] = props.headerColor;
+  if (props.activeBackground) s['--apex-accordion-active-bg'] = props.activeBackground;
+  if (props.activeColor) s['--apex-accordion-active-fg'] = props.activeColor;
+  if (props.contentBackground) s['--apex-accordion-body-bg'] = props.contentBackground;
+  if (props.borderColor) s['--apex-accordion-border'] = props.borderColor;
+  if (props.radius) s['--apex-accordion-radius'] = props.radius;
   return s;
 });
 const panelId = (panel: AccordionPanel) => `apex-ac-${String(panel.value).replace(/\W+/g, '-')}`;
