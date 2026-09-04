@@ -57,7 +57,9 @@ function pick() {
 
 <template>
   <!-- The label element IS the control, so the whole row is the hit target. -->
-  <label v-if="bare" class="apex-radio" :class="[{ 'apex-radio--card': card }, ui?.control]"
+  <!-- Inside a group this row is one option; standalone it is the control
+       itself. Same element, different role, so a different key. -->
+  <label v-if="bare" class="apex-radio" :class="[{ 'apex-radio--card': card }, ui?.option]"
          :data-checked="checked ? 'true' : 'false'"
          :data-disabled="(disabled || readonly) ? 'true' : 'false'">
     <input type="radio" :name="group" :value="String(value)" :checked="checked"

@@ -32,6 +32,18 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   cancel?: boolean;
   /** Text beside the stars, e.g. "3.5 of 5". */
   showValue?: boolean;
+
+  /* Appearance, over --apex-rating-*. `starSize` and `color` above belong to
+     the same set — they were here first, so they keep their names. */
+  /** An unfilled star. Worth setting whenever you set `color`. */
+  emptyColor?: string;
+  /** Space between stars. */
+  gap?: string;
+  /** The × button, at rest and under the pointer. */
+  cancelColor?: string;
+  cancelHoverColor?: string;
+  /** The "3 / 5" text beside the stars. */
+  valueColor?: string;
 }>(), {
   stars: 5, orientation: 'horizontal', shape: 'star', variant: 'filled',
   statusIcon: false,
@@ -55,10 +67,21 @@ const value = computed(() => Number(props.modelValue ?? 0));
 const shown = computed(() => hover.value ?? value.value);
 const fieldProps = computed(() => pickFieldProps(props as unknown as Record<string, unknown>));
 const locked = computed(() => props.disabled || props.readonly);
-const rootStyle = computed(() => ({
-  '--rating-size': (props.starSize ? props.starSize + 'px' : undefined),
-  '--rating-color': props.color,
-}));
+/** Appearance prop -> CSS variable. Only what is set. */
+const rootStyle = computed(() => {
+  const out: Record<string, string> = {};
+  const map: Array<[string | undefined, string]> = [
+    [props.starSize ? props.starSize + 'px' : undefined, '--apex-rating-size'],
+    [props.color, '--apex-rating-color'],
+    [props.emptyColor, '--apex-rating-empty'],
+    [props.gap, '--apex-rating-gap'],
+    [props.cancelColor, '--apex-rating-cancel-fg'],
+    [props.cancelHoverColor, '--apex-rating-cancel-hover-fg'],
+    [props.valueColor, '--apex-rating-value-fg'],
+  ];
+  map.forEach(([v, name]) => { if (v) out[name] = v; });
+  return Object.keys(out).length ? out : undefined;
+});
 
 /** 0 = empty, 1 = half, 2 = full. */
 function state(i: number) {
@@ -100,8 +123,8 @@ function onKey(e: KeyboardEvent) {
 
 <template>
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="true" :focused="focused"
-             v-slot="{ id, describedBy, invalid, size }">
-    <div class="apex-rating" :id="id" :data-size="size" :data-orientation="orientation"
+             v-slot="{ id, describedBy, invalid, size, ui }">
+    <div class="apex-rating" :class="ui.control" :id="id" :data-size="size" :data-orientation="orientation"
          :data-disabled="disabled ? 'true' : 'false'" :data-readonly="readonly ? 'true' : 'false'"
          :style="rootStyle" role="slider" :tabindex="locked ? -1 : 0"
          :aria-valuemin="0" :aria-valuemax="stars" :aria-valuenow="value"
@@ -110,17 +133,17 @@ function onKey(e: KeyboardEvent) {
          :aria-readonly="readonly || undefined"
          @keydown="onKey" @focus="focused = true" @blur="focused = false"
          @pointerleave="hover = null">
-      <button v-if="cancel && !locked" type="button" class="apex-rating__cancel" aria-label="Clear rating"
-              @click="commit(null)">
+      <button v-if="cancel && !locked" type="button" class="apex-rating__cancel" :class="ui.button"
+              aria-label="Clear rating" @click="commit(null)">
         <ApexIcon name="close" :size="16" />
       </button>
-      <span v-for="i in stars" :key="i" class="apex-rating__star" :data-state="state(i)"
+      <span v-for="i in stars" :key="i" class="apex-rating__star" :class="ui.option" :data-state="state(i)"
             :aria-hidden="true" @pointermove="hover = fromPointer(i, $event)"
             @click="commit(fromPointer(i, $event))">
-        <ApexIcon class="apex-rating__bg" :name="emptyGlyph" />
-        <span class="apex-rating__fill"><ApexIcon :name="glyph" :fill="solid" /></span>
+        <ApexIcon class="apex-rating__bg" :class="ui.range" :name="emptyGlyph" />
+        <span class="apex-rating__fill" :class="ui.fill"><ApexIcon :name="glyph" :fill="solid" /></span>
       </span>
-      <span v-if="showValue" class="apex-rating__value">{{ value }} / {{ stars }}</span>
+      <span v-if="showValue" class="apex-rating__value" :class="ui.value">{{ value }} / {{ stars }}</span>
     </div>
   </ApexField>
 </template>

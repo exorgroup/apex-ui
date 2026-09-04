@@ -279,24 +279,24 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-field[data-tone="danger"] .apex-listbox{border-color:var(--apex-field-danger)}
 
 /* ─── rating ───────────────────────────────────────────── */
-.apex-rating{--rating-size:26px;display:inline-flex;align-items:center;gap:3px;outline:none;border-radius:var(--r-sm);padding:2px}
-.apex-rating[data-size="sm"]{--rating-size:20px}
-.apex-rating[data-size="lg"]{--rating-size:32px}
+.apex-rating{--apex-rating-size:26px;display:inline-flex;align-items:center;gap:var(--apex-rating-gap,3px);outline:none;border-radius:var(--r-sm);padding:2px}
+.apex-rating[data-size="sm"]{--apex-rating-size:20px}
+.apex-rating[data-size="lg"]{--apex-rating-size:32px}
 .apex-rating[data-orientation="vertical"]{flex-direction:column}
 .apex-rating:focus-visible{box-shadow:var(--focus-ring)}
 .apex-rating[data-disabled="true"]{opacity:.5}
 .apex-rating[data-disabled="true"] .apex-rating__star,.apex-rating[data-readonly="true"] .apex-rating__star{cursor:default}
-.apex-rating__star{position:relative;display:block;inline-size:var(--rating-size);block-size:var(--rating-size);cursor:pointer;color:var(--border-strong)}
-.apex-rating__star .apex-icon{--apex-icon-size:var(--rating-size);--apex-icon-wght:300;display:block}
-.apex-rating__bg{color:var(--border-strong)}
-.apex-rating__fill{position:absolute;inset-block:0;inset-inline-start:0;inline-size:0;overflow:hidden;color:var(--rating-color,var(--accent-warning));transition:inline-size 110ms var(--ease-out)}
+.apex-rating__star{position:relative;display:block;inline-size:var(--apex-rating-size);block-size:var(--apex-rating-size);cursor:pointer;color:var(--apex-rating-empty,var(--border-strong))}
+.apex-rating__star .apex-icon{--apex-icon-size:var(--apex-rating-size);--apex-icon-wght:300;display:block}
+.apex-rating__bg{color:var(--apex-rating-empty,var(--border-strong))}
+.apex-rating__fill{position:absolute;inset-block:0;inset-inline-start:0;inline-size:0;overflow:hidden;color:var(--apex-rating-color,var(--accent-warning));transition:inline-size 110ms var(--ease-out)}
 .apex-rating[data-orientation="vertical"] .apex-rating__fill{transition:none}
 .apex-rating__star[data-state="1"] .apex-rating__fill{inline-size:50%}
 .apex-rating__star[data-state="2"] .apex-rating__fill{inline-size:100%}
-.apex-rating__star:hover .apex-rating__bg{color:var(--border-strong)}
-.apex-rating__cancel{display:grid;place-items:center;border:0;background:transparent;color:var(--fg-subtle);cursor:pointer;padding:3px;margin-inline-end:4px;border-radius:var(--r-sm)}
-.apex-rating__cancel:hover{color:var(--accent-danger);background:var(--bg-muted)}
-.apex-rating__value{margin-inline-start:8px;font-size:13px;font-weight:600;color:var(--fg-muted);font-family:var(--font-mono)}
+.apex-rating__star:hover .apex-rating__bg{color:var(--apex-rating-empty,var(--border-strong))}
+.apex-rating__cancel{display:grid;place-items:center;border:0;background:transparent;color:var(--apex-rating-cancel-fg,var(--fg-subtle));cursor:pointer;padding:3px;margin-inline-end:4px;border-radius:var(--r-sm)}
+.apex-rating__cancel:hover{color:var(--apex-rating-cancel-hover-fg,var(--accent-danger));background:var(--apex-rating-cancel-hover-bg,var(--bg-muted))}
+.apex-rating__value{margin-inline-start:8px;font-size:var(--apex-rating-value-fs,13px);font-weight:600;color:var(--apex-rating-value-fg,var(--fg-muted));font-family:var(--font-mono)}
 .apex-field[data-tone="danger"] .apex-rating__bg{color:var(--apex-field-danger)}
 
 /* ─── tree select ──────────────────────────────────────── */
@@ -321,34 +321,34 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-cb__box .apex-icon{color:var(--apex-cb-tick,#fff)}
 
 /* ─── segmented ────────────────────────────────────────── */
-.apex-seg{display:inline-flex;padding:3px;gap:2px;border:1px solid var(--border-default);border-radius:calc(var(--r-md) + 2px);background:var(--bg-subtle)}
+.apex-seg{display:inline-flex;padding:3px;gap:2px;border:1px solid var(--apex-seg-border,var(--border-default));border-radius:var(--apex-seg-radius,calc(var(--r-md) + 2px));background:var(--apex-seg-bg,var(--bg-subtle))}
 .apex-seg[data-block="true"]{display:flex;width:100%}
 .apex-seg[data-block="true"] .apex-seg__btn{flex:1 1 0}
-.apex-seg__btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;background:transparent;font:inherit;font-size:calc(var(--apex-ctl-fs) - .5px);font-weight:600;color:var(--fg-muted);padding-block:calc((var(--apex-ctl-h) - 22px) / 2 - 3px);padding-inline:18px;border-radius:var(--r-md);cursor:pointer;transition:all var(--dur-fast) var(--ease-out);white-space:nowrap}
-.apex-seg__btn:hover:not(:disabled){color:var(--fg-default)}
-.apex-seg__btn[aria-checked="true"]{background:var(--bg-surface);color:var(--accent-primary);box-shadow:var(--shadow-xs),0 0 0 1px color-mix(in srgb,var(--accent-primary) 20%,transparent)}
+.apex-seg__btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;background:transparent;font:inherit;font-size:calc(var(--apex-ctl-fs) - .5px);font-weight:600;color:var(--apex-seg-fg,var(--fg-muted));padding-block:calc((var(--apex-ctl-h) - 22px) / 2 - 3px);padding-inline:18px;border-radius:var(--apex-seg-btn-radius,var(--r-md));cursor:pointer;transition:all var(--dur-fast) var(--ease-out);white-space:nowrap}
+.apex-seg__btn:hover:not(:disabled){color:var(--apex-seg-hover-fg,var(--fg-default))}
+.apex-seg__btn[aria-checked="true"]{background:var(--apex-seg-on-bg,var(--bg-surface));color:var(--apex-seg-on-fg,var(--accent-primary));box-shadow:var(--shadow-xs),0 0 0 1px var(--apex-seg-on-ring,color-mix(in srgb,var(--accent-primary) 20%,transparent))}
 .apex-seg__btn:disabled{opacity:.5;cursor:not-allowed}
 .apex-seg__btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 
 /* ─── select button ────────────────────────────────────── */
 /* Wraps rather than clipping: the row is inline-level, so a narrow container caps
    its width, and with overflow:hidden a fourth option simply vanished. */
-.apex-sb{display:inline-flex;flex-wrap:wrap;max-inline-size:100%;border:1px solid var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);overflow:hidden}
+.apex-sb{display:inline-flex;flex-wrap:wrap;max-inline-size:100%;border:1px solid var(--apex-sb-border,var(--border-default));border-radius:var(--apex-sb-radius,var(--r-md));background:var(--apex-sb-bg,var(--bg-surface));overflow:hidden}
 .apex-sb__txt{min-inline-size:0}
 .apex-sb[data-block="true"]{display:flex;inline-size:100%}
 .apex-sb[data-block="true"] .apex-sb__btn{flex:1 1 0}
 .apex-sb[data-vertical="true"]{flex-direction:column;flex-wrap:nowrap}
 .apex-sb[data-detached="true"]{border:0;background:transparent;gap:8px;overflow:visible}
-.apex-sb[data-detached="true"] .apex-sb__btn{border:1px solid var(--border-default);border-radius:var(--r-md)}
-.apex-sb__btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;background:transparent;font:inherit;font-size:calc(var(--apex-ctl-fs) - .5px);font-weight:600;color:var(--sb-muted,var(--fg-muted));min-block-size:var(--apex-ctl-h);padding-inline:16px;cursor:pointer;white-space:nowrap;transition:background var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast)}
-.apex-sb:not([data-detached="true"]) .apex-sb__btn+.apex-sb__btn{border-inline-start:1px solid var(--border-default)}
-.apex-sb[data-vertical="true"]:not([data-detached="true"]) .apex-sb__btn+.apex-sb__btn{border-inline-start:0;border-block-start:1px solid var(--border-default)}
-.apex-sb__btn:hover:not(:disabled){background:var(--bg-muted);color:var(--fg-default)}
-.apex-sb__btn[data-on="true"]{background:var(--sb-color,var(--accent-primary));color:var(--sb-text,#fff)}
-.apex-sb__btn[data-on="true"]:hover:not(:disabled){background:var(--sb-color,var(--accent-primary-hover));color:var(--sb-text,#fff);filter:brightness(1.06)}
-.apex-sb[data-detached="true"] .apex-sb__btn[data-on="true"]{border-color:var(--sb-color,var(--accent-primary))}
+.apex-sb[data-detached="true"] .apex-sb__btn{border:1px solid var(--apex-sb-border,var(--border-default));border-radius:var(--apex-sb-radius,var(--r-md))}
+.apex-sb__btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;background:transparent;font:inherit;font-size:calc(var(--apex-ctl-fs) - .5px);font-weight:600;color:var(--apex-sb-muted,var(--fg-muted));min-block-size:var(--apex-ctl-h);padding-inline:16px;cursor:pointer;white-space:nowrap;transition:background var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast)}
+.apex-sb:not([data-detached="true"]) .apex-sb__btn+.apex-sb__btn{border-inline-start:1px solid var(--apex-sb-border,var(--border-default))}
+.apex-sb[data-vertical="true"]:not([data-detached="true"]) .apex-sb__btn+.apex-sb__btn{border-inline-start:0;border-block-start:1px solid var(--apex-sb-border,var(--border-default))}
+.apex-sb__btn:hover:not(:disabled){background:var(--apex-sb-hover-bg,var(--bg-muted));color:var(--apex-sb-hover-fg,var(--fg-default))}
+.apex-sb__btn[data-on="true"]{background:var(--apex-sb-color,var(--accent-primary));color:var(--apex-sb-text,#fff)}
+.apex-sb__btn[data-on="true"]:hover:not(:disabled){background:var(--apex-sb-color,var(--accent-primary-hover));color:var(--apex-sb-text,#fff);filter:brightness(1.06)}
+.apex-sb[data-detached="true"] .apex-sb__btn[data-on="true"]{border-color:var(--apex-sb-color,var(--accent-primary))}
 .apex-sb__btn:disabled{opacity:.45;cursor:not-allowed}
-.apex-sb__btn:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--accent-primary)}
+.apex-sb__btn:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--apex-sb-focus-ring,var(--accent-primary))}
 .apex-sb[data-icon-only="true"] .apex-sb__btn{padding-inline:0;inline-size:var(--apex-ctl-h)}
 .apex-sb__txt{display:flex;flex-direction:column;align-items:center;gap:1px}
 .apex-sb__help{font-size:11px;font-weight:500;opacity:.75}
@@ -383,28 +383,28 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-field[data-tone="danger"] .apex-slider__handle{border-color:var(--apex-field-danger)}
 
 /* ─── toggle button ────────────────────────────────────── */
-.apex-tb{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-block-size:var(--apex-ctl-h);padding-inline:18px;border:1px solid var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);font:inherit;font-size:calc(var(--apex-ctl-fs) - .5px);font-weight:600;color:var(--fg-muted);cursor:pointer;white-space:nowrap;transition:background var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast),box-shadow var(--dur-fast)}
+.apex-tb{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-block-size:var(--apex-ctl-h);padding-inline:18px;border:1px solid var(--apex-tb-border,var(--border-default));border-radius:var(--apex-tb-radius,var(--r-md));background:var(--apex-tb-bg,var(--bg-surface));font:inherit;font-size:calc(var(--apex-ctl-fs) - .5px);font-weight:600;color:var(--apex-tb-fg,var(--fg-muted));cursor:pointer;white-space:nowrap;transition:background var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast),box-shadow var(--dur-fast)}
 /* As a flex item of ApexField's column body, display:inline-flex is blockified to
    flex and stretched — so the button must opt out of the stretch to hug its label,
    which is what inline-flex was asking for. data-block still fills deliberately. */
 .apex-tb{align-self:flex-start}
 .apex-tb[data-block="true"]{display:flex;inline-size:100%;align-self:stretch}
-.apex-tb:hover:not(:disabled){border-color:var(--border-strong);color:var(--fg-default)}
-.apex-tb[data-on="true"]{background:var(--tb-on,var(--accent-primary));border-color:var(--tb-on,var(--accent-primary));color:var(--tb-on-text,#fff);box-shadow:var(--shadow-xs)}
-.apex-tb[data-on="true"]:hover:not(:disabled){filter:brightness(1.06);color:var(--tb-on-text,#fff)}
-.apex-tb[data-variant="outline"][data-on="true"]{background:transparent;color:var(--tb-on,var(--accent-primary));box-shadow:inset 0 0 0 1px var(--tb-on,var(--accent-primary))}
+.apex-tb:hover:not(:disabled){border-color:var(--apex-tb-hover-border,var(--border-strong));color:var(--apex-tb-hover-fg,var(--fg-default))}
+.apex-tb[data-on="true"]{background:var(--apex-tb-on,var(--accent-primary));border-color:var(--apex-tb-on,var(--accent-primary));color:var(--apex-tb-on-text,#fff);box-shadow:var(--shadow-xs)}
+.apex-tb[data-on="true"]:hover:not(:disabled){filter:brightness(1.06);color:var(--apex-tb-on-text,#fff)}
+.apex-tb[data-variant="outline"][data-on="true"]{background:transparent;color:var(--apex-tb-on,var(--accent-primary));box-shadow:inset 0 0 0 1px var(--apex-tb-on,var(--accent-primary))}
 .apex-tb:disabled{opacity:.5;cursor:not-allowed}
 .apex-tb:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-field[data-tone="danger"] .apex-tb{border-color:var(--apex-field-danger)}
 
 /* ─── switch ───────────────────────────────────────────── */
-.apex-switch{position:relative;inline-size:44px;block-size:25px;border:0;border-radius:var(--r-full);background:var(--border-strong);cursor:pointer;flex:0 0 auto;transition:background var(--dur-mid) var(--ease-out);padding:0}
+.apex-switch{position:relative;inline-size:44px;block-size:25px;border:0;border-radius:var(--r-full);background:var(--apex-switch-off-bg,var(--border-strong));cursor:pointer;flex:0 0 auto;transition:background var(--dur-mid) var(--ease-out);padding:0}
 .apex-switch[data-size="sm"]{inline-size:36px;block-size:21px}
 .apex-switch[data-size="lg"]{inline-size:52px;block-size:30px}
-.apex-switch[aria-checked="true"]{background:var(--accent-primary)}
+.apex-switch[aria-checked="true"]{background:var(--apex-switch-on-bg,var(--accent-primary))}
 .apex-switch:disabled{opacity:.5;cursor:not-allowed}
 .apex-switch:focus-visible{outline:none;box-shadow:var(--focus-ring)}
-.apex-switch i{position:absolute;inset-block-start:3px;inset-inline-start:3px;inline-size:19px;block-size:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:inset-inline-start var(--dur-mid) var(--ease-out)}
+.apex-switch i{position:absolute;inset-block-start:3px;inset-inline-start:3px;inline-size:19px;block-size:19px;border-radius:50%;background:var(--apex-switch-knob,#fff);box-shadow:0 1px 3px rgba(0,0,0,.3);transition:inset-inline-start var(--dur-mid) var(--ease-out)}
 .apex-switch[data-size="sm"] i{inline-size:15px;block-size:15px}
 .apex-switch[data-size="lg"] i{inline-size:24px;block-size:24px}
 .apex-switch[aria-checked="true"] i{inset-inline-start:calc(100% - 22px)}
@@ -423,31 +423,31 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
    toggling changes the text but never the width. */
 .apex-switch__text{display:grid;font-size:11px;font-weight:700;line-height:1;text-align:center}
 .apex-switch__on,.apex-switch__off{grid-area:1/1;transition:opacity var(--dur-fast)}
-.apex-switch__on{color:#fff}
+.apex-switch__on{color:var(--apex-switch-on-fg,#fff)}
 /* The off track is --border-strong, which flips with the theme — so does
    --fg-default, which is why it reads in both. White would not. */
-.apex-switch__off{color:var(--fg-default)}
+.apex-switch__off{color:var(--apex-switch-off-fg,var(--fg-default))}
 .apex-switch[data-on="false"] .apex-switch__on{opacity:0}
 .apex-switch[data-on="true"] .apex-switch__off{opacity:0}
 
 /* ─── radio group ──────────────────────────────────────── */
-.apex-radios{display:grid;gap:8px}
+.apex-radios{display:grid;gap:var(--apex-radios-gap,8px)}
 .apex-radios[data-inline="true"]{grid-auto-flow:column;grid-auto-columns:max-content;gap:18px}
 .apex-radios[data-cols]{grid-template-columns:repeat(var(--apex-radio-cols,2),minmax(0,1fr));grid-auto-flow:row}
-.apex-radio{display:flex;align-items:flex-start;gap:10px;padding:0;cursor:pointer;font-size:var(--apex-ctl-fs);color:var(--fg-default)}
-.apex-radio--card{padding:12px 14px;border:1px solid var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);transition:border-color var(--dur-fast),background var(--dur-fast)}
-.apex-radio--card:hover{border-color:var(--border-strong)}
-.apex-radio--card[data-checked="true"]{border-color:var(--accent-primary);background:color-mix(in srgb,var(--accent-primary) 5%,var(--bg-surface))}
-.apex-radio__dot{inline-size:18px;block-size:18px;border-radius:50%;border:1.5px solid var(--border-strong);flex:0 0 auto;display:grid;place-items:center;margin-block-start:1px;transition:border-color var(--dur-fast)}
-.apex-radio[data-checked="true"] .apex-radio__dot{border-color:var(--accent-primary);border-width:5px}
+.apex-radio{display:flex;align-items:flex-start;gap:var(--apex-radio-gap,10px);padding:0;cursor:pointer;font-size:var(--apex-ctl-fs);color:var(--apex-radio-fg,var(--fg-default))}
+.apex-radio--card{padding:12px 14px;border:1px solid var(--apex-radio-card-border,var(--border-default));border-radius:var(--apex-radio-card-radius,var(--r-md));background:var(--apex-radio-card-bg,var(--bg-surface));transition:border-color var(--dur-fast),background var(--dur-fast)}
+.apex-radio--card:hover{border-color:var(--apex-radio-card-hover-border,var(--border-strong))}
+.apex-radio--card[data-checked="true"]{border-color:var(--apex-radio-card-on-border,var(--accent-primary));background:var(--apex-radio-card-on-bg,color-mix(in srgb,var(--accent-primary) 5%,var(--bg-surface)))}
+.apex-radio__dot{inline-size:var(--apex-radio-size,18px);block-size:var(--apex-radio-size,18px);border-radius:50%;border:1.5px solid var(--apex-radio-border,var(--border-strong));flex:0 0 auto;display:grid;place-items:center;margin-block-start:1px;transition:border-color var(--dur-fast)}
+.apex-radio[data-checked="true"] .apex-radio__dot{border-color:var(--apex-radio-on,var(--accent-primary));border-width:var(--apex-radio-on-width,5px)}
 .apex-radio input{position:absolute;opacity:0;inline-size:1px;block-size:1px}
-.apex-radio input:focus-visible+.apex-radio__dot{box-shadow:var(--focus-ring)}
+.apex-radio input:focus-visible+.apex-radio__dot{box-shadow:var(--apex-radio-focus-ring,var(--focus-ring))}
 .apex-radio__txt{display:flex;flex-direction:column;gap:2px;min-width:0}
 /* Was an inline style on the element, which put it beyond the reach of both
    the ui classes and the variables. */
 .apex-radio__lead{display:inline-flex;align-items:center;gap:6px;font-weight:500}
 .apex-radio__img{inline-size:20px;block-size:20px;border-radius:var(--r-xs);object-fit:cover;flex:0 0 auto}
-.apex-radio__help{font-size:12.5px;color:var(--fg-subtle);line-height:1.45}
+.apex-radio__help{font-size:var(--apex-radio-help-fs,12.5px);color:var(--apex-radio-help-fg,var(--fg-subtle));line-height:1.45}
 .apex-radio[data-disabled="true"]{opacity:.5;cursor:not-allowed}
 
 /* ─── checkbox ─────────────────────────────────────────── */
@@ -467,10 +467,10 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-cb__help{font-size:12.5px;color:var(--apex-cb-help-fg,var(--fg-subtle));line-height:1.45}
 .apex-cb__img{inline-size:18px;block-size:18px;border-radius:3px;object-fit:cover}
 .apex-cb--before{flex-direction:row-reverse;justify-content:flex-end}
-.apex-checks{display:grid;gap:9px}
+.apex-checks{display:grid;gap:var(--apex-checks-gap,9px)}
 .apex-checks[data-inline="true"]{grid-auto-flow:column;grid-auto-columns:max-content;gap:18px}
 .apex-checks[data-cols]{grid-template-columns:repeat(var(--apex-check-cols,2),minmax(0,1fr));grid-auto-flow:row}
-.apex-checks__all{justify-self:start;display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-primary);cursor:pointer;padding:2px 0}
+.apex-checks__all{justify-self:start;display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--apex-checks-all-fg,var(--accent-primary));cursor:pointer;padding:2px 0}
 .apex-checks__all:hover{text-decoration:underline}
 
 /* ─── dialog ───────────────────────────────────────────── */

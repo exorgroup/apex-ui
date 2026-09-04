@@ -33,6 +33,15 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   textColor?: string;
   /** Unselected label colour. */
   mutedColor?: string;
+  /* The rest of the bar, over --apex-sb-*. Named `bar*` rather than
+     `background`/`radius`, which ApexFieldProps already defines for the field
+     box — one name cannot mean two things. */
+  barBackground?: string;
+  barBorderColor?: string;
+  barRadius?: string;
+  /** An unselected button under the pointer. */
+  hoverBackground?: string;
+  hoverColor?: string;
 }>(), { allowEmpty: true, statusIcon: false });
 
 const emit = defineEmits<{
@@ -48,11 +57,22 @@ const selected = computed<unknown[]>(() => {
   return props.modelValue == null ? [] : [props.modelValue];
 });
 const isOn = (o: ApexOption) => selected.value.includes(o.value);
-const rootStyle = computed(() => ({
-  '--sb-color': props.color,
-  '--sb-text': props.textColor,
-  '--sb-muted': props.mutedColor,
-}));
+/** Appearance prop -> CSS variable. Only what is set. */
+const rootStyle = computed(() => {
+  const out: Record<string, string> = {};
+  const map: Array<[string | undefined, string]> = [
+    [props.color, '--apex-sb-color'],
+    [props.textColor, '--apex-sb-text'],
+    [props.mutedColor, '--apex-sb-muted'],
+    [props.barBackground, '--apex-sb-bg'],
+    [props.barBorderColor, '--apex-sb-border'],
+    [props.barRadius, '--apex-sb-radius'],
+    [props.hoverBackground, '--apex-sb-hover-bg'],
+    [props.hoverColor, '--apex-sb-hover-fg'],
+  ];
+  map.forEach(([v, name]) => { if (v) out[name] = v; });
+  return Object.keys(out).length ? out : undefined;
+});
 
 function pick(o: ApexOption) {
   if (props.disabled || props.readonly || o.disabled) return;
@@ -75,13 +95,13 @@ function move(i: number, d: number) {
 </script>
 
 <template>
-  <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, size }">
-    <div class="apex-sb" :id="id" :style="rootStyle" :data-size="size" :data-block="block ? 'true' : 'false'"
+  <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, size, ui }">
+    <div class="apex-sb" :class="ui.control" :id="id" :style="rootStyle" :data-size="size" :data-block="block ? 'true' : 'false'"
          :data-vertical="vertical ? 'true' : 'false'" :data-detached="detached ? 'true' : 'false'"
          :data-icon-only="iconOnly ? 'true' : 'false'"
          :role="multiple ? 'group' : 'radiogroup'" :aria-describedby="describedBy"
          :aria-label="labelPlacement === 'hidden' ? label : undefined">
-      <button v-for="(o, i) in opts" :key="String(o.value)" ref="btns" type="button" class="apex-sb__btn"
+      <button v-for="(o, i) in opts" :key="String(o.value)" ref="btns" type="button" class="apex-sb__btn" :class="ui.option"
               :role="multiple ? undefined : 'radio'"
               :aria-checked="multiple ? undefined : isOn(o)"
               :aria-pressed="multiple ? isOn(o) : undefined"

@@ -5,6 +5,10 @@ import ApexRadioGroup from '../src/components/ApexRadioGroup.vue';
 import ApexCheckbox from '../src/components/ApexCheckbox.vue';
 import ApexCheckboxGroup from '../src/components/ApexCheckboxGroup.vue';
 import ApexSwitch from '../src/components/ApexSwitch.vue';
+import ApexRating from '../src/components/ApexRating.vue';
+import ApexSegmented from '../src/components/ApexSegmented.vue';
+import ApexSelectButton from '../src/components/ApexSelectButton.vue';
+import ApexToggleButton from '../src/components/ApexToggleButton.vue';
 
 const PLANS = [
   { value: 'free', label: 'Free', help: 'One event' },
@@ -186,5 +190,189 @@ describe('ApexSwitch — the labels that used to do nothing', () => {
     expect(w.find('.apex-switch__text').attributes('aria-hidden')).toBe('true');
     expect(w.find('button').attributes('role')).toBe('switch');
     expect(w.find('button').attributes('aria-checked')).toBe('true');
+  });
+});
+
+describe('ApexRating', () => {
+  const rate = (p: Record<string, unknown> = {}) =>
+    mount(ApexRating, { props: { modelValue: 0, label: 'Score', ...p } });
+
+  it('draws one star per `stars`, and fills up to the value', () => {
+    const w = rate({ modelValue: 3, stars: 5 });
+    const states = w.findAll('.apex-rating__star').map((s) => s.attributes('data-state'));
+    expect(states).toEqual(['2', '2', '2', '0', '0']);
+  });
+
+  it('allowHalf gives the boundary star the half state', () => {
+    const w = rate({ modelValue: 2.5, stars: 5, allowHalf: true });
+    expect(w.findAll('.apex-rating__star').map((s) => s.attributes('data-state')))
+      .toEqual(['2', '2', '1', '0', '0']);
+  });
+
+  it('arrow keys step by one, or by a half when allowHalf is on', async () => {
+    const w = rate({ modelValue: 2 });
+    await w.find('.apex-rating').trigger('keydown', { key: 'ArrowRight' });
+    expect(w.emitted('update:modelValue')![0]).toEqual([3]);
+
+    const h = rate({ modelValue: 2, allowHalf: true });
+    await h.find('.apex-rating').trigger('keydown', { key: 'ArrowRight' });
+    expect(h.emitted('update:modelValue')![0]).toEqual([2.5]);
+  });
+
+  it('End goes to the top, and cancel clears', async () => {
+    const w = rate({ modelValue: 1, stars: 5 });
+    await w.find('.apex-rating').trigger('keydown', { key: 'End' });
+    expect(w.emitted('update:modelValue')![0]).toEqual([5]);
+
+    const c = rate({ modelValue: 3, cancel: true });
+    await c.find('.apex-rating__cancel').trigger('click');
+    expect(c.emitted('update:modelValue')![0]).toEqual([null]);
+  });
+
+  it('readonly and disabled refuse input', async () => {
+    const w = rate({ modelValue: 2, readonly: true });
+    await w.findAll('.apex-rating__star')[4].trigger('click');
+    expect(w.emitted('update:modelValue')).toBeUndefined();
+  });
+
+  it('the appearance props reach the element as variables', () => {
+    const w = rate({ color: '#C24A06', emptyColor: '#333', starSize: 30, gap: '8px' });
+    const s = w.find('.apex-rating').attributes('style') || '';
+    expect(s).toContain('--apex-rating-color: #C24A06');
+    expect(s).toContain('--apex-rating-empty: #333');
+    expect(s).toContain('--apex-rating-size: 30px');
+    expect(s).toContain('--apex-rating-gap: 8px');
+  });
+});
+
+const VIEWS = [{ value: 'day', label: 'Day' }, { value: 'week', label: 'Week' }, { value: 'month', label: 'Month' }];
+
+describe('ApexSegmented', () => {
+  const seg = (p: Record<string, unknown> = {}) =>
+    mount(ApexSegmented, { props: { options: VIEWS, label: 'View', ...p } });
+
+  it('is a radiogroup with one radio per option', () => {
+    const w = seg({ modelValue: 'week' });
+    expect(w.find('.apex-seg').attributes('role')).toBe('radiogroup');
+    expect(w.findAll('[role="radio"]').length).toBe(3);
+    expect(w.findAll('[role="radio"]')[1].attributes('aria-checked')).toBe('true');
+  });
+
+  it('roving focus: only the chosen segment is tabbable', () => {
+    const t = seg({ modelValue: 'month' }).findAll('button').map((b) => b.attributes('tabindex'));
+    expect(t).toEqual(['-1', '-1', '0']);
+  });
+
+  it('arrow keys move the selection and wrap around', async () => {
+    const w = seg({ modelValue: 'day' });
+    await w.findAll('button')[0].trigger('keydown.left');
+    expect(w.emitted('update:modelValue')![0]).toEqual(['month']);
+  });
+
+  it('disabled refuses both click and arrows', async () => {
+    const w = seg({ modelValue: 'day', disabled: true });
+    await w.findAll('button')[1].trigger('click');
+    await w.findAll('button')[0].trigger('keydown.right');
+    expect(w.emitted('update:modelValue')).toBeUndefined();
+  });
+
+  it('the appearance props reach the bar as variables', () => {
+    const s = seg({ selectedBackground: '#101820', selectedColor: '#7AA2F7' })
+      .find('.apex-seg').attributes('style') || '';
+    expect(s).toContain('--apex-seg-on-bg: #101820');
+    expect(s).toContain('--apex-seg-on-fg: #7AA2F7');
+  });
+});
+
+describe('ApexSelectButton', () => {
+  const sb = (p: Record<string, unknown> = {}) =>
+    mount(ApexSelectButton, { props: { options: VIEWS, label: 'View', ...p } });
+
+  it('single choice is a radiogroup; multiple is a plain group of toggles', () => {
+    expect(sb({ modelValue: 'day' }).find('.apex-sb').attributes('role')).toBe('radiogroup');
+    const m = sb({ multiple: true, modelValue: ['day'] });
+    expect(m.find('.apex-sb').attributes('role')).toBe('group');
+    expect(m.findAll('button')[0].attributes('aria-pressed')).toBe('true');
+  });
+
+  it('allowEmpty lets the chosen one be cleared by re-clicking', async () => {
+    const w = sb({ modelValue: 'day' });
+    await w.findAll('button')[0].trigger('click');
+    expect(w.emitted('update:modelValue')![0]).toEqual([null]);
+
+    const keep = sb({ modelValue: 'day', allowEmpty: false });
+    await keep.findAll('button')[0].trigger('click');
+    expect(keep.emitted('update:modelValue')![0]).toEqual(['day']);
+  });
+
+  it('multiple accumulates and removes', async () => {
+    const w = sb({ multiple: true, modelValue: ['day'] });
+    await w.findAll('button')[1].trigger('click');
+    expect(w.emitted('update:modelValue')![0][0]).toEqual(['day', 'week']);
+  });
+
+  it('iconOnly moves the label to the accessible name', () => {
+    const w = sb({ modelValue: 'day', iconOnly: true });
+    expect(w.findAll('button')[0].attributes('aria-label')).toBe('Day');
+    expect(w.find('.apex-sb__txt').exists()).toBe(false);
+  });
+
+  it('the appearance props reach the bar as variables', () => {
+    const s = sb({ color: '#137C4A', barBackground: '#101820', hoverColor: '#fff' })
+      .find('.apex-sb').attributes('style') || '';
+    expect(s).toContain('--apex-sb-color: #137C4A');
+    expect(s).toContain('--apex-sb-bg: #101820');
+    expect(s).toContain('--apex-sb-hover-fg: #fff');
+  });
+});
+
+describe('ApexToggleButton', () => {
+  it('swaps label and icon with the state', async () => {
+    const w = mount(ApexToggleButton, {
+      props: { modelValue: false, onLabel: 'Live', offLabel: 'Paused', onIcon: 'play_arrow', offIcon: 'pause' },
+    });
+    expect(w.text()).toContain('Paused');
+    await w.setProps({ modelValue: true });
+    expect(w.text()).toContain('Live');
+  });
+
+  it('reports its state through aria-pressed, and toggles', async () => {
+    const w = mount(ApexToggleButton, { props: { modelValue: false, label: 'Live' } });
+    expect(w.find('button').attributes('aria-pressed')).toBe('false');
+    await w.find('button').trigger('click');
+    expect(w.emitted('update:modelValue')![0]).toEqual([true]);
+  });
+
+  it('the appearance props reach the button as variables', () => {
+    const w = mount(ApexToggleButton, {
+      props: { modelValue: true, label: 'Live', onColor: '#137C4A', offColor: '#6B7789' },
+    });
+    const s = w.find('.apex-tb').attributes('style') || '';
+    expect(s).toContain('--apex-tb-on: #137C4A');
+    expect(s).toContain('--apex-tb-fg: #6B7789');
+  });
+});
+
+describe('the ui class map reaches every one of them', () => {
+  it('lands on each control root and its own parts', () => {
+    expect(mount(ApexRating, { props: { modelValue: 3, cancel: true, showValue: true,
+      ui: { control: 'x-rate', option: 'x-star', value: 'x-val', button: 'x-cancel' } } })
+      .findAll('.x-rate, .x-star, .x-val, .x-cancel').length).toBeGreaterThan(3);
+
+    expect(mount(ApexSegmented, { props: { options: VIEWS, ui: { control: 'x-seg', option: 'x-segbtn' } } })
+      .findAll('.x-seg, .x-segbtn').length).toBe(4);
+
+    expect(mount(ApexSelectButton, { props: { options: VIEWS, ui: { control: 'x-sb', option: 'x-sbbtn' } } })
+      .findAll('.x-sb, .x-sbbtn').length).toBe(4);
+
+    expect(mount(ApexToggleButton, { props: { label: 'Live', ui: { control: 'x-tb' } } })
+      .find('.x-tb').exists()).toBe(true);
+
+    expect(mount(ApexSwitch, { props: { onLabel: 'ON', offLabel: 'OFF',
+      ui: { control: 'x-sw', text: 'x-swtext', handle: 'x-knob' } } })
+      .findAll('.x-sw, .x-swtext, .x-knob').length).toBe(3);
+
+    expect(mount(ApexRadioGroup, { props: { options: PLANS, ui: { group: 'x-radios', option: 'x-radio', dot: 'x-dot' } } })
+      .findAll('.x-radios, .x-radio, .x-dot').length).toBe(7);
   });
 });

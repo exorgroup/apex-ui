@@ -85,7 +85,7 @@ function toggle() {
   <ApexField v-else v-bind="fieldProps" :value="modelValue" label-placement="hidden"
              v-slot="{ id, describedBy, size: fieldSize, ui: fieldUi }">
     <label class="apex-cb"
-           :class="[{ 'apex-cb--card': card, 'apex-cb--before': labelPlacement === 'before' }, fieldUi.option]"
+           :class="[{ 'apex-cb--card': card, 'apex-cb--before': labelPlacement === 'before' }, fieldUi.control]"
            :data-size="fieldSize" :data-checked="checked ? 'true' : 'false'"
            :data-indeterminate="!checked && indeterminate ? 'true' : 'false'"
            :data-disabled="disabled ? 'true' : 'false'">

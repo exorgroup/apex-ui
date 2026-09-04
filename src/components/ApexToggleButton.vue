@@ -25,6 +25,15 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   onTextColor?: string;
   /** Outlined while off instead of tinted. */
   variant?: 'solid' | 'outline';
+  /* The off state, over --apex-tb-*. Named `off*` so they cannot be confused
+     with the field-box props of the same idea already on ApexFieldProps. */
+  offBackground?: string;
+  offColor?: string;
+  offBorderColor?: string;
+  offRadius?: string;
+  /** Under the pointer while off. */
+  hoverColor?: string;
+  hoverBorderColor?: string;
 }>(), { variant: 'solid', statusIcon: false });
 
 const emit = defineEmits<{
@@ -36,7 +45,22 @@ const on = computed(() => !!props.modelValue);
 const text = computed(() => (on.value ? props.onLabel : props.offLabel) ?? props.onLabel ?? props.offLabel ?? props.label);
 const glyph = computed(() => (on.value ? props.onIcon : props.offIcon) ?? props.onIcon ?? props.offIcon);
 const fieldProps = computed(() => pickFieldProps(props as unknown as Record<string, unknown>));
-const rootStyle = computed(() => ({ '--tb-on': props.onColor, '--tb-on-text': props.onTextColor }));
+/** Appearance prop -> CSS variable. Only what is set. */
+const rootStyle = computed(() => {
+  const out: Record<string, string> = {};
+  const map: Array<[string | undefined, string]> = [
+    [props.onColor, '--apex-tb-on'],
+    [props.onTextColor, '--apex-tb-on-text'],
+    [props.offBackground, '--apex-tb-bg'],
+    [props.offColor, '--apex-tb-fg'],
+    [props.offBorderColor, '--apex-tb-border'],
+    [props.offRadius, '--apex-tb-radius'],
+    [props.hoverColor, '--apex-tb-hover-fg'],
+    [props.hoverBorderColor, '--apex-tb-hover-border'],
+  ];
+  map.forEach(([v, name]) => { if (v) out[name] = v; });
+  return Object.keys(out).length ? out : undefined;
+});
 
 function toggle() {
   if (props.disabled || props.readonly) return;
@@ -46,8 +70,8 @@ function toggle() {
 </script>
 
 <template>
-  <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, size }">
-    <button type="button" class="apex-tb" :id="id" :style="rootStyle" :data-size="size"
+  <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, size, ui }">
+    <button type="button" class="apex-tb" :class="ui.control" :id="id" :style="rootStyle" :data-size="size"
             :data-on="on ? 'true' : 'false'" :data-variant="variant"
             :data-block="block ? 'true' : 'false'" :disabled="disabled"
             :aria-pressed="on" :aria-describedby="describedBy"
