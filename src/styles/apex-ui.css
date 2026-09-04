@@ -2082,7 +2082,10 @@ inline-size var(--dur-mid) var(--ease-out),block-size var(--dur-mid) var(--ease-
 .apex-tabs[data-vertical="true"][data-variant="underline"] .apex-tabs__bar{inset-block-start:var(--apex-tabs-pos);block-size:var(--apex-tabs-size);inline-size:2px;inset-inline-start:auto;inset-inline-end:0;border-radius:2px 0 0 2px}
 .apex-tabs[data-placement="right"][data-variant="underline"] .apex-tabs__bar{inset-inline-end:auto;inset-inline-start:0;border-radius:0 2px 2px 0}
 .apex-tabs[data-variant="pill"] .apex-tabs__bar{inset-block:4px;inset-inline-start:var(--apex-tabs-pos);inline-size:var(--apex-tabs-size);border-radius:var(--r-sm);z-index:0}
-.apex-tabs[data-vertical="true"][data-variant="pill"] .apex-tabs__bar{inset-inline:4px;inset-block-start:var(--apex-tabs-pos);block-size:var(--apex-tabs-size)}
+/* inline-size must go back to auto, or the horizontal rule's
+   inline-size:var(--apex-tabs-size) wins over inset-inline and the pill is
+   drawn the width of the tab's HEIGHT — a small square behind the icon. */
+.apex-tabs[data-vertical="true"][data-variant="pill"] .apex-tabs__bar{inset-inline:4px;inline-size:auto;inset-block-start:var(--apex-tabs-pos);block-size:var(--apex-tabs-size)}
 .apex-tabs[data-variant="enclosed"] .apex-tabs__bar{display:none}
 
 /* strip chrome per variant */
@@ -2093,9 +2096,25 @@ inline-size var(--dur-mid) var(--ease-out),block-size var(--dur-mid) var(--ease-
 .apex-tabs[data-variant="pill"] .apex-tabs__strip{padding:4px;background:var(--bg-subtle);border-radius:calc(var(--apex-tabs-radius) + 2px);gap:2px}
 .apex-tabs[data-variant="pill"] .apex-tabs__tab{position:relative;z-index:1;border-radius:var(--r-sm)}
 .apex-tabs[data-variant="pill"] .apex-tabs__tab[data-on="true"]{color:#fff}
-.apex-tabs[data-variant="enclosed"] .apex-tabs__strip{gap:3px;box-shadow:inset 0 -1px 0 0 var(--apex-tabs-border)}
-.apex-tabs[data-variant="enclosed"] .apex-tabs__tab{border:1px solid transparent;border-block-end:0;border-radius:var(--apex-tabs-radius) var(--apex-tabs-radius) 0 0;margin-block-end:-1px}
+/* Enclosed. The selected tab joins the panel, so it drops the border on the
+   side facing it and pulls 1px over the strip's line to cover it; every other
+   tab shows only that line. Each placement turns the whole arrangement, which
+   is why all four are written out rather than one rule plus overrides. */
+.apex-tabs[data-variant="enclosed"] .apex-tabs__strip{gap:3px}
+.apex-tabs[data-variant="enclosed"] .apex-tabs__tab{border:1px solid transparent}
 .apex-tabs[data-variant="enclosed"] .apex-tabs__tab[data-on="true"]{border-color:var(--apex-tabs-border);background:var(--bg-surface)}
+
+.apex-tabs[data-placement="top"][data-variant="enclosed"] .apex-tabs__strip{box-shadow:inset 0 -1px 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-placement="top"][data-variant="enclosed"] .apex-tabs__tab{border-block-end:0;border-radius:var(--apex-tabs-radius) var(--apex-tabs-radius) 0 0;margin-block-end:-1px}
+
+.apex-tabs[data-placement="bottom"][data-variant="enclosed"] .apex-tabs__strip{box-shadow:inset 0 1px 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-placement="bottom"][data-variant="enclosed"] .apex-tabs__tab{border-block-start:0;border-radius:0 0 var(--apex-tabs-radius) var(--apex-tabs-radius);margin-block-start:-1px}
+
+.apex-tabs[data-placement="left"][data-variant="enclosed"] .apex-tabs__strip{box-shadow:inset -1px 0 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-placement="left"][data-variant="enclosed"] .apex-tabs__tab{border-inline-end:0;border-radius:var(--apex-tabs-radius) 0 0 var(--apex-tabs-radius);margin-inline-end:-1px}
+
+.apex-tabs[data-placement="right"][data-variant="enclosed"] .apex-tabs__strip{box-shadow:inset 1px 0 0 0 var(--apex-tabs-border)}
+.apex-tabs[data-placement="right"][data-variant="enclosed"] .apex-tabs__tab{border-inline-start:0;border-radius:0 var(--apex-tabs-radius) var(--apex-tabs-radius) 0;margin-inline-start:-1px}
 
 /* overflow controls appear only when the strip actually overflows */
 .apex-tabs__scroll{display:grid;place-items:center;flex:0 0 auto;inline-size:30px;block-size:30px;
