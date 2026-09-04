@@ -53,6 +53,41 @@ export const LABEL_PLACEMENTS = [
 
 export const SIZES = ['sm', 'md', 'lg'] as const;
 
+/**
+ * The switch's in-track labels, shown live rather than quoted — what is worth
+ * seeing is that the track does NOT resize as the word changes, which a code
+ * block cannot demonstrate. The pairs deliberately vary in length.
+ */
+export const SWITCH_LABEL_CASES: Array<{ tag: string; bind: Record<string, unknown> }> = [
+  { tag: 'ON / OFF', bind: { onLabel: 'ON', offLabel: 'OFF', label: 'Accepting bookings' } },
+  { tag: 'Enabled / Disabled', bind: { onLabel: 'Enabled', offLabel: 'Disabled', label: 'Door sales' } },
+  { tag: 'YES / NO', bind: { onLabel: 'YES', offLabel: 'NO', label: 'Send receipts' } },
+  { tag: 'on-label only', bind: { onLabel: 'LIVE', label: 'Broadcast' } },
+  { tag: 'no labels', bind: { label: 'The default' } },
+  { tag: 'label before', bind: { onLabel: 'ON', offLabel: 'OFF', label: 'Reminders', labelPlacement: 'before' } },
+];
+
+export const SWITCH_LABELS_SNIPPET = `<!-- Both words are rendered into one grid cell, the hidden one still taking
+     up its space, so the track measures the wider of the two and toggling
+     never changes its width. Nothing to configure. -->
+<ApexSwitch v-model="live" label="Accepting bookings" on-label="ON" off-label="OFF" />
+
+<!-- Give only one and the other side shows nothing — useful for a switch that
+     announces itself when on and stays quiet when off. -->
+<ApexSwitch v-model="onAir" label="Broadcast" on-label="LIVE" />
+
+/* The colours, if the defaults do not suit. The off word takes --fg-default
+   rather than white, because the off track is --border-strong and the two flip
+   together with the theme; set both if you set a track colour of your own. */
+.live-switch {
+  --apex-switch-on-bg: #137C4A;
+  --apex-switch-on-fg: #fff;
+  --apex-switch-off-bg: #3A4657;
+  --apex-switch-off-fg: #0F141C;
+}
+
+<ApexSwitch v-model="live" on-label="ON" off-label="OFF" :ui="{ control: 'live-switch' }" />`;
+
 /** The eight colour roles ApexButton and friends share. */
 export const SEVERITIES = [
   'primary', 'secondary', 'success', 'info', 'warning', 'help', 'danger', 'contrast',

@@ -8,7 +8,8 @@ import {
   BUTTON_FAMILY, DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
   OWN_PARTS, SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_OWN, SNIP_PROPS, SNIP_TONE,
   SNIP_UI, SPLIT_MODEL,
-  SUMMARY_ERRORS, TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
+  SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
+  TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
 import type { AddNewKind, DocEntry, DocPage } from './registry';
 import { useApexDialog } from '@exorgroup/apex-ui';
@@ -177,6 +178,17 @@ const rulesQty = ref(3);
 
 /** One value per arc so the three knobs move independently. */
 const arcDemo = reactive<Record<number, number>>({ 180: 30, 270: 55, 360: 80 });
+
+/**
+ * One model per switch on the labels section, keyed by its tag. Seeded on and
+ * off in turn so the page shows both states without anyone having to click.
+ */
+const switchDemo = reactive<Record<string, boolean>>(
+  Object.fromEntries([
+    ...SWITCH_LABEL_CASES.map((s, i) => [s.tag, i % 2 === 0]),
+    ...SIZES.map((s, i) => [s, i !== 1]),
+  ]),
+);
 
 /**
  * The Add New demos. One section serves both choosers, so everything here is
@@ -1430,6 +1442,58 @@ async function copyUsage() {
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
           </div>
+        </template>
+
+        <!-- The words in the track are the one switch feature you have to
+             click to judge, so these are live rather than quoted. -->
+        <template v-if="entry.id === 'switch'">
+          <h2>Labels in the track</h2>
+          <p class="note">
+            <code>on-label</code> and <code>off-label</code> put the state inside the
+            track. Toggle any of these — the track does not resize as the word changes,
+            because both words are rendered into the same grid cell and the hidden one
+            still takes up its space. The track therefore measures the wider of the two
+            and stays there. Watch the <strong>Enabled / Disabled</strong> one, where the
+            two words differ most in length.
+          </p>
+          <div class="grid grid--3">
+            <div v-for="s in SWITCH_LABEL_CASES" :key="s.tag" class="cell">
+              <span class="cell__tag">{{ s.tag }}</span>
+              <ApexSwitch v-model="switchDemo[s.tag]" v-bind="s.bind" />
+            </div>
+          </div>
+
+          <h3 class="sub">At each size, and while disabled</h3>
+          <p class="note">
+            The padding that keeps the knob off the text scales with the size, so the
+            word stays clear of it at all three. A disabled switch still shows its state.
+          </p>
+          <div class="grid grid--3">
+            <div v-for="s in SIZES" :key="s" class="cell">
+              <span class="cell__tag">size="{{ s }}"</span>
+              <ApexSwitch v-model="switchDemo[s]" :size="s" on-label="ON" off-label="OFF"
+                          label="Accepting bookings" />
+            </div>
+          </div>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">disabled, on</span>
+              <ApexSwitch :model-value="true" disabled on-label="ON" off-label="OFF" label="Locked open" />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">disabled, off</span>
+              <ApexSwitch :model-value="false" disabled on-label="ON" off-label="OFF" label="Locked shut" />
+            </div>
+          </div>
+
+          <p class="note">
+            Keep the words short. They live inside the track, so a long one makes a wide
+            switch — at which point
+            <button class="linkish" @click="current = 'togglebutton'">ApexToggleButton</button>
+            is the better control: same idea, but shaped like a button, with room for an
+            icon and a full phrase.
+          </p>
+          <div class="usage"><pre><code>{{ SWITCH_LABELS_SNIPPET }}</code></pre></div>
         </template>
 
         <!-- ApexNumber, like ApexInput, renders only shared parts. -->
