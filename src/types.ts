@@ -347,6 +347,74 @@ export interface ApexContainerClasses {
  * and no validation, so this is the class map and nothing else — each control
  * declares its own appearance props, which are already in place.
  */
+/**
+ * Class hooks for the display controls: ApexAvatar, ApexBadge, ApexChip,
+ * ApexSkeleton, ApexProgressSpinner, ApexMeterGroup, ApexInplace, ApexBlockUI
+ * and ApexScrollTop.
+ *
+ * The fourth such map, after ApexFieldClasses, ApexButtonClasses and
+ * ApexContainerClasses. These nine are neither field, action nor container:
+ * they mark, measure or cover something.
+ *
+ * A caveat worth stating, because it differs from the container family: these
+ * nine have almost nothing structurally in common. Reading every part they
+ * render, only `label` appears in three or more — an avatar, a spinner and a
+ * meter simply are not built alike. So the shared core here is deliberately
+ * two keys, and the rest of the map is per-control extras. That is the honest
+ * shape of the group rather than a shared vocabulary invented to look tidy.
+ *
+ * A key names the part's ROLE, not its class.
+ */
+export interface ApexDisplayClasses {
+  /** The outermost element. Every one of the nine has this. */
+  root?: string;
+  /** Text identifying the thing — ApexScrollTop's tooltip, a meter's caption,
+      a chip's text. */
+  label?: string;
+
+  /* Parts belonging to one or two of the nine. Ignored by the others. */
+  /** ApexAvatar and ApexChip — the image, and the glyph shown instead. */
+  img?: string;
+  icon?: string;
+  /** ApexAvatar — the initials, the corner count, the status dot. */
+  text?: string;
+  badge?: string;
+  dot?: string;
+  /** ApexChip and ApexInplace — the remove/close button. */
+  close?: string;
+  /** ApexProgressSpinner and ApexMeterGroup — the unfilled groove behind the
+      value. */
+  track?: string;
+  /** ApexProgressSpinner — the drawing, the moving arc, the number in it. */
+  svg?: string;
+  arc?: string;
+  value?: string;
+  /** ApexMeterGroup — one filled segment, the legend area and its rows, a
+      row's icon, the marker on the bar, and the percentage. */
+  seg?: string;
+  labelregion?: string;
+  labels?: string;
+  licon?: string;
+  marker?: string;
+  pct?: string;
+  /** ApexInplace — the closed state and the editor it opens into. */
+  display?: string;
+  content?: string;
+  /** ApexBlockUI — the sheet over the content, the panel on it, its message
+      and its countdown. */
+  cover?: string;
+  body?: string;
+  msg?: string;
+  timer?: string;
+  /** ApexScrollTop — the button itself. */
+  dock?: string;
+}
+
+export interface ApexDisplayProps {
+  /** Your own class on any part. See ApexDisplayClasses. */
+  ui?: ApexDisplayClasses;
+}
+
 export interface ApexContainerProps {
   /** Your own class on any part. See ApexContainerClasses. */
   ui?: ApexContainerClasses;
