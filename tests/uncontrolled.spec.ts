@@ -70,27 +70,34 @@ describe.each(CASES)('$name, uncontrolled', ({ C, props, toggle, root }) => {
 });
 
 /**
- * ApexPanel rolls its content up like a garage door rather than swapping
- * `hidden`, which read as the content vanishing.
+ * Both containers roll their content up like a garage door rather than swapping
+ * `hidden`, which read as the content vanishing. They share one implementation
+ * in core/collapseDoor, so both are driven through the same cases.
  *
  * The keyframes are built from a measured height, so the shape of the travel is
  * what can be checked here: it must lift 10px past the natural height before
  * running to zero, and overshoot the same amount on the way back. happy-dom has
- * no Web Animations, so `animate` is stubbed — which also proves the component
- * degrades to the instant swap wherever it is missing.
+ * no Web Animations, so `animate` is stubbed — which also proves the components
+ * degrade to the instant swap wherever it is missing.
  */
-describe('ApexPanel garage door', () => {
+const DOORS = [
+  { name: 'ApexPanel', C: ApexPanel, props: { header: 'Fees', toggleable: true }, door: '.apex-pn__region', toggle: '.apex-pn__toggle' },
+  { name: 'ApexFieldset', C: ApexFieldset, props: { legend: 'Billing', toggleable: true }, door: '.apex-fs__body', toggle: '.apex-fs__label' },
+] as Array<{ name: string; C: unknown; props: Record<string, unknown>; door: string; toggle: string }>;
+
+describe.each(DOORS)('$name garage door', ({ C, props, door, toggle }) => {
   const OVER = 10;
   const NATURAL = 100; // the height in the brief, so the numbers read directly
 
   /** Mount with a measurable region and a recording `animate`. */
   async function stage() {
-    const w = mount(ApexPanel, {
-      props: { header: 'Fees', toggleable: true },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = mount(C as any, {
+      props,
       slots: { default: 'Body copy' },
       attachTo: document.body,
     });
-    const el = w.find('.apex-pn__region').element as HTMLElement;
+    const el = w.find(door).element as HTMLElement;
     Object.defineProperty(el, 'scrollHeight', { configurable: true, get: () => NATURAL });
 
     /* The stub has to answer everything the component calls, `cancel` included:
@@ -109,7 +116,7 @@ describe('ApexPanel garage door', () => {
 
   it('closing lifts past the natural height, then runs to zero', async () => {
     const { w, frames } = await stage();
-    await w.find('.apex-pn__toggle').trigger('click');
+    await w.find(toggle).trigger('click');
 
     expect(frames).toHaveLength(1);
     expect(heights(frames[0])).toEqual([`${NATURAL}px`, `${NATURAL + OVER}px`, '0px']);
@@ -117,9 +124,9 @@ describe('ApexPanel garage door', () => {
 
   it('opening overshoots by the same amount, then settles back', async () => {
     const { w, frames } = await stage();
-    await w.find('.apex-pn__toggle').trigger('click'); // shut
+    await w.find(toggle).trigger('click'); // shut
     frames.length = 0;
-    await w.find('.apex-pn__toggle').trigger('click'); // open again
+    await w.find(toggle).trigger('click'); // open again
 
     expect(frames).toHaveLength(1);
     expect(heights(frames[0])).toEqual(['0px', `${NATURAL + OVER}px`, `${NATURAL}px`]);
@@ -129,7 +136,7 @@ describe('ApexPanel garage door', () => {
     const { w, el } = await stage();
     expect(el.style.overflow).toBe('');
 
-    await w.find('.apex-pn__toggle').trigger('click');
+    await w.find(toggle).trigger('click');
     // the finished promise, then the nextTick that applies `hidden`
     await new Promise((r) => setTimeout(r, 0));
     await w.vm.$nextTick();
@@ -138,7 +145,13 @@ describe('ApexPanel garage door', () => {
     expect(el.style.overflow, 'overflow must not be left clipped').toBe('');
   });
 
-  it('the body and footer share one region, so they move together', () => {
+});
+
+/* Panel-only: it is the one with a footer, so it is the one that needed a
+   wrapper to make body and footer travel as a single door. The fieldset's body
+   is already one element. */
+describe('ApexPanel region', () => {
+  it('holds the body and the footer, so they move together', () => {
     const w = mount(ApexPanel, {
       props: { header: 'Fees', toggleable: true },
       slots: { default: 'Body copy', footer: 'Footer' },

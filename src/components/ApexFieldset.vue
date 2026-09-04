@@ -6,6 +6,7 @@
  */
 import { computed, ref } from 'vue';
 import type { ApexContainerProps } from '../types';
+import { useCollapseDoor } from '../core/collapseDoor';
 import ApexIcon from './ApexIcon.vue';
 
 const props = withDefaults(defineProps<ApexContainerProps & {
@@ -44,6 +45,11 @@ const emit = defineEmits<{
 
 const localCollapsed = ref(false);
 const shut = computed(() => (props.collapsed !== undefined ? props.collapsed : localCollapsed.value));
+
+/* The same rolling collapse ApexPanel uses — see core/collapseDoor. The body
+   is already one element here, so it needs no wrapper to travel as a whole. */
+const body = ref<HTMLElement | null>(null);
+const { animating } = useCollapseDoor(shut, body);
 
 function toggle() {
   if (!props.toggleable || props.disabled) return;
@@ -85,7 +91,7 @@ const rootStyle = computed(() => {
       </component>
     </legend>
 
-    <div class="apex-fs__body" :class="ui?.body" :hidden="shut">
+    <div ref="body" class="apex-fs__body" :class="ui?.body" :hidden="shut && !animating">
       <slot />
     </div>
   </fieldset>

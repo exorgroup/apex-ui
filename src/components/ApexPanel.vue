@@ -5,8 +5,9 @@
  * Where ApexFieldset groups form controls with a legend on the border, a panel
  * has a full header bar that can also carry actions, and a footer.
  */
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import type { ApexContainerProps } from '../types';
+import { useCollapseDoor } from '../core/collapseDoor';
 import ApexIcon from './ApexIcon.vue';
 
 const props = withDefaults(defineProps<ApexContainerProps & {
@@ -61,70 +62,10 @@ function toggle() {
   emit('toggle', { collapsed: next });
 }
 
-/* ── the garage door ──────────────────────────────────────────────────────
-   Collapsing used to swap `hidden`, which reads as the content vanishing. The
-   region instead rolls: it lifts a little past its own height, then runs to
-   zero — and on the way back it overshoots the same amount before settling.
-   The lift is what makes it read as a door on a track rather than a wipe.
-
-   Heights have to be measured, not declared, because the content decides them,
-   so this is script rather than a CSS transition. */
-const OVERSHOOT = 10;   // px past the natural height, at either end
-const DURATION = 260;   // ms for the whole travel
-
+/* The collapse animation lives in core/collapseDoor: ApexFieldset rolls the
+   same way, and one measured-height animation is enough for both. */
 const region = ref<HTMLElement | null>(null);
-/** True only while the door is moving; it keeps `hidden` off in the meantime. */
-const animating = ref(false);
-let run = 0;
-
-/** Someone who asked for less motion gets the instant swap, as before. */
-const wantsMotion = () =>
-  typeof matchMedia !== 'function' || !matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-watch(shut, async (closing) => {
-  const el = region.value;
-  // No element, no Web Animations (happy-dom), or reduced motion: `hidden`
-  // alone still gives the correct end state.
-  if (!el || typeof el.animate !== 'function' || !wantsMotion()) return;
-
-  const mine = ++run;
-  /* Closing can measure now, while the region is still laid out. Opening has to
-     wait for `hidden` to come off, which `animating` does on the next tick. */
-  animating.value = true;
-  if (!closing) await nextTick();
-  const natural = el.scrollHeight;
-  if (mine !== run) return;
-
-  const peak = `${natural + OVERSHOOT}px`;
-  const frames = closing
-    ? [{ height: `${natural}px` }, { height: peak, offset: 0.25 }, { height: '0px' }]
-    : [{ height: '0px' }, { height: peak, offset: 0.75 }, { height: `${natural}px` }];
-
-  /* Clipped only for the duration: a permanently hidden overflow would cut off
-     a menu or date picker opening out of the panel body. */
-  el.style.overflow = 'hidden';
-  /* `forwards` keeps the last frame after it finishes. Without it the height
-     springs back to natural the instant the animation ends, and the panel flashes
-     open for the frame before `hidden` lands. */
-  const anim = el.animate(frames, {
-    duration: DURATION, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards',
-  });
-  try {
-    await anim.finished;
-  } catch {
-    return; // superseded by a faster click; that run does the cleanup
-  }
-  if (mine !== run) return;
-
-  /* Drop `animating` first, then wait for the render that applies `hidden`,
-     and only then release the held height — so nothing is ever visible at full
-     height while the panel is meant to be shut. */
-  animating.value = false;
-  await nextTick();
-  if (mine !== run) return;
-  anim.cancel();
-  el.style.overflow = '';
-});
+const { animating } = useCollapseDoor(shut, region);
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
