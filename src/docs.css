@@ -398,3 +398,69 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
   font-size: 9.5px; font-weight: 700; letter-spacing: .08em;
 }
 .av-add { color: var(--fg-subtle); }
+
+/* ── Skeleton, spinner, meter ──────────────────────────────────────────── */
+
+/* A placeholder for an avatar beside two lines of text — the shape most
+   loading rows take. */
+.skl-media { display: flex; gap: 14px; align-items: center; }
+.skl-media--tight { gap: 10px; }
+.skl-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.skl-lines--tight { gap: 7px; }
+.skl-col { display: flex; flex-direction: column; gap: 8px; }
+.skl-narrow { max-inline-size: 420px; }
+.skl-groups { display: flex; flex-direction: column; gap: 20px; }
+.skl-shapes { gap: 14px; align-items: flex-end; }
+
+.skl-anim { display: flex; flex-direction: column; gap: 16px; max-inline-size: 460px; }
+.skl-anim__row { gap: 12px; }
+.skl-anim__tag { min-inline-size: 56px; margin: 0; }
+
+.skl-cardph { max-inline-size: 340px; display: flex; flex-direction: column; gap: 14px; }
+.skl-actions { gap: 10px; }
+
+.skl-list { display: flex; flex-direction: column; gap: 16px; }
+.skl-table { display: flex; flex-direction: column; gap: 10px; }
+.skl-trow { gap: 12px; }
+.skl-th { flex: 1; font-size: 12px; }
+.skl-td { flex: 1; }
+.skl-tiles { margin-block-start: 14px; }
+.skl-tile { display: flex; flex-direction: column; gap: 10px; }
+
+/* Spinners need more air than the default strip gap, since the ring has no
+   box around it to separate one from the next. */
+.psp-strip { gap: 28px; }
+.psp-mid { gap: 24px; align-items: center; }
+.psp-rows { display: flex; flex-direction: column; gap: 18px; }
+.psp-run { gap: 16px; align-items: center; }
+.psp-figure { font-size: 26px; font-weight: 700; }
+.psp-figure__pc { font-size: 13px; }
+.psp-done { color: var(--accent-success); }
+.psp-inline { display: inline-flex; align-items: center; gap: 8px; }
+.psp-btn { align-self: flex-start; }
+.psp-pane {
+  min-block-size: 90px; display: grid; place-items: center;
+  border: 1px solid var(--border-subtle); border-radius: var(--r-md);
+  background: var(--bg-surface);
+}
+
+.meter-stage { inline-size: 100%; max-inline-size: 420px; }
+.mtr-stack { max-inline-size: 460px; display: flex; flex-direction: column; gap: 22px; }
+.mtr-narrow { max-inline-size: 460px; }
+.mtr-wide { max-inline-size: 480px; }
+.mtr-cards { gap: 10px; }
+.mtr-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 14px; border: 1px solid var(--border-default);
+  border-radius: var(--r-lg); background: var(--bg-elevated);
+}
+.mtr-card__label { display: block; font-size: 12.5px; color: var(--fg-subtle); }
+.mtr-card__value { font-size: 19px; }
+.mtr-badge {
+  display: grid; place-items: center; inline-size: 34px; block-size: 34px;
+  border-radius: var(--r-full); color: #FFF;
+}
+.mtr-row { display: flex; align-items: center; gap: 14px; }
+.mtr-row__title { font-size: 14px; }
+.mtr-row__cap { color: var(--fg-subtle); }
+.mtr-actions { justify-content: space-between; }

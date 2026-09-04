@@ -32,7 +32,8 @@ export interface DocEntry {
    * `plain` is for a control that renders from its props and has no model at
    * all — ApexIcon, ApexBadge, ApexAvatar.
    */
-  demo?: 'plain' | 'chip' | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container';
+  demo?: 'plain' | 'chip' | 'meter' | 'button' | 'split' | 'dial' | 'group' | 'field'
+    | 'order' | 'container';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -43,6 +44,8 @@ export interface DocEntry {
   slots?: string[][];
   /** [name, what it does] — what defineExpose offers, where a control has one. */
   exposed?: string[][];
+  /** Opening attributes for the usage snippet, before the playground props. */
+  lead?: string[];
   /**
    * Closing text for the usage snippet, where the default `/>` is wrong —
    * a self-closing tag for a control that takes no children, or the closing
@@ -203,6 +206,33 @@ export const FAQ_ZONES = [1, 2, 3, 4, 5].map((i) => ({
 
 /** The three product shots the card's media examples use. */
 export const CARD_MEDIA = ['totem-43', 'wall-55', 'menu-board'];
+
+/** Six measurements over one disk, for the meter playground. They deliberately
+    sum to 63 rather than 100: the remainder is the point of a meter, and a set
+    that filled the track would hide it. */
+export const MTR_DISK = [
+  { label: 'Apps', value: 14 }, { label: 'Messages', value: 12 },
+  { label: 'Media', value: 8 }, { label: 'System', value: 12 },
+  { label: 'Documents', value: 6 }, { label: 'Cache', value: 11 },
+];
+
+/** One item per colour notation the component accepts — oklch, hex, rgb —
+    which is the point the Colour example is making. */
+export const MTR_COLOURS = [
+  { label: 'Violet', value: 12, color: 'oklch(0.55 0.20 300)' },
+  { label: 'Emerald', value: 14, color: '#10B981' },
+  { label: 'Rose', value: 10, color: 'rgb(244, 63, 94)' },
+  { label: 'Blue', value: 8, color: '#3B82F6' },
+  { label: 'Amber', value: 10, color: '#EAB308' },
+];
+
+/** Four items carrying icons, which replace their markers. */
+export const MTR_ICONS = [
+  { label: 'Apps', value: 25, color: 'oklch(0.55 0.20 300)', icon: 'grid_view' },
+  { label: 'Messages', value: 15, color: '#10B981', icon: 'mail' },
+  { label: 'Media', value: 20, color: '#F59E0B', icon: 'image' },
+  { label: 'System', value: 10, color: '#3B82F6', icon: 'settings' },
+];
 
 /** Seven people for the avatar examples. Only the first three carry a status,
     so the group examples show both states without looking uniform. */
@@ -3506,5 +3536,114 @@ export const ENTRIES: DocEntry[] = [
     ],
     events: [],
     slots: [['default', 'Overlay content inside the avatar, e.g. a badge']],
+  },
+  {
+    id: 'skeleton', name: 'ApexSkeleton', group: 'Utilities',
+    blurb: 'A placeholder standing in for content that has not arrived. The shimmer is a background-position animation on a gradient rather than a moving child element — nothing to clip or position, and one compositor property per frame however many are on screen, which matters because a loading screen is made of dozens of them.',
+    noField: true, demo: 'plain',
+    tail: ' />',
+    base: { shape: 'rectangle', animation: 'wave', width: '100%', height: '1.25rem' },
+    controls: [
+      { key: 'shape', type: 'select', options: ['rectangle', 'rounded', 'square', 'circle', 'text'] },
+      { key: 'animation', type: 'select', options: ['wave', 'pulse', 'none'] },
+      { key: 'width', type: 'text' }, { key: 'height', type: 'text' }, { key: 'size', type: 'text' },
+      { key: 'borderRadius', type: 'text' },
+      { key: 'duration', type: 'text' }, { key: 'delay', type: 'text' },
+      { key: 'lines', type: 'number' }, { key: 'lineGap', type: 'text' },
+      { key: 'lastLineWidth', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'shimmerColor', type: 'color' },
+    ],
+    props: [
+      ['shape', "'rectangle' | 'rounded' | 'square' | 'circle' | 'text'", "'rectangle'", 'text is a line of copy height; rounded takes the large radius'],
+      ['size', 'string', "'2.5rem'", 'Diameter for circle and square. Those shapes hold a 1:1 ratio from their width, so a round placeholder stays round even at a percentage width — and cannot come out an ellipse'],
+      ['width / height / borderRadius', 'string', '100% / 1rem / tokens', 'height is ignored by circle and square, whose ratio owns that axis — an oval is shape="rounded" with a radius'],
+      ['animation', "'wave' | 'pulse' | 'none'", "'wave'", 'wave travels left to right; pulse fades; none is static'],
+      ['duration / delay', 'string', "'1.4s' / '0s'", 'A delay staggers a stack so the rows do not shimmer in lockstep'],
+      ['lines / lineGap / lastLineWidth', 'number / string / string', "1 / 8px / '65%'", 'With shape="text" and lines > 1 it renders a paragraph block, the last line shortened'],
+      ['background / shimmerColor', 'string', 'tokens', 'The base and the travelling band'],
+    ],
+    events: [],
+    serviceTitle: 'Notes',
+    serviceRows: [
+      ['aria-hidden', 'always', 'A skeleton is decorative — announce loading on the region it stands in for, not on each shape'],
+      ['prefers-reduced-motion', 'respected', 'The animation stops; the placeholder stays visible'],
+      ['composition', 'expected', 'Card, list, grid and table placeholders are a handful of these in the layout they mimic — no separate components'],
+    ],
+  },
+  {
+    id: 'progressspinner', name: 'ApexProgressSpinner', group: 'Utilities',
+    blurb: 'A circular status indicator, determinate or not. One SVG circle drives both modes through stroke-dasharray — the determinate arc is the same ring the indeterminate one spins — so a spinner can become a percentage the moment the total is known without the geometry shifting. The radius is derived from the stroke width, so a thick ring never clips.',
+    noField: true, demo: 'plain',
+    tail: ' />',
+    base: { size: 56, strokeWidth: 4, showTrack: true },
+    controls: [
+      { key: 'value', type: 'number' }, { key: 'max', type: 'number' },
+      { key: 'size', type: 'number' }, { key: 'strokeWidth', type: 'number' },
+      { key: 'showTrack', type: 'bool' }, { key: 'showValue', type: 'bool' },
+      { key: 'pulse', type: 'bool' },
+      { key: 'arc', type: 'number' }, { key: 'duration', type: 'text' },
+      { key: 'linecap', type: 'select', options: ['round', 'butt'] },
+      { key: 'severity', type: 'select', options: ['primary', 'success', 'warning', 'danger', 'auto'] },
+      { key: 'color', type: 'color' }, { key: 'trackColor', type: 'color' },
+      { key: 'valueColor', type: 'color' }, { key: 'valueSize', type: 'text' },
+      { key: 'label', type: 'text' },
+    ],
+    props: [
+      ['value / max', 'number', '— / 100', 'A value makes it determinate; leave it out and it spins'],
+      ['size', 'number | string', '48', 'Diameter — a number is pixels'],
+      ['strokeWidth', 'number', '4', 'Ring thickness, in the same units as the diameter'],
+      ['showTrack / trackColor', 'boolean / string', 'true / tokens', 'The unfilled ring behind the arc — off leaves a bare arc'],
+      ['showValue / valueColor / valueSize', 'boolean / string / string', 'false / tokens', 'Percentage in the middle, determinate only'],
+      ['arc', 'number', '25', 'How much of the ring the spinning arc covers'],
+      ['pulse', 'boolean', 'false', 'Grows and shrinks the arc as well as rotating it — the classic two-part spin'],
+      ['duration', 'string', "'1.2s'", 'One rotation, or one pulse cycle'],
+      ['linecap', "'round' | 'butt'", "'round'", 'Arc ends'],
+      ['color / severity', 'string', "tokens / 'primary'", 'auto tints by threshold — danger under 34%, warning under 67%'],
+      ['label', 'string', '—', 'Accessible name for the progressbar role'],
+    ],
+    events: [],
+    slots: [['default', 'Replaces the middle readout; receives { value, percent, formatted }']],
+  },
+  {
+    id: 'metergroup', name: 'ApexMeterGroup', group: 'Utilities',
+    blurb: 'Several measurements sharing one track. Segments are sized as percentages of max − min in a flex track, so the bar stays honest about the remainder: whatever is unaccounted for reads as empty track rather than the segments stretching to fill it — which is what separates a meter from a stacked bar chart.',
+    noField: true, demo: 'meter',
+    lead: [':value="value"'],
+    tail: '\n/>',
+    base: {
+      orientation: 'horizontal', labelPosition: 'end', labelOrientation: 'horizontal',
+      showLabels: true, showValues: true, showMarkers: true, hoverable: true,
+    },
+    controls: [
+      { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'labelPosition', type: 'select', options: ['end', 'start'] },
+      { key: 'labelOrientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'showLabels', type: 'bool' }, { key: 'showValues', type: 'bool' },
+      { key: 'showMarkers', type: 'bool' },
+      { key: 'hoverable', type: 'bool' }, { key: 'animated', type: 'bool' },
+      { key: 'min', type: 'number' }, { key: 'max', type: 'number' },
+      { key: 'size', type: 'text' }, { key: 'length', type: 'text' },
+      { key: 'radius', type: 'text' }, { key: 'segmentRadius', type: 'text' },
+      { key: 'gap', type: 'text' }, { key: 'labelSize', type: 'text' },
+      { key: 'trackBackground', type: 'color' }, { key: 'labelColor', type: 'color' },
+    ],
+    props: [
+      ['value', 'MeterItem[]', '[]', '{ label, value, color, icon } — colours fall back to a six-step sequence, so a group is legible without any being set'],
+      ['min / max', 'number', '0 / 100', 'The range each value is measured against'],
+      ['orientation', "'horizontal' | 'vertical'", "'horizontal'", 'Vertical stacks the segments from the bottom'],
+      ['labelPosition / labelOrientation', "'end' | 'start' / 'horizontal' | 'vertical'", "'end' / 'horizontal'", 'Labels after or before the track, in a row or a column'],
+      ['showLabels / showValues / showMarkers', 'boolean', 'true', 'The label list, the percentage after each label, and the dot before it — an item’s icon replaces its marker'],
+      ['hoverable', 'boolean', 'false', 'Dims the other segments on hover, which reads more clearly than highlighting the one under the pointer'],
+      ['animated', 'boolean', 'false', 'Grows the segments from zero on mount'],
+      ['size / length', 'string', '9px / 100% (220px when vertical)', 'Track thickness and length — a vertical track needs a height of its own, since 100% of an auto-height parent is nothing'],
+      ['radius / segmentRadius', 'string', 'pill / 0', 'The track’s corners, and each segment’s — a segment radius separates the meters visually'],
+      ['gap / labelSize / labelColor / trackBackground', 'string', 'tokens', ''],
+    ],
+    events: [['item-click', '{ item, index } — a segment was clicked']],
+    slots: [
+      ['start / end', 'Content above and below the whole group; both receive { total }'],
+      ['label', 'Replaces the label list; receives { items, total }. It fills the same region as the built-in list, so labelPosition still places it'],
+      ['meter', 'Replaces one segment; receives { item, index, percent, color }'],
+    ],
   },
 ];

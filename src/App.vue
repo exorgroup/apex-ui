@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import {
   AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, COMMON_CONTROLS, ENTRIES, FORMATTING_RULE,
   ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
@@ -14,7 +14,7 @@ import {
   SPLIT_MAILS, SPLIT_PAIR, SPLIT_THIRDS, SPLIT_COLLAPSIBLE, SPLIT_NESTED,
   SPLIT_EVENTS, SPLIT_STATEFUL, SPLIT_NAV, PANEL_REPEAT, LEGEND_ALIGNS,
   FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
-  BDG_SEVERITIES, BDG_COUNT, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
+  BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
@@ -32,6 +32,32 @@ const copied = ref(false);
 
 /** v-model per control, so switching away and back keeps what you typed. */
 const model = reactive<Record<string, unknown>>({});
+
+/**
+ * The determinate spinner's Run button. A spinner that only ever shows a
+ * fixed number does not demonstrate the thing it is for, so this one climbs.
+ * The interval is cleared on arrival and on reset, and reset also stops a run
+ * already in flight — otherwise a second Run would leave two intervals going.
+ */
+const spinLive = ref(0);
+let spinTimer: ReturnType<typeof setInterval> | undefined;
+function stopSpin() {
+  clearInterval(spinTimer);
+  spinTimer = undefined;
+}
+function startSpin() {
+  stopSpin();
+  spinLive.value = 0;
+  spinTimer = setInterval(() => {
+    spinLive.value += 4;
+    if (spinLive.value >= 100) { spinLive.value = 100; stopSpin(); }
+  }, 90);
+}
+function resetSpin() {
+  stopSpin();
+  spinLive.value = 0;
+}
+onBeforeUnmount(stopSpin);
 
 /** ApexChip's second model — a selectable chip is a two-state control. */
 const chipSelected = ref(false);
@@ -663,6 +689,20 @@ async function copyUsage() {
               <!-- "plain" is the whole treatment for a control that renders
                    from its props: ApexIcon, ApexBadge, ApexAvatar. -->
               <component v-if="entry.demo === 'plain'" :is="entry.name" v-bind="live" />
+
+              <!-- A meter is nothing without measurements, so the stage
+                   supplies them rather than expecting the rail to. Its
+                   click log is what makes item-click visible. -->
+              <div v-else-if="entry.demo === 'meter'" class="meter-stage">
+                <ApexMeterGroup
+                  v-bind="live"
+                  :value="MTR_DISK"
+                  @item-click="actionLog = $event.item.label"
+                />
+                <p class="note stage__log">
+                  Last clicked: <code>{{ actionLog || 'none yet' }}</code>
+                </p>
+              </div>
 
               <!-- A chip carries a second model. Its selected state is what
                    `clickable` exists for, so binding it is the difference
@@ -1634,6 +1674,398 @@ async function copyUsage() {
             <div v-for="a in [180, 270, 360]" :key="a" class="cell dial-cell">
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
+            </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. Both spinner modes are the same ring, so
+             the examples are arranged to make that visible. -->
+        <template v-if="entry.id === 'progressspinner'">
+          <h2>Indeterminate</h2>
+          <p class="note">
+            With no <code>value</code> the ring spins. <code>arc</code> sets how much of the
+            circle it covers, <code>duration</code> its pace, and <code>pulse</code> adds the
+            classic growing-and-shrinking arc on top of the rotation.
+          </p>
+          <div class="card iconstrip psp-strip">
+            <ApexProgressSpinner label="Loading" />
+            <ApexProgressSpinner :arc="60" label="Loading" />
+            <ApexProgressSpinner :arc="12" :stroke-width="8" duration="0.7s" label="Loading" />
+            <ApexProgressSpinner pulse :show-track="false" label="Loading" />
+            <ApexProgressSpinner pulse :size="72" :stroke-width="6" severity="success" label="Loading" />
+          </div>
+
+          <h2>Determinate</h2>
+          <p class="note">
+            Give it a <code>value</code> and the same ring becomes an arc, with
+            <code>showValue</code> for the figure in the middle. Because both modes are one
+            circle, switching between them does not move anything.
+          </p>
+          <div class="card psp-rows">
+            <div class="iconstrip psp-strip">
+              <ApexProgressSpinner v-for="v in [25, 50, 75, 100]" :key="v" :value="v" show-value :size="64" />
+            </div>
+            <div class="iconstrip psp-strip">
+              <ApexProgressSpinner v-for="v in [24, 58, 91]" :key="'a' + v" :value="v" show-value :size="64" severity="auto" />
+              <span class="note">severity="auto" — tinted by threshold</span>
+            </div>
+            <div class="iconstrip psp-run">
+              <ApexProgressSpinner :value="spinLive" show-value :size="72" :stroke-width="6" />
+              <ApexButton size="sm" @click="startSpin">Run</ApexButton>
+              <ApexButton size="sm" severity="secondary" variant="outlined" @click="resetSpin">Reset</ApexButton>
+            </div>
+          </div>
+
+          <h2>Size, stroke and colour</h2>
+          <p class="note">
+            The radius is derived from the stroke, so a thick ring stays inside its box at any
+            diameter. <code>linecap="butt"</code> squares the ends, and <code>showTrack</code>
+            off leaves a bare arc.
+          </p>
+          <div class="card skl-groups">
+            <div class="iconstrip psp-mid">
+              <ApexProgressSpinner v-for="s in [20, 32, 48, 72, 96]" :key="s" :size="s" :stroke-width="4" />
+            </div>
+            <div class="iconstrip psp-mid">
+              <ApexProgressSpinner v-for="w in [2, 4, 8, 14, 20]" :key="w" :size="64" :stroke-width="w" :value="65" />
+            </div>
+            <div class="iconstrip psp-mid">
+              <ApexProgressSpinner :value="70" :size="64" color="#0F141C" track-color="#E8ECF2" show-value />
+              <ApexProgressSpinner :value="70" :size="64" color="oklch(0.55 0.20 300)" :show-track="false" show-value />
+              <ApexProgressSpinner :value="70" :size="64" :stroke-width="10" linecap="butt" color="#F97316" />
+              <ApexProgressSpinner :size="64" :stroke-width="10" linecap="butt" :arc="30" />
+            </div>
+          </div>
+
+          <h2>In context</h2>
+          <p class="note">
+            The middle slot takes any content, so the ring can hold a figure of its own — and
+            the whole thing sits inline with text or inside a button as easily as on its own.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">custom middle content</span>
+              <div class="iconstrip psp-mid">
+                <ApexProgressSpinner :value="33" :size="96" :stroke-width="7" show-value color="#0E8C86">
+                  <template #default="{ percent }">
+                    <span class="psp-figure">{{ Math.round(percent) }}<span class="psp-figure__pc">%</span></span>
+                  </template>
+                </ApexProgressSpinner>
+                <ApexProgressSpinner :value="86" :size="96" :stroke-width="7" show-value severity="success">
+                  <template #default><ApexIcon name="check" :size="34" class="psp-done" /></template>
+                </ApexProgressSpinner>
+              </div>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">inline and in a button</span>
+              <div class="skl-col">
+                <span class="note psp-inline">
+                  <ApexProgressSpinner :size="16" :stroke-width="10" :show-track="false" /> Checking availability…
+                </span>
+                <ApexButton severity="secondary" variant="outlined" class="psp-btn">
+                  <ApexProgressSpinner :size="15" :stroke-width="12" :show-track="false" color="currentColor" />
+                  Saving
+                </ApexButton>
+                <div class="psp-pane">
+                  <ApexProgressSpinner pulse :size="40" :show-track="false" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. A meter is about the remainder as much as
+             the segments, so every example keeps the empty track visible. -->
+        <template v-if="entry.id === 'metergroup'">
+          <h2>Basic</h2>
+          <p class="note">
+            One value or many, all measured against <code>min</code> and <code>max</code>. The
+            remainder stays as empty track — a meter is about what is used out of a whole, not
+            a distribution.
+          </p>
+          <div class="card mtr-stack">
+            <ApexMeterGroup :value="[{ label: 'Space used', value: 15 }]" />
+            <ApexMeterGroup :value="MTR_DISK" />
+          </div>
+
+          <h2>Colour</h2>
+          <p class="note">
+            Each item takes a <code>color</code> — a CSS variable, hex, rgb or hsl. Without
+            one, colours come from a six-step sequence so a group is legible before any are set.
+          </p>
+          <div class="card mtr-narrow">
+            <ApexMeterGroup :value="MTR_COLOURS" />
+          </div>
+
+          <h2>Icons and labels</h2>
+          <p class="note">
+            An item's <code>icon</code> replaces its marker.
+            <code>labelOrientation="vertical"</code> stacks the labels, and
+            <code>labelPosition="start"</code> puts them above the track.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">icons</span>
+              <ApexMeterGroup :value="MTR_ICONS" />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">vertical labels, above the track</span>
+              <ApexMeterGroup :value="MTR_ICONS" label-orientation="vertical" label-position="start" />
+            </div>
+          </div>
+
+          <h2>Vertical</h2>
+          <p class="note">
+            <code>orientation="vertical"</code> stands the track up and stacks the segments
+            from the bottom.
+          </p>
+          <div class="card">
+            <ApexMeterGroup :value="MTR_ICONS" orientation="vertical" length="220px" size="12px" />
+          </div>
+
+          <h2>Min and max</h2>
+          <p class="note">
+            The same values against a different range — <code>max="200"</code> halves every
+            segment, which is the point of stating the range rather than pre-computing
+            percentages.
+          </p>
+          <div class="card mtr-stack">
+            <ApexMeterGroup :value="MTR_DISK" :max="100" />
+            <ApexMeterGroup :value="MTR_DISK" :max="200" />
+          </div>
+
+          <h2>Styling and interaction</h2>
+          <p class="note">
+            <code>hoverable</code> dims the other segments on hover, which reads more clearly
+            than highlighting the one under the pointer, and emits <code>item-click</code>. A
+            <code>segmentRadius</code> separates the meters into distinct quantities.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">thick, separated segments</span>
+              <ApexMeterGroup
+                :value="MTR_COLOURS"
+                size="16px"
+                segment-radius="999px"
+                gap="18px"
+                track-background="var(--bg-subtle)"
+                hoverable
+                animated
+                @item-click="actionLog = $event.item.label"
+              />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">square, no markers or values</span>
+              <ApexMeterGroup
+                :value="MTR_COLOURS"
+                size="22px"
+                radius="4px"
+                :show-values="false"
+                :show-markers="false"
+                label-size="12px"
+                hoverable
+                @item-click="actionLog = $event.item.label"
+              />
+            </div>
+          </div>
+          <p class="note">Last clicked: <code>{{ actionLog || 'none yet' }}</code></p>
+
+          <h2>Template</h2>
+          <p class="note">
+            The <code>label</code> slot replaces the list, <code>start</code> and
+            <code>end</code> add content around the group, and <code>meter</code> replaces a
+            single segment. All receive the computed total.
+          </p>
+          <div class="card mtr-wide">
+            <ApexMeterGroup :value="MTR_ICONS" label-position="start" gap="16px">
+              <template #label="{ items }">
+                <div class="grid grid--2 mtr-cards">
+                  <div v-for="it in items" :key="it.label" class="mtr-card">
+                    <div>
+                      <span class="mtr-card__label">{{ it.label }}</span>
+                      <strong class="mtr-card__value">{{ it.value }}%</strong>
+                    </div>
+                    <span class="mtr-badge" :style="{ background: it.color }">
+                      <ApexIcon :name="it.icon" :size="18" />
+                    </span>
+                  </div>
+                </div>
+              </template>
+              <template #start="{ total }">
+                <div class="mtr-row">
+                  <strong class="mtr-row__title">Storage</strong>
+                  <span>{{ Math.round(total) }}%</span>
+                  <span class="mtr-row__cap">1 TB</span>
+                </div>
+              </template>
+              <template #end>
+                <div class="iconstrip mtr-actions">
+                  <ApexButton size="sm" severity="secondary" variant="outlined">Manage storage</ApexButton>
+                  <ApexButton size="sm">Update plan</ApexButton>
+                </div>
+              </template>
+            </ApexMeterGroup>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. A skeleton is only convincing in the
+             shape of the thing it stands in for, so the later examples are
+             compositions rather than single placeholders. -->
+        <template v-if="entry.id === 'skeleton'">
+          <h2>Basic</h2>
+          <p class="note">
+            Placeholder shapes in the layout the real content will take. The shimmer travels
+            left to right; a <code>delay</code> staggers a stack so the rows don't move in
+            lockstep.
+          </p>
+          <div class="card skl-media skl-narrow">
+            <ApexSkeleton shape="circle" size="2.5rem" />
+            <div class="skl-lines">
+              <ApexSkeleton height=".75rem" />
+              <ApexSkeleton height=".75rem" width="90%" delay=".15s" />
+            </div>
+          </div>
+
+          <h2>Shapes</h2>
+          <p class="note">
+            <code>shape</code> with <code>size</code>, <code>width</code>, <code>height</code>
+            and <code>borderRadius</code>. A circle and a square size from one value, so
+            neither can come out stretched.
+          </p>
+          <div class="card skl-groups">
+            <div>
+              <span class="cell__tag">circle</span>
+              <div class="iconstrip skl-shapes">
+                <ApexSkeleton v-for="s in ['5rem', '4rem', '3rem', '2rem']" :key="s" shape="circle" :size="s" />
+              </div>
+            </div>
+            <div>
+              <span class="cell__tag">square</span>
+              <div class="iconstrip skl-shapes">
+                <ApexSkeleton v-for="s in ['5rem', '4rem', '3rem', '2rem']" :key="s" shape="square" :size="s" />
+              </div>
+            </div>
+            <div class="skl-narrow">
+              <span class="cell__tag">rectangle</span>
+              <div class="skl-col">
+                <ApexSkeleton height="1rem" />
+                <ApexSkeleton height="1rem" width="70%" />
+                <ApexSkeleton height="4rem" />
+              </div>
+            </div>
+            <div class="skl-narrow">
+              <span class="cell__tag">rounded</span>
+              <div class="skl-col">
+                <ApexSkeleton shape="rounded" height="1rem" />
+                <ApexSkeleton shape="rounded" height="4rem" />
+                <ApexSkeleton height="2rem" width="60%" border-radius="999px" />
+              </div>
+            </div>
+          </div>
+
+          <h2>Text blocks</h2>
+          <p class="note">
+            <code>shape="text"</code> with <code>lines</code> renders a paragraph block at copy
+            height, the last line shortened to <code>lastLineWidth</code> so it reads as prose
+            rather than a bar chart.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">3 lines</span>
+              <ApexSkeleton shape="text" :lines="3" />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">5 lines, wider gap, 40% last line</span>
+              <ApexSkeleton shape="text" :lines="5" line-gap="12px" last-line-width="40%" />
+            </div>
+          </div>
+
+          <h2>Animation and colour</h2>
+          <p class="note">
+            Three animations, a configurable <code>duration</code>, and both the base and the
+            travelling band are colours you set.
+          </p>
+          <div class="card skl-anim">
+            <div v-for="a in ['wave', 'pulse', 'none']" :key="a" class="iconstrip skl-anim__row">
+              <span class="cell__tag skl-anim__tag">{{ a }}</span>
+              <ApexSkeleton :animation="a" height="1rem" />
+            </div>
+            <div class="iconstrip skl-anim__row">
+              <span class="cell__tag skl-anim__tag">slow</span>
+              <ApexSkeleton duration="3s" height="1rem" />
+            </div>
+            <div class="skl-col">
+              <ApexSkeleton
+                height="1.25rem"
+                background="color-mix(in oklch, var(--accent-primary) 18%, transparent)"
+                shimmer-color="color-mix(in oklch, var(--accent-primary) 38%, #FFF)"
+              />
+              <ApexSkeleton height="1.25rem" background="#1B2430" shimmer-color="#33404F" />
+              <ApexSkeleton
+                height="1.25rem"
+                background="color-mix(in oklch, var(--accent-success) 20%, transparent)"
+                shimmer-color="color-mix(in oklch, var(--accent-success) 40%, #FFF)"
+                border-radius="999px"
+              />
+            </div>
+          </div>
+
+          <h2>Card</h2>
+          <p class="note">
+            A card placeholder is a handful of skeletons in the card's own layout — no separate
+            component.
+          </p>
+          <div class="card skl-cardph">
+            <div class="skl-media">
+              <ApexSkeleton shape="circle" size="3rem" />
+              <div class="skl-lines">
+                <ApexSkeleton height=".8rem" width="55%" />
+                <ApexSkeleton height=".8rem" delay=".1s" />
+              </div>
+            </div>
+            <ApexSkeleton shape="rounded" height="9rem" delay=".2s" />
+            <div class="iconstrip skl-actions">
+              <ApexSkeleton shape="rounded" width="5rem" height="2rem" />
+              <ApexSkeleton shape="rounded" width="5rem" height="2rem" delay=".1s" />
+            </div>
+          </div>
+
+          <h2>List, grid and table</h2>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">list</span>
+              <div class="skl-list">
+                <div v-for="n in 4" :key="n" class="skl-media">
+                  <ApexSkeleton shape="circle" size="2.75rem" :delay="(n * 0.08) + 's'" />
+                  <div class="skl-lines skl-lines--tight">
+                    <ApexSkeleton height=".7rem" :delay="(n * 0.08) + 's'" />
+                    <ApexSkeleton height=".7rem" width="72%" :delay="(n * 0.08 + 0.05) + 's'" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">table</span>
+              <div class="skl-table">
+                <div class="iconstrip skl-trow">
+                  <strong v-for="h in ['Code', 'Name', 'Qty']" :key="h" class="skl-th">{{ h }}</strong>
+                </div>
+                <div v-for="n in 5" :key="n" class="iconstrip skl-trow">
+                  <ApexSkeleton v-for="col in 3" :key="col" height=".7rem" class="skl-td" :delay="(n * 0.06) + 's'" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid--3 skl-tiles">
+            <div v-for="n in 6" :key="n" class="cell skl-tile">
+              <ApexSkeleton shape="rounded" height="6rem" :delay="(n * 0.07) + 's'" />
+              <div class="skl-media skl-media--tight">
+                <ApexSkeleton shape="circle" size="1.75rem" :delay="(n * 0.07) + 's'" />
+                <div class="skl-lines skl-lines--tight">
+                  <ApexSkeleton height=".6rem" :delay="(n * 0.07) + 's'" />
+                  <ApexSkeleton height=".6rem" width="70%" :delay="(n * 0.07 + 0.05) + 's'" />
+                </div>
+              </div>
             </div>
           </div>
         </template>

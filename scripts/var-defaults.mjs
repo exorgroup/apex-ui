@@ -76,12 +76,27 @@ for (const m of (css + tokens).matchAll(/(--apex-[a-z0-9-]+)\s*:\s*([^;}]+)/g)) 
    --apex-picker-thumb-size as if they were the same kind of thing. */
 for (const m of tokens.matchAll(/(--apex-[a-z0-9-]+)\s*:/g)) palette.add(m[1]);
 
+/**
+ * Variables the component writes at runtime rather than the stylesheet
+ * declaring. They are read but never set here, which looks identical to a
+ * typo — so name them, or every run reports four defects that are not.
+ *
+ * These are geometry only the component can know: where the tab indicator has
+ * to sit, how far along its track a meter segment reaches. Setting one
+ * yourself achieves nothing, because the next render overwrites it.
+ */
+const COMPONENT_OWNED = new Set([
+  '--apex-tabs-pos', '--apex-tabs-size',     // indicator offset and width
+  '--apex-meter-pct', '--apex-meter-fill',   // a segment's extent and colour
+]);
+
 const dead = [];
+const owned = [];
 const varies = [];
 found.forEach((fallback, name) => {
   if (fallback) return;
   const decls = declared.get(name);
-  if (!decls) { dead.push(name); return; }
+  if (!decls) { (COMPONENT_OWNED.has(name) ? owned : dead).push(name); return; }
   found.set(name, decls[0]);
   // Distinct values, not just repeats of the same one.
   if (new Set(decls).size > 1) varies.push([name, new Set(decls).size]);
@@ -118,6 +133,10 @@ console.log(`wrote ${rows.length} variables to src/var-defaults.ts`);
 if (varies.length) {
   console.log(`\n${varies.length} vary by size or severity — the value written is the base one:`);
   varies.forEach(([k, n]) => console.log(`  ${k}  (${n} distinct declarations)`));
+}
+if (owned.length) {
+  console.log(`\n${owned.length} written by the component at runtime — not yours to set:`);
+  owned.forEach((k) => console.log('  ' + k));
 }
 if (dead.length) {
   console.log(`\n${dead.length} READ BUT NEVER SET — these resolve to nothing:`);
