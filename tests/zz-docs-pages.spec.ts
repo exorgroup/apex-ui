@@ -77,9 +77,15 @@ describe('the ported gallery examples are on the page', () => {
       'Dynamic panels and lazy content', 'Keyboard'],
     ApexScrollArea: ['Vertical', 'Horizontal', 'Both axes', 'Scroll fade',
       'Variants', 'Custom bars', 'Inside a panel'],
+    ApexOrderList: ['Selected', 'Control placement', 'Control alignment',
+      'Without checkboxes', 'Buttons only'],
     ApexInput: ['Autocomplete', 'Icon slots', 'Affixes and transforms'],
-    ApexButton: ['Raised', 'Rounded and icon-only', 'Icon position', 'Badge', 'Link',
-      'Sizes and states'],
+    /* "Severity × variant" carries a real multiplication sign. It was once
+       written as the six characters of its escape, which Vue renders
+       literally in template text, so the page showed the backslash to the
+       reader. Keeping it here means that cannot come back unnoticed. */
+    ApexButton: ['Severity × variant', 'Raised', 'Rounded and icon-only', 'Icon position',
+      'Badge', 'Link', 'Sizes and states'],
   };
 
   it.each(Object.entries(EXPECTED))('%s', async (name, headings) => {
