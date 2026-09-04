@@ -29,7 +29,7 @@ export interface DocEntry {
    * How the live stage renders this one. Omitted means the default: the
    * component with v-model and the playground props.
    */
-  demo?: 'icon' | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order';
+  demo?: 'icon' | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -943,6 +943,70 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['addNew', '.apex-pop__add', '--apex-pop-add-bg, --apex-pop-add-border, --apex-pop-add-fg, --apex-pop-add-hover-bg, --apex-pop-add-icon — one per open column'],
     ['option / tick / empty', '.apex-pop__opt, .apex-pop__tick, .apex-pop__empty', 'shared — all on ApexField. The tick doubles as the branch arrow'],
   ],
+  toolbar: [
+    ['root', '.apex-tbar', '--apex-toolbar-bg, --apex-toolbar-border, --apex-toolbar-fg, --apex-toolbar-radius, --apex-toolbar-pad'],
+    ['region', '.apex-tbar__region', '--apex-toolbar-gap — one of start / center / end'],
+  ],
+  tabs: [
+    ['root', '.apex-tabs', '--apex-tabs-border, --apex-tabs-radius'],
+    ['striparea / scroll', '.apex-tabs__striparea, .apex-tabs__scroll', 'the strip and its scroller — layout only'],
+    ['strip', '.apex-tabs__strip', '--apex-tabs-strip-bg, --apex-tabs-strip-w (vertical placements)'],
+    ['tab', '.apex-tabs__tab', '--apex-tabs-fg, --apex-tabs-active, --apex-tabs-fs, --apex-tabs-pad, --apex-tabs-tab-x, --apex-tabs-tab-y'],
+    ['label / badge', '.apex-tabs__label, .apex-tabs__badge', 'the text and its count'],
+    ['bar', '.apex-tabs__bar', '--apex-tabs-indicator. Its position and width are --apex-tabs-pos and --apex-tabs-size, which the component rewrites on every change — do not set them'],
+    ['panels / panel', '.apex-tabs__panels, .apex-tabs__panel', 'the panel area, and one panel'],
+  ],
+  steps: [
+    ['root', '.apex-st', '--apex-steps-fs'],
+    ['item', '.apex-st__item', 'one step and everything in it'],
+    ['marker', '.apex-st__marker', '--apex-steps-marker, --apex-steps-active, --apex-steps-complete — the numbered circle'],
+    ['rail', '.apex-st__rail', '--apex-steps-line — the line joining the markers'],
+    ['text / label / sub', '.apex-st__text, .apex-st__label, .apex-st__sub', 'the two lines beside a marker'],
+    ['body / panel', '.apex-st__body, .apex-st__panel', "the current step's content"],
+    ['nav / list', '.apex-st__nav, .apex-st__list', 'the Back / Next bar, and the rail as a list'],
+  ],
+  splitter: [
+    ['root', '.apex-sp', '--apex-splitter-h, --apex-splitter-radius, --apex-splitter-border'],
+    ['panel', '.apex-sp__panel', 'one pane — its width is a percentage the component owns'],
+    ['gutter', '.apex-sp__gutter', '--apex-splitter-gutter, --apex-splitter-gutter-bg, --apex-splitter-gutter-hover'],
+    ['grip', '.apex-sp__grip', 'the handle drawn on the gutter'],
+  ],
+  scrollarea: [
+    ['root', '.apex-sa', '--apex-scroll-w, --apex-scroll-fade'],
+    ['viewport', '.apex-sa__viewport', '--apex-scroll-h, --apex-scroll-max-h, --apex-scroll-pad — the clipping box'],
+    ['content', '.apex-sa__content', 'what scrolls inside it'],
+    ['bar', '.apex-sa__bar', '--apex-scroll-track, --apex-scroll-size, --apex-scroll-radius'],
+    ['thumb', '.apex-sa__thumb', '--apex-scroll-thumb, --apex-scroll-thumb-hover'],
+  ],
+  panel: [
+    ['root', '.apex-pn', '--apex-panel-bg, --apex-panel-border, --apex-panel-radius, --apex-panel-pad, --apex-panel-fs'],
+    ['head', '.apex-pn__head', '--apex-panel-head-bg, --apex-panel-head-fg'],
+    ['toggle / icon', '.apex-pn__toggle, .apex-pn__icon', 'the chevron and the header icon'],
+    ['title / sub', '.apex-pn__title, .apex-pn__sub', 'the two header lines'],
+    ['body / foot', '.apex-pn__body, .apex-pn__foot', 'content and footer; `flush` removes the body padding'],
+  ],
+  fieldset: [
+    ['root', '.apex-fs', '--apex-fieldset-bg, --apex-fieldset-border, --apex-fieldset-radius, --apex-fieldset-pad, --apex-fieldset-fs'],
+    ['legend', '.apex-fs__legend', '--apex-fieldset-legend-bg — the element that straddles the border'],
+    ['label', '.apex-fs__label', '--apex-fieldset-legend-fg — the legend text, a button when toggleable'],
+    ['toggle / icon', '.apex-fs__toggle, .apex-fs__icon', 'the chevron and the legend icon'],
+    ['body', '.apex-fs__body', 'the grouped controls'],
+  ],
+  card: [
+    ['root', '.apex-cd', '--apex-card-bg, --apex-card-border, --apex-card-radius, --apex-card-pad'],
+    ['media', '.apex-cd__media', '--apex-card-media-h — the image band'],
+    ['head / title / sub', '.apex-cd__head, .apex-cd__title, .apex-cd__sub', 'the header'],
+    ['body / foot', '.apex-cd__body, .apex-cd__foot', 'content and footer'],
+  ],
+  accordion: [
+    ['root', '.apex-ac', '--apex-accordion-gap, --apex-accordion-border, --apex-accordion-radius, --apex-accordion-fs'],
+    ['panel', '.apex-ac__panel', 'one item, header and body together'],
+    ['heading / head', '.apex-ac__heading, .apex-ac__header', '--apex-accordion-head-bg, --apex-accordion-head-fg, --apex-accordion-active-bg, --apex-accordion-active-fg, --apex-accordion-pad-x, --apex-accordion-pad-y'],
+    ['toggle / icon', '.apex-ac__toggle, .apex-ac__icon', 'the chevron and the item icon'],
+    ['title', '.apex-ac__title', 'the header text'],
+    ['badge', '.apex-dt__badge', "borrows the DataTable's badge class rather than owning one, so restyling that class reaches both. The ui key is scoped to this control"],
+    ['body / inner', '.apex-ac__body, .apex-ac__inner', '--apex-accordion-body-bg — the collapsing region and its padded content'],
+  ],
   radio: [
     ['control', '.apex-radio', 'the row, when the radio stands alone; inside a group it is `option` instead'],
     ['dot', '.apex-radio__dot', '--apex-radio-size, --apex-radio-border, --apex-radio-on, --apex-radio-on-width, --apex-radio-focus-ring'],
@@ -1135,6 +1199,168 @@ export const OWN_PARTS: Record<string, string[][]> = {
 };
 
 export const SNIP_OWN: Record<string, string> = {
+  toolbar: `.event-bar {
+  --apex-toolbar-bg: #101820;
+  --apex-toolbar-border: #243040;
+  --apex-toolbar-fg: #E8EEF7;
+  --apex-toolbar-gap: 10px;
+  --apex-toolbar-pad: 10px 14px;
+}
+
+<ApexToolbar :ui="{ root: 'event-bar', region: 'event-bar-region' }">
+  <template #start>…</template>
+  <template #center>…</template>
+  <template #end>…</template>
+</ApexToolbar>
+
+/* Start and end grow equally from a zero basis, so the centre region sits on
+   the bar's midpoint whatever the sides hold. Fill only start and end and the
+   middle stays empty rather than the sides drifting. */`,
+
+  tabs: `.report-tabs {
+  --apex-tabs-strip-bg: #0B1017;
+  --apex-tabs-border: #243040;
+  --apex-tabs-fg: #6B7789;
+  --apex-tabs-active: #7AA2F7;
+  --apex-tabs-indicator: #7AA2F7;
+}
+
+<ApexTabs v-model="tab" :tabs="TABS"
+  :ui="{ root: 'report-tabs', strip: 'report-strip', bar: 'report-bar' }" />
+
+/* --apex-tabs-pos and --apex-tabs-size are NOT yours to set. The component
+   rewrites both on every change so the indicator can slide to the active tab;
+   anything you put there is overwritten on the next click. */
+
+/* One slot per tab, named for its value: */
+<ApexTabs v-model="tab" :tabs="TABS">
+  <template #sales>…</template>
+  <template #refunds>…</template>
+</ApexTabs>`,
+
+  steps: `.checkout-steps {
+  --apex-steps-marker: #243040;
+  --apex-steps-active: #7AA2F7;
+  --apex-steps-complete: #137C4A;
+  --apex-steps-line: #243040;
+}
+
+<ApexSteps v-model="step" :steps="STEPS" show-nav
+  :ui="{ root: 'checkout-steps', marker: 'step-marker', rail: 'step-rail' }" />
+
+/* linear gates forward movement, so a step cannot be skipped until the one
+   before it is done. Without it every step is reachable at any time — right
+   for a settings wizard, wrong for a checkout. */
+<ApexSteps v-model="step" :steps="STEPS" linear show-nav @finish="submit" />`,
+
+  splitter: `.map-split {
+  --apex-splitter-h: 420px;
+  --apex-splitter-border: #243040;
+  --apex-splitter-gutter: 10px;
+  --apex-splitter-gutter-bg: #101820;
+  --apex-splitter-gutter-hover: #7AA2F7;
+}
+
+<ApexSplitter :panels="[{ min: 30 }, { min: 20 }]" state-key="seatmap"
+  :ui="{ root: 'map-split', gutter: 'map-gutter' }">
+  <template #panel-1>…</template>
+  <template #panel-2>…</template>
+</ApexSplitter>
+
+/* Sizes are percentages, so the split survives a window resize rather than
+   drifting the way fixed pixels would. stateKey remembers where the user
+   left the gutter. */`,
+
+  scrollarea: `.log-scroll {
+  --apex-scroll-max-h: 320px;
+  --apex-scroll-size: 10px;
+  --apex-scroll-track: #101820;
+  --apex-scroll-thumb: #2C3A4D;
+  --apex-scroll-thumb-hover: #3A4657;
+  --apex-scroll-radius: 6px;
+}
+
+<ApexScrollArea max-height="320px" fade :ui="{ root: 'log-scroll', thumb: 'log-thumb' }">
+  …
+</ApexScrollArea>
+
+/* Leave height and maxHeight unset and the box sizes to its content — the
+   variables fall back to auto, so nothing is capped until you say so. */`,
+
+  panel: `.fees-panel {
+  --apex-panel-bg: #101820;
+  --apex-panel-border: #243040;
+  --apex-panel-radius: 12px;
+  --apex-panel-pad: 16px;
+  --apex-panel-head-bg: #0B1017;
+  --apex-panel-head-fg: #E8EEF7;
+}
+
+<ApexPanel header="Fees" subheader="Per order" icon="payments" toggleable
+  :ui="{ root: 'fees-panel', head: 'fees-head', body: 'fees-body' }" />
+
+/* flush removes the body padding, for a table or list that brings its own —
+   otherwise the two paddings stack and the content sits oddly inset. */
+<ApexPanel header="Bookings" flush><ApexDataTable … /></ApexPanel>`,
+
+  fieldset: `.booker-fs {
+  --apex-fieldset-border: #243040;
+  --apex-fieldset-radius: 10px;
+  --apex-fieldset-pad: 16px;
+  /* The legend sits ON the border, so its background must match whatever is
+     behind the fieldset or the border will show through the text. */
+  --apex-fieldset-legend-bg: #0F141C;
+  --apex-fieldset-legend-fg: #E8EEF7;
+}
+
+<ApexFieldset legend="Lead booker" icon="person"
+  :ui="{ root: 'booker-fs', legend: 'booker-legend', body: 'booker-body' }">
+  <ApexInput label="Name" />
+</ApexFieldset>
+
+/* This is a real <fieldset>, which is the reason to use it over a panel:
+   disabled turns off every control inside in one go. */
+<ApexFieldset legend="Billing" :disabled="sameAsDelivery">…</ApexFieldset>`,
+
+  card: `.event-card {
+  --apex-card-bg: #101820;
+  --apex-card-border: #243040;
+  --apex-card-radius: 14px;
+  --apex-card-pad: 16px;
+  --apex-card-media-h: 180px;
+}
+
+<ApexCard title="Aida" subtitle="14 March" image="/aida.jpg"
+  :ui="{ root: 'event-card', media: 'event-media', title: 'event-title' }" />
+
+/* Give it href or clickable and it renders as <a> or <button> rather than a
+   div with a click handler — so the keyboard and screen readers get the
+   affordance for free. */
+<ApexCard title="Aida" href="/events/aida" hoverable />`,
+
+  accordion: `.faq-acc {
+  --apex-accordion-gap: 8px;
+  --apex-accordion-border: #243040;
+  --apex-accordion-radius: 10px;
+  --apex-accordion-head-bg: #101820;
+  --apex-accordion-head-fg: #E8EEF7;
+  --apex-accordion-active-bg: #16202C;
+  --apex-accordion-active-fg: #7AA2F7;
+  --apex-accordion-body-bg: #0B1017;
+}
+
+<ApexAccordion v-model:value="open" :items="FAQ"
+  :ui="{ root: 'faq-acc', head: 'faq-head', body: 'faq-body' }" />
+
+/* multiple lets several stand open and turns the model into an array.
+   collapsible={false} keeps one always open, which suits a settings page
+   where an empty state would be meaningless. */
+<ApexAccordion v-model:value="openList" :items="FAQ" multiple />
+
+/* The badge borrows the DataTable's class rather than owning one, so
+   .apex-dt__badge dresses both. Scope it with the ui key if you mean only
+   this accordion. */`,
+
   radio: `/* The dot and the card are this control's own; the label, message and
    tone come from the shared field surface. */
 .plan-radio {
@@ -2215,6 +2441,220 @@ export const ENTRIES: DocEntry[] = [
       ['add-new', '{ query }'],
     ],
     slots: [['item', 'Custom row content; receives { item, index }']],
+  },
+  /* ── Layout ────────────────────────────────────────────
+     Containers, not controls: no value, no label or message line, no tone.
+     They take `noField` for the page and `demo: 'container'` for the stage,
+     which renders sample content inside each — a frame around nothing shows
+     nothing. Their class map is ApexContainerClasses, not ApexFieldClasses. */
+  {
+    id: 'toolbar', name: 'ApexToolbar', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'A bar with start, center and end regions. Contents are slotted, since a toolbar holds whatever the screen needs; the component owns the layout and the chrome. Start and end grow equally from zero, so the centre sits on the bar’s midpoint whatever the sides hold.',
+    base: { size: 'md', bordered: true },
+    controls: [
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'bordered', type: 'bool' }, { key: 'raised', type: 'bool' },
+      { key: 'wrap', type: 'bool' }, { key: 'sticky', type: 'bool' },
+      { key: 'gap', type: 'text' }, { key: 'padding', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'borderColor', type: 'color' },
+      { key: 'radius', type: 'text' },
+    ],
+    props: [
+      ['size', "'sm' | 'md' | 'lg'", "'md'", 'Height and padding'],
+      ['gap', 'string', '—', 'Space between items inside a region'],
+      ['wrap', 'boolean', 'false', 'Wrap onto more lines instead of scrolling'],
+      ['bordered / raised', 'boolean', 'true / false', 'A border, or elevation instead'],
+      ['sticky', 'boolean', 'false', 'Stick to the top of the scroll container'],
+      ['background / borderColor / color / radius / padding', 'string', '—', 'Chrome, over --apex-toolbar-*'],
+    ],
+    events: [],
+    slots: [['start / center / end', 'The three regions'], ['default', 'Anything outside them']],
+  },
+  {
+    id: 'tabs', name: 'ApexTabs', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'Tabbed panels with a sliding indicator. Four variants, either orientation, optional scrolling when the strip outgrows its box, and lazy panels that mount on first view.',
+    base: { variant: 'underline', size: 'md' },
+    controls: [
+      { key: 'variant', type: 'select', options: ['underline', 'pill', 'enclosed', 'plain'] },
+      { key: 'placement', type: 'select', options: ['top', 'bottom', 'left', 'right'] },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'align', type: 'select', options: ['start', 'center', 'end'] },
+      { key: 'fill', type: 'bool' }, { key: 'lazy', type: 'bool' },
+      { key: 'selectOnFocus', type: 'bool' }, { key: 'tabsOnly', type: 'bool' },
+      { key: 'activeColor', type: 'color' }, { key: 'indicatorColor', type: 'color' },
+    ],
+    props: [
+      ['modelValue', 'unknown', '—', "The active tab's value"],
+      ['tabs', 'TabItem[]', '[]', '{ value, label, icon?, badge?, disabled? }'],
+      ['variant', "'underline' | 'pill' | 'enclosed' | 'plain'", "'underline'", ''],
+      ['placement', "'top' | 'bottom' | 'left' | 'right'", "'top'", 'Left and right stack the strip beside the panels'],
+      ['fill', 'boolean', 'false', 'Tabs share the width equally'],
+      ['lazy', 'boolean', 'false', 'Mount a panel on first view'],
+      ['unmountInactive', 'boolean', 'false', 'Destroy a panel when it is left'],
+      ['selectOnFocus', 'boolean', 'false', 'Arrow keys select as they move, rather than only moving focus'],
+      ['tabsOnly', 'boolean', 'false', 'Render the strip without the panel area, for driving something else'],
+    ],
+    events: [['update:modelValue', 'value'], ['change', 'value']],
+    slots: [['panel-1, panel-2, …', 'One slot per tab, BY POSITION — not by value'], ['tab-1, tab-2, …', 'Custom tab content; receives { tab, index, active }']],
+  },
+  {
+    id: 'steps', name: 'ApexSteps', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'A numbered sequence with a panel per step. `linear` gates forward movement until the current step is complete; the optional nav bar gives Back and Next without wiring them yourself.',
+    base: { orientation: 'horizontal', showNav: true },
+    controls: [
+      { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'linear', type: 'bool' }, { key: 'showNav', type: 'bool' },
+      { key: 'showComplete', type: 'bool' }, { key: 'stepsOnly', type: 'bool' },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'activeColor', type: 'color' }, { key: 'completeColor', type: 'color' },
+    ],
+    props: [
+      ['modelValue', 'unknown', '—', "The current step's value"],
+      ['steps', 'StepItem[]', '[]', '{ value, label, sub?, icon?, disabled? }'],
+      ['orientation', "'horizontal' | 'vertical'", "'horizontal'", ''],
+      ['linear', 'boolean', 'false', 'Only the next step may be reached'],
+      ['showNav', 'boolean', 'false', 'Back / Next / Finish beneath the panel'],
+      ['showComplete', 'boolean', 'false', 'Tick completed markers rather than numbering them'],
+      ['stepsOnly', 'boolean', 'false', 'The rail without the panel area'],
+    ],
+    events: [['update:modelValue', 'value'], ['change', 'value'], ['finish', '—']],
+    slots: [['panel-1, panel-2, …', 'One slot per step, BY POSITION'], ['step-1, step-2, …', 'Custom rail content; receives { step, index, active }']],
+  },
+  {
+    id: 'splitter', name: 'ApexSplitter', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'Resizable panes with a draggable gutter. Sizes are percentages, so the split survives a window resize; `stateKey` remembers where the user left it.',
+    base: { layout: 'horizontal', height: '220px' },
+    controls: [
+      { key: 'layout', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'height', type: 'text' }, { key: 'gutterSize', type: 'number' },
+      { key: 'step', type: 'number' }, { key: 'showHandle', type: 'bool' },
+      { key: 'bordered', type: 'bool' }, { key: 'disabled', type: 'bool' },
+      { key: 'gutterColor', type: 'color' },
+    ],
+    props: [
+      ['panels', 'SplitterPanel[]', '[]', '{ key?, min?, max?, size? } per pane'],
+      ['sizes', 'number[]', '—', 'Starting percentages'],
+      ['layout', "'horizontal' | 'vertical'", "'horizontal'", ''],
+      ['step', 'number', '—', 'Snap the drag to this many percent'],
+      ['stateKey / stateStorage', 'string', '—', 'Persist the sizes between visits'],
+      ['gutterSize', 'number', '—', 'Thickness of the divider in pixels'],
+    ],
+    events: [['resize', 'number[] — while dragging'], ['resizeend', 'number[]'], ['update:sizes', 'number[]']],
+    slots: [['panel-1, panel-2, …', 'One slot per pane'], ['gutter', 'Custom divider; receives { index }']],
+  },
+  {
+    id: 'scrollarea', name: 'ApexScrollArea', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'A box that scrolls with a styled bar instead of the browser’s. Sizes to its content unless you cap it, and can fade the edges to signal there is more.',
+    base: { height: '180px' },
+    controls: [
+      { key: 'height', type: 'text' }, { key: 'maxHeight', type: 'text' },
+      { key: 'width', type: 'text' }, { key: 'padding', type: 'text' },
+      { key: 'size', type: 'number' }, { key: 'fade', type: 'bool' },
+      { key: 'thumbColor', type: 'color' }, { key: 'trackColor', type: 'color' },
+    ],
+    props: [
+      ['height / maxHeight / width', 'string', 'auto', 'Unset means size to content'],
+      ['padding', 'string', '—', 'Inside the viewport'],
+      ['size', 'number', '—', 'Scrollbar thickness in pixels'],
+      ['fade', 'boolean', 'false', 'Fade the edges where content continues'],
+      ['thumbColor / trackColor', 'string', '—', 'Over --apex-scroll-*'],
+    ],
+    events: [['scroll', 'the native event']],
+    slots: [['default', 'The scrolling content']],
+  },
+  {
+    id: 'panel', name: 'ApexPanel', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'A titled section, optionally collapsible. Where ApexFieldset groups form controls with a legend on its border, a panel is the general-purpose block: a header with actions, a body, and a footer.',
+    base: { header: 'Fees', subheader: 'Applied per order', icon: 'payments', bordered: true },
+    controls: [
+      { key: 'header', type: 'text' }, { key: 'subheader', type: 'text' },
+      { key: 'icon', type: 'text' }, { key: 'toggleable', type: 'bool' },
+      { key: 'collapsed', type: 'bool' }, { key: 'bordered', type: 'bool' },
+      { key: 'flush', type: 'bool' },
+      { key: 'shadow', type: 'select', options: ['none', 'sm', 'md', 'lg'] },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'togglePosition', type: 'select', options: ['start', 'end'] },
+      { key: 'headerBackground', type: 'color' }, { key: 'headerColor', type: 'color' },
+    ],
+    props: [
+      ['header / subheader', 'string', '—', 'The two lines in the header'],
+      ['icon', 'string', '—', 'Before the header text'],
+      ['toggleable', 'boolean', 'false', 'Collapsible, with a chevron'],
+      ['collapsed', 'boolean', 'false', 'v-model:collapsed — the open state'],
+      ['flush', 'boolean', 'false', 'No body padding, for a table or list that supplies its own'],
+      ['bordered / shadow', 'boolean / string', 'true / sm', ''],
+    ],
+    events: [['update:collapsed', 'boolean'], ['toggle', 'boolean']],
+    slots: [['default', 'Body'], ['header', 'Replace the header'], ['icons', 'Actions at the header’s end'], ['footer', 'Footer'], ['toggleicon', 'Custom chevron; receives { collapsed }']],
+  },
+  {
+    id: 'fieldset', name: 'ApexFieldset', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'A real <fieldset> whose legend straddles the border, optionally collapsible. Use it to group related form controls — `disabled` disables every control inside it in one go, which a plain div cannot do.',
+    base: { legend: 'Lead booker', icon: 'person', bordered: true },
+    controls: [
+      { key: 'legend', type: 'text' }, { key: 'icon', type: 'text' },
+      { key: 'legendAlign', type: 'select', options: ['start', 'center', 'end'] },
+      { key: 'toggleable', type: 'bool' }, { key: 'collapsed', type: 'bool' },
+      { key: 'bordered', type: 'bool' }, { key: 'disabled', type: 'bool' },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'legendBackground', type: 'color' }, { key: 'legendColor', type: 'color' },
+    ],
+    props: [
+      ['legend', 'string', '—', 'The text on the border'],
+      ['legendAlign', "'start' | 'center' | 'end'", "'start'", ''],
+      ['toggleable', 'boolean', 'false', 'Collapsible, with the legend as the button'],
+      ['collapsed', 'boolean', 'false', 'v-model:collapsed'],
+      ['disabled', 'boolean', 'false', 'Disables every control inside — the reason to use a fieldset'],
+    ],
+    events: [['update:collapsed', 'boolean'], ['toggle', 'boolean']],
+    slots: [['default', 'The grouped controls'], ['legend', 'Replace the legend'], ['toggleicon', 'Custom chevron']],
+  },
+  {
+    id: 'card', name: 'ApexCard', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'Media, header, body and footer, each a slot. The common cases are props, so a plain card needs no markup at all. Give it `href` or `clickable` and it renders as a link or a button rather than a div with a click handler.',
+    base: { title: 'Aida', subtitle: 'Teatru Manoel · 14 March', bordered: true, shadow: 'sm' },
+    controls: [
+      { key: 'title', type: 'text' }, { key: 'subtitle', type: 'text' },
+      { key: 'image', type: 'text' }, { key: 'imageHeight', type: 'text' },
+      { key: 'bordered', type: 'bool' }, { key: 'hoverable', type: 'bool' },
+      { key: 'clickable', type: 'bool' }, { key: 'horizontal', type: 'bool' },
+      { key: 'shadow', type: 'select', options: ['none', 'sm', 'md', 'lg'] },
+      { key: 'radius', type: 'text' }, { key: 'padding', type: 'text' },
+    ],
+    props: [
+      ['title / subtitle', 'string', '—', 'The header, without writing markup'],
+      ['image / imageAlt / imageHeight', 'string', '—', 'Media band across the top'],
+      ['href / clickable', 'string / boolean', '—', 'Renders as <a> or <button> rather than <article>'],
+      ['hoverable', 'boolean', 'false', 'Lift on hover'],
+      ['horizontal', 'boolean', 'false', 'Body flows in a row'],
+      ['bordered / shadow / radius / padding', '—', '—', 'Over --apex-card-*'],
+    ],
+    events: [['click', 'MouseEvent — only when clickable or href is set']],
+    slots: [['default', 'Body'], ['media', 'Replace the image'], ['header', 'Replace the header'], ['footer', 'Footer']],
+  },
+  {
+    id: 'accordion', name: 'ApexAccordion', group: 'Layout', noField: true, demo: 'container',
+    blurb: 'Stacked collapsible panels. One at a time by default; `multiple` lets several stand open and turns the model into an array. `lazy` mounts a panel’s content on first open.',
+    base: { bordered: true },
+    controls: [
+      { key: 'multiple', type: 'bool' }, { key: 'collapsible', type: 'bool' },
+      { key: 'lazy', type: 'bool' }, { key: 'bordered', type: 'bool' },
+      { key: 'gap', type: 'text' },
+      { key: 'togglePosition', type: 'select', options: ['start', 'end'] },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'headerBackground', type: 'color' }, { key: 'activeBackground', type: 'color' },
+    ],
+    props: [
+      ['value', 'unknown | unknown[]', '—', 'v-model:value; an array once multiple is on'],
+      ['items', 'AccordionPanel[]', '[]', '{ value, header?, content?, icon?, badge?, disabled? }'],
+      ['multiple', 'boolean', 'false', 'Several open at once'],
+      ['collapsible', 'boolean', 'true', 'The open one may be closed, leaving none'],
+      ['lazy', 'boolean', 'false', 'Mount content on first open'],
+      ['gap', 'string', '—', 'Space between panels'],
+      ['togglePosition', "'start' | 'end'", "'start'", 'Which side the chevron sits'],
+    ],
+    events: [['update:value', 'value | value[]'], ['change', 'value'], ['toggle', '{ value, open }']],
+    slots: [['default', 'A panel body; receives { panel, index }'], ['content', 'Replace the whole body region'], ['header', 'Custom header; receives { panel, active, index }'], ['toggleicon', 'Custom chevron']],
   },
   {
     id: 'checkbox', name: 'ApexCheckbox', group: 'Choice',

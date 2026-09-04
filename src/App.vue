@@ -14,6 +14,7 @@ import {
 import type { AddNewKind, DocEntry, DocPage } from './registry';
 import { useApexDialog } from '@exorgroup/apex-ui';
 import LocalityForm from './demos/LocalityForm.vue';
+import ContainerStage from './demos/ContainerStage.vue';
 
 const current = ref('input');
 const theme = ref<'light' | 'dark'>('dark');
@@ -437,9 +438,13 @@ async function copyUsage() {
         <p v-if="groups.length === 0" class="navempty">No control matches that.</p>
       </nav>
 
-      <!-- Said out loud rather than left to be discovered: this harness covers the
-           five controls under review, not the whole library. -->
-      <p class="side-note">Five of 84 controls, plus the Foundations pages. The rest arrive as each is reviewed.</p>
+      <!-- Said out loud rather than left to be discovered: this harness covers
+           the controls reviewed so far, not the whole library. Counted from the
+           registry rather than written down, so it cannot go stale again. -->
+      <p class="side-note">
+        {{ ENTRIES.length }} of 84 controls, plus the Foundations pages.
+        The rest arrive as each is reviewed.
+      </p>
     </aside>
 
     <main>
@@ -578,6 +583,15 @@ async function copyUsage() {
                   />
                 </div>
               </ApexField>
+
+              <!-- A container is a frame around content, so it cannot be
+                   rendered from props alone the way a field control can. The
+                   sample content for all nine lives in ContainerStage. -->
+              <ContainerStage
+                v-else-if="entry.demo === 'container'"
+                :id="entry.id"
+                :bind="live"
+              />
 
               <!-- Two models: the collection, and the rows the move buttons
                    act on. Without the second the buttons never enable. -->
@@ -1410,6 +1424,17 @@ async function copyUsage() {
           <p v-else-if="entry.id === 'icon'" class="note">
             ApexIcon is neither a field nor a button, so it has no shared surface to
             inherit — everything it responds to is listed here.
+          </p>
+          <!-- Containers have their own class map. Pointing them at ApexField
+               would be wrong: they have no value, label, message or tone. -->
+          <p v-else-if="entry.demo === 'container'" class="note">
+            A container is not a field: it has no value, no label or message line and
+            no tone, so none of the ApexField surface applies. Its class map is
+            <code>ApexContainerClasses</code> — <code>root</code>, <code>head</code>,
+            <code>title</code>, <code>sub</code>, <code>body</code>, <code>foot</code>,
+            <code>toggle</code>, <code>icon</code>, <code>panel</code> and
+            <code>label</code> are shared by the nine, and the keys below are what
+            {{ entry.name }} adds. A key names the part’s <em>role</em>, not its class.
           </p>
           <p v-else class="note">
             The shared surface — the box, the label, the message line, the appearance
