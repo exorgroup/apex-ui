@@ -93,10 +93,14 @@ describe('ApexPanel garage door', () => {
     const el = w.find('.apex-pn__region').element as HTMLElement;
     Object.defineProperty(el, 'scrollHeight', { configurable: true, get: () => NATURAL });
 
+    /* The stub has to answer everything the component calls, `cancel` included:
+       the component holds the last frame with fill:'forwards' and releases it
+       only after `hidden` has landed, so a stub without cancel throws where the
+       real Animation would not. */
     const frames: Keyframe[][] = [];
     (el as unknown as { animate: unknown }).animate = (kf: Keyframe[]) => {
       frames.push(kf);
-      return { finished: Promise.resolve() };
+      return { finished: Promise.resolve(), cancel: () => {} };
     };
     return { w, frames, el };
   }
@@ -126,7 +130,9 @@ describe('ApexPanel garage door', () => {
     expect(el.style.overflow).toBe('');
 
     await w.find('.apex-pn__toggle').trigger('click');
-    await new Promise((r) => setTimeout(r, 0)); // let the finished promise settle
+    // the finished promise, then the nextTick that applies `hidden`
+    await new Promise((r) => setTimeout(r, 0));
+    await w.vm.$nextTick();
     /* A panel that stayed clipped would cut off a select or date picker
        opening out of its body, so this must come back off. */
     expect(el.style.overflow, 'overflow must not be left clipped').toBe('');

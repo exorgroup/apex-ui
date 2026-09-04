@@ -103,14 +103,27 @@ watch(shut, async (closing) => {
   /* Clipped only for the duration: a permanently hidden overflow would cut off
      a menu or date picker opening out of the panel body. */
   el.style.overflow = 'hidden';
+  /* `forwards` keeps the last frame after it finishes. Without it the height
+     springs back to natural the instant the animation ends, and the panel flashes
+     open for the frame before `hidden` lands. */
+  const anim = el.animate(frames, {
+    duration: DURATION, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'forwards',
+  });
   try {
-    await el.animate(frames, { duration: DURATION, easing: 'cubic-bezier(.22,1,.36,1)' }).finished;
+    await anim.finished;
   } catch {
     return; // superseded by a faster click; that run does the cleanup
   }
   if (mine !== run) return;
-  el.style.overflow = '';
+
+  /* Drop `animating` first, then wait for the render that applies `hidden`,
+     and only then release the held height — so nothing is ever visible at full
+     height while the panel is meant to be shut. */
   animating.value = false;
+  await nextTick();
+  if (mine !== run) return;
+  anim.cancel();
+  el.style.overflow = '';
 });
 
 const rootStyle = computed(() => {

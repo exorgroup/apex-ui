@@ -22,5 +22,9 @@
      the distribution work, deliberately left until last. The spec still runs
      under vitest, which does not typecheck; excluding it keeps this typecheck
      about the library. Revisit once dist/index.d.ts exists. */
-  "exclude": ["tests/zz-docs-pages.spec.ts"]
+  /* zz-hidden-reset reads the stylesheet with `fs`, because Vite stubs a CSS
+     import to an empty string under vitest and the glob version of that guard
+     silently compared against nothing. Node types are not installed here, so it
+     is excluded for the same reason as the spec above. */
+  "exclude": ["tests/zz-docs-pages.spec.ts", "tests/zz-hidden-reset.spec.ts"]
 }
