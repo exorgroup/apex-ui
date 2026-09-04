@@ -130,6 +130,9 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
    so the cells stay wide enough for a suggestion list to open inside one. */
 .grid--2 { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
 
+/* Three narrow cells across, for comparing variants side by side. */
+.grid--3 { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+
 .note { font-size: 0.845rem; line-height: 1.65; color: var(--fg-subtle, rgb(255 255 255 / 0.6)); max-width: 70ch; }
 .note code {
   font-family: ui-monospace, 'IBM Plex Mono', monospace; font-size: 0.9em;
@@ -271,3 +274,11 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .demo-form__hint { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--fg-subtle); }
 .demo-form__actions { display: flex; justify-content: flex-end; gap: 8px; padding-block-start: 4px; }
 .demo-log { margin: 0; padding-inline-start: 18px; font-size: 13px; line-height: 1.7; color: var(--fg-muted); }
+
+
+/* The toolbar's navigation-bar example: a dark pill whose links and icon
+   buttons sit on the bar's own colour rather than the page's. */
+.tbar-nav { align-items: center; }
+.tbar-brand { display: inline-flex; align-items: center; gap: 8px; color: #fff; }
+.tbar-links { display: inline-flex; align-items: center; gap: 2px; margin-inline-start: 14px; }
+.tbar-link { color: rgb(255 255 255 / 0.72); }

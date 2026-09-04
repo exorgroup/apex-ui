@@ -8,7 +8,7 @@ import {
   BUTTON_FAMILY, DIAL_ITEMS, FIELD_PARTS, FIELD_STYLE_PROPS, FIELD_VARS, ICON_RESOLVER_SNIPPET, ICON_SETS,
   OWN_PARTS, SEVERITIES, SNIP_CLASS, SNIP_CTL, SNIP_DARK, SNIP_OWN, SNIP_PROPS, SNIP_TONE,
   SNIP_UI, SPLIT_MODEL,
-  SCROLL_IN_PANEL_SNIPPET, SCROLL_VARIANTS, SCROLL_WIDE,
+  SCROLL_IN_PANEL_SNIPPET, SCROLL_VARIANTS, SCROLL_WIDE, TBAR_LINKS, TBAR_MARKS,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
@@ -373,6 +373,11 @@ const rangeValue2 = ref([9, 17]);
 const vert1 = ref(60);
 const vert2 = ref(40);
 const vert3 = ref(75);
+
+/* --- ApexToolbar demos -------------------------------------------- */
+
+/** The search box in the toolbar's centre region. */
+const tbarQuery = ref('');
 
 /* --- ApexInput-only sections ------------------------------------- */
 
@@ -1482,6 +1487,139 @@ async function copyUsage() {
             <div v-for="a in [180, 270, 360]" :key="a" class="cell dial-cell">
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
+            </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. A toolbar is three regions and their
+             slack, which only reads as a layout once there is real content in
+             more than one of them. -->
+        <template v-if="entry.id === 'toolbar'">
+          <h2>Basic</h2>
+          <p class="note">
+            Three slots — <code>start</code>, <code>center</code>, <code>end</code>.
+            The start region takes the slack, so the end region is always pushed to
+            the far edge.
+          </p>
+          <div style="margin-top:12px">
+            <ApexToolbar>
+              <template #start>
+                <ApexButton severity="secondary" variant="text" icon="add" icon-only label="New" />
+                <ApexButton severity="secondary" variant="text" icon="print" icon-only label="Print" />
+                <ApexButton severity="secondary" variant="text" icon="upload" icon-only label="Upload" />
+              </template>
+              <template #center>
+                <ApexInput v-model="tbarQuery" placeholder="Search" leading-icon="search"
+                           label-placement="hidden" label="Search" size="sm" />
+              </template>
+              <template #end>
+                <ApexButton severity="secondary" variant="outlined" size="sm">Cancel</ApexButton>
+                <ApexButton size="sm" icon="check">Save</ApexButton>
+              </template>
+            </ApexToolbar>
+          </div>
+
+          <h2>Sizes and chrome</h2>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:14px">
+            <ApexToolbar v-for="s in SIZES" :key="s" :size="s">
+              <template #start><strong style="font-size:13.5px">size="{{ s }}"</strong></template>
+              <template #end>
+                <ApexButton severity="secondary" variant="text" icon="more_horiz" icon-only label="More" :size="s" />
+                <ApexButton :size="s" icon="check">Save</ApexButton>
+              </template>
+            </ApexToolbar>
+            <ApexToolbar raised radius="14px">
+              <template #start><strong style="font-size:13.5px">raised, radius="14px"</strong></template>
+              <template #end><ApexButton size="sm" severity="secondary" variant="outlined">Action</ApexButton></template>
+            </ApexToolbar>
+            <ApexToolbar :bordered="false" background="#EAF2FF" color="#073C9F">
+              <template #start><strong style="font-size:13.5px">tinted, borderless</strong></template>
+              <template #end><ApexButton size="sm">Continue</ApexButton></template>
+            </ApexToolbar>
+          </div>
+
+          <h2>Centred content</h2>
+          <p class="note">
+            Start and end grow equally from a zero basis, so the middle sits on the
+            bar's midpoint whatever the sides hold — one button against two below,
+            still centred. When the regions together outgrow the bar it scrolls
+            rather than letting them overlap.
+          </p>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:14px">
+            <ApexToolbar>
+              <template #start><ApexButton severity="secondary" variant="text" icon="arrow_back" icon-only label="Back" /></template>
+              <template #center><strong style="font-size:14px">Centred title</strong></template>
+              <template #end>
+                <ApexButton severity="secondary" variant="text" icon="share" icon-only label="Share" />
+                <ApexButton severity="secondary" variant="text" icon="more_vert" icon-only label="More" />
+              </template>
+            </ApexToolbar>
+            <ApexToolbar>
+              <template #start>
+                <ApexButton severity="secondary" variant="text" icon="arrow_back" icon-only label="Back" />
+                <ApexButton severity="secondary" variant="outlined" size="sm">Filters</ApexButton>
+              </template>
+              <template #center><strong style="font-size:14px">Still centred</strong></template>
+              <template #end><ApexButton severity="secondary" variant="text" icon="more_vert" icon-only label="More" /></template>
+            </ApexToolbar>
+          </div>
+
+          <h2>Custom — navigation bar</h2>
+          <p class="note">
+            The same three regions, restyled: a dark pill holding a brand mark, nav
+            links, a search control and an avatar.
+          </p>
+          <div style="margin-top:12px">
+            <ApexToolbar background="#0F141C" color="#fff" :bordered="false" radius="999px"
+                         padding="10px 14px 10px 20px" class="tbar-nav">
+              <template #start>
+                <span class="tbar-brand">
+                  <ApexIcon name="bolt" :size="20" fill />
+                  <strong>Brand</strong>
+                </span>
+                <span class="tbar-links">
+                  <ApexButton v-for="l in TBAR_LINKS" :key="l"
+                              severity="secondary" variant="text" size="sm" class="tbar-link">{{ l }}</ApexButton>
+                </span>
+              </template>
+              <template #end>
+                <ApexButton severity="secondary" variant="text" size="sm" icon="search" icon-only
+                            label="Search" class="tbar-link" />
+                <ApexButton size="sm" radius="999px">Get Started</ApexButton>
+                <ApexAvatar label="A. Borg" size="sm" auto-color />
+              </template>
+            </ApexToolbar>
+          </div>
+
+          <h2>Sticky and wrapping</h2>
+          <p class="note">
+            <code>sticky</code> keeps the bar at the top of a scrolling region;
+            <code>wrap</code> lets the regions fold onto more lines instead of squeezing.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell" style="padding:0;overflow:hidden">
+              <ApexScrollArea height="200px" padding="0">
+                <ApexToolbar sticky :bordered="false" raised radius="0">
+                  <template #start><strong style="font-size:13px">Sticky header</strong></template>
+                  <template #end><ApexButton size="sm" icon="add">Add</ApexButton></template>
+                </ApexToolbar>
+                <div style="padding:14px;font-size:13.5px;color:var(--fg-muted)">
+                  <p v-for="n in 8" :key="n" style="margin:0 0 12px">Row {{ n }} — scroll and the bar stays put.</p>
+                </div>
+              </ApexScrollArea>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">wrap</span>
+              <ApexToolbar wrap>
+                <template #start>
+                  <ApexButton v-for="l in TBAR_MARKS" :key="l" severity="secondary"
+                              variant="outlined" size="sm">{{ l }}</ApexButton>
+                </template>
+                <template #end>
+                  <ApexButton size="sm" severity="secondary" variant="outlined">Reset</ApexButton>
+                  <ApexButton size="sm">Apply</ApexButton>
+                </template>
+              </ApexToolbar>
             </div>
           </div>
         </template>

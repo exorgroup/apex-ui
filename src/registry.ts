@@ -90,6 +90,10 @@ export const SWITCH_LABELS_SNIPPET = `<!-- Both words are rendered into one grid
 
 <ApexSwitch v-model="live" on-label="ON" off-label="OFF" :ui="{ control: 'live-switch' }" />`;
 
+/** The toolbar's navigation-bar example: link labels, then the wrap example's. */
+export const TBAR_LINKS = ['Products', 'Solutions', 'Resources', 'Pricing'];
+export const TBAR_MARKS = ['Bold', 'Italic', 'Underline'];
+
 export const SCROLL_VARIANTS = ['auto', 'hover', 'scroll', 'always', 'hidden'] as const;
 
 /** Wide content for the horizontal-axis example. */
