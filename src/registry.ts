@@ -1194,7 +1194,7 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['— (indent)', '.apex-tree__row padding', '--apex-tree-indent — how far each level steps in. The leaf spacer reads the same --apex-tree-twisty-size, so rows stay in line'],
     ['addNew', '.apex-pop__add', '--apex-pop-add-bg, --apex-pop-add-border, --apex-pop-add-fg, --apex-pop-add-hover-bg, --apex-pop-add-icon — one per open branch, plus one for the root'],
     ['popover / filter / checkbox / tick / empty', '.apex-pop, .apex-pop__filter, .apex-cb__box, .apex-pop__tick, .apex-pop__empty', 'shared — all on ApexField'],
-    ['chip', '.apex-chip', 'the chips in the box under multiple/checkbox; --apex-chip-* as on Multiselect'],
+    ['chip', '.apex-chip', 'the chips in the box under multiple/checkbox; --apex-token-* as on Multiselect'],
   ],
   orderlist: [
     ['panel', '.apex-order__panel', '--apex-order-panel-bg, --apex-order-panel-border, --apex-order-panel-radius'],
@@ -1219,8 +1219,8 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['—' , '.apex-ctl--select option', '--apex-ctl-select-opt-bg, --apex-ctl-select-opt-fg, --apex-ctl-select-opt-disabled-fg, --apex-ctl-select-opt-selected-bg (native only; the OS draws this menu, so these are all it will honour)'],
   ],
   multiselect: [
-    ['chip', '.apex-chip', '--apex-chip-bg, --apex-chip-fg, --apex-chip-border, --apex-chip-radius, --apex-chip-remove, --apex-chip-remove-hover'],
-    ['chip (overflow)', '.apex-chip--more', '--apex-chip-more-bg, --apex-chip-more-fg — the "+N" pill, which takes the chip key too'],
+    ['chip', '.apex-chip', '--apex-token-bg, --apex-token-fg, --apex-token-border, --apex-token-radius, --apex-token-remove, --apex-token-remove-hover'],
+    ['chip (overflow)', '.apex-chip--more', '--apex-token-more-bg, --apex-token-more-fg — the "+N" pill, which takes the chip key too'],
     ['thumbnail', '.apex-chip__img and .apex-pop__img', "an option's image, on the chip and in the row"],
     ['placeholder', '.apex-ctl__ph', '--apex-ctl-placeholder'],
     ['chevron', '.apex-ctl__chev', 'the open/close arrow'],
@@ -1271,7 +1271,7 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['box', '.apex-otp__box', '--apex-otp-bg, --apex-otp-fg, --apex-otp-border, --apex-otp-border-focus, --apex-otp-ring, --apex-otp-radius'],
   ],
   tags: [
-    ['chip', '.apex-chip', '--apex-chip-bg, --apex-chip-fg, --apex-chip-border, --apex-chip-radius'],
+    ['chip', '.apex-chip', '--apex-token-bg, --apex-token-fg, --apex-token-border, --apex-token-radius'],
   ],
   stepper: [
     ['control', '.apex-stepper', 'the shared --apex-ctl-* set — the box behaves like any field box'],
@@ -1810,14 +1810,14 @@ function createRegion({ path }) {
 <ApexMultiselect v-model="roles" label="Roles" :options="options" :max-chips="3" />
 
 .role-picker {
-  --apex-chip-bg: #16202C;
-  --apex-chip-fg: #E8EEF7;
-  --apex-chip-border: #243040;
-  --apex-chip-remove: #6B7789;
-  --apex-chip-remove-hover: #E11D48;
+  --apex-token-bg: #16202C;
+  --apex-token-fg: #E8EEF7;
+  --apex-token-border: #243040;
+  --apex-token-remove: #6B7789;
+  --apex-token-remove-hover: #E11D48;
   /* The "+N" pill shown once maxChips is passed. */
-  --apex-chip-more-bg: #1D2735;
-  --apex-chip-more-fg: #8B98AD;
+  --apex-token-more-bg: #1D2735;
+  --apex-token-more-fg: #8B98AD;
 }
 
 <!-- One chip key covers both the ordinary chips and the overflow pill, so
@@ -2047,10 +2047,10 @@ function createRegion({ path }) {
   tags: `<ApexTags v-model="tags" label="Tags" :ui="{ chip: 'brand-chip' }" />
 
 .brand-chip.apex-chip {
-  --apex-chip-bg: #FFF1E5;
-  --apex-chip-fg: #6F2A03;
-  --apex-chip-border: #C24A06;
-  --apex-chip-radius: 6px;
+  --apex-token-bg: #FFF1E5;
+  --apex-token-fg: #6F2A03;
+  --apex-token-border: #C24A06;
+  --apex-token-radius: 6px;
 }`,
 };
 
