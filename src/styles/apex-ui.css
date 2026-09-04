@@ -2384,6 +2384,12 @@ font-family:var(--font-sans);color:var(--fg-default);overflow:hidden}
 .apex-pn__toggle [data-pn-rotate]{transition:transform var(--dur-mid) var(--ease-out)}
 .apex-pn__toggle[aria-expanded="true"] [data-pn-rotate]{transform:rotate(180deg)}
 
+/* The collapsible region: body and footer roll up together as one door. It
+   keeps the column layout the body used to get from the panel root, so
+   wrapping them changed nothing about how they sit. Height is animated in
+   script — the content decides it, so it cannot be declared here — and
+   overflow is clipped only while it moves, never at rest. */
+.apex-pn__region{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
 .apex-pn__body{padding:var(--apex-panel-pad);font-size:14px;line-height:1.6;color:var(--fg-muted);min-width:0;flex:1 1 auto}
 .apex-pn__body>p:first-child{margin-block-start:0}
 .apex-pn__body>p:last-child{margin-block-end:0}

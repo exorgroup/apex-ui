@@ -5,7 +5,7 @@
  * Where ApexFieldset groups form controls with a legend on the border, a panel
  * has a full header bar that can also carry actions, and a footer.
  */
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import type { ApexContainerProps } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
@@ -61,6 +61,58 @@ function toggle() {
   emit('toggle', { collapsed: next });
 }
 
+/* ── the garage door ──────────────────────────────────────────────────────
+   Collapsing used to swap `hidden`, which reads as the content vanishing. The
+   region instead rolls: it lifts a little past its own height, then runs to
+   zero — and on the way back it overshoots the same amount before settling.
+   The lift is what makes it read as a door on a track rather than a wipe.
+
+   Heights have to be measured, not declared, because the content decides them,
+   so this is script rather than a CSS transition. */
+const OVERSHOOT = 10;   // px past the natural height, at either end
+const DURATION = 260;   // ms for the whole travel
+
+const region = ref<HTMLElement | null>(null);
+/** True only while the door is moving; it keeps `hidden` off in the meantime. */
+const animating = ref(false);
+let run = 0;
+
+/** Someone who asked for less motion gets the instant swap, as before. */
+const wantsMotion = () =>
+  typeof matchMedia !== 'function' || !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+watch(shut, async (closing) => {
+  const el = region.value;
+  // No element, no Web Animations (happy-dom), or reduced motion: `hidden`
+  // alone still gives the correct end state.
+  if (!el || typeof el.animate !== 'function' || !wantsMotion()) return;
+
+  const mine = ++run;
+  /* Closing can measure now, while the region is still laid out. Opening has to
+     wait for `hidden` to come off, which `animating` does on the next tick. */
+  animating.value = true;
+  if (!closing) await nextTick();
+  const natural = el.scrollHeight;
+  if (mine !== run) return;
+
+  const peak = `${natural + OVERSHOOT}px`;
+  const frames = closing
+    ? [{ height: `${natural}px` }, { height: peak, offset: 0.25 }, { height: '0px' }]
+    : [{ height: '0px' }, { height: peak, offset: 0.75 }, { height: `${natural}px` }];
+
+  /* Clipped only for the duration: a permanently hidden overflow would cut off
+     a menu or date picker opening out of the panel body. */
+  el.style.overflow = 'hidden';
+  try {
+    await el.animate(frames, { duration: DURATION, easing: 'cubic-bezier(.22,1,.36,1)' }).finished;
+  } catch {
+    return; // superseded by a faster click; that run does the cleanup
+  }
+  if (mine !== run) return;
+  el.style.overflow = '';
+  animating.value = false;
+});
+
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
   if (props.radius) s['--apex-panel-radius'] = props.radius;
@@ -97,8 +149,12 @@ const hasHeader = computed(() => !!(props.header || props.subheader || props.ico
       <span v-if="$slots.icons" class="apex-pn__actions"><slot name="icons" /></span>
     </header>
 
-    <div class="apex-pn__body" :class="ui?.body" :hidden="shut"><slot /></div>
-
-    <footer v-if="$slots.footer" class="apex-pn__foot" :class="ui?.foot" :hidden="shut"><slot name="footer" /></footer>
+    <!-- Body and footer travel together, so the door is one moving element
+         rather than two that happen to animate alike. `hidden` stays off while
+         it moves, or the content would vanish before it had gone anywhere. -->
+    <div ref="region" class="apex-pn__region" :class="ui?.region" :hidden="shut && !animating">
+      <div class="apex-pn__body" :class="ui?.body"><slot /></div>
+      <footer v-if="$slots.footer" class="apex-pn__foot" :class="ui?.foot"><slot name="footer" /></footer>
+    </div>
   </section>
 </template>
