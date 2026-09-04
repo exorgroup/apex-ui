@@ -84,15 +84,15 @@ function close() {
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
   if (props.width) s.inlineSize = props.width;
-  if (props.radius) s['--inp-radius'] = props.radius;
-  if (props.padding) s['--inp-pad'] = props.padding;
-  if (props.background) s['--inp-bg'] = props.background;
-  if (props.color) s['--inp-fg'] = props.color;
-  if (props.borderColor) s['--inp-border'] = props.borderColor;
-  if (props.hoverBackground) s['--inp-hover-bg'] = props.hoverBackground;
-  if (props.hoverColor) s['--inp-hover-fg'] = props.hoverColor;
-  if (props.contentBackground) s['--inp-content-bg'] = props.contentBackground;
-  if (props.contentPadding) s['--inp-content-pad'] = props.contentPadding;
+  if (props.radius) s['--apex-inplace-radius'] = props.radius;
+  if (props.padding) s['--apex-inplace-pad'] = props.padding;
+  if (props.background) s['--apex-inplace-bg'] = props.background;
+  if (props.color) s['--apex-inplace-fg'] = props.color;
+  if (props.borderColor) s['--apex-inplace-border'] = props.borderColor;
+  if (props.hoverBackground) s['--apex-inplace-hover-bg'] = props.hoverBackground;
+  if (props.hoverColor) s['--apex-inplace-hover-fg'] = props.hoverColor;
+  if (props.contentBackground) s['--apex-inplace-content-bg'] = props.contentBackground;
+  if (props.contentPadding) s['--apex-inplace-content-pad'] = props.contentPadding;
   return s;
 });
 

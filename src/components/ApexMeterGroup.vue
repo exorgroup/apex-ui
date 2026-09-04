@@ -77,14 +77,14 @@ function colorOf(item: MeterItem, i: number) {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (props.size) s['--mtr-size'] = props.size;
-  if (props.length) s['--mtr-length'] = props.length;
-  if (props.radius) s['--mtr-radius'] = props.radius;
-  if (props.segmentRadius) s['--mtr-seg-radius'] = props.segmentRadius;
-  if (props.gap) s['--mtr-gap'] = props.gap;
-  if (props.trackBackground) s['--mtr-track'] = props.trackBackground;
-  if (props.labelColor) s['--mtr-label-fg'] = props.labelColor;
-  if (props.labelSize) s['--mtr-label-fs'] = props.labelSize;
+  if (props.size) s['--apex-meter-size'] = props.size;
+  if (props.length) s['--apex-meter-length'] = props.length;
+  if (props.radius) s['--apex-meter-radius'] = props.radius;
+  if (props.segmentRadius) s['--apex-meter-seg-radius'] = props.segmentRadius;
+  if (props.gap) s['--apex-meter-gap'] = props.gap;
+  if (props.trackBackground) s['--apex-meter-track'] = props.trackBackground;
+  if (props.labelColor) s['--apex-meter-label-fg'] = props.labelColor;
+  if (props.labelSize) s['--apex-meter-label-fs'] = props.labelSize;
   return s;
 });
 
@@ -106,7 +106,7 @@ defineSlots<{
       <template v-for="(item, i) in items" :key="i">
         <slot name="meter" :item="item" :index="i" :percent="percent(item.value)" :color="colorOf(item, i)">
           <div class="apex-mtr__seg" :data-animated="animated ? 'true' : 'false'"
-               :style="{ '--mtr-fill': colorOf(item, i), '--mtr-pct': percent(item.value) + '%' }"
+               :style="{ '--apex-meter-fill': colorOf(item, i), '--apex-meter-pct': percent(item.value) + '%' }"
                :title="item.label" @click="emit('item-click', { item, index: i })"></div>
         </slot>
       </template>

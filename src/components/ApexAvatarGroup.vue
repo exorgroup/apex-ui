@@ -36,7 +36,7 @@ const overlapDefault = computed(() => {
 
 const shown = computed(() => (props.max != null ? (props.people || []).slice(0, props.max) : (props.people || [])));
 const extra = computed(() => Math.max(0, (props.people || []).length - shown.value.length));
-const rootStyle = computed(() => ({ '--av-overlap': props.overlap || overlapDefault.value }));
+const rootStyle = computed(() => ({ '--apex-avatar-overlap': props.overlap || overlapDefault.value }));
 </script>
 
 <template>

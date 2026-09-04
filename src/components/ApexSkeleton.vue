@@ -49,12 +49,12 @@ const rootStyle = computed(() => {
     if (props.width) s.inlineSize = props.width;
     if (props.height) s.blockSize = props.height;
   }
-  if (props.borderRadius) s['--skl-radius'] = props.borderRadius;
-  if (props.background) s['--skl-bg'] = props.background;
-  if (props.shimmerColor) s['--skl-shimmer'] = props.shimmerColor;
-  if (props.duration) s['--skl-dur'] = props.duration;
-  if (props.delay) s['--skl-delay'] = props.delay;
-  if (props.lineGap) s['--skl-gap'] = props.lineGap;
+  if (props.borderRadius) s['--apex-skeleton-radius'] = props.borderRadius;
+  if (props.background) s['--apex-skeleton-bg'] = props.background;
+  if (props.shimmerColor) s['--apex-skeleton-shimmer'] = props.shimmerColor;
+  if (props.duration) s['--apex-skeleton-dur'] = props.duration;
+  if (props.delay) s['--apex-skeleton-delay'] = props.delay;
+  if (props.lineGap) s['--apex-skeleton-gap'] = props.lineGap;
   return s;
 });
 const lineStyle = (i: number) => (i === props.lines - 1 && props.lines > 1

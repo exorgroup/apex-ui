@@ -26,7 +26,7 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <span class="apex-obdg" :data-pos="position" :style="ringColor ? { '--bdg-ring': ringColor } : undefined">
+  <span class="apex-obdg" :data-pos="position" :style="ringColor ? { '--apex-badge-ring': ringColor } : undefined">
     <slot />
     <ApexBadge class="apex-obdg__badge" :data-ring="ring ? 'true' : 'false'"
                :value="value" :severity="severity" :size="size" :dot="dot" :variant="variant"

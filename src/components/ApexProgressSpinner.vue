@@ -62,13 +62,13 @@ const dash = computed(() => (determinate.value
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {
-    '--psp-size': typeof props.size === 'number' ? props.size + 'px' : props.size,
-    '--psp-dur': props.duration,
+    '--apex-spinner-size': typeof props.size === 'number' ? props.size + 'px' : props.size,
+    '--apex-spinner-dur': props.duration,
   };
-  if (props.color) s['--psp-fill'] = props.color;
-  if (props.trackColor) s['--psp-track'] = props.trackColor;
-  if (props.valueColor) s['--psp-value-fg'] = props.valueColor;
-  if (props.valueSize) s['--psp-value-fs'] = props.valueSize;
+  if (props.color) s['--apex-spinner-fill'] = props.color;
+  if (props.trackColor) s['--apex-spinner-track'] = props.trackColor;
+  if (props.valueColor) s['--apex-spinner-value-fg'] = props.valueColor;
+  if (props.valueSize) s['--apex-spinner-value-fs'] = props.valueSize;
   return s;
 });
 const readout = computed(() => Math.round(pct.value) + '%');

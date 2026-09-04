@@ -169,19 +169,19 @@ const shown = computed(() => visible.value && (!docked.value || inFrame.value));
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {
-    '--stt-size': props.size,
-    '--stt-offset': props.offset,
+    '--apex-scrolltop-size': props.size,
+    '--apex-scrolltop-offset': props.offset,
     zIndex: String(props.zIndex),
   };
-  if (props.radius) s['--stt-radius'] = props.radius;
-  if (props.background) s['--stt-bg'] = props.background;
-  if (props.color) s['--stt-fg'] = props.color;
-  if (props.borderColor) s['--stt-border'] = props.borderColor;
-  if (props.shadow) s['--stt-shadow'] = props.shadow;
-  if (props.hoverBackground) s['--stt-hover-bg'] = props.hoverBackground;
-  if (props.hoverColor) s['--stt-hover-fg'] = props.hoverColor;
-  if (props.progressColor) s['--stt-progress'] = props.progressColor;
-  s['--stt-pct'] = Math.round(progress.value * 100) + '%';
+  if (props.radius) s['--apex-scrolltop-radius'] = props.radius;
+  if (props.background) s['--apex-scrolltop-bg'] = props.background;
+  if (props.color) s['--apex-scrolltop-fg'] = props.color;
+  if (props.borderColor) s['--apex-scrolltop-border'] = props.borderColor;
+  if (props.shadow) s['--apex-scrolltop-shadow'] = props.shadow;
+  if (props.hoverBackground) s['--apex-scrolltop-hover-bg'] = props.hoverBackground;
+  if (props.hoverColor) s['--apex-scrolltop-hover-fg'] = props.hoverColor;
+  if (props.progressColor) s['--apex-scrolltop-progress'] = props.progressColor;
+  s['--apex-scrolltop-pct'] = Math.round(progress.value * 100) + '%';
   if (spot.value) {
     s.insetBlockStart = spot.value.top + 'px';
     s.insetInlineStart = spot.value.left + 'px';

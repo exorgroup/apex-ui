@@ -26,10 +26,10 @@ const props = withDefaults(defineProps<{
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (typeof props.size === 'number') s['--bdg-size'] = props.size + 'px';
-  if (props.background) s['--bdg-bg'] = props.background;
-  if (props.color) s['--bdg-fg'] = props.color;
-  if (props.borderColor) s['--bdg-border'] = props.borderColor;
+  if (typeof props.size === 'number') s['--apex-badge-size'] = props.size + 'px';
+  if (props.background) s['--apex-badge-bg'] = props.background;
+  if (props.color) s['--apex-badge-fg'] = props.color;
+  if (props.borderColor) s['--apex-badge-border'] = props.borderColor;
   if (props.radius) s.borderRadius = props.radius;
   return s;
 });

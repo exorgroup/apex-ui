@@ -1350,38 +1350,38 @@ transform:translate3d(var(--anim-x),var(--anim-y),0) scale(var(--anim-scale)) ro
 /* ─── badge ────────────────────────────────────────────── */
 /* sized from its content with a circular minimum: one digit is a circle, a
    longer value grows into a pill instead of being clipped */
-.apex-bdg{--bdg-size:20px;--bdg-bg:var(--accent-primary);--bdg-fg:#FFF;--bdg-border:transparent;
---bdg-ring:var(--bg-surface);
+.apex-bdg{--apex-badge-size:20px;--apex-badge-bg:var(--accent-primary);--apex-badge-fg:#FFF;--apex-badge-border:transparent;
+--apex-badge-ring:var(--bg-surface);
 /* the ink the derived variants draw with: an accent for most severities, but
    secondary's fill is a light surface token, so outlined and subtle would have
    painted near-white text on white */
---bdg-ink:var(--bdg-bg);
-display:inline-grid;place-items:center;min-inline-size:var(--bdg-size);block-size:var(--bdg-size);
-padding-inline:calc(var(--bdg-size) * 0.26);border:1px solid var(--bdg-border);
-border-radius:var(--r-full);background:var(--bdg-bg);color:var(--bdg-fg);
-font-family:var(--font-sans);font-size:calc(var(--bdg-size) * 0.6);font-weight:700;line-height:1;
+--apex-badge-ink:var(--apex-badge-bg);
+display:inline-grid;place-items:center;min-inline-size:var(--apex-badge-size);block-size:var(--apex-badge-size);
+padding-inline:calc(var(--apex-badge-size) * 0.26);border:1px solid var(--apex-badge-border);
+border-radius:var(--r-full);background:var(--apex-badge-bg);color:var(--apex-badge-fg);
+font-family:var(--font-sans);font-size:calc(var(--apex-badge-size) * 0.6);font-weight:700;line-height:1;
 font-variant-numeric:tabular-nums;white-space:nowrap;vertical-align:middle}
-.apex-bdg[data-size="sm"]{--bdg-size:16px}
-.apex-bdg[data-size="md"]{--bdg-size:20px}
-.apex-bdg[data-size="lg"]{--bdg-size:26px}
-.apex-bdg[data-size="xl"]{--bdg-size:32px}
+.apex-bdg[data-size="sm"]{--apex-badge-size:16px}
+.apex-bdg[data-size="md"]{--apex-badge-size:20px}
+.apex-bdg[data-size="lg"]{--apex-badge-size:26px}
+.apex-bdg[data-size="xl"]{--apex-badge-size:32px}
 /* a dot scales WITH the size scale rather than replacing it — half the diameter,
    floored so the smallest is still visible */
-.apex-bdg[data-dot="true"]{inline-size:max(8px,calc(var(--bdg-size) * 0.5));
-block-size:max(8px,calc(var(--bdg-size) * 0.5));min-inline-size:0;padding-inline:0}
-.apex-bdg[data-severity="primary"]{--bdg-bg:var(--accent-primary)}
-.apex-bdg[data-severity="secondary"]{--bdg-bg:var(--bg-muted);--bdg-fg:var(--fg-default);--bdg-ink:var(--fg-default)}
-.apex-bdg[data-severity="success"]{--bdg-bg:var(--accent-success)}
-.apex-bdg[data-severity="warn"]{--bdg-bg:var(--accent-warning)}
-.apex-bdg[data-severity="danger"]{--bdg-bg:var(--accent-danger)}
-.apex-bdg[data-severity="info"]{--bdg-bg:var(--accent-info,var(--accent-primary))}
-.apex-bdg[data-severity="contrast"]{--bdg-bg:var(--fg-default);--bdg-fg:var(--bg-surface)}
-.apex-bdg[data-variant="outlined"]{--bdg-fg:var(--bdg-ink);--bdg-border:var(--bdg-ink);background:transparent}
-.apex-bdg[data-variant="subtle"]{--bdg-fg:var(--bdg-ink);background:color-mix(in oklch,var(--bdg-ink) 16%,transparent)}
+.apex-bdg[data-dot="true"]{inline-size:max(8px,calc(var(--apex-badge-size) * 0.5));
+block-size:max(8px,calc(var(--apex-badge-size) * 0.5));min-inline-size:0;padding-inline:0}
+.apex-bdg[data-severity="primary"]{--apex-badge-bg:var(--accent-primary)}
+.apex-bdg[data-severity="secondary"]{--apex-badge-bg:var(--bg-muted);--apex-badge-fg:var(--fg-default);--apex-badge-ink:var(--fg-default)}
+.apex-bdg[data-severity="success"]{--apex-badge-bg:var(--accent-success)}
+.apex-bdg[data-severity="warn"]{--apex-badge-bg:var(--accent-warning)}
+.apex-bdg[data-severity="danger"]{--apex-badge-bg:var(--accent-danger)}
+.apex-bdg[data-severity="info"]{--apex-badge-bg:var(--accent-info,var(--accent-primary))}
+.apex-bdg[data-severity="contrast"]{--apex-badge-bg:var(--fg-default);--apex-badge-fg:var(--bg-surface)}
+.apex-bdg[data-variant="outlined"]{--apex-badge-fg:var(--apex-badge-ink);--apex-badge-border:var(--apex-badge-ink);background:transparent}
+.apex-bdg[data-variant="subtle"]{--apex-badge-fg:var(--apex-badge-ink);background:color-mix(in oklch,var(--apex-badge-ink) 16%,transparent)}
 /* the ring reads as separation from the host, so it belongs to the overlay only */
 .apex-obdg{position:relative;display:inline-flex}
 .apex-obdg__badge{position:absolute;z-index:1}
-.apex-obdg__badge[data-ring="true"]{box-shadow:0 0 0 2px var(--bdg-ring)}
+.apex-obdg__badge[data-ring="true"]{box-shadow:0 0 0 2px var(--apex-badge-ring)}
 .apex-obdg[data-pos="top-end"] .apex-obdg__badge{inset-block-start:0;inset-inline-end:0;translate:38% -38%}
 .apex-obdg[data-pos="top-start"] .apex-obdg__badge{inset-block-start:0;inset-inline-start:0;translate:-38% -38%}
 .apex-obdg[data-pos="bottom-end"] .apex-obdg__badge{inset-block-end:0;inset-inline-end:0;translate:38% 38%}
@@ -1463,22 +1463,22 @@ background:transparent;color:inherit;opacity:.62;cursor:pointer}
 .apex-chp__x:disabled{cursor:default}
 
 /* ─── inplace ──────────────────────────────────────────── */
-.apex-inp{--inp-radius:var(--r-md);--inp-pad:7px 10px;--inp-bg:transparent;--inp-fg:var(--fg-default);
---inp-border:var(--border-default);--inp-hover-bg:var(--bg-muted);--inp-hover-fg:var(--inp-fg);
---inp-content-bg:transparent;--inp-content-pad:0px;
+.apex-inp{--apex-inplace-radius:var(--r-md);--apex-inplace-pad:7px 10px;--apex-inplace-bg:transparent;--apex-inplace-fg:var(--fg-default);
+--apex-inplace-border:var(--border-default);--apex-inplace-hover-bg:var(--bg-muted);--apex-inplace-hover-fg:var(--apex-inplace-fg);
+--apex-inplace-content-bg:transparent;--apex-inplace-content-pad:0px;
 display:block;font-family:var(--font-sans)}
 /* a button, not a clickable div: the swap is an action, so it has to be
    reachable by keyboard and announced as one */
 .apex-inp__display{display:inline-flex;align-items:center;gap:7px;max-inline-size:100%;
-padding:var(--inp-pad);border:1px solid transparent;border-radius:var(--inp-radius);
-background:var(--inp-bg);color:var(--inp-fg);font:inherit;font-size:14px;text-align:start;
+padding:var(--apex-inplace-pad);border:1px solid transparent;border-radius:var(--apex-inplace-radius);
+background:var(--apex-inplace-bg);color:var(--apex-inplace-fg);font:inherit;font-size:14px;text-align:start;
 cursor:pointer;transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
-.apex-inp__display[data-hoverable="true"]:hover{background:var(--inp-hover-bg);color:var(--inp-hover-fg)}
+.apex-inp__display[data-hoverable="true"]:hover{background:var(--apex-inplace-hover-bg);color:var(--apex-inplace-hover-fg)}
 .apex-inp__display:focus-visible{outline:none;box-shadow:var(--focus-ring)}
-.apex-inp[data-outlined="true"] .apex-inp__display{border-style:dashed;border-color:var(--inp-border)}
+.apex-inp[data-outlined="true"] .apex-inp__display{border-style:dashed;border-color:var(--apex-inplace-border)}
 .apex-inp[data-disabled="true"] .apex-inp__display{opacity:.55;cursor:default}
 .apex-inp__content{position:relative;display:flex;align-items:center;gap:8px;
-padding:var(--inp-content-pad);border-radius:var(--inp-radius);background:var(--inp-content-bg)}
+padding:var(--apex-inplace-content-pad);border-radius:var(--apex-inplace-radius);background:var(--apex-inplace-content-bg)}
 .apex-inp__x{display:grid;place-items:center;flex:0 0 auto;inline-size:30px;block-size:30px;
 border:1px solid var(--border-default);border-radius:var(--r-sm);background:var(--bg-surface);
 color:var(--fg-subtle);cursor:pointer}
@@ -1486,27 +1486,27 @@ color:var(--fg-subtle);cursor:pointer}
 .apex-inp__x:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 
 /* ─── metergroup ───────────────────────────────────────── */
-.apex-mtr{--mtr-size:9px;--mtr-length:100%;--mtr-radius:var(--r-full);--mtr-seg-radius:0px;
---mtr-gap:14px;--mtr-track:var(--bg-muted);--mtr-label-fg:var(--fg-default);--mtr-label-fs:13px;
-display:flex;flex-direction:column;gap:var(--mtr-gap);inline-size:var(--mtr-length);
+.apex-mtr{--apex-meter-size:9px;--apex-meter-length:100%;--apex-meter-radius:var(--r-full);--apex-meter-seg-radius:0px;
+--apex-meter-gap:14px;--apex-meter-track:var(--bg-muted);--apex-meter-label-fg:var(--fg-default);--apex-meter-label-fs:13px;
+display:flex;flex-direction:column;gap:var(--apex-meter-gap);inline-size:var(--apex-meter-length);
 font-family:var(--font-sans)}
 /* Only the labels move: reversing the container also swapped the start and end
    slots, putting a header below the track and its buttons above it. */
 .apex-mtr[data-labels="start"] .apex-mtr__labelregion{order:-1}
 .apex-mtr__labelregion{min-inline-size:0}
-.apex-mtr__track{display:flex;overflow:hidden;inline-size:100%;block-size:var(--mtr-size);
-border-radius:var(--mtr-radius);background:var(--mtr-track)}
-.apex-mtr__seg{flex:0 0 auto;inline-size:var(--mtr-pct);background:var(--mtr-fill);
-border-radius:var(--mtr-seg-radius);transition:inline-size var(--dur-slow) var(--ease-out),
+.apex-mtr__track{display:flex;overflow:hidden;inline-size:100%;block-size:var(--apex-meter-size);
+border-radius:var(--apex-meter-radius);background:var(--apex-meter-track)}
+.apex-mtr__seg{flex:0 0 auto;inline-size:var(--apex-meter-pct);background:var(--apex-meter-fill);
+border-radius:var(--apex-meter-seg-radius);transition:inline-size var(--dur-slow) var(--ease-out),
 opacity var(--dur-fast) var(--ease-out)}
 .apex-mtr__seg[data-animated="true"]{animation:apex-mtr-grow var(--dur-slow) var(--ease-out) both}
 @keyframes apex-mtr-grow{from{inline-size:0}}
 /* vertical stands the track up and stacks the segments from the bottom */
 /* a vertical track needs a height of its own: 100% of an auto-height parent is 0 */
-.apex-mtr[data-orientation="vertical"]{--mtr-length:220px;flex-direction:row;align-items:stretch;inline-size:auto}
+.apex-mtr[data-orientation="vertical"]{--apex-meter-length:220px;flex-direction:row;align-items:stretch;inline-size:auto}
 .apex-mtr[data-orientation="vertical"] .apex-mtr__track{flex-direction:column-reverse;
-inline-size:var(--mtr-size);block-size:var(--mtr-length);min-block-size:60px}
-.apex-mtr[data-orientation="vertical"] .apex-mtr__seg{inline-size:auto;block-size:var(--mtr-pct)}
+inline-size:var(--apex-meter-size);block-size:var(--apex-meter-length);min-block-size:60px}
+.apex-mtr[data-orientation="vertical"] .apex-mtr__seg{inline-size:auto;block-size:var(--apex-meter-pct)}
 .apex-mtr[data-orientation="vertical"] .apex-mtr__seg[data-animated="true"]{animation-name:apex-mtr-grow-v}
 @keyframes apex-mtr-grow-v{from{block-size:0}}
 /* hover picks one meter out by dimming the others, which is easier to read than
@@ -1519,38 +1519,38 @@ inline-size:var(--mtr-size);block-size:var(--mtr-length);min-block-size:60px}
 .apex-mtr[data-orientation="vertical"] .apex-mtr__labelregion{display:flex;align-items:center}
 .apex-mtr[data-orientation="vertical"] .apex-mtr__labels{flex-direction:column;
 justify-content:center;gap:8px}
-.apex-mtr__label{display:inline-flex;align-items:center;gap:7px;color:var(--mtr-label-fg);
-font-size:var(--mtr-label-fs);line-height:1.3}
+.apex-mtr__label{display:inline-flex;align-items:center;gap:7px;color:var(--apex-meter-label-fg);
+font-size:var(--apex-meter-label-fs);line-height:1.3}
 .apex-mtr__marker{inline-size:8px;block-size:8px;flex:0 0 auto;border-radius:var(--r-full)}
-.apex-mtr__licon{--apex-icon-size:calc(var(--mtr-label-fs) + 3px);flex:0 0 auto}
+.apex-mtr__licon{--apex-icon-size:calc(var(--apex-meter-label-fs) + 3px);flex:0 0 auto}
 .apex-mtr__pct{color:var(--fg-subtle);font-variant-numeric:tabular-nums}
 
 /* ─── progress spinner ─────────────────────────────────── */
-.apex-psp{--psp-size:48px;--psp-fill:var(--accent-primary);--psp-track:var(--bg-muted);
---psp-value-fg:var(--fg-default);--psp-value-fs:13px;--psp-dur:1.2s;
+.apex-psp{--apex-spinner-size:48px;--apex-spinner-fill:var(--accent-primary);--apex-spinner-track:var(--bg-muted);
+--apex-spinner-value-fg:var(--fg-default);--apex-spinner-value-fs:13px;--apex-spinner-dur:1.2s;
 position:relative;display:inline-grid;place-items:center;flex:0 0 auto;
-inline-size:var(--psp-size);block-size:var(--psp-size);font-family:var(--font-sans)}
-.apex-psp[data-tone="success"]{--psp-fill:var(--accent-success)}
-.apex-psp[data-tone="warning"]{--psp-fill:var(--accent-warning)}
-.apex-psp[data-tone="danger"]{--psp-fill:var(--accent-danger)}
+inline-size:var(--apex-spinner-size);block-size:var(--apex-spinner-size);font-family:var(--font-sans)}
+.apex-psp[data-tone="success"]{--apex-spinner-fill:var(--accent-success)}
+.apex-psp[data-tone="warning"]{--apex-spinner-fill:var(--accent-warning)}
+.apex-psp[data-tone="danger"]{--apex-spinner-fill:var(--accent-danger)}
 .apex-psp__svg{inline-size:100%;block-size:100%;display:block}
-.apex-psp__track{stroke:var(--psp-track)}
+.apex-psp__track{stroke:var(--apex-spinner-track)}
 /* the arc starts at twelve o'clock in both modes, so a spinner that becomes a
    percentage does not appear to jump a quarter turn */
-.apex-psp__arc{stroke:var(--psp-fill);transform:rotate(-90deg);transform-origin:50% 50%;
+.apex-psp__arc{stroke:var(--apex-spinner-fill);transform:rotate(-90deg);transform-origin:50% 50%;
 transition:stroke-dasharray var(--dur-slow) var(--ease-out)}
-.apex-psp[data-mode="indeterminate"] .apex-psp__svg{animation:apex-psp-spin var(--psp-dur) linear infinite}
+.apex-psp[data-mode="indeterminate"] .apex-psp__svg{animation:apex-psp-spin var(--apex-spinner-dur) linear infinite}
 .apex-psp[data-mode="indeterminate"] .apex-psp__arc{transition:none}
 @keyframes apex-psp-spin{to{transform:rotate(360deg)}}
 /* pulse grows and shrinks the arc while the ring turns — two animations on two
    elements, so neither shorthand can discard the other */
 .apex-psp[data-mode="indeterminate"][data-pulse="true"] .apex-psp__arc{
-animation:apex-psp-dash calc(var(--psp-dur) * 1.6) ease-in-out infinite}
+animation:apex-psp-dash calc(var(--apex-spinner-dur) * 1.6) ease-in-out infinite}
 @keyframes apex-psp-dash{
 0%{stroke-dasharray:8 200;stroke-dashoffset:0}
 50%{stroke-dasharray:120 200;stroke-dashoffset:-24}
 100%{stroke-dasharray:8 200;stroke-dashoffset:-160}}
-.apex-psp__value{position:absolute;color:var(--psp-value-fg);font-size:var(--psp-value-fs);
+.apex-psp__value{position:absolute;color:var(--apex-spinner-value-fg);font-size:var(--apex-spinner-value-fs);
 font-weight:650;font-variant-numeric:tabular-nums;line-height:1}
 @media (prefers-reduced-motion:reduce){
 .apex-psp[data-mode="indeterminate"] .apex-psp__svg,
@@ -1574,13 +1574,13 @@ animation:apex-ripple-out var(--rp-dur) var(--ease-out) forwards}
 .apex-ripple__ink{animation-duration:1ms}}
 
 /* ─── scrolltop ────────────────────────────────────────── */
-.apex-stt{--stt-size:42px;--stt-offset:24px;--stt-radius:var(--r-full);--stt-bg:var(--fg-default);
---stt-fg:var(--bg-surface);--stt-border:transparent;--stt-shadow:var(--shadow-lg);
---stt-hover-bg:var(--stt-bg);--stt-hover-fg:var(--stt-fg);--stt-progress:currentColor;--stt-pct:0%;
+.apex-stt{--apex-scrolltop-size:42px;--apex-scrolltop-offset:24px;--apex-scrolltop-radius:var(--r-full);--apex-scrolltop-bg:var(--fg-default);
+--apex-scrolltop-fg:var(--bg-surface);--apex-scrolltop-border:transparent;--apex-scrolltop-shadow:var(--shadow-lg);
+--apex-scrolltop-hover-bg:var(--apex-scrolltop-bg);--apex-scrolltop-hover-fg:var(--apex-scrolltop-fg);--apex-scrolltop-progress:currentColor;--apex-scrolltop-pct:0%;
 position:fixed;display:inline-flex;align-items:center;justify-content:center;gap:7px;
-min-inline-size:var(--stt-size);block-size:var(--stt-size);
-border:1px solid var(--stt-border);border-radius:var(--stt-radius);
-background:var(--stt-bg);color:var(--stt-fg);box-shadow:var(--stt-shadow);
+min-inline-size:var(--apex-scrolltop-size);block-size:var(--apex-scrolltop-size);
+border:1px solid var(--apex-scrolltop-border);border-radius:var(--apex-scrolltop-radius);
+background:var(--apex-scrolltop-bg);color:var(--apex-scrolltop-fg);box-shadow:var(--apex-scrolltop-shadow);
 font-family:var(--font-sans);font-size:13.5px;font-weight:600;cursor:pointer;
 opacity:0;visibility:hidden;scale:.94;
 transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out),
@@ -1595,20 +1595,20 @@ scale var(--dur-fast) var(--ease-out)}
    resolves against the padding box and rides up over the text. */
 .apex-stt__dock{display:contents}
 /* against the window, CSS alone places it */
-.apex-stt[data-mode="fixed"][data-position="bottom-end"]{inset-block-end:var(--stt-offset);inset-inline-end:var(--stt-offset)}
-.apex-stt[data-mode="fixed"][data-position="bottom-start"]{inset-block-end:var(--stt-offset);inset-inline-start:var(--stt-offset)}
-.apex-stt[data-mode="fixed"][data-position="bottom-center"]{inset-block-end:var(--stt-offset);
+.apex-stt[data-mode="fixed"][data-position="bottom-end"]{inset-block-end:var(--apex-scrolltop-offset);inset-inline-end:var(--apex-scrolltop-offset)}
+.apex-stt[data-mode="fixed"][data-position="bottom-start"]{inset-block-end:var(--apex-scrolltop-offset);inset-inline-start:var(--apex-scrolltop-offset)}
+.apex-stt[data-mode="fixed"][data-position="bottom-center"]{inset-block-end:var(--apex-scrolltop-offset);
 inset-inline-start:50%;translate:-50% 0}
-.apex-stt:hover{background:var(--stt-hover-bg);color:var(--stt-hover-fg)}
+.apex-stt:hover{background:var(--apex-scrolltop-hover-bg);color:var(--apex-scrolltop-hover-fg)}
 .apex-stt[data-lift="true"]:hover{transform:translateY(-2px)}
-.apex-stt:focus-visible{outline:none;box-shadow:var(--focus-ring),var(--stt-shadow)}
+.apex-stt:focus-visible{outline:none;box-shadow:var(--focus-ring),var(--apex-scrolltop-shadow)}
 .apex-stt__label{padding-inline-end:4px}
 .apex-stt:has(.apex-stt__label){padding-inline:14px}
 /* a conic ring rather than an SVG: one gradient, no extra element, and it tracks
    a custom property so the scroll read is a style write */
 .apex-stt[data-progress="true"]::before{content:"";position:absolute;inset:-4px;
 border-radius:inherit;padding:2px;pointer-events:none;
-background:conic-gradient(var(--stt-progress) var(--stt-pct),transparent 0);
+background:conic-gradient(var(--apex-scrolltop-progress) var(--apex-scrolltop-pct),transparent 0);
 -webkit-mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);
 mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
 
@@ -1635,28 +1635,28 @@ mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
 @keyframes apex-sc-slide-up{to{opacity:0;translate:0 -10px}}
 
 /* ─── skeleton ─────────────────────────────────────────── */
-.apex-skl{--skl-bg:var(--bg-muted);--skl-shimmer:color-mix(in oklch,#FFF 62%,var(--skl-bg));
---skl-radius:var(--r-sm);--skl-dur:1.4s;--skl-delay:0s;
+.apex-skl{--apex-skeleton-bg:var(--bg-muted);--apex-skeleton-shimmer:color-mix(in oklch,#FFF 62%,var(--apex-skeleton-bg));
+--apex-skeleton-radius:var(--r-sm);--apex-skeleton-dur:1.4s;--apex-skeleton-delay:0s;
 display:block;inline-size:100%;block-size:1rem;flex:0 0 auto;
-border-radius:var(--skl-radius);background:var(--skl-bg);overflow:hidden;
+border-radius:var(--apex-skeleton-radius);background:var(--apex-skeleton-bg);overflow:hidden;
 /* the shimmer is a background-position animation, not a moving child: nothing to
    clip or position, and one compositor property per frame however many are on
    screen — a loading screen is made of dozens of these */
-background-image:linear-gradient(90deg,transparent 0%,var(--skl-shimmer) 50%,transparent 100%);
+background-image:linear-gradient(90deg,transparent 0%,var(--apex-skeleton-shimmer) 50%,transparent 100%);
 background-repeat:no-repeat;background-size:220% 100%;background-position:-110% 0}
-.apex-skl[data-anim="wave"]{animation:apex-skl-wave var(--skl-dur) var(--skl-delay) linear infinite}
+.apex-skl[data-anim="wave"]{animation:apex-skl-wave var(--apex-skeleton-dur) var(--apex-skeleton-delay) linear infinite}
 .apex-skl[data-anim="pulse"]{background-image:none;
-animation:apex-skl-pulse var(--skl-dur) var(--skl-delay) ease-in-out infinite}
+animation:apex-skl-pulse var(--apex-skeleton-dur) var(--apex-skeleton-delay) ease-in-out infinite}
 .apex-skl[data-anim="none"]{background-image:none}
 @keyframes apex-skl-wave{to{background-position:110% 0}}
 @keyframes apex-skl-pulse{50%{opacity:.45}}
 .apex-skl[data-shape="text"]{block-size:.85rem;border-radius:var(--r-sm)}
-.apex-skl[data-shape="rounded"]{--skl-radius:var(--r-lg)}
+.apex-skl[data-shape="rounded"]{--apex-skeleton-radius:var(--r-lg)}
 /* the ratio keeps these square at any width, including a percentage */
-.apex-skl[data-shape="square"]{--skl-radius:var(--r-sm);aspect-ratio:1;block-size:auto}
-.apex-skl[data-shape="circle"]{--skl-radius:var(--r-full);aspect-ratio:1;
+.apex-skl[data-shape="square"]{--apex-skeleton-radius:var(--r-sm);aspect-ratio:1;block-size:auto}
+.apex-skl[data-shape="circle"]{--apex-skeleton-radius:var(--r-full);aspect-ratio:1;
 inline-size:2.5rem;block-size:auto}
-.apex-skl-stack{--skl-gap:8px;display:flex;flex-direction:column;gap:var(--skl-gap);inline-size:100%}
+.apex-skl-stack{--apex-skeleton-gap:8px;display:flex;flex-direction:column;gap:var(--apex-skeleton-gap);inline-size:100%}
 @media (prefers-reduced-motion:reduce){
 .apex-skl[data-anim="wave"],.apex-skl[data-anim="pulse"]{animation:none}}
 
@@ -2429,49 +2429,49 @@ button.apex-fs__label:hover .apex-fs__toggle{color:inherit}
 .apex-fs__body>p:last-child{margin-block-end:0}
 
 /* ─── avatar ───────────────────────────────────────────── */
-.apex-av{--av-size:38px;--av-bg:var(--bg-muted);--av-fg:var(--fg-muted);--av-ring:var(--bg-surface);--av-status:var(--accent-success);
-position:relative;display:inline-grid;place-items:center;inline-size:var(--av-size);block-size:var(--av-size);flex:0 0 auto;
-background:var(--av-bg);color:var(--av-fg);font-family:var(--font-sans);font-weight:600;overflow:visible;user-select:none}
-.apex-av[data-size="xs"]{--av-size:24px}
-.apex-av[data-size="sm"]{--av-size:30px}
-.apex-av[data-size="md"]{--av-size:38px}
-.apex-av[data-size="lg"]{--av-size:52px}
-.apex-av[data-size="xl"]{--av-size:72px}
+.apex-av{--apex-avatar-size:38px;--apex-avatar-bg:var(--bg-muted);--apex-avatar-fg:var(--fg-muted);--apex-avatar-ring:var(--bg-surface);--apex-avatar-status:var(--accent-success);
+position:relative;display:inline-grid;place-items:center;inline-size:var(--apex-avatar-size);block-size:var(--apex-avatar-size);flex:0 0 auto;
+background:var(--apex-avatar-bg);color:var(--apex-avatar-fg);font-family:var(--font-sans);font-weight:600;overflow:visible;user-select:none}
+.apex-av[data-size="xs"]{--apex-avatar-size:24px}
+.apex-av[data-size="sm"]{--apex-avatar-size:30px}
+.apex-av[data-size="md"]{--apex-avatar-size:38px}
+.apex-av[data-size="lg"]{--apex-avatar-size:52px}
+.apex-av[data-size="xl"]{--apex-avatar-size:72px}
 .apex-av[data-shape="circle"]{border-radius:var(--r-full)}
-.apex-av[data-shape="rounded"]{border-radius:calc(var(--av-size) / 5)}
+.apex-av[data-shape="rounded"]{border-radius:calc(var(--apex-avatar-size) / 5)}
 .apex-av[data-shape="square"]{border-radius:0}
-.apex-av[data-ring="true"]{box-shadow:0 0 0 2px var(--av-ring)}
+.apex-av[data-ring="true"]{box-shadow:0 0 0 2px var(--apex-avatar-ring)}
 .apex-av__img{inline-size:100%;block-size:100%;object-fit:cover;border-radius:inherit;display:block}
-.apex-av__text{font-size:calc(var(--av-size) * 0.38);letter-spacing:.01em;line-height:1}
-.apex-av__icon{--apex-icon-size:calc(var(--av-size) * 0.52);color:currentColor}
-.apex-av__dot{position:absolute;inline-size:calc(var(--av-size) * 0.28);block-size:calc(var(--av-size) * 0.28);min-inline-size:8px;min-block-size:8px;border-radius:var(--r-full);background:var(--av-status);box-shadow:0 0 0 2px var(--bg-surface)}
+.apex-av__text{font-size:calc(var(--apex-avatar-size) * 0.38);letter-spacing:.01em;line-height:1}
+.apex-av__icon{--apex-icon-size:calc(var(--apex-avatar-size) * 0.52);color:currentColor}
+.apex-av__dot{position:absolute;inline-size:calc(var(--apex-avatar-size) * 0.28);block-size:calc(var(--apex-avatar-size) * 0.28);min-inline-size:8px;min-block-size:8px;border-radius:var(--r-full);background:var(--apex-avatar-status);box-shadow:0 0 0 2px var(--bg-surface)}
 .apex-av[data-status-pos="bottom-end"] .apex-av__dot{inset-block-end:0;inset-inline-end:0}
 .apex-av[data-status-pos="bottom-start"] .apex-av__dot{inset-block-end:0;inset-inline-start:0}
 .apex-av[data-status-pos="top-end"] .apex-av__dot{inset-block-start:0;inset-inline-end:0}
 .apex-av[data-status-pos="top-start"] .apex-av__dot{inset-block-start:0;inset-inline-start:0}
 /* a badge is a pill, not a dot: it has to hold two digits without clipping, so it
    sizes from its own content and only its minimum tracks the avatar */
-.apex-av__badge{--av-badge-bg:var(--accent-danger);--av-badge-fg:#FFF;
+.apex-av__badge{--apex-avatar-badge-bg:var(--accent-danger);--apex-avatar-badge-fg:#FFF;
 position:absolute;z-index:1;display:grid;place-items:center;
-min-inline-size:calc(var(--av-size) * 0.42);block-size:calc(var(--av-size) * 0.42);
-min-block-size:16px;padding-inline:calc(var(--av-size) * 0.1);
-border-radius:var(--r-full);background:var(--av-badge-bg);color:var(--av-badge-fg);
-font-size:calc(var(--av-size) * 0.26);font-weight:700;line-height:1;
-box-shadow:0 0 0 2px var(--av-ring)}
-.apex-av__badge[data-severity="primary"]{--av-badge-bg:var(--accent-primary)}
-.apex-av__badge[data-severity="success"]{--av-badge-bg:var(--accent-success)}
-.apex-av__badge[data-severity="warn"]{--av-badge-bg:var(--accent-warning)}
-.apex-av__badge[data-severity="danger"]{--av-badge-bg:var(--accent-danger)}
-.apex-av__badge[data-severity="info"]{--av-badge-bg:var(--accent-info,var(--accent-primary))}
-.apex-av__badge[data-severity="secondary"]{--av-badge-bg:var(--bg-muted);--av-badge-fg:var(--fg-default)}
-.apex-av__badge[data-severity="contrast"]{--av-badge-bg:var(--fg-default);--av-badge-fg:var(--bg-surface)}
+min-inline-size:calc(var(--apex-avatar-size) * 0.42);block-size:calc(var(--apex-avatar-size) * 0.42);
+min-block-size:16px;padding-inline:calc(var(--apex-avatar-size) * 0.1);
+border-radius:var(--r-full);background:var(--apex-avatar-badge-bg);color:var(--apex-avatar-badge-fg);
+font-size:calc(var(--apex-avatar-size) * 0.26);font-weight:700;line-height:1;
+box-shadow:0 0 0 2px var(--apex-avatar-ring)}
+.apex-av__badge[data-severity="primary"]{--apex-avatar-badge-bg:var(--accent-primary)}
+.apex-av__badge[data-severity="success"]{--apex-avatar-badge-bg:var(--accent-success)}
+.apex-av__badge[data-severity="warn"]{--apex-avatar-badge-bg:var(--accent-warning)}
+.apex-av__badge[data-severity="danger"]{--apex-avatar-badge-bg:var(--accent-danger)}
+.apex-av__badge[data-severity="info"]{--apex-avatar-badge-bg:var(--accent-info,var(--accent-primary))}
+.apex-av__badge[data-severity="secondary"]{--apex-avatar-badge-bg:var(--bg-muted);--apex-avatar-badge-fg:var(--fg-default)}
+.apex-av__badge[data-severity="contrast"]{--apex-avatar-badge-bg:var(--fg-default);--apex-avatar-badge-fg:var(--bg-surface)}
 .apex-av__badge[data-pos="top-end"]{inset-block-start:0;inset-inline-end:0;translate:35% -35%}
 .apex-av__badge[data-pos="top-start"]{inset-block-start:0;inset-inline-start:0;translate:-35% -35%}
 .apex-av__badge[data-pos="bottom-end"]{inset-block-end:0;inset-inline-end:0;translate:35% 35%}
 .apex-av__badge[data-pos="bottom-start"]{inset-block-end:0;inset-inline-start:0;translate:-35% 35%}
 
-.apex-avg{--av-overlap:10px;display:inline-flex;align-items:center}
-.apex-avg>*+*{margin-inline-start:calc(-1 * var(--av-overlap))}
+.apex-avg{--apex-avatar-overlap:10px;display:inline-flex;align-items:center}
+.apex-avg>*+*{margin-inline-start:calc(-1 * var(--apex-avatar-overlap))}
 /* later avatars sit on top, so the stack reads left to right */
 .apex-avg>*{position:relative}
 .apex-avg>*:hover{z-index:2}

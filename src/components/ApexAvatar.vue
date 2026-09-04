@@ -61,15 +61,15 @@ const TONES: Record<string, string> = {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (typeof props.size === 'number') s['--av-size'] = props.size + 'px';
-  if (props.background) s['--av-bg'] = props.background;
-  else if (props.autoColor) s['--av-bg'] = `oklch(0.92 0.06 ${hue.value})`;
-  if (props.color) s['--av-fg'] = props.color;
-  else if (props.autoColor) s['--av-fg'] = `oklch(0.42 0.13 ${hue.value})`;
-  if (props.ringColor) s['--av-ring'] = props.ringColor;
-  if (props.status) s['--av-status'] = TONES[props.status] || props.status;
-  if (props.badgeBackground) s['--av-badge-bg'] = props.badgeBackground;
-  if (props.badgeColor) s['--av-badge-fg'] = props.badgeColor;
+  if (typeof props.size === 'number') s['--apex-avatar-size'] = props.size + 'px';
+  if (props.background) s['--apex-avatar-bg'] = props.background;
+  else if (props.autoColor) s['--apex-avatar-bg'] = `oklch(0.92 0.06 ${hue.value})`;
+  if (props.color) s['--apex-avatar-fg'] = props.color;
+  else if (props.autoColor) s['--apex-avatar-fg'] = `oklch(0.42 0.13 ${hue.value})`;
+  if (props.ringColor) s['--apex-avatar-ring'] = props.ringColor;
+  if (props.status) s['--apex-avatar-status'] = TONES[props.status] || props.status;
+  if (props.badgeBackground) s['--apex-avatar-badge-bg'] = props.badgeBackground;
+  if (props.badgeColor) s['--apex-avatar-badge-fg'] = props.badgeColor;
   return s;
 });
 const sizeToken = computed(() => (typeof props.size === 'number' ? undefined : props.size));
