@@ -1,6 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import { ENTRIES } from '../../apex-ui-docs/src/registry';
 
 /**
@@ -13,20 +11,30 @@ import { ENTRIES } from '../../apex-ui-docs/src/registry';
  * use something that does not exist. Only reading the component catches it.
  */
 
-const SRC = resolve(__dirname, '../src/components');
+/* Sources are read through Vite rather than `fs`, so the guard needs no Node
+   types in a library that has none. `?raw` hands back the file as a string. */
+const SOURCES = import.meta.glob('../src/components/*.vue', {
+  query: '?raw', import: 'default', eager: true,
+}) as Record<string, string>;
+const TYPES = Object.values(
+  import.meta.glob('../src/types.ts', { query: '?raw', import: 'default', eager: true }),
+)[0] as string;
+
+/** The component's source, or undefined when there is no such file. */
+const sourceOf = (name: string) => SOURCES[`../src/components/${name}.vue`];
 
 /** Prop names a component declares, including those it inherits by spread. */
 function declaredProps(name: string): Set<string> {
-  const file = readFileSync(`${SRC}/${name}.vue`, 'utf8');
+  const file = sourceOf(name);
+  if (file === undefined) throw new Error(`no source for ${name}`);
   const block = (file.match(/defineProps<([\s\S]*?)>\(\)/) || [])[1] ?? '';
   const own = [...block.matchAll(/^\s{2}([a-zA-Z][a-zA-Z0-9]*)\??:/gm)].map((m) => m[1]);
 
   /* Inherited sets, so a page may document `disabled` on a control that gets
      it from ApexFieldProps rather than declaring it itself. */
   const inherited: string[] = [];
-  const types = readFileSync(resolve(SRC, '../types.ts'), 'utf8');
   const grab = (iface: string) => {
-    const body = (types.match(new RegExp(`interface ${iface} \\{([\\s\\S]*?)\\n\\}`)) || [])[1] ?? '';
+    const body = (TYPES.match(new RegExp(`interface ${iface} \\{([\\s\\S]*?)\\n\\}`)) || [])[1] ?? '';
     return [...body.matchAll(/^\s{2}([a-zA-Z][a-zA-Z0-9]*)\??:/gm)].map((m) => m[1]);
   };
   if (/ApexFieldProps/.test(block)) inherited.push(...grab('ApexFieldProps'));
@@ -38,7 +46,8 @@ function declaredProps(name: string): Set<string> {
 
 /** Slot names a component actually renders, static and templated alike. */
 function declaredSlots(name: string): { fixed: Set<string>; templated: boolean } {
-  const file = readFileSync(`${SRC}/${name}.vue`, 'utf8');
+  const file = sourceOf(name);
+  if (file === undefined) throw new Error(`no source for ${name}`);
   const fixed = new Set([...file.matchAll(/<slot[^>]*\sname="([a-zA-Z][\w-]*)"/g)].map((m) => m[1]));
   if (/<slot(?![^>]*\sname=)/.test(file)) fixed.add('default');
   // `name="\`panel-${i + 1}\`"` — positional, so names cannot be checked literally.
