@@ -26,5 +26,11 @@
      import to an empty string under vitest and the glob version of that guard
      silently compared against nothing. Node types are not installed here, so it
      is excluded for the same reason as the spec above. */
-  "exclude": ["tests/zz-docs-pages.spec.ts", "tests/zz-hidden-reset.spec.ts"]
+  /* service-stage mounts the docs app for the same reason, and drags in the
+     same undeclared imports, so it is excluded on the same grounds. */
+  "exclude": [
+    "tests/zz-docs-pages.spec.ts",
+    "tests/zz-hidden-reset.spec.ts",
+    "tests/service-stage.spec.ts"
+  ]
 }

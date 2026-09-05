@@ -20,6 +20,25 @@ const TYPES = Object.values(
   import.meta.glob('../src/types.ts', { query: '?raw', import: 'default', eager: true }),
 )[0] as string;
 
+/* A service keeps its API in an options interface under core/, not as props on
+   a component. ApexToast's page documents what you hand to add() — that is
+   ToastMessage. The host's own props (position, mode, max…) are a different
+   table for a different question. Without this the guard compares a page
+   against the wrong declaration and reports every documented option as
+   invented. */
+const CORE = import.meta.glob('../src/core/*.ts', {
+  query: '?raw', import: 'default', eager: true,
+}) as Record<string, string>;
+
+/** Field names on an interface declared anywhere under core/. */
+function interfaceFields(iface: string): Set<string> {
+  for (const src of Object.values(CORE)) {
+    const body = (src.match(new RegExp(`interface ${iface} \\{([\\s\\S]*?)\\n\\}`)) || [])[1];
+    if (body) return new Set([...body.matchAll(/^\s{2}([a-zA-Z][a-zA-Z0-9]*)\??:/gm)].map((m) => m[1]));
+  }
+  throw new Error(`no interface ${iface} under core/ — check optionsType`);
+}
+
 /** The component's source, or undefined when there is no such file. */
 const sourceOf = (name: string) => SOURCES[`../src/components/${name}.vue`];
 
@@ -66,7 +85,9 @@ describe('every prop the docs name is declared by the component', () => {
   it.each(CONTROLS.map((e) => [e.name, e] as const))('%s', (name, entry) => {
     let declared: Set<string>;
     try {
-      declared = declaredProps(name);
+      declared = entry.service?.optionsType
+        ? interfaceFields(entry.service.optionsType)
+        : declaredProps(name);
     } catch {
       return; // ApexField and friends live elsewhere; covered by their own pages
     }
@@ -98,7 +119,11 @@ describe('every playground control edits a real prop', () => {
   it.each(CONTROLS.map((e) => [e.name, e] as const))('%s', (name, entry) => {
     let declared: Set<string>;
     try {
-      declared = declaredProps(name);
+      /* A service's rail edits the options object, not the host's props, so it
+         is checked against the same interface the props table documents. */
+      declared = entry.service?.optionsType
+        ? interfaceFields(entry.service.optionsType)
+        : declaredProps(name);
     } catch {
       return;
     }
