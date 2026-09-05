@@ -21,7 +21,7 @@ import { useAlertButtons } from '../core/alertButtons';
 
 const props = withDefaults(defineProps<{
   group?: string;
-  /* declarative defaults — a require() value wins */
+  /* declarative defaults — a value on the confirm() call wins */
   message?: string;
   icon?: string;
   iconColor?: string;
