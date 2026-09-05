@@ -17,6 +17,20 @@ export const APEX_FALLBACK_STRINGS: ApexStrings = {
   'apexui.increment': 'Increase',
   'apexui.decrement': 'Decrease',
   'apexui.errorSummaryTitle': 'Fix the following before continuing',
+  /* ApexAlert's defaults live here rather than in the service, because
+     translating needs `inject` and the service is called from event handlers
+     where there is no component instance. The service leaves a label undefined
+     and the host resolves it at render. */
+  'apexui.alert.yes': 'Yes',
+  'apexui.alert.cancel': 'Cancel',
+  'apexui.alert.ok': 'OK',
+  'apexui.alert.saving': 'Saving…',
+  'apexui.alert.doneTitle': 'Done',
+  'apexui.alert.errorTitle': 'Couldn’t complete that',
+  'apexui.alert.saveErrorTitle': 'Couldn’t save',
+  'apexui.alert.saveErrorMessage': 'The data could not be saved. Please review the form.',
+  'apexui.alert.copy': 'Copy',
+  'apexui.alert.copied': 'Copied',
 };
 
 /**

@@ -575,4 +575,14 @@ export interface ApexStrings {
   'apexui.increment': string;
   'apexui.decrement': string;
   'apexui.errorSummaryTitle': string;
+  'apexui.alert.yes': string;
+  'apexui.alert.cancel': string;
+  'apexui.alert.ok': string;
+  'apexui.alert.saving': string;
+  'apexui.alert.doneTitle': string;
+  'apexui.alert.errorTitle': string;
+  'apexui.alert.saveErrorTitle': string;
+  'apexui.alert.saveErrorMessage': string;
+  'apexui.alert.copy': string;
+  'apexui.alert.copied': string;
 }
