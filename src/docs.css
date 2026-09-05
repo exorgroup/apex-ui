@@ -548,7 +548,15 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .dir-hint { font-size: 13px; color: var(--fg-subtle); margin: 0; }
 .dir-gap { block-size: 150px; }
 
-/* ── The four directives' examples ─────────────────────────────────────── */
+/* ── The directives' examples ──────────────────────────────────────────── */
+
+/* Tooltip's Basic example needs a non-control host, to show the directive
+   attaching to a bare span. The dotted underline and help cursor are the
+   affordance that makes it look hoverable at all. */
+.tip-hint {
+  font-size: 13.5px; cursor: help;
+  border-block-end: 1px dotted var(--border-strong);
+}
 
 /* Ripple. A plain box is the honest host: it shows that the directive needs
    nothing from the element beyond somewhere to draw. */

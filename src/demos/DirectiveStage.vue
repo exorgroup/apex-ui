@@ -4,8 +4,16 @@
        withDirectives() and a lookup — buys nothing at four of them and hides
        what each host actually is. -->
   <div class="dir-stage">
+    <!-- A tooltip needs something to point at and a reason to hover it. -->
+    <ApexButton
+      v-if="id === 'tooltip'"
+      v-apex-tooltip="bind"
+      severity="secondary"
+      variant="outlined"
+    >{{ label }}</ApexButton>
+
     <button
-      v-if="id === 'ripple'"
+      v-else-if="id === 'ripple'"
       v-apex-ripple="bind"
       type="button"
       class="dir-host dir-host--press"

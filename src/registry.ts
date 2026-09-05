@@ -4122,4 +4122,49 @@ export const ENTRIES: DocEntry[] = [
       ['setAlertInterpreter(fn)', 'void', 'Registers how to read an action’s outcome — an Inertia app reads its flash bag here, and no call site changes'],
     ],
   },
+  {
+    id: 'tooltip', name: 'ApexTooltip', group: 'Overlays',
+    optionsType: 'TooltipOptions',
+    blurb: 'Advisory text on hover or focus, applied as a directive — v-apex-tooltip="’Save changes’". Written against the DOM rather than as a component, so it attaches to anything, including elements the kit does not own.',
+    noField: true, directiveName: 'apex-tooltip',
+    hostTag: 'button', hostLabel: 'Hover me',
+    base: {
+      value: 'Saved to your library', position: 'right', showDelay: 0, hideDelay: 0,
+      event: 'hover', autoHide: true, escape: true, showArrow: true,
+    },
+    controls: [
+      { key: 'value', type: 'text' },
+      { key: 'position', type: 'select', options: ['right', 'top', 'bottom', 'left'] },
+      { key: 'showDelay', type: 'number' }, { key: 'hideDelay', type: 'number' },
+      { key: 'event', type: 'select', options: ['hover', 'focus', 'both'] },
+      { key: 'autoHide', type: 'bool' }, { key: 'escape', type: 'bool' },
+      { key: 'showArrow', type: 'bool' }, { key: 'gap', type: 'number' },
+      { key: 'maxWidth', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'color', type: 'color' },
+    ],
+    props: [
+      ['value', 'string', '—', 'The text, or HTML when escape is false — a bare string binding is shorthand for this'],
+      ['position', "'top' | 'bottom' | 'left' | 'right'", "'right'", 'Also settable as a modifier: v-apex-tooltip.top'],
+      ['showDelay / hideDelay', 'number', '0 / 0', 'Milliseconds before it appears and before it goes'],
+      ['event', "'hover' | 'focus' | 'both'", "'hover'", 'Pointer enter, focus, or both'],
+      ['autoHide', 'boolean', 'true', 'false keeps it while the pointer is over it, so links inside are reachable'],
+      ['escape', 'boolean', 'true', 'false renders value as HTML'],
+      ['disabled', 'boolean', 'false', 'Suppresses it, and closes it if open — bind a condition here'],
+      ['gap / showArrow', 'number / boolean', '8 / true', 'Distance from the target, and the arrow'],
+      ['maxWidth / background / color', 'string', 'tokens', 'Chrome'],
+      ['class', 'string', '—', 'Your own class on the tooltip node'],
+      ['zIndex', 'number', '1200', 'Above dialogs and popovers'],
+    ],
+    events: [],
+    /* The gallery heads this table "Forms", which is a copy-paste slip from a
+       neighbouring entry — the rows below are the four ways to apply the
+       directive, so the heading says that instead. Rows are verbatim. */
+    serviceTitle: 'Usage',
+    serviceRows: [
+      ['v-apex-tooltip="’Text’"', 'string', 'The short form — default position, no delay'],
+      ['v-apex-tooltip.top="’Text’"', 'modifier', 'top, bottom, left or right'],
+      ['v-apex-tooltip="{ value, … }"', 'object', 'Every option above, and reactive — a live tooltip picks up new text without a re-hover'],
+      ['app.use(ApexUI)', 'plugin', 'Registers the directive; import { apexTooltip } to register it yourself'],
+    ],
+  },
 ];

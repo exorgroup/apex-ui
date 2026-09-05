@@ -43,6 +43,17 @@ const model = reactive<Record<string, unknown>>({});
 const rpOff = ref(false);
 
 /**
+ * ApexTooltip's Event and "Disabled and reactive" examples.
+ *
+ * `tipText` and `tipOff` exist to prove the binding is reactive rather than
+ * read once on mount: changing either while the tooltip is open must reach it
+ * without a re-hover, which is the point that section makes.
+ */
+const tipField = ref('');
+const tipText = ref('First message');
+const tipOff = ref(false);
+
+/**
  * FocusTrap's fields. The trap is about where Tab goes, so the examples need
  * real focusable content and one field deliberately outside it.
  */
@@ -1939,6 +1950,152 @@ async function copyUsage() {
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery, seven sections. Prose and bindings are the
+             gallery's; the tags are ours (PascalCase) and the inline
+             font-size on each paragraph is `class="note"`, which is the same
+             size and is what every other page here uses. -->
+        <template v-if="entry.id === 'tooltip'">
+          <h2>Basic</h2>
+          <p class="note">
+            The directive's value is the text. It attaches to anything — a kit control, a
+            plain span, a table cell.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexButton v-apex-tooltip="'Save changes'" icon="save" /&gt;
+&lt;span v-apex-tooltip="'Read-only in this plan'"&gt;Seats&lt;/span&gt;</pre>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton v-apex-tooltip="'Save changes'" icon="save" icon-only label="Save" />
+            <ApexButton
+              v-apex-tooltip="'Duplicate this record'"
+              severity="secondary"
+              variant="outlined"
+              icon="content_copy"
+              icon-only
+              label="Duplicate"
+            />
+            <span v-apex-tooltip="'Read-only in this plan'" class="tip-hint">Seats</span>
+          </div>
+
+          <h2>Position</h2>
+          <p class="note">
+            A modifier is the shorthand — <code>v-apex-tooltip.top</code>. The default is
+            <code>right</code>, and any side flips when it will not fit.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton v-apex-tooltip.top="'Above'" severity="secondary" variant="outlined" size="sm">top</ApexButton>
+            <ApexButton v-apex-tooltip.bottom="'Below'" severity="secondary" variant="outlined" size="sm">bottom</ApexButton>
+            <ApexButton v-apex-tooltip.left="'Before'" severity="secondary" variant="outlined" size="sm">left</ApexButton>
+            <ApexButton v-apex-tooltip.right="'After'" severity="secondary" variant="outlined" size="sm">right</ApexButton>
+          </div>
+
+          <h2>Delay</h2>
+          <p class="note">
+            A show delay keeps tooltips out of the way while the pointer crosses a toolbar; a
+            hide delay lets it survive a brief exit.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-apex-tooltip="{ value: 'Appears after 600ms', showDelay: 600 }"
+              severity="secondary"
+              variant="outlined"
+              size="sm"
+            >showDelay 600</ApexButton>
+            <ApexButton
+              v-apex-tooltip="{ value: 'Lingers for 800ms', hideDelay: 800 }"
+              severity="secondary"
+              variant="outlined"
+              size="sm"
+            >hideDelay 800</ApexButton>
+          </div>
+
+          <h2>Event</h2>
+          <p class="note">
+            Hover by default. <code>focus</code> serves keyboard users on a field;
+            <code>both</code> covers either route — tab into the input below.
+          </p>
+          <div class="grid grid--2" style="margin-top: 12px">
+            <div class="cell">
+              <span class="cell__tag">event: 'focus'</span>
+              <ApexInput
+                v-model="tipField"
+                v-apex-tooltip="{ value: 'Your work email', event: 'focus' }"
+                label="Email"
+                placeholder="you@company.com"
+              />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">event: 'both'</span>
+              <ApexButton
+                v-apex-tooltip="{ value: 'Hover or focus', event: 'both' }"
+                severity="secondary"
+                variant="outlined"
+              >Either</ApexButton>
+            </div>
+          </div>
+
+          <h2>Auto hide</h2>
+          <p class="note">
+            With <code>autoHide: false</code> the tooltip stays while the pointer is inside it,
+            so content in it can be read or clicked. A short grace period covers the gap
+            between target and panel.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-apex-tooltip="{ value: 'Move onto this tooltip &mdash; it waits. &lt;a href=&quot;#&quot;&gt;Even a link&lt;/a&gt; is reachable.', autoHide: false, escape: false, maxWidth: '220px', position: 'bottom' }"
+              severity="secondary"
+              variant="outlined"
+              icon="ads_click"
+              size="sm"
+            >Interactive</ApexButton>
+          </div>
+
+          <h2>Custom</h2>
+          <p class="note">
+            Set <code>escape: false</code> for rich content, and override the chrome per
+            tooltip.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-apex-tooltip="{ value: '&lt;strong&gt;Storage&lt;/strong&gt;&lt;br&gt;72 of 100 GB used', escape: false, position: 'top' }"
+              severity="secondary"
+              variant="outlined"
+              size="sm"
+            >HTML</ApexButton>
+            <ApexButton
+              v-apex-tooltip="{ value: 'This action cannot be undone', background: '#C41E1E', color: '#FFF', position: 'top' }"
+              severity="danger"
+              variant="outlined"
+              size="sm"
+            >Tinted</ApexButton>
+            <ApexButton
+              v-apex-tooltip="{ value: 'No arrow, wider box, and a little further out', showArrow: false, maxWidth: '180px', gap: 14, position: 'bottom' }"
+              severity="secondary"
+              variant="outlined"
+              size="sm"
+            >Chrome</ApexButton>
+          </div>
+
+          <h2>Disabled and reactive</h2>
+          <p class="note">
+            The binding is reactive: <code>disabled</code> suppresses the tooltip and closes it
+            if open, and new text reaches an open tooltip without a re-hover.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-apex-tooltip="{ value: tipText, disabled: tipOff }"
+              severity="secondary"
+              variant="outlined"
+            >Hover me</ApexButton>
+            <ApexButton
+              size="sm"
+              variant="text"
+              @click="tipText = tipText === 'First message' ? 'Changed while open' : 'First message'"
+            >change text</ApexButton>
+            <ApexButton size="sm" variant="text" @click="tipOff = !tipOff">
+              {{ tipOff ? 'enable' : 'disable' }}
+            </ApexButton>
           </div>
         </template>
 
