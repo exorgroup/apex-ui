@@ -11,6 +11,13 @@
       <ApexTieredMenu v-else :items="MENU_ITEMS" v-bind="bind" @item-click="onPick" />
       <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
+
+    <!-- The bar renders inline; its dropdowns open from the root items, so it
+         needs no trigger of its own. -->
+    <template v-else-if="id === 'menubar'">
+      <ApexMenubar :items="BAR_ITEMS" v-bind="bind" @item-click="onPick" />
+      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+    </template>
   </div>
 </template>
 
@@ -28,7 +35,7 @@
  * other check, which is exactly how two overlay stages once shipped blank.
  */
 import { ref } from 'vue';
-import { ApexTieredMenu } from '@exorgroup/apex-ui';
+import { ApexTieredMenu, ApexMenubar } from '@exorgroup/apex-ui';
 import type { MenuItem } from '@exorgroup/apex-ui';
 
 defineProps<{
@@ -61,6 +68,25 @@ const MENU_ITEMS: MenuItem[] = [
   ] },
   { separator: true },
   { label: 'Delete', icon: 'delete', disabled: true },
+];
+
+/** A bar with a couple of real menus, so switching between them is visible. */
+const BAR_ITEMS: MenuItem[] = [
+  { label: 'File', icon: 'folder', items: [
+    { label: 'New', icon: 'note_add', hint: '⌘N' },
+    { label: 'Open', icon: 'folder_open' },
+    { separator: true },
+    { label: 'Export', icon: 'download', items: [{ label: 'PDF' }, { label: 'CSV' }] },
+  ] },
+  { label: 'Edit', icon: 'edit', items: [
+    { label: 'Undo', hint: '⌘Z' },
+    { label: 'Redo', hint: '⇧⌘Z' },
+    { separator: true },
+    { header: 'Clipboard' },
+    { label: 'Copy', icon: 'content_copy' },
+    { label: 'Paste', icon: 'content_paste', disabled: true },
+  ] },
+  { label: 'Help', icon: 'help', href: '#' },
 ];
 
 const tmenu = ref<InstanceType<typeof ApexTieredMenu> | null>(null);

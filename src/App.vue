@@ -24,7 +24,7 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar } from '@exorgroup/apex-ui';
 import type { MenuItem } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
@@ -190,6 +190,52 @@ const msgEmail = ref('');
  * anchor. `povShared` is the exception that proves the point — one popover
  * serving four triggers, which only works because the anchor is the event.
  */
+/* ── ApexMenubar page ────────────────────────────────────── */
+const mbPicked = ref('');
+
+const mbBasic: MenuItem[] = [
+  { label: 'File', icon: 'folder', items: [
+    { label: 'New', icon: 'note_add', hint: '⌘N' },
+    { label: 'Open', icon: 'folder_open' },
+    { separator: true },
+    { label: 'Export', icon: 'download', items: [{ label: 'PDF' }, { label: 'CSV' }] },
+  ] },
+  { label: 'Edit', icon: 'edit', items: [
+    { label: 'Undo', hint: '⌘Z' },
+    { label: 'Redo', hint: '⇧⌘Z' },
+    { separator: true },
+    { header: 'Clipboard' },
+    { label: 'Copy', icon: 'content_copy' },
+    { label: 'Paste', icon: 'content_paste', disabled: true },
+  ] },
+  { label: 'Help', icon: 'help', href: '#' },
+];
+
+const mbCommand: MenuItem[] = [
+  { label: 'Actions', icon: 'bolt', items: [
+    { label: 'Publish', icon: 'publish', command: () => { mbPicked.value = 'Publish (its own command ran first)'; } },
+    { label: 'Archive', icon: 'archive' },
+  ] },
+  { label: 'Docs', icon: 'open_in_new', href: 'https://example.com/docs', target: '_blank' },
+];
+
+/*
+ * Gated at both levels: Settings is a denied child, Admin a denied root item,
+ * and Reports a root item whose children are all denied — so it goes with them
+ * rather than dropping an empty panel.
+ */
+const mbGated: MenuItem[] = [
+  { label: 'File', icon: 'folder', items: [
+    { label: 'New', icon: 'note_add' },
+    { label: 'Settings', icon: 'settings', can: 'settings' },
+  ] },
+  { label: 'Admin', icon: 'shield', can: 'settings', items: [{ label: 'Users' }] },
+  { label: 'Reports', icon: 'bar_chart', items: [
+    { label: 'Sales', can: 'reports' },
+    { label: 'Attendance', can: 'reports' },
+  ] },
+];
+
 /* ── ApexTieredMenu page ─────────────────────────────────── */
 const tmPop = ref<InstanceType<typeof ApexTieredMenu> | null>(null);
 const tmPop2 = ref<InstanceType<typeof ApexTieredMenu> | null>(null);
@@ -2936,6 +2982,92 @@ function pick(city) {
         <!-- Ported from the gallery, five sections. The popover is reached
              through its ref throughout, which is how it is meant to be used —
              so each example declares its own ref rather than sharing one. -->
+        <template v-if="entry.id === 'menubar'">
+          <h2>Basic and submenus</h2>
+          <p class="note">
+            Root items sit on the bar; give one its own <code>items</code> and it drops a
+            menu. The dropdown is the same renderer the context menu uses, so nesting,
+            separators, headers and hints all behave identically. Once a menu is open,
+            moving along the bar switches menus without another click — a bar that needed
+            a second click for every sibling reads as broken.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexMenubar :items="items" /&gt;
+
+const items = [
+  { label: 'File', icon: 'folder', items: [
+    { label: 'New', hint: '⌘N' },
+    { separator: true },
+    { label: 'Export', items: [{ label: 'PDF' }, { label: 'CSV' }] },
+  ] },
+  { label: 'Help', href: '/help' },
+]</pre>
+          <ApexMenubar :items="mbBasic" />
+
+          <h2>Colour</h2>
+          <p class="note">
+            A root item has three states worth colouring — resting, hovered, and open —
+            so a bar can sit on a dark chrome or a brand surface without a stylesheet
+            override.
+          </p>
+          <ApexMenubar
+            :items="mbBasic" class="mbar-demo"
+            background="#101828" borderColor="#1f2a3c" textColor="#e6edf7"
+            iconColor="#7aa2ff" hoverBackground="#182338" hoverTextColor="#ffffff"
+            openBackground="#233250" openTextColor="#ffffff" radius="10px"
+          />
+
+          <h2>Template — bar edges</h2>
+          <p class="note">
+            <code>start</code> and <code>end</code> are the bar's edges: a logo on one
+            side, a search box or an avatar on the other. The menus stay in the middle
+            and keep their own behaviour.
+          </p>
+          <ApexMenubar :items="mbBasic" class="mbar-demo">
+            <template #start>
+              <span class="mbar-brand"><ApexIcon name="bolt" :size="18" /> Apex</span>
+            </template>
+            <template #end>
+              <ApexAvatar label="DD" size="sm" shape="circle" />
+            </template>
+          </ApexMenubar>
+
+          <h2>Command and router</h2>
+          <p class="note">
+            A row runs its own <code>command</code> first, then the bar emits
+            <code>item-click</code> — for a root item or a child alike. A row with an
+            <code>href</code> renders as a real link, so middle-click and copy-address
+            keep working.
+          </p>
+          <ApexMenubar :items="mbCommand" class="mbar-demo"
+                       @item-click="mbPicked = $event.item.label || ''" />
+          <p class="pov-state">item-click: <code>{{ mbPicked || 'nothing yet' }}</code></p>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            <code>can</code> works at both levels here. A denied child is dropped from its
+            dropdown; a denied root item leaves the bar entirely — and so does one whose
+            children have all gone, since opening it would show an empty panel.
+          </p>
+          <p class="note">
+            The bar's open index follows the filtered list, so a hidden root item cannot
+            be reached by index either. As everywhere, this is presentation: the endpoint
+            behind the row still has to authorise the request.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <ApexMenubar :items="mbGated" class="mbar-demo" />
+          <p class="pov-state">
+            A Viewer loses Settings from File, the whole Admin menu, and Reports — which
+            had only gated children.
+          </p>
+        </template>
+
         <template v-if="entry.id === 'tieredmenu'">
           <h2>Basic</h2>
           <p class="note">
