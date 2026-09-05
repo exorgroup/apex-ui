@@ -6,6 +6,7 @@ import ApexTieredMenu from '../src/components/ApexTieredMenu.vue';
 import ApexMenubar from '../src/components/ApexMenubar.vue';
 import ApexContextMenu from '../src/components/ApexContextMenu.vue';
 import ApexSplitButton from '../src/components/ApexSplitButton.vue';
+import ApexMenu from '../src/components/ApexMenu.vue';
 import type { MenuItem } from '../src/components/ApexMenuItem';
 
 /**
@@ -129,6 +130,67 @@ describe('with no resolver wired, nothing is hidden', () => {
     });
     expect(w.text()).toContain('Hidden');
     expect(w.text()).toContain('Branch');
+    w.unmount();
+  });
+});
+
+describe('ApexMenu filters, and its expandedKeys follow', () => {
+  /*
+   * ApexMenu is the one control where hiding a row has a second consequence.
+   * Its open state is a bindable map, and expandAll()/collapseAll() build that
+   * map by walking the model — so walking the raw model would write keys for
+   * groups this user cannot see, and a consumer persisting the map to restore
+   * a sidebar would save and reload state for a menu it never showed.
+   */
+  const MENU: MenuItem[] = [
+    { key: 'reports', label: 'Reports', toggleable: true, items: [{ label: 'Sales' }] },
+    { key: 'admin', label: 'Admin', toggleable: true, can: 'secret', items: [{ label: 'Users' }] },
+    {
+      key: 'gone',
+      label: 'Gone',
+      toggleable: true,
+      items: [{ label: 'Only child', can: 'secret' }],
+    },
+  ];
+
+  it('hides a denied group, and one emptied by the filter', () => {
+    const w = mount(ApexMenu, {
+      props: { items: MENU }, global: gated, attachTo: document.body,
+    });
+    const text = w.text();
+    expect(text).toContain('Reports');
+    expect(text, 'denied outright').not.toContain('Admin');
+    expect(text, 'a group with no children left is a doorway to nothing')
+      .not.toContain('Gone');
+    w.unmount();
+  });
+
+  it('expandAll writes keys only for groups that survived', async () => {
+    const w = mount(ApexMenu, {
+      props: { items: MENU }, global: gated, attachTo: document.body,
+    });
+    w.vm.expandAll();
+    await w.vm.$nextTick();
+
+    const emitted = w.emitted('update:expandedKeys');
+    expect(emitted, 'expandAll emits the map').toBeTruthy();
+    const map = emitted![emitted!.length - 1][0] as Record<string, boolean>;
+    expect(Object.keys(map).sort(), 'only the visible group').toEqual(['reports']);
+    w.unmount();
+  });
+
+  it('with no resolver, expandAll covers every group', async () => {
+    const w = mount(ApexMenu, {
+      props: { items: MENU },
+      global: { plugins: [ApexUI] },
+      attachTo: document.body,
+    });
+    w.vm.expandAll();
+    await w.vm.$nextTick();
+
+    const emitted = w.emitted('update:expandedKeys');
+    const map = emitted![emitted!.length - 1][0] as Record<string, boolean>;
+    expect(Object.keys(map).sort()).toEqual(['admin', 'gone', 'reports']);
     w.unmount();
   });
 });

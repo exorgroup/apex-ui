@@ -14,6 +14,8 @@
 import { computed, nextTick, onBeforeUnmount, ref, Teleport, watch } from 'vue';
 import ApexMenuNode from './ApexMenuNode.vue';
 import { anchorPosition, resolveTarget, type AnchorAlign, type AnchorSide } from '../core/anchor';
+import { useCan } from '../core/can';
+import { filterMenu } from '../core/menuPermissions';
 import type { MenuItem } from './ApexMenuItem';
 
 const props = withDefaults(defineProps<{
@@ -52,6 +54,22 @@ const emit = defineEmits<{
   (e: 'item-click', payload: { item: MenuItem; originalEvent: MouseEvent }): void;
   (e: 'show' | 'hide'): void;
 }>();
+
+/*
+ * Rows the resolver denies never reach the renderer, along with the groups,
+ * headings and rules they leave hanging.
+ *
+ * Inside a computed because useCan() injects at setup, and because a resolver
+ * that reads reactive state — permissions arriving with the page — must be
+ * able to change the menu when it does.
+ *
+ * Everything downstream reads `shown` rather than props.items, expandAll and
+ * collapseAll included: a group nobody can see must not appear in the
+ * expandedKeys map either. A consumer watching that map to persist a sidebar's
+ * open state would otherwise save keys for groups this user never had.
+ */
+const can = useCan();
+const shown = computed(() => filterMenu(props.items, can));
 
 /* Own state when nothing is bound, so an uncontrolled menu still toggles. */
 const inner = ref<Record<string, boolean>>({ ...(props.expandedKeys || {}) });
@@ -181,7 +199,7 @@ function setAll(v: boolean) {
     if ((it.toggleable as boolean | undefined) ?? depth > 0) out[String(it.key ?? it.label ?? '')] = v;
     walk(it.items, depth + 1);
   });
-  walk(props.items || [], 0);
+  walk(shown.value, 0);
   inner.value = out;
   emit('update:expandedKeys', out);
 }
@@ -198,7 +216,7 @@ defineExpose({ show, hide, toggle: togglePopup, expandAll: () => setAll(true), c
            :data-popup="popup ? 'true' : 'false'" :data-caps="labelCaps ? 'true' : 'false'" role="menu">
         <div v-if="slots.start" class="apex-mnu__edge"><slot name="start" /></div>
         <ul class="apex-mnu__list">
-          <ApexMenuNode v-for="(item, i) in items || []" :key="i" :item="item" :depth="0" :expanded="expanded"
+          <ApexMenuNode v-for="(item, i) in shown" :key="i" :item="item" :depth="0" :expanded="expanded"
                         :item-render="slots.item ? (ctx) => slots.item!(ctx) : undefined"
                         :label-render="slots.submenulabel ? (ctx) => slots.submenulabel!(ctx) : undefined"
                         @pick="onPick" @toggle="toggle" />
