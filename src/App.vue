@@ -45,6 +45,43 @@ const model = reactive<Record<string, unknown>>({});
 
 /* ── The directives ──────────────────────────────────────────────────── */
 
+/* ── ApexFileUpload ──────────────────────────────────────────────────── */
+
+/** What the custom-upload handler is doing, shown live under the demo. */
+const fuCustomLog = ref('');
+
+/**
+ * The Custom upload section's handler — a stub, deliberately.
+ *
+ * These docs have no server, and none of the other demos sets a `url` for
+ * that reason: with none, the selection itself is the result. This section is
+ * the exception, because customUpload's whole point is that the control sends
+ * nothing and hands you { files, clear, setProgress } instead. Showing that
+ * needs a handler that actually drives setProgress, so this one walks the
+ * files on a timer and reports as it goes.
+ *
+ * It calls clear() at the end like a real one would, so the control returns
+ * to empty rather than sitting on a finished selection for ever.
+ */
+async function fuCustom({ files, clear, setProgress }: {
+  files: File[];
+  clear: () => void;
+  setProgress: (n: number) => void;
+}) {
+  if (!files.length) return;
+  for (let i = 0; i < files.length; i += 1) {
+    fuCustomLog.value = `sending ${files[i].name} (${i + 1} of ${files.length})`;
+    await new Promise((r) => setTimeout(r, 500));
+    setProgress(Math.round(((i + 1) / files.length) * 100));
+  }
+  fuCustomLog.value = `done — ${files.length} file(s)`;
+  clear();
+}
+
+/** "In a form": the uploader bound as a plain File[], beside a real field. */
+const fuTitle = ref('');
+const fuFiles = ref<File[]>([]);
+
 /* ── ApexDynamicDialog ───────────────────────────────────────────────── */
 
 /** What the last dialog returned, or that it was dismissed. */
@@ -2143,6 +2180,208 @@ async function copyUsage() {
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery, nine sections. None of these sets a url:
+             with none the selection itself is the result, so every demo is
+             live without a server behind it. Custom upload is the exception
+             and stubs its own handler. -->
+        <template v-if="entry.id === 'fileupload'">
+          <h2>Basic</h2>
+          <p class="note">
+            One button, and the chosen file beside it. <code>maxFileSize</code> is the size
+            limit in bytes — a file over it is rejected with a message, and the limit doubles as
+            the hint.
+          </p>
+          <div class="card fu-card" style="margin-top: 12px">
+            <ApexFileUpload mode="basic" :max-file-size="1048576" choose-label="Choose file" />
+          </div>
+
+          <h2>Auto</h2>
+          <p class="note">
+            With <code>auto</code> a file is sent the moment it is chosen. With no
+            <code>url</code>, as here, the selection itself is the result — which is what a form
+            posting files alongside its own fields wants.
+          </p>
+          <div class="card fu-card" style="margin-top: 12px">
+            <ApexFileUpload mode="basic" auto choose-label="Upload now" :max-file-size="2097152" />
+          </div>
+
+          <h2>Advanced</h2>
+          <p class="note">
+            The button row, the drop area and the file list, with per-file status and a progress
+            bar while a request is in flight. Drag files onto the area or click to browse.
+          </p>
+          <div class="card fu-card fu-card--wide" style="margin-top: 12px">
+            <ApexFileUpload multiple :max-file-size="5242880" :max-files="6" accept="image/*,.pdf" />
+          </div>
+          <p class="msg-event">
+            Limits above: <code>maxFileSize: 5242880</code> (5 MB each), <code>maxFiles: 6</code>,
+            <code>accept: "image/*,.pdf"</code>.
+          </p>
+
+          <h2>Validation</h2>
+          <p class="note">
+            Three independent limits, each with its own message template — <code>{name}</code>,
+            <code>{limit}</code> and <code>{max}</code> are filled in. Try a large file, or a type
+            outside <code>accept</code>.
+          </p>
+          <div class="grid grid--2" style="margin-top: 12px">
+            <div class="cell">
+              <span class="cell__tag">maxFileSize: 51200 (50 KB)</span>
+              <ApexFileUpload multiple :max-file-size="51200" empty-label="Drop something small" />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">maxTotalSize: 204800 (200 KB)</span>
+              <ApexFileUpload multiple :max-total-size="204800" hint="200 KB across the selection" />
+            </div>
+          </div>
+
+          <h2>Button styling</h2>
+          <p class="note">
+            The three built-in buttons are ApexButtons, so each takes its own severity and
+            variant — plus a shared <code>buttonSize</code> and <code>buttonsRounded</code>.
+            Replace them outright with the <code>header</code> slot when the row itself needs to
+            change.
+          </p>
+          <div class="grid grid--2" style="margin-top: 12px">
+            <div class="cell">
+              <span class="cell__tag">success / danger, all solid</span>
+              <ApexFileUpload
+                multiple
+                :max-file-size="2097152"
+                :dropzone="false"
+                choose-severity="success"
+                upload-severity="success"
+                cancel-severity="danger"
+                cancel-variant="outlined"
+                upload-variant="solid"
+              />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">contrast, outlined, rounded, sm</span>
+              <ApexFileUpload
+                multiple
+                :max-file-size="2097152"
+                :dropzone="false"
+                choose-severity="contrast"
+                choose-variant="outlined"
+                upload-severity="info"
+                cancel-severity="secondary"
+                button-size="sm"
+                buttons-rounded
+              />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">warning solid, lg</span>
+              <ApexFileUpload
+                multiple
+                :max-file-size="2097152"
+                :dropzone="false"
+                choose-severity="warning"
+                upload-severity="warning"
+                upload-variant="outlined"
+                cancel-severity="warning"
+                button-size="lg"
+              />
+            </div>
+            <div class="cell">
+              <span class="cell__tag">basic mode, danger</span>
+              <ApexFileUpload
+                mode="basic"
+                :max-file-size="2097152"
+                choose-severity="danger"
+                upload-severity="danger"
+                choose-label="Attach file"
+              />
+            </div>
+          </div>
+
+          <h2>Custom upload</h2>
+          <p class="note">
+            With <code>customUpload</code> the control emits <code>uploader</code> instead of
+            sending anything. You get the files, a <code>clear</code> and a
+            <code>setProgress</code> — so an S3 signature, a chunked upload or an Inertia post all
+            fit.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexFileUpload custom-upload multiple @uploader="send" /&gt;
+
+async function send({ files, clear, setProgress }) {
+  for (const [i, file] of files.entries()) {
+    await put(file);
+    setProgress(Math.round(((i + 1) / files.length) * 100));
+  }
+  clear();
+}</pre>
+          <div class="card fu-card fu-card--wide" style="margin-top: 12px">
+            <ApexFileUpload custom-upload multiple @uploader="fuCustom" />
+          </div>
+          <p class="msg-event">Handler: <code>{{ fuCustomLog || 'idle' }}</code></p>
+
+          <h2>Dropzone</h2>
+          <p class="note">
+            The <code>empty</code> slot owns the drop area's content, and <code>content</code>
+            replaces the list — here a compact one built from <code>removeFileCallback</code>.
+          </p>
+          <div class="card fu-card fu-card--wide" style="margin-top: 12px">
+            <ApexFileUpload multiple :show-buttons="false" accept="image/*" :max-file-size="2097152">
+              <template #empty>
+                <ApexIcon name="backup" :size="40" class="fu-drop__icon" />
+                <strong>Drop files here</strong>
+                <em>or click to browse</em>
+              </template>
+              <template #content="{ files, removeFileCallback, chooseCallback, formatSize }">
+                <div v-if="files.length" class="fu-chips">
+                  <span v-for="(f, i) in files" :key="i" class="fu-chip">
+                    <img v-if="f.preview" :src="f.preview" :alt="f.file.name" />
+                    <b>{{ f.file.name }}</b><em>{{ formatSize(f.file.size) }}</em>
+                    <button type="button" aria-label="Remove" @click="removeFileCallback(i)">
+                      <ApexIcon name="close" :size="15" />
+                    </button>
+                  </span>
+                  <ApexButton size="sm" variant="text" icon="add" @click="chooseCallback()">Add more</ApexButton>
+                </div>
+              </template>
+            </ApexFileUpload>
+          </div>
+
+          <h2>Image preview</h2>
+          <p class="note">
+            <code>layout="grid"</code> lays the selection out as thumbnails, with the remove
+            button appearing on hover. The <code>header</code> slot replaces the button row.
+          </p>
+          <div class="card fu-card fu-card--wide" style="margin-top: 12px">
+            <ApexFileUpload
+              multiple
+              accept="image/*"
+              layout="grid"
+              :preview-size="96"
+              :max-file-size="5242880"
+            >
+              <template #header="{ files, chooseCallback, uploadCallback, clearCallback }">
+                <div class="apex-fu__bar">
+                  <ApexButton severity="secondary" variant="outlined" icon="add" @click="chooseCallback()">
+                    Add images
+                  </ApexButton>
+                  <ApexButton v-if="files.length" icon="upload" @click="uploadCallback()">Upload all</ApexButton>
+                  <ApexButton v-if="files.length" variant="text" severity="secondary" @click="clearCallback()">
+                    Clear
+                  </ApexButton>
+                </div>
+              </template>
+            </ApexFileUpload>
+          </div>
+
+          <h2>In a form</h2>
+          <p class="note">
+            <code>v-model</code> binds the selection as a plain <code>File[]</code>, so the
+            uploader sits in a form like any other control.
+          </p>
+          <div class="card fu-form" style="margin-top: 12px">
+            <ApexInput v-model="fuTitle" label="Document title" placeholder="Q3 report" />
+            <ApexFileUpload v-model="fuFiles" multiple :max-file-size="5242880" empty-label="Attachments" />
+            <p class="fu-bound">Bound value: <code>{{ fuFiles.length }}</code> file(s)</p>
           </div>
         </template>
 

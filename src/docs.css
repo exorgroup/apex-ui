@@ -548,6 +548,34 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .dir-hint { font-size: 13px; color: var(--fg-subtle); margin: 0; }
 .dir-gap { block-size: 150px; }
 
+/* ── ApexFileUpload's examples ─────────────────────────────────────────── */
+
+/* The uploader wants more room than the default card, and the advanced mode
+   wants more again. */
+.fu-card { max-inline-size: 560px; }
+.fu-card--wide { max-inline-size: 620px; }
+.fu-form { max-inline-size: 560px; display: flex; flex-direction: column; gap: 14px; }
+.fu-bound { margin: 0; font-size: 13px; color: var(--fg-subtle); }
+.fu-drop__icon { color: var(--accent-primary); }
+
+/* The Dropzone example's own file list, built from the content slot — a chip
+   per file rather than the default rows. */
+.fu-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.fu-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 6px 4px 4px; border-radius: 999px;
+  border: 1px solid var(--border-default); background: var(--bg-surface);
+  font-size: 12.5px;
+}
+.fu-chip img { inline-size: 22px; block-size: 22px; border-radius: 50%; object-fit: cover; }
+.fu-chip b { font-weight: 600; color: var(--fg-default); }
+.fu-chip em { font-style: normal; color: var(--fg-subtle); }
+.fu-chip button {
+  display: grid; place-items: center; padding: 0; border: 0;
+  background: transparent; color: var(--fg-subtle); cursor: pointer;
+}
+.fu-chip button:hover { color: var(--fg-default); }
+
 /* ── ApexDynamicDialog's examples ──────────────────────────────────────── */
 
 /* CityPicker is loaded into a dialog, so it lays itself out and the dialog
