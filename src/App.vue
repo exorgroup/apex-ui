@@ -24,7 +24,7 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock } from '@exorgroup/apex-ui';
 import type { MenuItem, MegaItem } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
@@ -190,6 +190,66 @@ const msgEmail = ref('');
  * anchor. `povShared` is the exception that proves the point — one popover
  * serving four triggers, which only works because the anchor is the event.
  */
+/* ── ApexDock page ─────────────────────────────── */
+const dkPicked = ref('');
+
+/* `tint` is the demo's own field, read by the custom-item slot. */
+const dkBasic: MenuItem[] = [
+  { icon: 'home', label: 'Home', tint: '#2f6f4f' },
+  { icon: 'search', label: 'Search', tint: '#3b5b8c' },
+  { icon: 'event', label: 'Calendar', tint: '#7a4b8c' },
+  { icon: 'chat', label: 'Messages', tint: '#8c5a2b' },
+  { icon: 'settings', label: 'Settings', tint: '#444a5a' },
+];
+
+const dkGroups: MenuItem[] = [
+  { icon: 'home', label: 'Home' },
+  { icon: 'folder', label: 'Files', items: [
+    { icon: 'description', label: 'Documents' },
+    { icon: 'image', label: 'Pictures' },
+    { icon: 'movie', label: 'Video' },
+  ] },
+  { icon: 'add', label: 'Create', items: [
+    { icon: 'note_add', label: 'Document' },
+    { icon: 'event', label: 'Event' },
+  ] },
+  { icon: 'settings', label: 'Settings' },
+];
+
+const dkBadges: MenuItem[] = [
+  { icon: 'mail', label: 'Mail', badge: '3' },
+  { icon: 'notifications', label: 'Alerts', badge: '12' },
+  { icon: 'cloud_upload', label: 'Sync' },
+  { icon: 'delete', label: 'Trash', disabled: true },
+];
+
+const dkDesktop: MenuItem[] = [
+  { icon: 'dashboard', label: 'Dashboard' },
+  { icon: 'event', label: 'Events', badge: '4' },
+  { icon: 'folder', label: 'Library', items: [
+    { icon: 'image', label: 'Posters' },
+    { icon: 'movie', label: 'Trailers' },
+    { icon: 'description', label: 'Contracts' },
+  ] },
+  { icon: 'bar_chart', label: 'Reports' },
+  { icon: 'person', label: 'Account', items: [
+    { icon: 'badge', label: 'Profile' },
+    { icon: 'logout', label: 'Sign out' },
+  ] },
+];
+
+/* Settings is denied outright; Reports is a group whose children are both
+   gated, so it goes with them rather than fanning onto nothing. */
+const dkGated: MenuItem[] = [
+  { icon: 'home', label: 'Home' },
+  { icon: 'event', label: 'Events' },
+  { icon: 'bar_chart', label: 'Reports', items: [
+    { icon: 'payments', label: 'Sales', can: 'reports' },
+    { icon: 'groups', label: 'Attendance', can: 'reports' },
+  ] },
+  { icon: 'settings', label: 'Settings', can: 'settings' },
+];
+
 /* ── ApexMegaMenu page ─────────────────────────── */
 const mgPicked = ref('');
 
@@ -3188,6 +3248,117 @@ function pick(city) {
         <!-- Ported from the gallery, five sections. The popover is reached
              through its ref throughout, which is how it is meant to be used —
              so each example declares its own ref rather than sharing one. -->
+        <template v-if="entry.id === 'dock'">
+          <h2>Basic</h2>
+          <p class="note">
+            A strip of icons pinned to an edge. Items are data, and
+            <code>position</code> decides which edge — which in turn decides which way a
+            label leans and which way a group fans.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexDock :items="items" position="bottom" /&gt;
+
+const items = [
+  { icon: 'home', label: 'Home' },
+  { icon: 'mail', label: 'Mail', badge: '3' },
+  { icon: 'folder', label: 'Files', items: [
+    { icon: 'description', label: 'Documents' },
+  ] },
+]</pre>
+          <div class="dock-stage">
+            <ApexDock :items="dkBasic" />
+          </div>
+
+          <h2>Single action, or a speed dial</h2>
+          <p class="note">
+            A slot is one action until you nest <code>items</code> on it — then it fans
+            its children out from the dock, speed-dial style, and one place in the strip
+            stays useful for a whole family of actions. Only one group fans at a time.
+          </p>
+          <div class="dock-stage">
+            <ApexDock :items="dkGroups" />
+          </div>
+
+          <h2>Badges and disabled</h2>
+          <p class="note">
+            <code>badge</code> puts a count on the icon; <code>disabled</code> keeps the
+            slot in place but inert, which reads better than a strip whose contents move
+            about as state changes.
+          </p>
+          <div class="dock-stage">
+            <ApexDock :items="dkBadges" />
+          </div>
+
+          <h2>Size, chrome and magnification</h2>
+          <p class="note">
+            <code>size</code> is the icon box in pixels and the glyph scales with it.
+            Magnification grows the hovered icon and its two neighbours — it is CSS off
+            <code>:hover</code> and the adjacent siblings, with no pointer tracking and no
+            work on scroll, so it costs nothing when nobody is hovering.
+          </p>
+          <div class="dock-stage">
+            <ApexDock :items="dkBasic" :size="56" gap="10px" radius="18px"
+                      background="#101828" borderColor="#1f2a3c" />
+          </div>
+          <div class="dock-stage">
+            <ApexDock :items="dkBasic" :size="36" :magnify="false" radius="10px" />
+          </div>
+
+          <h2>Custom item</h2>
+          <p class="note">
+            The <code>item</code> slot replaces the icon and receives
+            <code>{ item, index, inGroup }</code> — the hook for real application
+            artwork rather than a glyph.
+          </p>
+          <div class="dock-stage">
+            <ApexDock :items="dkBasic">
+              <template #item="{ item }">
+                <span class="dock-tile" :style="{ background: String(item.tint || '#334') }">
+                  {{ String(item.label || '').slice(0, 2) }}
+                </span>
+              </template>
+            </ApexDock>
+          </div>
+
+          <h2>Advanced — a desktop</h2>
+          <p class="note">
+            Put together: a strip on the left edge, groups that fan, a badge, and labels
+            on hover — the shape a small application shell actually takes.
+          </p>
+          <div class="dock-stage dock-stage--tall">
+            <ApexDock :items="dkDesktop" position="left" :size="44" blur
+                      @item-click="dkPicked = $event.item.label || ''" />
+          </div>
+          <p class="pov-state">item-click: <code>{{ dkPicked || 'nothing yet' }}</code></p>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            A dock slot is an icon with no text, so a denied one left in place would be an
+            unlabelled button that does nothing — worse than a stray row in a menu, not
+            better. <code>can</code> removes it, and a group whose children have all gone
+            goes with them, since its fan would open onto nothing.
+          </p>
+          <p class="note">
+            The open fan closes whenever the strip changes shape. Denying a slot shifts
+            everything after it one place left, so an index left pointing into the old
+            strip could fan open a different group entirely.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <div class="dock-stage">
+            <ApexDock :items="dkGated" />
+          </div>
+          <p class="pov-state">
+            A Viewer loses Settings and the whole Reports group, whose children were both
+            gated.
+          </p>
+        </template>
+
         <template v-if="entry.id === 'megamenu'">
           <h2>Basic</h2>
           <p class="note">

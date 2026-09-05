@@ -39,6 +39,15 @@
       <ApexMegaMenu :items="MEGA_ITEMS" v-bind="bind" @item-click="onPick" />
       <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
+
+    <!-- The strip pins itself to an edge, so the stage gives it a box to sit
+         in rather than letting it escape to the viewport. -->
+    <template v-else-if="id === 'dock'">
+      <div class="menu-stage__dock">
+        <ApexDock :items="DOCK_ITEMS" v-bind="bind" @item-click="onPick" />
+      </div>
+      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+    </template>
   </div>
 </template>
 
@@ -56,7 +65,7 @@
  * other check, which is exactly how two overlay stages once shipped blank.
  */
 import { ref } from 'vue';
-import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu } from '@exorgroup/apex-ui';
+import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock } from '@exorgroup/apex-ui';
 import type { MenuItem, MegaItem } from '@exorgroup/apex-ui';
 
 defineProps<{
@@ -161,6 +170,19 @@ const MEGA_ITEMS: MegaItem[] = [
     ] },
   ] },
   { label: 'Support', icon: 'help', href: '#' },
+];
+
+/** One plain action, one badged, one disabled, and a group that fans. */
+const DOCK_ITEMS: MenuItem[] = [
+  { icon: 'home', label: 'Home' },
+  { icon: 'mail', label: 'Mail', badge: '3' },
+  { icon: 'folder', label: 'Files', items: [
+    { icon: 'description', label: 'Documents' },
+    { icon: 'image', label: 'Pictures' },
+    { icon: 'movie', label: 'Video' },
+  ] },
+  { icon: 'settings', label: 'Settings' },
+  { icon: 'delete', label: 'Trash', disabled: true },
 ];
 
 const tmenu = ref<InstanceType<typeof ApexTieredMenu> | null>(null);
