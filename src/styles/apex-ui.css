@@ -3180,3 +3180,45 @@ stroke-linejoin:round;stroke-dasharray:var(--len,120);stroke-dashoffset:0}
 [data-theme="dark"] .apex-alert[data-tone="danger"]{--ring:#e8595a}
 [data-theme="dark"] .apex-alert[data-tone="warn"]{--ring:#f37e1f}
 [data-theme="dark"] .apex-alert[data-tone="info"]{--ring:#3b7ffe}
+
+/* Icon or image in place of the drawn figure, and where the figure sits. */
+.apex-alert-image{max-width:100%;max-height:88px;object-fit:contain;border-radius:var(--r-md)}
+.apex-alert-icon[data-anim="pulse"]{animation:apex-alert-pulse-icon 1.6s var(--ease-out) infinite}
+.apex-alert-icon[data-anim="shake"]{animation:apex-alert-shake .5s var(--ease-out)}
+.apex-alert-icon[data-anim="bounce"]{animation:apex-alert-bounce .7s var(--ease-spring)}
+@keyframes apex-alert-pulse-icon{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+@keyframes apex-alert-shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@keyframes apex-alert-bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}70%{transform:translateY(-4px)}}
+@media (prefers-reduced-motion: reduce){.apex-alert-icon{animation:none}}
+
+/* iconPosition. The panel is a centred column by default; left and right turn
+   the figure and the content into a row, and bottom simply reverses. */
+.apex-alert[data-icon-pos="bottom"]{flex-direction:column-reverse}
+.apex-alert[data-icon-pos="bottom"] .apex-alert-figure{margin:18px auto 0}
+.apex-alert[data-icon-pos="left"],.apex-alert[data-icon-pos="right"]{flex-direction:row;align-items:center;text-align:start}
+.apex-alert[data-icon-pos="right"]{flex-direction:row-reverse}
+.apex-alert[data-icon-pos="left"] .apex-alert-figure,
+.apex-alert[data-icon-pos="right"] .apex-alert-figure{margin:0 18px 0 0}
+.apex-alert[data-icon-pos="right"] .apex-alert-figure{margin:0 0 0 18px}
+.apex-alert[data-icon-pos="left"] .apex-alert-actions,
+.apex-alert[data-icon-pos="right"] .apex-alert-actions{justify-content:flex-start}
+
+.apex-alert-close{position:absolute;inset-block-start:10px;inset-inline-end:10px;display:grid;place-items:center;
+inline-size:30px;block-size:30px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--fg-subtle);cursor:pointer}
+.apex-alert-close:hover{background:var(--bg-muted);color:var(--fg-default)}
+
+.apex-alert-footnote{margin:14px 0 0;font-size:var(--t-sm);color:var(--fg-subtle)}
+.apex-alert-footnote a{color:var(--accent-primary)}
+
+/* The autoClose countdown, drawn rather than described — a bar that empties is
+   read at a glance where "closing in 4s" has to be re-read every second. */
+.apex-alert-timer{margin-block-start:16px;block-size:3px;border-radius:999px;background:var(--bg-muted);overflow:hidden}
+.apex-alert-timer::after{content:"";display:block;block-size:100%;background:var(--ring,var(--accent-primary));
+transform-origin:left;animation:apex-alert-countdown var(--apex-alert-life,3000ms) linear forwards}
+@keyframes apex-alert-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+
+/* transition: the default is the pop; these replace it. */
+.apex-alert--fade{animation:apex-alert-fade var(--dur-mid) var(--ease-out) both}
+.apex-alert--slide{animation:apex-alert-slide var(--dur-slow) var(--ease-spring) both}
+.apex-alert--none{animation:none}
+@keyframes apex-alert-slide{from{transform:translateY(-24px);opacity:0}to{transform:none;opacity:1}}

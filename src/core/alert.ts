@@ -30,9 +30,47 @@ export interface AlertChange {
   to?: unknown;
 }
 
+export type AlertSeverity =
+  'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info' | 'contrast';
+
+/**
+ * One button in the row.
+ *
+ * A button carries its own action rather than being reported back through a
+ * single handler, so "Surprise me" can open a form and Cancel can just close
+ * without the caller switching on an index.
+ *
+ * `role` is what `run()` reads: accept proceeds to the work, reject and cancel
+ * abort it, and a button with no role runs its action and stops there. It also
+ * decides the keyboard — Enter fires accept, Escape fires reject or cancel —
+ * which is why free-form buttons still need one of the three between them.
+ */
+export interface AlertButton {
+  label: string;
+  icon?: string;
+  severity?: AlertSeverity;
+  variant?: 'solid' | 'outlined' | 'text';
+  role?: 'accept' | 'reject' | 'cancel';
+  /** Whatever it does: a request, a route, another alert, a form. */
+  action?: () => void | Promise<void>;
+  /** Whether pressing it closes the alert. Default true. */
+  close?: boolean;
+  /**
+   * Hidden when the app's `can` resolver denies this action on this resource.
+   * Hidden rather than disabled, matching every other gated control — and it
+   * is presentation, not authorisation. The endpoint still has to check.
+   */
+  can?: string;
+  resource?: string;
+  /** Explicit visibility, for logic no resolver can express. Wins outright. */
+  visible?: boolean;
+}
+
 export interface AlertOptions {
   tone?: AlertTone;
   title?: string;
+  /** Alias of `title` — the name ApexConfirmDialog used, kept for its callers. */
+  header?: string;
   message?: string;
   /** Shows what is about to change, so a confirm can be read rather than trusted. */
   changes?: AlertChange[] | null;
@@ -42,6 +80,70 @@ export interface AlertOptions {
   cancelText?: string | null;
   /** When set, a button copies this to the clipboard — a generated password. */
   copyText?: string | null;
+
+  /* ── the figure ──────────────────────────────────────────────
+     The tone figure is the default. Supplying an icon or an image replaces it,
+     at which point iconAnimation applies to that icon instead. So the drawn
+     figure is what you get without asking, and the icon path stays available
+     for the cases that need a specific glyph. */
+  icon?: string;
+  iconPosition?: 'top' | 'left' | 'right' | 'bottom';
+  /** No `spin` — a confirmation is not loading, and spinning it says otherwise. */
+  iconAnimation?: 'none' | 'pulse' | 'shake' | 'bounce';
+  iconColor?: string;
+  image?: string;
+  imageAlt?: string;
+
+  /* ── buttons ─────────────────────────────────────────────── */
+  /** Replaces the default row entirely. */
+  buttons?: AlertButton[];
+  acceptLabel?: string;
+  rejectLabel?: string;
+  acceptIcon?: string;
+  rejectIcon?: string;
+  acceptSeverity?: AlertSeverity;
+  rejectSeverity?: AlertSeverity;
+  /** A note or link under the buttons. */
+  footnote?: string;
+
+  /* ── panel ───────────────────────────────────────────────── */
+  width?: string;
+  padding?: string;
+  background?: string;
+  radius?: string;
+  maskColor?: string;
+  maskBlur?: boolean;
+  closable?: boolean;
+  dismissableMask?: boolean;
+  /** Close after this many milliseconds. Never while the work is running. */
+  autoClose?: number;
+  /** A bar counting the autoClose down. */
+  showTimer?: boolean;
+  transition?: 'scale' | 'slide' | 'fade' | 'none';
+  enterClass?: string;
+  leaveClass?: string;
+
+  /* ── anchored ────────────────────────────────────────────── */
+  /**
+   * An element, selector or event. Its presence routes `confirm()` to
+   * ApexConfirmPopup instead — one service driving both, without the caller
+   * choosing a component.
+   *
+   * `run()` ignores it: a progress spinner in a popup anchored to the button
+   * that has just been pressed reads badly, and the popup would have to
+   * survive a re-anchor at every stage.
+   */
+  target?: unknown;
+  side?: 'top' | 'bottom' | 'left' | 'right';
+  align?: 'start' | 'center' | 'end';
+
+  /** Marks a request so a headless container can render its own UI per kind. */
+  group?: string;
+
+  accept?: () => void;
+  reject?: () => void;
+  /** Fired for a button that is neither accept nor reject. */
+  onCustom?: (button: AlertButton, index: number) => void;
 }
 
 /**
@@ -76,16 +178,63 @@ interface AlertState extends AlertOptions {
   seq: number;
 }
 
-const state = reactive<AlertState>({
-  open: false,
-  stage: 'confirm',
+/**
+ * Everything a stage starts from.
+ *
+ * One list, spread on every transition, rather than a hand-written reset per
+ * field. With forty options a hand-written list is a matter of time before one
+ * is forgotten — and a forgotten field is a confirm's Delete button surviving
+ * into the success stage, which looks like an offer to delete it again.
+ */
+const BLANK: AlertOptions = {
   tone: 'info',
-  title: '',
+  title: undefined,
+  header: undefined,
   message: '',
   changes: null,
   confirmText: undefined,
   cancelText: null,
   copyText: null,
+  icon: undefined,
+  iconPosition: 'top',
+  iconAnimation: 'none',
+  iconColor: undefined,
+  image: undefined,
+  imageAlt: undefined,
+  buttons: undefined,
+  acceptLabel: undefined,
+  rejectLabel: undefined,
+  acceptIcon: undefined,
+  rejectIcon: undefined,
+  acceptSeverity: undefined,
+  rejectSeverity: undefined,
+  footnote: undefined,
+  width: undefined,
+  padding: undefined,
+  background: undefined,
+  radius: undefined,
+  maskColor: undefined,
+  maskBlur: undefined,
+  closable: undefined,
+  dismissableMask: undefined,
+  autoClose: undefined,
+  showTimer: undefined,
+  transition: undefined,
+  enterClass: undefined,
+  leaveClass: undefined,
+  target: undefined,
+  side: undefined,
+  align: undefined,
+  group: undefined,
+  accept: undefined,
+  reject: undefined,
+  onCustom: undefined,
+};
+
+const state = reactive<AlertState>({
+  ...BLANK,
+  open: false,
+  stage: 'confirm',
   seq: 0,
 });
 
@@ -124,7 +273,13 @@ function settle(kind: string) {
 function close() {
   state.open = false;
   state.stage = 'confirm';
+  /* Settle anyone still waiting rather than dropping the resolver on the
+     floor. Closing programmatically — a route change, a teardown — used to
+     leave `await confirm()` pending for the life of the page. It reports
+     cancel, because nothing was agreed to. */
+  const r = resolver;
   resolver = null;
+  if (r) r('cancel');
 }
 
 /**
@@ -135,16 +290,10 @@ function close() {
  * kept `changes` would list the edits again under "Done".
  */
 function setStage(stage: AlertStage, patch: AlertOptions) {
-  Object.assign(state, {
-    open: true,
-    stage,
-    changes: null,
-    cancelText: null,
-    copyText: null,
-    confirmText: undefined,
-    message: '',
-    seq: state.seq + 1,
-  }, patch);
+  Object.assign(state, BLANK, { open: true, stage, seq: state.seq + 1 }, patch);
+  /* `header` is the older name for the same thing; settle it here so nothing
+     downstream has to know there are two. */
+  if (patch.header !== undefined && patch.title === undefined) state.title = patch.header;
 }
 
 /** Asks, and resolves true only if the accepting button was pressed. */
@@ -170,7 +319,11 @@ async function run(options: AlertRunOptions): Promise<boolean> {
   const { confirm: confirmOpts = null, progressTitle, action } = options;
 
   if (confirmOpts) {
-    setStage('confirm', { tone: 'warn', ...confirmOpts });
+    /* Anchoring is dropped rather than honoured: a staged flow has to stay put
+       across three stages, and the element it would anchor to is usually the
+       button that has just been pressed. confirm() may anchor; this may not. */
+    const { target: _anchored, side: _s, align: _a, ...dialogOnly } = confirmOpts;
+    setStage('confirm', { tone: 'warn', ...dialogOnly });
     if (await wait() !== 'confirm') { close(); return false; }
   }
 
