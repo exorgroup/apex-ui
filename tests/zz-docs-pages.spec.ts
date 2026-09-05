@@ -146,6 +146,8 @@ describe('the ported gallery examples are on the page', () => {
     ApexDrawer: ['Position', 'Responsive', 'Template', 'Floating and headless'],
     ApexDialog: ['Positions', 'Draggable, non-modal and timed'],
     ApexDynamicDialog: ['The service', 'Passing data, and returning a value', 'Stacking'],
+    ApexFileUpload: ['Basic', 'Auto', 'Advanced', 'Validation', 'Button styling',
+      'Custom upload', 'Dropzone', 'Image preview', 'In a form'],
     ApexToast: ['Service', 'Severity', 'Timed close', 'Sticky', 'Promise', 'Position',
       'Expanded and stacked', 'Custom content and actions'],
     ApexMessage: ['Severity', 'Variant', 'Icon', 'Sizes', 'Blur', 'Closable and life',
