@@ -420,3 +420,30 @@ describe('a hidden row is unreachable by keyboard, not merely unseen', () => {
     dial.unmount();
   });
 });
+
+describe('ApexTieredMenu really has the item slot the docs claim', () => {
+  /*
+   * It does not render `<slot name="item">` anywhere. The slot is declared with
+   * defineSlots and handed to ApexMenuItem as the `itemRender` prop, so the row
+   * keeps its own click, hover and submenu behaviour while the consumer
+   * replaces only the contents.
+   *
+   * That indirection is invisible to the docs-api guard, which reads the file
+   * for <slot> tags. Before teaching that guard about defineSlots, this proves
+   * the slot is genuinely wired — otherwise the guard would be relaxed to
+   * excuse a documented slot that does nothing.
+   */
+  it('renders the consumer’s template inside the row', () => {
+    const w = mount(ApexTieredMenu, {
+      props: { items: [{ label: 'New' }, { label: 'Open' }] },
+      slots: { item: '<span class="mine">{{ params.item.label }}!</span>' },
+      global: { plugins: [ApexUI] },
+      attachTo: document.body,
+    });
+    const mine = w.findAll('.mine').map((n) => n.text());
+    expect(mine, 'both rows went through the slot').toEqual(['New!', 'Open!']);
+    /* Still a real menu row, not just the slot's markup. */
+    expect(w.find('.apex-menu__row .mine').exists()).toBe(true);
+    w.unmount();
+  });
+});

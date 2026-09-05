@@ -69,6 +69,20 @@ function declaredSlots(name: string): { fixed: Set<string>; templated: boolean }
   if (file === undefined) throw new Error(`no source for ${name}`);
   const fixed = new Set([...file.matchAll(/<slot[^>]*\sname="([a-zA-Z][\w-]*)"/g)].map((m) => m[1]));
   if (/<slot(?![^>]*\sname=)/.test(file)) fixed.add('default');
+
+  /*
+   * A slot need not be rendered by a <slot> tag. ApexTieredMenu declares `item`
+   * with defineSlots and hands it to ApexMenuItem as the `itemRender` prop, so
+   * the row keeps its click, hover and submenu behaviour while the consumer
+   * replaces only the contents — there is no <slot> anywhere in the file.
+   *
+   * Reading only for tags called that an undocumented slot; the slot works, and
+   * menu-gating.spec proves it by mounting one. So the declaration counts too.
+   */
+  const declared = file.match(/defineSlots<\{([\s\S]*?)\}>\(\)/);
+  if (declared) {
+    for (const m of declared[1].matchAll(/^\s*([a-zA-Z][\w-]*)\??\s*:/gm)) fixed.add(m[1]);
+  }
   // `name="\`panel-${i + 1}\`"` — positional, so names cannot be checked literally.
   const templated = /<slot[^>]*:name=/.test(file);
   return { fixed, templated };

@@ -132,6 +132,32 @@ describe('every overlay entry has a stage that does something', () => {
   });
 });
 
+describe('every menu entry has a stage that renders a menu', () => {
+  /*
+   * The same failure OverlayStage shipped twice: an entry with demo: 'menu'
+   * and no matching branch is an empty div. The page renders, warns about
+   * nothing, has every section, and its props table is right — the playground
+   * is just blank, with every rail control apparently inert.
+   *
+   * A menu stage is worth looking at only if it has rows, so requiring one
+   * menu row is the cheap version of the check.
+   */
+  const MENUS = ENTRIES.filter((e) => e.demo === 'menu');
+
+  it('there are menu entries to check', () => {
+    expect(MENUS.length).toBeGreaterThan(0);
+  });
+
+  it.each(MENUS.map((e) => [e.name] as const))('%s', async (name) => {
+    const { wrapper, open } = await harness();
+    await open(name);
+    const rows = wrapper.findAll('.stage__demo .apex-menu__row, .stage__demo button');
+    expect(rows.length, `${name}'s stage is empty — is its MenuStage branch missing?`)
+      .toBeGreaterThan(0);
+    wrapper.unmount();
+  });
+});
+
 describe('the ported gallery examples are on the page', () => {
   /* Headings taken from APEX UI Gallery.html. A build cannot tell you a
      section is missing — only reading the rendered page can. */
@@ -191,6 +217,8 @@ describe('the ported gallery examples are on the page', () => {
       'Styling and states'],
     ApexAvatar: ['Content', 'Sizes and shapes', 'Auto colour', 'Status', 'Badge', 'Groups',
       'Template'],
+    ApexTieredMenu: ['Basic', 'Popup', 'Template', 'Colour', 'Command and router',
+      'Permissions'],
     ApexInput: ['Autocomplete', 'Icon slots', 'Affixes and transforms'],
     /* "Severity × variant" carries a real multiplication sign. It was once
        written as the six characters of its escape, which Vue renders
