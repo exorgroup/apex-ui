@@ -78,6 +78,7 @@ import ApexTabs from './components/ApexTabs.vue';
 import ApexToolbar from './components/ApexToolbar.vue';
 import ApexDialog from './components/ApexDialog.vue';
 import ApexConfirmDialog from './components/ApexConfirmDialog.vue';
+import ApexAlert from './components/ApexAlert.vue';
 import ApexConfirmPopup from './components/ApexConfirmPopup.vue';
 import ApexDrawer from './components/ApexDrawer.vue';
 import ApexDynamicDialog from './components/ApexDynamicDialog.vue';
@@ -186,6 +187,7 @@ export const components = {
   Toolbar: ApexToolbar,
   Dialog: ApexDialog,
   ConfirmDialog: ApexConfirmDialog,
+  Alert: ApexAlert,
   ConfirmPopup: ApexConfirmPopup,
   Drawer: ApexDrawer,
   DynamicDialog: ApexDynamicDialog,
@@ -265,7 +267,7 @@ export {
   ApexDrawer, ApexDynamicDialog, ApexPopover, ApexFileUpload, ApexBreadcrumb, ApexContextMenu, ApexDock, ApexMegaMenu, ApexMenu, ApexMenubar, ApexTieredMenu, ApexMessage, ApexToast, ApexCarousel, ApexCarouselContent, ApexCarouselItem,
   ApexCarouselNav, ApexCarouselControls, ApexCarouselIndicators,
   ApexCompare, ApexCompareItem, ApexGallery, ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger,
-  ApexButton, ApexButtonGroup, ApexSpeedDial, ApexSplitButton, ApexDataTable, ApexPaginator, ApexDataView, ApexOrgChart, ApexPickList, ApexTimeline, ApexTree, ApexTreeTable, ApexAccordion, ApexAvatar, ApexBadge, ApexOverlayBadge, ApexBlockUI, ApexChip, ApexInplace, ApexMeterGroup, ApexProgressSpinner, ApexScrollTop, ApexSkeleton, ApexChart, ApexChartGroup, ApexTaskBoard, ApexTaskCard, ApexAvatarGroup, ApexCard, ApexFieldset, ApexPanel, ApexScrollArea, ApexSplitter, ApexSteps, ApexTabs, ApexToolbar, ApexDialog, ApexConfirmDialog, ApexConfirmPopup, ApexProgressBar, ApexColumnFilter, ApexErrorSummary,
+  ApexButton, ApexButtonGroup, ApexSpeedDial, ApexSplitButton, ApexDataTable, ApexPaginator, ApexDataView, ApexOrgChart, ApexPickList, ApexTimeline, ApexTree, ApexTreeTable, ApexAccordion, ApexAvatar, ApexBadge, ApexOverlayBadge, ApexBlockUI, ApexChip, ApexInplace, ApexMeterGroup, ApexProgressSpinner, ApexScrollTop, ApexSkeleton, ApexChart, ApexChartGroup, ApexTaskBoard, ApexTaskCard, ApexAvatarGroup, ApexCard, ApexFieldset, ApexPanel, ApexScrollArea, ApexSplitter, ApexSteps, ApexTabs, ApexToolbar, ApexDialog, ApexConfirmDialog, ApexConfirmPopup, ApexAlert, ApexProgressBar, ApexColumnFilter, ApexErrorSummary,
 };
 export { useFieldState, nextId } from './core/useFieldState';
 export { evalCondition, getPath } from './core/conditions';

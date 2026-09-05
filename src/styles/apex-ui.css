@@ -3102,3 +3102,81 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 .apex-pop__add{position:sticky;inset-block-end:-5px;z-index:1;display:flex;align-items:center;gap:9px;inline-size:100%;text-align:start;margin:3px -5px -5px;padding-block:9px;padding-inline:14px;border:0;border-block-start:1px solid var(--apex-pop-add-border,var(--border-subtle));background:var(--apex-pop-add-bg,var(--bg-elevated));font:inherit;font-size:13.5px;font-weight:600;color:var(--apex-pop-add-fg,var(--accent-primary));cursor:pointer}
 .apex-pop__add:hover,.apex-pop__add[data-active="true"]{background:var(--apex-pop-add-hover-bg,var(--bg-muted))}
 .apex-pop__add .apex-icon{color:var(--apex-pop-add-icon,var(--apex-pop-add-fg,var(--accent-primary)))}
+
+/* ─── alert ────────────────────────────────────────────────
+ * The animated figure is the reason this control looks the way it does, and
+ * the keyframes below are the whole of it. In Pando they lived in a separate
+ * app stylesheet next to the component; here they belong with everything else
+ * the package ships, or a consumer gets the markup and none of the motion.
+ */
+.apex-alert-overlay{position:fixed;inset:0;z-index:11000;display:grid;place-items:center;padding:5vh 4vw;
+background:rgba(15,20,28,.5);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+.apex-alert{position:relative;width:100%;max-width:480px;background:var(--bg-elevated);border-radius:var(--r-xl);
+box-shadow:0 5px 5px rgba(8,12,20,.28),0 24px 60px -24px rgba(8,12,20,.45),0 0 0 1px var(--border-subtle);
+display:flex;flex-direction:column;align-items:center;text-align:center;padding:34px 36px 28px;
+animation:apex-alert-pop var(--dur-slow) var(--ease-spring) both}
+@keyframes apex-alert-pop{from{transform:translateY(14px) scale(.96)}to{transform:none}}
+@media (max-width:600px){.apex-alert{padding:30px 24px 24px}}
+
+/* Re-keyed per stage, so this fade replays while the height eases. */
+.apex-alert-content{width:100%;min-width:0;animation:apex-alert-fade var(--dur-mid) var(--ease-out) both}
+@keyframes apex-alert-fade{from{opacity:0}to{opacity:1}}
+.apex-alert-title{margin:0 0 10px;font-size:var(--t-2xl);font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--fg-default)}
+.apex-alert-text{margin:0;font-size:var(--t-md);line-height:1.55;color:var(--fg-muted)}
+.apex-alert-text b{color:var(--fg-default);font-weight:600}
+
+/* The edit-confirm diff. Left-aligned inside a centred panel, because a
+   column of from→to pairs is read down the labels, not across the middle. */
+.apex-alert-changes{list-style:none;margin:14px auto 0;padding:0;display:inline-flex;flex-direction:column;gap:6px;
+font-size:var(--t-sm);text-align:left}
+.apex-alert-changes li{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px}
+.apex-alert-changes__label{color:var(--fg-subtle);font-weight:500}
+.apex-alert-changes__from{color:var(--fg-muted);text-decoration:line-through}
+.apex-alert-changes__to{color:var(--fg-default);font-weight:600}
+.apex-alert-changes__arrow{color:var(--fg-subtle)}
+
+.apex-alert-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center}
+.apex-alert-actions .apex-btn{min-width:120px}
+
+/* ─── the figure ─── */
+.apex-alert-figure{width:88px;height:88px;flex-shrink:0;position:relative;display:grid;place-items:center;margin:0 auto 18px}
+
+.apex-alert-pulse{position:absolute;inset:0;border-radius:50%;background:var(--ring,var(--apex-blue-500));opacity:.12;
+animation:apex-alert-pulse 2.4s var(--ease-out) infinite}
+@keyframes apex-alert-pulse{0%{transform:scale(.82);opacity:.18}70%{transform:scale(1.12);opacity:0}100%{transform:scale(1.12);opacity:0}}
+
+.apex-alert-svg{position:relative;width:88px;height:88px;overflow:visible}
+
+.apex-alert-circle{fill:none;stroke:var(--ring,var(--apex-blue-500));stroke-width:5;stroke-linecap:round;
+stroke-dasharray:472;stroke-dashoffset:0;transform:rotate(-90deg);transform-origin:center}
+@keyframes apex-alert-draw{from{stroke-dashoffset:472}to{stroke-dashoffset:0}}
+
+/* --len is set inline per path: its own length, so the dash covers exactly
+   its own geometry rather than a number that happens to be long enough. */
+.apex-alert-mark{fill:none;stroke:var(--ring,var(--apex-blue-500));stroke-width:6;stroke-linecap:round;
+stroke-linejoin:round;stroke-dasharray:var(--len,120);stroke-dashoffset:0}
+@keyframes apex-alert-draw-mark{from{stroke-dashoffset:var(--len,120)}to{stroke-dashoffset:0}}
+
+.apex-alert-dot{fill:var(--ring,var(--apex-blue-500));transform-box:fill-box;transform-origin:center;opacity:1}
+@keyframes apex-alert-dot{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+
+/* Everything is drawn only when motion is welcome. The marks sit at their
+   finished state by default, so switching the animations off leaves a
+   complete figure rather than an empty circle. */
+@media (prefers-reduced-motion: no-preference){
+  .apex-alert-circle{animation:apex-alert-draw .7s var(--ease-out) .05s forwards}
+  .apex-alert-mark{animation:apex-alert-draw-mark .5s var(--ease-spring) .55s forwards}
+  .apex-alert-dot{animation:apex-alert-dot .35s var(--ease-spring) .9s forwards}
+}
+@media (prefers-reduced-motion: reduce){
+  .apex-alert,.apex-alert-content,.apex-alert-pulse{animation:none}
+}
+
+.apex-alert[data-tone="success"]{--ring:var(--apex-green-500)}
+.apex-alert[data-tone="danger"]{--ring:var(--apex-red-500)}
+.apex-alert[data-tone="warn"]{--ring:var(--apex-orange-500)}
+.apex-alert[data-tone="info"]{--ring:var(--apex-blue-500)}
+[data-theme="dark"] .apex-alert[data-tone="success"]{--ring:#2ba864}
+[data-theme="dark"] .apex-alert[data-tone="danger"]{--ring:#e8595a}
+[data-theme="dark"] .apex-alert[data-tone="warn"]{--ring:#f37e1f}
+[data-theme="dark"] .apex-alert[data-tone="info"]{--ring:#3b7ffe}
