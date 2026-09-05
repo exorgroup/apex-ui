@@ -22,6 +22,7 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 import { useApexDialog } from '@exorgroup/apex-ui';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
+import DirectiveStage from './demos/DirectiveStage.vue';
 
 const current = ref('input');
 const theme = ref<'light' | 'dark'>('dark');
@@ -251,6 +252,21 @@ function reset() {
 /** The usage snippet, generated from whatever the playground currently shows. */
 const usage = computed(() => {
   const bind = overrides[current.value] ?? {};
+
+  /* A directive has no tag of its own, so its snippet is a host element with
+     the binding object spelled out — which is also how you would really write
+     it, since the options go in one object rather than as attributes. */
+  if (entry.value.directiveName) {
+    const opts = Object.entries(bind)
+      .filter(([, v]) => v !== '' && v !== null && v !== undefined)
+      .map(([k, v]) => `    ${k}: ${typeof v === 'string' ? `'${v}'` : String(v)},`);
+    const tag = entry.value.hostTag === 'button' ? 'ApexButton' : 'div';
+    const label = entry.value.hostLabel || 'Hover me';
+    return opts.length
+      ? `<${tag}\n  v-${entry.value.directiveName}="{\n${opts.join('\n')}\n  }"\n>${label}</${tag}>`
+      : `<${tag} v-${entry.value.directiveName}>${label}</${tag}>`;
+  }
+
   const lines = Object.entries(bind)
     .filter(([, v]) => v !== '' && v !== null && v !== undefined && v !== false)
     // A snippet that spells out the defaults is noise you would delete by hand.
@@ -738,6 +754,16 @@ async function copyUsage() {
               <!-- "plain" is the whole treatment for a control that renders
                    from its props: ApexIcon, ApexBadge, ApexAvatar. -->
               <component v-if="entry.demo === 'plain'" :is="entry.name" v-bind="live" />
+
+              <!-- A directive has no tag of its own, so it needs a host — and
+                   two of the four need more than that. DirectiveStage holds
+                   the four hosts. -->
+              <DirectiveStage
+                v-else-if="entry.directiveName"
+                :id="entry.id"
+                :bind="live"
+                :label="entry.hostLabel"
+              />
 
               <!-- An Inplace is two states, and only the closed one shows
                    without content to swap to. -->

@@ -44,6 +44,18 @@ export interface DocEntry {
   slots?: string[][];
   /** [name, what it does] — what defineExpose offers, where a control has one. */
   exposed?: string[][];
+  /**
+   * A directive rather than a component: `apex-ripple` renders as
+   * `v-apex-ripple` on a host element.
+   *
+   * These still have a props table and a playground — the bindings are props
+   * in every sense that matters, and they are worth trying. What differs is
+   * that a directive has no tag of its own, so the snippet and the stage both
+   * need a host to put it on, which is what hostTag and hostLabel supply.
+   */
+  directiveName?: string;
+  hostTag?: 'div' | 'button';
+  hostLabel?: string;
   /** Opening attributes for the usage snippet, before the playground props. */
   lead?: string[];
   /**
@@ -3780,5 +3792,139 @@ export const ENTRIES: DocEntry[] = [
     ],
     events: [['click', '— the button was pressed']],
     slots: [['default', 'Replaces the icon and label entirely']],
+  },
+
+  /* The four directives. They keep a props table and a playground — the
+     bindings are props in every sense that matters — but each needs a host
+     element to sit on, which is what directiveName and hostTag declare. */
+  {
+    id: 'styleclass', name: 'ApexStyleClass', group: 'Utilities',
+    blurb: 'Toggles classes on another element declaratively — v-apex-style-class="{ selector: ’@next’, toggleClass: ’open’ }". Two modes over one directive: toggleClass adds and removes a class, while the enter/leave triple runs an animation and reads its real duration off the element, so a class whose animation length changes needs no matching timeout here — a hard-coded delay is the usual reason these sequences break.',
+    noField: true, directiveName: 'apex-style-class',
+    hostTag: 'button', hostLabel: 'Toggle panel',
+    base: {
+      selector: '@next', enterFromClass: 'apex-hidden', enterActiveClass: 'apex-scale-in',
+      leaveActiveClass: 'apex-scale-out', leaveToClass: 'apex-hidden',
+      hideOnOutsideClick: true, hideOnEscape: true,
+    },
+    controls: [
+      { key: 'selector', type: 'select', options: ['@next', '@prev', '@parent', '@grandparent'] },
+      { key: 'toggleClass', type: 'text' },
+      { key: 'enterFromClass', type: 'text' }, { key: 'enterActiveClass', type: 'text' },
+      { key: 'enterToClass', type: 'text' },
+      { key: 'leaveFromClass', type: 'text' }, { key: 'leaveActiveClass', type: 'text' },
+      { key: 'leaveToClass', type: 'text' },
+      { key: 'hideOnOutsideClick', type: 'bool' }, { key: 'hideOnEscape', type: 'bool' },
+      { key: 'hideOnResize', type: 'bool' }, { key: 'resizeSelector', type: 'text' },
+    ],
+    props: [
+      ['selector', 'string', '—', "'@next', '@prev', '@parent', '@grandparent', or any CSS selector. Resolved at click time, not at mount, so a conditionally rendered sibling still binds"],
+      ['toggleClass', 'string', '—', 'Add/remove mode — the simple case, and a bare string binding is the shorthand for it on @next'],
+      ['enterFromClass / enterActiveClass / enterToClass', 'string', '—', 'The reveal sequence: from is removed, active runs, then to is applied when the animation ends'],
+      ['leaveFromClass / leaveActiveClass / leaveToClass', 'string', '—', 'The same in reverse'],
+      ['hideOnOutsideClick', 'boolean', 'false', 'Runs the leave sequence when a click lands outside the target — for a panel behaving as an overlay'],
+      ['hideOnEscape', 'boolean', 'false', 'Runs the leave sequence on Escape'],
+      ['hideOnResize / resizeSelector', 'boolean / string', "false / 'window'", "Leave on resize. 'window' or 'document' listens to the browser; a CSS selector observes that element's own size, skipping the observer's initial call so it does not close on arrival"],
+    ],
+    events: [],
+    serviceTitle: 'Animation helpers',
+    serviceRows: [
+      ['apex-hidden', 'display:none', 'The usual from/to class'],
+      ['apex-fade-in / apex-fade-out', 'opacity', ''],
+      ['apex-scale-in / apex-scale-out', 'opacity + scale', ''],
+      ['apex-slide-down / apex-slide-up', 'opacity + offset', ''],
+      ['apex-dur-fast / apex-dur-slow', 'duration', 'Override the 220ms default on the target'],
+      ['your own classes', 'supported', 'Any class works — the directive reads whatever duration the class declares'],
+    ],
+  },
+  {
+    id: 'ripple', name: 'ApexRipple', group: 'Utilities',
+    blurb: 'A ripple spreading from the point of contact, applied as a directive — v-apex-ripple. The radius is computed from the press to the furthest corner, so the wave always reaches the whole element however off-centre the click was. Each press creates its own ink element and removes it when the animation ends: one reused node cannot show two overlapping presses, and restarting it mid-flight makes a rapid double click read as one interrupted ripple.',
+    noField: true, directiveName: 'apex-ripple',
+    hostTag: 'div', hostLabel: 'Press me',
+    base: { color: '', opacity: 0.28, duration: '600ms', centered: false, keyboard: true },
+    controls: [
+      { key: 'color', type: 'color' }, { key: 'opacity', type: 'number' },
+      { key: 'duration', type: 'text' },
+      { key: 'centered', type: 'bool' }, { key: 'keyboard', type: 'bool' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['color', 'string', "the host's text colour", 'Any CSS colour. Without one the ink is a tint of currentColor, so it suits a dark and a light host without being set'],
+      ['opacity', 'number', '0.28', 'The ink’s opacity at the start of the wave'],
+      ['duration', 'string', "'600ms'", 'How long one ripple takes'],
+      ['centered', 'boolean', 'false', 'Start from the element’s centre instead of the pointer'],
+      ['keyboard', 'boolean', 'true', 'Also ripple on Enter or Space, from the centre — so a keyboard press gets the same feedback as a click'],
+      ['disabled', 'boolean', 'false', 'v-apex-ripple="false" is the shorthand'],
+    ],
+    events: [],
+    serviceTitle: 'Notes',
+    serviceRows: [
+      ['v-apex-ripple="’#fff’"', 'shorthand', 'A bare string is the colour'],
+      ['host element', 'untouched', 'The wave is clipped by a layer the directive adds inside the host, so the host keeps overflow:visible — a button’s badge or an avatar’s status dot is not cut off by having a ripple'],
+      ['rapid presses', 'stack', 'Each press has its own ink, so two overlapping ripples both play out'],
+      ['prefers-reduced-motion', 'respected', 'The animation collapses to 1ms rather than being removed, so nothing is left painted'],
+    ],
+  },
+  {
+    id: 'focustrap', name: 'ApexFocusTrap', group: 'Utilities',
+    blurb: 'Keeps Tab inside a container, applied as a directive — v-apex-focus-trap. Implemented with a keydown handler on the container rather than sentinel elements at its edges, because the tabbable set is read at the moment Tab is pressed: a trap that captured its boundaries on mount would leak as soon as a field was disabled, revealed or added.',
+    noField: true, directiveName: 'apex-focus-trap',
+    hostTag: 'div', hostLabel: '… form fields …',
+    base: { disabled: false, autoFocus: true, restoreFocus: true },
+    controls: [
+      { key: 'disabled', type: 'bool' }, { key: 'autoFocus', type: 'bool' },
+      { key: 'restoreFocus', type: 'bool' }, { key: 'initialFocus', type: 'text' },
+    ],
+    props: [
+      ['disabled', 'boolean', 'false', 'Turns the trap off without removing the directive — v-apex-focus-trap="false" is the shorthand'],
+      ['autoFocus', 'boolean', 'true', 'Focus the first tabbable element on mount; an [autofocus] element wins'],
+      ['initialFocus', 'string', '—', 'A selector inside the container to focus instead of the first tabbable. A selector that matches nothing falls back to the autoFocus path rather than leaving the panel unfocused'],
+      ['restoreFocus', 'boolean', 'true', 'Return focus to whatever was focused before, on unmount — so closing a trapped panel does not drop the caret at the top of the page'],
+    ],
+    events: [],
+    serviceTitle: 'Behaviour',
+    serviceRows: [
+      ['Tab at the last element', 'wraps', 'To the first, and Shift+Tab from the first wraps to the last'],
+      ['focus outside the container', 'returns', 'A programmatic move out is pulled back to the nearest edge rather than continuing out of the trap'],
+      ['no tabbable children', 'holds', 'Tab is swallowed rather than escaping to the page'],
+      ['ApexDialog / ApexDrawer', 'built in', 'Both trap focus already — this directive is for your own panels'],
+    ],
+  },
+  {
+    id: 'animateonscroll', name: 'ApexAnimateOnScroll', group: 'Utilities',
+    blurb: 'Plays an animation as an element enters or leaves the viewport, applied as a directive — v-apex-animate-on-scroll="{ enterClass, leaveClass }". Built on IntersectionObserver rather than scroll maths: it fires off the main thread and costs nothing while the element is far away, so a page can carry a hundred of these without a scroll handler each.',
+    noField: true, directiveName: 'apex-animate-on-scroll',
+    hostTag: 'div', hostLabel: 'Card',
+    base: {
+      enterClass: 'apex-anim-enter apex-fade apex-from-b apex-dur-700',
+      leaveClass: 'apex-anim-leave apex-fade apex-dur-200',
+      threshold: 0.15, once: false,
+    },
+    controls: [
+      { key: 'enterClass', type: 'text' }, { key: 'leaveClass', type: 'text' },
+      { key: 'threshold', type: 'number' }, { key: 'rootMargin', type: 'text' },
+      { key: 'once', type: 'bool' },
+    ],
+    props: [
+      ['enterClass', 'string', '—', 'Classes applied when the element enters, e.g. "apex-anim-enter apex-fade apex-from-b"'],
+      ['leaveClass', 'string', '—', 'Classes applied when it leaves; omit and the element stays as it is once shown'],
+      ['root', 'Element | string', 'viewport', 'A scroll container, as an element or a selector'],
+      ['threshold', 'number', '0.15', 'How much must be visible to count as entered'],
+      ['rootMargin', 'string', "'0px'", 'Grows or shrinks the trigger area — "-80px 0px" fires later'],
+      ['once', 'boolean', 'false', 'Animate the entrance once, then stop observing'],
+    ],
+    events: [],
+    serviceTitle: 'Animation classes',
+    serviceRows: [
+      ['apex-anim-enter / apex-anim-leave', 'required', 'The animation itself — everything below only sets where it starts from'],
+      ['apex-fade / apex-fade-10 / apex-fade-25', 'opacity', 'The opacity it starts from'],
+      ['apex-from-t / -b / -l / -r', 'offset', 'Slides in from that side'],
+      ['apex-dist-sm / apex-dist-lg', 'distance', 'How far it slides — 0.75rem or 4rem instead of the default 2rem'],
+      ['apex-zoom-50 / -75 / -90 / -110', 'scale', 'The scale it starts from'],
+      ['apex-spin-45 / apex-spin-n45 / apex-spin-90', 'rotation', 'The rotation it starts from'],
+      ['apex-dur-200 … apex-dur-1000', 'duration', ''],
+      ['apex-delay-100 / -200 / -300', 'delay', 'Stagger a row of cards'],
+    ],
   },
 ];

@@ -502,3 +502,37 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 }
 .st-stage { inline-size: 100%; max-inline-size: 460px; }
 .st-para { font-size: 13px; margin: 0 0 12px; }
+
+/* ── Directive stages ──────────────────────────────────────────────────── */
+
+.dir-stage { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+
+/* A neutral host: enough of a surface for a ripple to spread across or a
+   class to be toggled on, without being a component in its own right. */
+.dir-host {
+  display: grid; place-items: center; padding: 14px 22px;
+  border: 1px solid var(--border-default); border-radius: var(--r-md);
+  background: var(--bg-elevated); color: var(--fg-default);
+  font: inherit; font-size: 13.5px;
+}
+.dir-host--press { cursor: pointer; user-select: none; }
+.dir-host--panel {
+  display: flex; flex-direction: column; gap: 10px; align-items: stretch;
+  inline-size: 100%; max-inline-size: 300px; place-items: stretch;
+}
+.dir-host--card { min-block-size: 90px; inline-size: 100%; }
+
+.dir-target {
+  padding: 14px 18px; border-radius: var(--r-md);
+  background: var(--bg-muted); color: var(--fg-subtle); font-size: 13px;
+}
+
+/* AnimateOnScroll needs the card to start out of view, so the scroller has
+   deliberate empty space above and below it. */
+.dir-scroller {
+  overflow-y: auto; block-size: 220px; inline-size: 100%; padding: 16px;
+  border: 1px solid var(--border-default); border-radius: var(--r-lg);
+  background: var(--bg-surface);
+}
+.dir-hint { font-size: 13px; color: var(--fg-subtle); margin: 0; }
+.dir-gap { block-size: 150px; }
