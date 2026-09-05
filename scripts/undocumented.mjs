@@ -20,8 +20,28 @@ import { entryBlock, rows } from './reconcile.mjs';
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SRC = path.join(HERE, '..', 'src');
 const LIB = path.join(HERE, '..', '..', 'apex-ui', 'src', 'components');
+const CORE = path.join(HERE, '..', '..', 'apex-ui', 'src', 'core');
 
 const registry = fs.readFileSync(path.join(SRC, 'registry.ts'), 'utf8');
+
+/**
+ * Field names on an options interface declared anywhere under core/.
+ *
+ * Directives and services keep their API there rather than in a component's
+ * defineProps. Until this existed the script resolved them to a .vue file that
+ * is not present and skipped the entry — so the four directives shipped in
+ * AF2-176 were checked in neither direction, and read as clean because nothing
+ * had looked at them.
+ */
+function interfaceFields(iface) {
+  for (const f of fs.readdirSync(CORE)) {
+    if (!f.endsWith('.ts')) continue;
+    const src = fs.readFileSync(path.join(CORE, f), 'utf8');
+    const body = (src.match(new RegExp(`interface ${iface} \\{([\\s\\S]*?)\\n\\}`)) || [])[1];
+    if (body) return [...body.matchAll(/^\s{2}([a-zA-Z][a-zA-Z0-9]*)\??\s*:/gm)].map((m) => m[1]);
+  }
+  throw new Error(`no interface ${iface} under core/ — check optionsType`);
+}
 const ids = process.argv.slice(2).length
   ? process.argv.slice(2)
   : [...registry.matchAll(/^\s*id:\s*'([a-z0-9-]+)'/gm)].map((m) => m[1]);
@@ -35,17 +55,27 @@ const SHARED = new Set([
 ]);
 
 let total = 0;
+let checked = 0;
 for (const id of ids) {
   const block = entryBlock(registry, id);
   if (!block) continue;
   const name = (block.match(/name:\s*'([^']+)'/) || [])[1];
-  const file = path.join(LIB, `${name}.vue`);
-  if (!fs.existsSync(file)) continue;   // directives and foundations pages
+  const optionsType = (block.match(/optionsType:\s*'([^']+)'/) || [])[1];
 
-  const src = fs.readFileSync(file, 'utf8');
-  const propsBlock = (src.match(/defineProps<([\s\S]*?)>\(\)/) || [])[1] || '';
-  const declared = [...propsBlock.matchAll(/^\s{2}([a-zA-Z][a-zA-Z0-9]*)\??\s*:/gm)].map((m) => m[1]);
+  /* An entry naming an options interface is a directive or a service: its API
+     lives under core/, and there is no component to read. */
+  let declared;
+  if (optionsType) {
+    declared = interfaceFields(optionsType);
+  } else {
+    const file = path.join(LIB, `${name}.vue`);
+    if (!fs.existsSync(file)) continue;   // foundations pages have no component
+    const src = fs.readFileSync(file, 'utf8');
+    const propsBlock = (src.match(/defineProps<([\s\S]*?)>\(\)/) || [])[1] || '';
+    declared = [...propsBlock.matchAll(/^\s{2}([a-zA-Z][a-zA-Z0-9]*)\??\s*:/gm)].map((m) => m[1]);
+  }
   if (!declared.length) continue;
+  checked++;
 
   /* Documented if the name appears anywhere in the entry — its own row, a
      merged row, or a description. A prop named in prose is not undocumented. */
@@ -62,4 +92,7 @@ for (const id of ids) {
   console.log(`${name}: ${missing.join(', ')}`);
 }
 
-console.log(`\n${total} declared prop(s) named nowhere on their page.`);
+/* The count of what was examined, not just what was found. "0 undocumented"
+   reads identically whether every control was clean or none were opened — and
+   the second is what had been happening to every directive. */
+console.log(`\n${total} declared prop(s) named nowhere on their page, across ${checked} control(s).`);

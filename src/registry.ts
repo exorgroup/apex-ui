@@ -20,12 +20,6 @@
 export interface ServiceSpec {
   /** Composable to call, e.g. 'useApexToast'. Resolved from a fixed map. */
   composable: string;
-  /**
-   * The options interface the call takes, e.g. 'ToastMessage'. This is what
-   * the props table documents — a service has no props — so the guard checks
-   * the page against this rather than against the host component.
-   */
-  optionsType?: string;
   /** What the snippet names the returned handle, e.g. 'toast'. */
   handle?: string;
   /** The method the trigger fires, e.g. 'add'. Receives the rail's options. */
@@ -97,6 +91,16 @@ export interface DocEntry {
    * appears wherever the host is — not inside the stage.
    */
   service?: ServiceSpec;
+  /**
+   * The options interface this control's props table documents, when that is
+   * an interface under core/ rather than a component's defineProps — every
+   * directive and every service. 'TooltipOptions', 'ToastMessage'.
+   *
+   * The guards resolve the page against this instead of a .vue file. Without
+   * it they silently skip the control: there is no component to compare
+   * against, so nothing is checked and everything reads as clean.
+   */
+  optionsType?: string;
   /** Opening attributes for the usage snippet, before the playground props. */
   lead?: string[];
   /**
@@ -3869,7 +3873,7 @@ export const ENTRIES: DocEntry[] = [
      bindings are props in every sense that matters — but each needs a host
      element to sit on, which is what directiveName and hostTag declare. */
   {
-    id: 'styleclass', name: 'ApexStyleClass', group: 'Utilities',
+    id: 'styleclass', name: 'ApexStyleClass', group: 'Utilities', optionsType: 'StyleClassOptions',
     blurb: 'Toggles classes on another element declaratively — v-apex-style-class="{ selector: ’@next’, toggleClass: ’open’ }". Two modes over one directive: toggleClass adds and removes a class, while the enter/leave triple runs an animation and reads its real duration off the element, so a class whose animation length changes needs no matching timeout here — a hard-coded delay is the usual reason these sequences break.',
     noField: true, directiveName: 'apex-style-class',
     hostTag: 'button', hostLabel: 'Toggle panel',
@@ -3909,7 +3913,7 @@ export const ENTRIES: DocEntry[] = [
     ],
   },
   {
-    id: 'ripple', name: 'ApexRipple', group: 'Utilities',
+    id: 'ripple', name: 'ApexRipple', group: 'Utilities', optionsType: 'RippleOptions',
     blurb: 'A ripple spreading from the point of contact, applied as a directive — v-apex-ripple. The radius is computed from the press to the furthest corner, so the wave always reaches the whole element however off-centre the click was. Each press creates its own ink element and removes it when the animation ends: one reused node cannot show two overlapping presses, and restarting it mid-flight makes a rapid double click read as one interrupted ripple.',
     noField: true, directiveName: 'apex-ripple',
     hostTag: 'div', hostLabel: 'Press me',
@@ -3938,7 +3942,7 @@ export const ENTRIES: DocEntry[] = [
     ],
   },
   {
-    id: 'focustrap', name: 'ApexFocusTrap', group: 'Utilities',
+    id: 'focustrap', name: 'ApexFocusTrap', group: 'Utilities', optionsType: 'FocusTrapOptions',
     blurb: 'Keeps Tab inside a container, applied as a directive — v-apex-focus-trap. Implemented with a keydown handler on the container rather than sentinel elements at its edges, because the tabbable set is read at the moment Tab is pressed: a trap that captured its boundaries on mount would leak as soon as a field was disabled, revealed or added.',
     noField: true, directiveName: 'apex-focus-trap',
     hostTag: 'div', hostLabel: '… form fields …',
@@ -3963,7 +3967,7 @@ export const ENTRIES: DocEntry[] = [
     ],
   },
   {
-    id: 'animateonscroll', name: 'ApexAnimateOnScroll', group: 'Utilities',
+    id: 'animateonscroll', name: 'ApexAnimateOnScroll', group: 'Utilities', optionsType: 'AnimateOnScrollOptions',
     blurb: 'Plays an animation as an element enters or leaves the viewport, applied as a directive — v-apex-animate-on-scroll="{ enterClass, leaveClass }". Built on IntersectionObserver rather than scroll maths: it fires off the main thread and costs nothing while the element is far away, so a page can carry a hundred of these without a scroll handler each.',
     noField: true, directiveName: 'apex-animate-on-scroll',
     hostTag: 'div', hostLabel: 'Card',
@@ -4000,12 +4004,11 @@ export const ENTRIES: DocEntry[] = [
   },
 
   {
-    id: 'toast', name: 'ApexToast', group: 'Overlays',
+    id: 'toast', name: 'ApexToast', group: 'Overlays', optionsType: 'ToastMessage',
     blurb: 'Announces something without owning any visible state: mount one ApexToast in the app shell and every add() call anywhere in the app lands in it. A queue rather than one current message, so a second toast stacks instead of replacing the first — and each carries its own id, so a late remove() can never close the wrong one.',
     noField: true,
     service: {
       composable: 'useApexToast', handle: 'toast', method: 'add',
-      optionsType: 'ToastMessage',
       host: 'ApexToast', trigger: 'Add toast',
       extras: [['Clear all', 'removeAll']],
     },
