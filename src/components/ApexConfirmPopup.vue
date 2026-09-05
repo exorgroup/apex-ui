@@ -2,15 +2,22 @@
 /**
  * ApexConfirmPopup — a confirmation anchored to the control that triggered it.
  *
- * Shares the confirm service with ApexConfirmDialog: a request carrying a
- * `target` lands here, one without lands in the dialog. One service, one
- * `require()` call site, and the caller never picks a component.
+ * Shares the alert service with ApexAlert: a request carrying a `target` lands
+ * here, one without lands in the alert. One service, one call site, and the
+ * caller never picks a component.
+ *
+ * Deliberately plain — no staged flow. `run()` drops `target` for that reason:
+ * a progress spinner in a popup anchored to the button just pressed reads
+ * badly, and the popup would have to survive a re-anchor at every stage. This
+ * answers the low-stakes question in place; anything with work behind it opens
+ * the alert.
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import ApexButton from './ApexButton.vue';
 import ApexIcon from './ApexIcon.vue';
 import { anchorPosition, resolveTarget, type AnchorSide } from '../core/anchor';
-import { useApexConfirm, type ConfirmButton, type ConfirmOptions } from '../core/confirm';
+import { useApexAlert, type AlertButton } from '../core/alert';
+import { useAlertButtons } from '../core/alertButtons';
 
 const props = withDefaults(defineProps<{
   group?: string;
@@ -32,35 +39,32 @@ const props = withDefaults(defineProps<{
   acceptLabel: 'Yes', rejectLabel: 'Cancel', zIndex: 1100,
 });
 
-const confirm = useApexConfirm();
-const state = confirm.state;
-const o = computed<ConfirmOptions>(() => state.options || {});
+const confirm = useApexAlert();
+/* The alert state is flat, so `o` is the state itself. Kept under the old name
+   because the slots hand it to callers as `options`. */
+const o = computed(() => confirm.state);
 
 const mine = computed(() => {
   if (!o.value.target) return false;
   return props.group ? o.value.group === props.group : !o.value.group;
 });
-const open = computed(() => state.visible && mine.value);
+const open = computed(() => confirm.state.open && mine.value);
 
 const message = computed(() => o.value.message ?? props.message);
 const icon = computed(() => o.value.icon ?? props.icon);
 const iconColor = computed(() => o.value.iconColor ?? props.iconColor);
-const buttons = computed<ConfirmButton[]>(() => o.value.buttons || [
-  {
-    label: o.value.rejectLabel ?? props.rejectLabel,
-    icon: o.value.rejectIcon,
-    severity: o.value.rejectSeverity || 'secondary',
-    variant: 'text',
-    role: 'reject',
-  },
-  {
-    label: o.value.acceptLabel ?? props.acceptLabel,
-    icon: o.value.acceptIcon,
-    severity: o.value.acceptSeverity || 'primary',
-    variant: 'solid',
-    role: 'accept',
-  },
-]);
+
+/* Same builder as the alert: the two hosts answer one request and must offer
+   the same buttons, gated the same way. Only the presentation differs. */
+const built = useAlertButtons({
+  acceptLabel: props.acceptLabel,
+  rejectLabel: props.rejectLabel,
+});
+const buttons = computed<AlertButton[]>(() => built.value.map((b) => ({
+  /* A popup is a small aside, so its reject is quieter than the alert's. */
+  variant: b.role === 'reject' ? 'text' : 'solid',
+  ...b,
+})));
 
 /* ── positioning ────────────────────────────────────────── */
 const panel = ref<HTMLElement | null>(null);
@@ -146,7 +150,7 @@ const panelStyle = computed(() => {
     <Transition name="apex-pop-fade">
       <div v-if="open" ref="panel" class="apex-cpop" :style="panelStyle" :data-side="pos.side"
            :data-arrow="showArrow ? 'true' : 'false'" role="dialog" :aria-label="message">
-        <slot name="container" :options="o" :accept="confirm.accept" :reject="confirm.reject"
+        <slot name="container" :options="o" :press="confirm.press"
               :close="confirm.close" :buttons="buttons">
           <div class="apex-cpop__body">
             <slot name="message" :options="o">
@@ -158,7 +162,7 @@ const panelStyle = computed(() => {
             <ApexButton v-for="(b, i) in buttons" :key="i" size="sm" :severity="b.severity"
                         :variant="b.variant" :icon="b.icon"
                         :data-autofocus="b.role === 'accept' ? '' : undefined"
-                        @click="confirm.custom(b, i)">{{ b.label }}</ApexButton>
+                        @click="confirm.press(b, i)">{{ b.label }}</ApexButton>
           </div>
         </slot>
         <span v-if="showArrow" class="apex-cpop__tip" aria-hidden="true"></span>

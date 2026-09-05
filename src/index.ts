@@ -77,7 +77,6 @@ import ApexSteps from './components/ApexSteps.vue';
 import ApexTabs from './components/ApexTabs.vue';
 import ApexToolbar from './components/ApexToolbar.vue';
 import ApexDialog from './components/ApexDialog.vue';
-import ApexConfirmDialog from './components/ApexConfirmDialog.vue';
 import ApexAlert from './components/ApexAlert.vue';
 import ApexConfirmPopup from './components/ApexConfirmPopup.vue';
 import ApexDrawer from './components/ApexDrawer.vue';
@@ -186,7 +185,6 @@ export const components = {
   Tabs: ApexTabs,
   Toolbar: ApexToolbar,
   Dialog: ApexDialog,
-  ConfirmDialog: ApexConfirmDialog,
   Alert: ApexAlert,
   ConfirmPopup: ApexConfirmPopup,
   Drawer: ApexDrawer,
@@ -267,7 +265,7 @@ export {
   ApexDrawer, ApexDynamicDialog, ApexPopover, ApexFileUpload, ApexBreadcrumb, ApexContextMenu, ApexDock, ApexMegaMenu, ApexMenu, ApexMenubar, ApexTieredMenu, ApexMessage, ApexToast, ApexCarousel, ApexCarouselContent, ApexCarouselItem,
   ApexCarouselNav, ApexCarouselControls, ApexCarouselIndicators,
   ApexCompare, ApexCompareItem, ApexGallery, ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger,
-  ApexButton, ApexButtonGroup, ApexSpeedDial, ApexSplitButton, ApexDataTable, ApexPaginator, ApexDataView, ApexOrgChart, ApexPickList, ApexTimeline, ApexTree, ApexTreeTable, ApexAccordion, ApexAvatar, ApexBadge, ApexOverlayBadge, ApexBlockUI, ApexChip, ApexInplace, ApexMeterGroup, ApexProgressSpinner, ApexScrollTop, ApexSkeleton, ApexChart, ApexChartGroup, ApexTaskBoard, ApexTaskCard, ApexAvatarGroup, ApexCard, ApexFieldset, ApexPanel, ApexScrollArea, ApexSplitter, ApexSteps, ApexTabs, ApexToolbar, ApexDialog, ApexConfirmDialog, ApexConfirmPopup, ApexAlert, ApexProgressBar, ApexColumnFilter, ApexErrorSummary,
+  ApexButton, ApexButtonGroup, ApexSpeedDial, ApexSplitButton, ApexDataTable, ApexPaginator, ApexDataView, ApexOrgChart, ApexPickList, ApexTimeline, ApexTree, ApexTreeTable, ApexAccordion, ApexAvatar, ApexBadge, ApexOverlayBadge, ApexBlockUI, ApexChip, ApexInplace, ApexMeterGroup, ApexProgressSpinner, ApexScrollTop, ApexSkeleton, ApexChart, ApexChartGroup, ApexTaskBoard, ApexTaskCard, ApexAvatarGroup, ApexCard, ApexFieldset, ApexPanel, ApexScrollArea, ApexSplitter, ApexSteps, ApexTabs, ApexToolbar, ApexDialog, ApexConfirmPopup, ApexAlert, ApexProgressBar, ApexColumnFilter, ApexErrorSummary,
 };
 export { useFieldState, nextId } from './core/useFieldState';
 export { evalCondition, getPath } from './core/conditions';
@@ -337,7 +335,6 @@ export type {
   TaskBoardColumn, TaskBoardSwimlane, TaskBoardItem, TaskBoardCell, TaskBoardMove, TaskCardFields,
 } from './core/taskboard';
 export type { ToastMessage } from './core/toast';
-export { useApexConfirm } from './core/confirm';
 export { useApexDialog } from './core/dialog';
 export { useApexSidebar } from './core/sidebar';
 export type { SidebarState } from './core/sidebar';
@@ -354,15 +351,15 @@ export type { TooltipOptions } from './core/tooltip';
 export type { DynamicDialogOptions, DynamicDialogInstance, DynamicDialogHandle } from './core/dialog';
 export { anchorPosition, resolveTarget } from './core/anchor';
 export type { AnchorSide, AnchorAlign } from './core/anchor';
-export type { ConfirmOptions, ConfirmButton } from './core/confirm';
 export type { ColorFormat, Channel } from './core/color';
 export type { ApexDateLocale } from './core/dates';
 export { useApexI18n, APEX_FALLBACK_STRINGS } from './core/i18n';
 export { useApexAlert, setAlertInterpreter } from './core/alert';
 export type {
-  AlertTone, AlertStage, AlertChange, AlertOptions,
-  AlertRunResult, AlertRunOptions,
+  AlertTone, AlertStage, AlertChange, AlertOptions, AlertButton,
+  AlertSeverity, AlertRunResult, AlertRunOptions,
 } from './core/alert';
+export { useAlertButtons } from './core/alertButtons';
 /* Exported so an app can ask the same question its controls are asking, with
    the same precedence, rather than reimplementing the rule beside them. */
 export { useCan } from './core/can';

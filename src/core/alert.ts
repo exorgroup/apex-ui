@@ -355,8 +355,32 @@ async function run(options: AlertRunOptions): Promise<boolean> {
   return !!outcome.ok;
 }
 
+/**
+ * Run a button's own action, then do what its role means.
+ *
+ * Here rather than in ApexAlert because ApexConfirmPopup shows the same
+ * buttons for the same request — one service driving two hosts — and two
+ * copies of this would drift the moment one of them gained a case.
+ *
+ * `close: false` leaves the alert standing, for a button that changes what is
+ * on screen rather than finishing with it. Everything else settles, and the
+ * roleless case settles as neither accept nor reject: `confirm()` reports
+ * false and `run()` stops without doing the work, because nothing was agreed
+ * to.
+ */
+async function press(b: AlertButton, index = 0) {
+  await b.action?.();
+
+  if (b.role === 'accept') state.accept?.();
+  else if (b.role === 'reject' || b.role === 'cancel') state.reject?.();
+  else state.onCustom?.(b, index);
+
+  if (b.close === false) return;
+  settle(b.role === 'accept' ? 'confirm' : b.role ? 'cancel' : 'custom');
+}
+
 export function useApexAlert() {
-  return { state: readonly(state) as AlertState, confirm, notify, run, settle, close };
+  return { state: readonly(state) as AlertState, confirm, notify, run, settle, press, close };
 }
 
 /** Internal handles for ApexAlert, which needs to write and to settle. */

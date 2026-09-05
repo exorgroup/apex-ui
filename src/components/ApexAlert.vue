@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div
-      v-if="state.open"
+      v-if="state.open && !state.target"
       class="apex-alert-overlay"
       :class="ui?.overlay"
       :style="overlayStyle"
@@ -176,10 +176,9 @@
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useApexAlert } from '../core/alert';
-import type { AlertButton } from '../core/alert';
+import { useAlertButtons } from '../core/alertButtons';
 import type { ApexAlertClasses } from '../types';
 import { useApexI18n } from '../core/i18n';
-import { useCan } from '../core/can';
 import ApexButton from './ApexButton.vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexProgressSpinner from './ApexProgressSpinner.vue';
@@ -210,70 +209,19 @@ const props = withDefaults(defineProps<{
   iconAnimation: 'none',
 });
 
-const { state, settle, close } = useApexAlert();
+const { state, settle, press, close } = useApexAlert();
 const t = useApexI18n();
-const can = useCan();
 
 const alertEl = ref<HTMLElement | null>(null);
 
 /* ── the button row ─────────────────────────────────────────── */
 
-/**
- * What to show, and in what order.
- *
- * A caller-supplied `buttons` array replaces the default pair outright.
- * Otherwise the row is built from the labels: a reject only when there is a
- * cancel to offer, then the accepting one.
- */
-const buttons = computed<AlertButton[]>(() => {
-  const supplied = state.buttons;
-  const list: AlertButton[] = supplied ? [...supplied] : [];
-
-  if (!supplied) {
-    if (state.cancelText) {
-      list.push({
-        label: state.cancelText,
-        icon: state.rejectIcon,
-        severity: state.rejectSeverity ?? 'secondary',
-        variant: 'outlined',
-        role: 'reject',
-      });
-    }
-    list.push({
-      label: state.confirmText
-        ?? state.acceptLabel
-        ?? props.acceptLabel
-        ?? t(state.stage === 'result' ? 'apexui.alert.ok' : 'apexui.alert.yes'),
-      icon: state.acceptIcon,
-      severity: state.acceptSeverity ?? (state.tone === 'danger' ? 'danger' : 'primary'),
-      role: 'accept',
-    });
-  }
-
-  /* Hidden rather than disabled, like every other gated control: a greyed-out
-     Delete still tells someone the action exists and that they may not have
-     it. And it is presentation — the endpoint behind it must still check. */
-  return list.filter((b) => (b.visible !== undefined ? b.visible : can(b.can ?? '', b.resource)));
+/* Built and gated in one place, because ApexConfirmPopup answers the same
+   request with the same buttons. */
+const buttons = useAlertButtons({
+  acceptLabel: props.acceptLabel,
+  rejectLabel: props.rejectLabel,
 });
-
-/**
- * Run a button's own action, then do what its role means.
- *
- * `close: false` leaves the alert standing — for a button that changes what is
- * on screen rather than finishing with it. Everything else settles, and the
- * roleless case settles as neither accept nor reject, so `confirm()` reports
- * false and `run()` stops without doing the work.
- */
-async function press(b: AlertButton, index: number) {
-  await b.action?.();
-
-  if (b.role === 'accept') state.accept?.();
-  else if (b.role === 'reject' || b.role === 'cancel') state.reject?.();
-  else state.onCustom?.(b, index);
-
-  if (b.close === false) return;
-  settle(b.role === 'accept' ? 'confirm' : b.role ? 'cancel' : 'custom');
-}
 
 /* ── copy ───────────────────────────────────────────────────── */
 
