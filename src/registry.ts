@@ -228,6 +228,35 @@ export const MTR_DISK = [
   { label: 'Documents', value: 6 }, { label: 'Cache', value: 11 },
 ];
 
+/* ── AnimateOnScroll's four rows ──────────────────────────────────────────
+   Each row demonstrates a different axis of the animation vocabulary:
+   direction, alternating direction with a longer distance, rotation and
+   scale, then scale with a stagger. One row would show only that it works. */
+
+export const AOS_PLANS = [
+  { title: 'Individual', icon: 'person', from: 'apex-from-l', blurb: 'One seat, everything included, cancel whenever.' },
+  { title: 'Team', icon: 'group', from: '', blurb: 'Shared workspaces and role-based permissions.' },
+  { title: 'Enterprise', icon: 'apartment', from: 'apex-from-r', blurb: 'SSO, audit logs and a dedicated environment.' },
+];
+
+export const AOS_PEOPLE = [
+  { name: 'Jenna Thompson', role: 'Head of Design' },
+  { name: 'Isabel Garcia', role: 'Staff Engineer' },
+  { name: 'Xavier Mason', role: 'Product Lead' },
+];
+
+export const AOS_STATS = [
+  { value: '850K', label: 'Customers', anim: 'apex-spin-45', blurb: 'Accounts active in the last 30 days.' },
+  { value: '$1.5M', label: 'Revenue', anim: 'apex-zoom-50', blurb: 'Recurring revenue booked this quarter.' },
+  { value: '140K', label: 'Sales', anim: 'apex-spin-n45', blurb: 'Orders processed since January.' },
+];
+
+export const AOS_ZOOMS = [
+  { label: 'Bandwidth', icon: 'wifi', anim: 'apex-zoom-50', bg: '#6D4AC4', blurb: 'Unmetered transfer on every plan.' },
+  { label: 'Storage', icon: 'database', anim: 'apex-zoom-75', bg: '#0E8C86', blurb: 'Object storage in three regions.' },
+  { label: 'Requests', icon: 'swap_vert', anim: 'apex-zoom-50', bg: '#3F51B5', blurb: 'Burst capacity without pre-provisioning.' },
+];
+
 /** The lazy-loaded table inside ApexInplace. Four columns and a handful of
     rows: enough to look like real content arriving, small enough that the
     point is the fetch rather than the table. */

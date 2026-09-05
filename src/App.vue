@@ -14,7 +14,8 @@ import {
   SPLIT_MAILS, SPLIT_PAIR, SPLIT_THIRDS, SPLIT_COLLAPSIBLE, SPLIT_NESTED,
   SPLIT_EVENTS, SPLIT_STATEFUL, SPLIT_NAV, PANEL_REPEAT, LEGEND_ALIGNS,
   FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
-  BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
+  BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS,
+  AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
@@ -33,6 +34,22 @@ const copied = ref(false);
 
 /** v-model per control, so switching away and back keeps what you typed. */
 const model = reactive<Record<string, unknown>>({});
+
+/* ── The directives ──────────────────────────────────────────────────── */
+
+/** Ripple's Disabled example — the switch it is bound to. */
+const rpOff = ref(false);
+
+/**
+ * FocusTrap's fields. The trap is about where Tab goes, so the examples need
+ * real focusable content and one field deliberately outside it.
+ */
+const trapName = ref('');
+const trapEmail = ref('');
+const trapAgree = ref(false);
+const trapOutside = ref('');
+const trapPanel = ref(false);
+const trapOff = ref(false);
 
 /* ── ApexInplace ─────────────────────────────────────────────────────── */
 
@@ -1784,6 +1801,366 @@ async function copyUsage() {
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. StyleClass has two modes and four
+             selector keywords; each example isolates one of them. -->
+        <template v-if="entry.id === 'styleclass'">
+          <h2>Basic</h2>
+          <p class="note">
+            The target is resolved with <code>selector</code> — here <code>@next</code>, the
+            next sibling. No state, no handler: the panel is revealed and hidden by classes
+            alone, and <code>hideOnOutsideClick</code> plus <code>hideOnEscape</code> make it
+            behave as an overlay.
+          </p>
+          <div class="sc-block">
+            <ApexButton
+              v-apex-style-class="{ selector: '@next', enterFromClass: 'apex-hidden',
+                enterActiveClass: 'apex-scale-in', leaveActiveClass: 'apex-scale-out',
+                leaveToClass: 'apex-hidden', hideOnOutsideClick: true, hideOnEscape: true }"
+              icon="expand_more"
+            >Toggle panel</ApexButton>
+            <div class="sc-panel apex-hidden sc-gap">
+              This panel is toggled with ApexStyleClass. Click outside it or press Escape and it
+              leaves the same way it arrived.
+            </div>
+          </div>
+
+          <h2>Animation</h2>
+          <p class="note">
+            The enter and leave triples take any classes. The directive reads the animation's
+            real duration off the element, so a slower class needs no matching timeout — these
+            two panels differ only in the classes they are given.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">fade</span>
+              <div class="iconstrip">
+                <ApexButton
+                  v-apex-style-class="{ selector: '.sc-box1', enterFromClass: 'apex-hidden', enterActiveClass: 'apex-fade-in' }"
+                  size="sm"
+                >Show</ApexButton>
+                <ApexButton
+                  v-apex-style-class="{ selector: '.sc-box1', leaveActiveClass: 'apex-fade-out', leaveToClass: 'apex-hidden' }"
+                  size="sm"
+                  severity="secondary"
+                  variant="outlined"
+                >Hide</ApexButton>
+              </div>
+              <div class="sc-box sc-box1 apex-hidden sc-gap">Fade</div>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">slide, slowed with apex-dur-slow</span>
+              <div class="iconstrip">
+                <ApexButton
+                  v-apex-style-class="{ selector: '.sc-box2', enterFromClass: 'apex-hidden', enterActiveClass: 'apex-slide-down' }"
+                  size="sm"
+                >Show</ApexButton>
+                <ApexButton
+                  v-apex-style-class="{ selector: '.sc-box2', leaveActiveClass: 'apex-slide-up', leaveToClass: 'apex-hidden' }"
+                  size="sm"
+                  severity="secondary"
+                  variant="outlined"
+                >Hide</ApexButton>
+              </div>
+              <div class="sc-box sc-box2 apex-hidden apex-dur-slow sc-gap">Slide</div>
+            </div>
+          </div>
+
+          <h2>Toggle class</h2>
+          <p class="note">
+            The other mode: <code>toggleClass</code> simply adds and removes a class, for
+            anything that is a state rather than an entrance. A bare string binding is the
+            shorthand for toggling on <code>@next</code>.
+          </p>
+          <div class="sc-block">
+            <ApexButton
+              v-apex-style-class="{ selector: '@next', toggleClass: 'sc-lit' }"
+              severity="secondary"
+              variant="outlined"
+            >Toggle highlight</ApexButton>
+            <div class="sc-panel sc-gap">
+              This panel gains and loses a class — no animation sequence involved.
+            </div>
+          </div>
+
+          <h2>Selector keywords</h2>
+          <p class="note">
+            Four keywords beyond plain CSS selectors, resolved at click time so a conditionally
+            rendered sibling still binds.
+          </p>
+          <div class="card sc-keywords">
+            <div class="sc-frame">
+              <div class="sc-mark">@grandparent target</div>
+              <div class="sc-frame sc-frame--inner">
+                <div class="sc-mark">@parent target</div>
+                <ApexButton v-apex-style-class="{ selector: '@parent', toggleClass: 'sc-lit' }" size="sm" variant="text">@parent</ApexButton>
+                <ApexButton v-apex-style-class="{ selector: '@grandparent', toggleClass: 'sc-lit' }" size="sm" variant="text">@grandparent</ApexButton>
+              </div>
+            </div>
+            <div class="iconstrip">
+              <div class="sc-chip">@prev target</div>
+              <ApexButton v-apex-style-class="{ selector: '@prev', toggleClass: 'sc-lit' }" size="sm" variant="text">@prev</ApexButton>
+              <ApexButton v-apex-style-class="{ selector: '@next', toggleClass: 'sc-lit' }" size="sm" variant="text">@next</ApexButton>
+              <div class="sc-chip">@next target</div>
+            </div>
+            <div class="iconstrip">
+              <ApexButton v-apex-style-class="{ selector: '#sc-far', toggleClass: 'sc-lit' }" size="sm" variant="text">CSS selector</ApexButton>
+              <div id="sc-far" class="sc-chip">#sc-far, anywhere on the page</div>
+            </div>
+          </div>
+
+          <h2>Hide on resize</h2>
+          <p class="note">
+            <code>hideOnResize</code> runs the leave sequence when something resizes.
+            <code>resizeSelector</code> chooses what to watch: <code>window</code> for the
+            browser, or a selector to observe that element's own size — the observer's initial
+            call is skipped, so the panel does not close the moment it opens.
+          </p>
+          <div class="grid grid--2">
+            <div class="cell">
+              <span class="cell__tag">window resize</span>
+              <ApexButton
+                v-apex-style-class="{ selector: '.sc-win', enterFromClass: 'apex-hidden',
+                  enterActiveClass: 'apex-fade-in', leaveActiveClass: 'apex-fade-out',
+                  leaveToClass: 'apex-hidden', hideOnResize: true }"
+                size="sm"
+              >Show panel</ApexButton>
+              <div class="sc-panel sc-win apex-hidden sc-gap">Resize the browser window and this closes itself.</div>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">element resize</span>
+              <ApexButton
+                v-apex-style-class="{ selector: '.sc-el', enterFromClass: 'apex-hidden',
+                  enterActiveClass: 'apex-fade-in', leaveActiveClass: 'apex-fade-out',
+                  leaveToClass: 'apex-hidden', hideOnResize: true, resizeSelector: '.sc-resizable' }"
+                size="sm"
+              >Show panel</ApexButton>
+              <div class="sc-panel sc-el apex-hidden sc-gap">Drag the handle below and this closes itself.</div>
+              <div class="sc-resizable sc-gap">Drag my corner</div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. Both examples scroll inside their own
+             panel: `root` points the observer at that container, so the page
+             itself does not have to be scrolled to see anything happen. -->
+        <template v-if="entry.id === 'animateonscroll'">
+          <h2>Enter and leave</h2>
+          <p class="note">
+            The directive takes an <code>enterClass</code> and an optional
+            <code>leaveClass</code>. Any CSS animation works; the classes below ship with the
+            package. Scroll the panel — <code>root</code> points the observer at that container
+            instead of the viewport.
+          </p>
+          <div id="aos-scroller" class="aos-scroller">
+            <div class="aos-hint">Scroll down<span class="aos-arrow">↓</span></div>
+            <div class="aos-gap"></div>
+            <div class="aos-row">
+              <div
+                v-for="c in AOS_PLANS"
+                :key="c.title"
+                v-apex-animate-on-scroll="{ root: '#aos-scroller', enterClass: 'apex-anim-enter apex-fade ' + c.from + ' apex-dur-1000', leaveClass: 'apex-anim-leave apex-fade apex-dur-200' }"
+                class="aos-card"
+              >
+                <span class="aos-badge"><ApexIcon :name="c.icon" :size="22" /></span>
+                <strong class="aos-title">{{ c.title }}</strong>
+                <span class="aos-blurb">{{ c.blurb }}</span>
+              </div>
+            </div>
+            <div class="aos-gap"></div>
+            <div class="aos-row">
+              <div
+                v-for="(p, i) in AOS_PEOPLE"
+                :key="p.name"
+                v-apex-animate-on-scroll="{ root: '#aos-scroller', enterClass: 'apex-anim-enter apex-fade ' + (i % 2 ? 'apex-from-b' : 'apex-from-t') + ' apex-dist-lg apex-dur-1000', leaveClass: 'apex-anim-leave apex-fade apex-dur-200' }"
+                class="aos-card"
+              >
+                <ApexAvatar :label="p.name" size="lg" shape="circle" auto-color />
+                <strong class="aos-name">{{ p.name }}</strong>
+                <span class="aos-blurb">{{ p.role }}</span>
+              </div>
+            </div>
+            <div class="aos-gap"></div>
+            <div class="aos-row">
+              <div
+                v-for="s in AOS_STATS"
+                :key="s.label"
+                v-apex-animate-on-scroll="{ root: '#aos-scroller', enterClass: 'apex-anim-enter apex-fade ' + s.anim + ' apex-from-t apex-dur-1000', leaveClass: 'apex-anim-leave apex-fade apex-dur-200' }"
+                class="aos-card aos-card--solid"
+              >
+                <span class="aos-figure">{{ s.value }}</span>
+                <strong class="aos-title">{{ s.label }}</strong>
+                <span class="aos-blurb aos-blurb--on">{{ s.blurb }}</span>
+              </div>
+            </div>
+            <div class="aos-gap"></div>
+            <div class="aos-row">
+              <div
+                v-for="(z, i) in AOS_ZOOMS"
+                :key="z.label"
+                v-apex-animate-on-scroll="{ root: '#aos-scroller', enterClass: 'apex-anim-enter apex-fade ' + z.anim + ' apex-dur-1000 apex-delay-' + (i * 100 || 100), leaveClass: 'apex-anim-leave apex-fade apex-dur-200' }"
+                class="aos-card aos-card--tint"
+                :style="{ background: z.bg }"
+              >
+                <span class="aos-ring"><ApexIcon :name="z.icon" :size="22" /></span>
+                <strong class="aos-title">{{ z.label }}</strong>
+                <span class="aos-blurb aos-blurb--on">{{ z.blurb }}</span>
+              </div>
+            </div>
+            <div class="aos-gap aos-gap--sm"></div>
+          </div>
+
+          <h2>Once</h2>
+          <p class="note">
+            Without a <code>leaveClass</code> the element stays put after its entrance;
+            <code>once</code> also stops the observer, which is what you want for content that
+            should settle rather than replay every time it passes.
+          </p>
+          <div id="aos-once" class="aos-scroller aos-scroller--short">
+            <div class="aos-gap aos-gap--md"></div>
+            <div class="aos-row">
+              <div
+                v-for="n in 3"
+                :key="n"
+                v-apex-animate-on-scroll="{ root: '#aos-once', once: true, enterClass: 'apex-anim-enter apex-fade apex-zoom-75 apex-dur-700 apex-delay-' + (n * 100) }"
+                class="aos-card aos-card--tight"
+              >
+                <strong class="aos-name">Settles once</strong>
+                <span class="aos-blurb">Delay {{ n * 100 }}ms</span>
+              </div>
+            </div>
+            <div class="aos-gap aos-gap--sm"></div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. A ripple is only judged by pressing one,
+             so every example here is pressable. -->
+        <template v-if="entry.id === 'ripple'">
+          <h2>Default</h2>
+          <p class="note">
+            Add <code>v-apex-ripple</code> to any element. Press near a corner and the wave
+            still covers the whole box — the radius is measured to the furthest corner, not
+            assumed from the centre. The boxes are focusable, so Enter and Space ripple too.
+          </p>
+          <div class="card iconstrip rp-strip">
+            <div v-apex-ripple class="rp-box" tabindex="0">Default</div>
+            <div v-apex-ripple class="rp-box rp-box--dark" tabindex="0">On dark</div>
+            <div v-apex-ripple="{ centered: true }" class="rp-box" tabindex="0">Centred</div>
+          </div>
+
+          <h2>Custom</h2>
+          <p class="note">
+            Without a colour the ink tints from the host's own text colour, which suits a dark
+            and a light surface without being set. <code>color</code>, <code>opacity</code> and
+            <code>duration</code> override it per element.
+          </p>
+          <div class="card iconstrip rp-strip">
+            <div v-apex-ripple="'var(--accent-primary)'" class="rp-box" tabindex="0">Accent</div>
+            <div v-apex-ripple="{ color: '#F97316', opacity: 0.5 }" class="rp-box" tabindex="0">Warm, 50%</div>
+            <div v-apex-ripple="{ color: '#0E8C86', duration: '1.4s' }" class="rp-box" tabindex="0">Slow</div>
+            <div v-apex-ripple="{ duration: '260ms', opacity: 0.4 }" class="rp-box" tabindex="0">Quick</div>
+          </div>
+
+          <h2>On real controls</h2>
+          <p class="note">
+            The directive attaches to anything, so existing components pick it up without
+            changes — buttons, cards, list rows.
+          </p>
+          <div class="card skl-groups">
+            <div class="iconstrip rp-buttons">
+              <ApexButton v-apex-ripple="{ color: '#FFF', opacity: 0.35 }">Solid button</ApexButton>
+              <ApexButton v-apex-ripple severity="secondary" variant="outlined">Outlined</ApexButton>
+              <ApexButton v-apex-ripple variant="text">Text</ApexButton>
+              <ApexButton v-apex-ripple icon="favorite" aria-label="Like" />
+            </div>
+            <div class="rp-list">
+              <button
+                v-for="p in CREW.slice(0, 4)"
+                :key="p.label"
+                v-apex-ripple
+                type="button"
+                class="rp-row"
+              >
+                <ApexAvatar :label="p.label" size="sm" auto-color />
+                <span class="rp-row__name">{{ p.label }}</span>
+                <ApexIcon name="chevron_right" :size="18" class="rp-row__chev" />
+              </button>
+            </div>
+          </div>
+
+          <h2>Disabled</h2>
+          <p class="note">
+            <code>v-apex-ripple="false"</code> leaves the directive in place and stops the
+            effect, which is what a conditionally interactive element needs.
+          </p>
+          <div class="iconstrip">
+            <ApexSwitch v-model="rpOff" label="Ripple disabled" />
+          </div>
+          <div class="card iconstrip">
+            <div v-apex-ripple="{ disabled: rpOff }" class="rp-box" tabindex="0">
+              {{ rpOff ? 'No ripple' : 'Press me' }}
+            </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery. A trap is only observable by tabbing, so
+             each example is a form with more than one field in it. -->
+        <template v-if="entry.id === 'focustrap'">
+          <h2>Basic</h2>
+          <p class="note">
+            Apply <code>v-apex-focus-trap</code> to a container and Tab cycles within it: from
+            the last field it wraps to the first, and Shift+Tab from the first wraps to the
+            last. Click into the form and tab through it — focus never reaches the page behind.
+          </p>
+          <div v-apex-focus-trap="{ autoFocus: false }" class="trap-box">
+            <ApexInput v-model="trapName" label="Name" />
+            <ApexInput v-model="trapEmail" label="Email" />
+            <ApexCheckbox v-model="trapAgree" label="I agree to the terms and conditions" />
+            <ApexButton class="trap-submit">Submit</ApexButton>
+          </div>
+          <p class="note">
+            This field is outside the trap:
+            <ApexInput v-model="trapOutside" placeholder="Unreachable by Tab from inside" class="trap-outside" />
+          </p>
+
+          <h2>Initial focus</h2>
+          <p class="note">
+            <code>autoFocus</code> focuses the first tabbable element on mount, and an
+            <code>[autofocus]</code> element wins over it. <code>initialFocus</code> takes a
+            selector when neither is the field you want — here the email.
+          </p>
+          <div class="iconstrip">
+            <ApexButton size="sm" @click="trapPanel = !trapPanel">
+              {{ trapPanel ? 'Close panel' : 'Open panel' }}
+            </ApexButton>
+            <span class="note">Focus returns to this button when the panel closes.</span>
+          </div>
+          <div
+            v-if="trapPanel"
+            v-apex-focus-trap="{ initialFocus: '#trap-email', restoreFocus: true }"
+            class="trap-box"
+          >
+            <ApexInput v-model="trapName" label="Name" />
+            <ApexInput id="trap-email" v-model="trapEmail" label="Email" />
+            <ApexButton size="sm" severity="secondary" variant="outlined" class="trap-submit" @click="trapPanel = false">
+              Close
+            </ApexButton>
+          </div>
+
+          <h2>Disabled</h2>
+          <p class="note">
+            <code>v-apex-focus-trap="false"</code> — or <code>{ disabled: true }</code> — leaves
+            the directive in place and lets Tab out again, which is what a conditionally modal
+            panel needs.
+          </p>
+          <div class="iconstrip">
+            <ApexSwitch v-model="trapOff" label="Trap disabled" />
+          </div>
+          <div v-apex-focus-trap="{ disabled: trapOff, autoFocus: false }" class="trap-box">
+            <ApexInput v-model="trapName" label="Name" />
+            <ApexButton size="sm" class="trap-submit">Submit</ApexButton>
           </div>
         </template>
 
