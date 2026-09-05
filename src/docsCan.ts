@@ -17,16 +17,41 @@ export type DocsRole = typeof ROLES[number];
 
 export const docsRole = ref<DocsRole>('Admin');
 
-/** Who may do what. Deliberately small and readable, not a real policy. */
-const GRANTS: Record<DocsRole, string[]> = {
-  Admin: ['read', 'update', 'delete', 'export'],
-  Coordinator: ['read', 'update', 'export'],
-  Viewer: ['read'],
+/**
+ * Who may do what, per resource. Deliberately small and readable, not a real
+ * policy.
+ *
+ * Resource-aware because the menu family's shorthand — a bare `can: 'reports'`
+ * — resolves to read on that resource, and every role can read *something*. A
+ * table keyed on the action alone would answer yes to all of them and the
+ * gating demos would show nothing happening.
+ *
+ * `'*'` is the fallback for a resource not named here, so the pages that gate
+ * on action alone keep working.
+ */
+const GRANTS: Record<DocsRole, Record<string, string[]>> = {
+  Admin: {
+    '*': ['read', 'update', 'delete', 'export'],
+    settings: ['read', 'update', 'delete'],
+    reports: ['read', 'export'],
+  },
+  Coordinator: {
+    '*': ['read', 'update', 'export'],
+    settings: [],
+    reports: ['read'],
+  },
+  Viewer: {
+    '*': ['read'],
+    settings: [],
+    reports: [],
+  },
 };
 
-export function docsCan(action: string, _resource: string): boolean {
+export function docsCan(action: string, resource: string): boolean {
   /* An empty action means the caller asked without naming one — nothing to
      check, so nothing is hidden. Matches useCan's own default. */
   if (!action) return true;
-  return GRANTS[docsRole.value].includes(action);
+  const table = GRANTS[docsRole.value];
+  const allowed = resource && resource in table ? table[resource] : table['*'];
+  return allowed.includes(action);
 }

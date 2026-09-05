@@ -58,7 +58,7 @@ export interface DocEntry {
    */
   demo?: 'plain' | 'chip' | 'meter' | 'inplace' | 'block' | 'scrolltop'
     | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container'
-    | 'overlay';
+    | 'overlay' | 'menu';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -4222,6 +4222,50 @@ export const ENTRIES: DocEntry[] = [
       ['v-apex-tooltip.top="’Text’"', 'modifier', 'top, bottom, left or right'],
       ['v-apex-tooltip="{ value, … }"', 'object', 'Every option above, and reactive — a live tooltip picks up new text without a re-hover'],
       ['app.use(ApexUI)', 'plugin', 'Registers the directive; import { apexTooltip } to register it yourself'],
+    ],
+  },
+  {
+    id: 'tieredmenu', name: 'ApexTieredMenu', group: 'Menu',
+    blurb: 'A vertical menu whose submenus open as nested overlays to the side. Rows come from the shared overlay renderer, so nesting, hover-open, separators, hints and the off-screen flip are already handled — this component owns the outer panel and, in popup mode, its placement.',
+    noField: true, demo: 'menu',
+    lead: [':items="items"'],
+    tail: '\n/>',
+    base: { width: '220px' },
+    controls: [
+      { key: 'popup', type: 'bool' },
+      { key: 'side', type: 'select', options: ['bottom', 'top', 'left', 'right'] },
+      { key: 'align', type: 'select', options: ['start', 'center', 'end'] },
+      { key: 'gap', type: 'number' }, { key: 'width', type: 'text' },
+      { key: 'radius', type: 'text' }, { key: 'rowRadius', type: 'text' }, { key: 'padding', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'borderColor', type: 'color' },
+      { key: 'textColor', type: 'color' }, { key: 'iconColor', type: 'color' },
+      { key: 'hoverBackground', type: 'color' }, { key: 'hoverTextColor', type: 'color' },
+      { key: 'headerColor', type: 'color' }, { key: 'hintColor', type: 'color' },
+      { key: 'separatorColor', type: 'color' },
+    ],
+    props: [
+      ['items', 'MenuItem[]', '[]', 'Nest an items array on a row and it opens a submenu overlay to the side; also takes { icon, hint, href, target, command, disabled, separator, header }'],
+      ['popup', 'boolean', 'false', 'Overlay anchored to whatever called toggle(event)'],
+      ['side / align / gap', 'string / string / number', "'bottom' / 'start' / 6", 'Popup placement, flipping and shifting like the popover'],
+      ['width', 'string', "'220px'", 'Minimum panel width'],
+      ['background / borderColor / radius', 'string', 'tokens', 'Panel chrome'],
+      ['textColor / iconColor', 'string', 'tokens', 'Row text, and row icons'],
+      ['hoverBackground / hoverTextColor', 'string', 'tokens', 'A row on hover'],
+      ['headerColor / hintColor', 'string', 'tokens', 'Section headers, and the shortcut column'],
+      ['separatorColor', 'string', 'borderColor', 'Divider rows — follows borderColor unless set'],
+      ['padding / rowRadius', 'string', 'tokens', 'Panel inner padding, and a row’s corner radius'],
+      ['zIndex', 'number', '1100', 'Popup stack order'],
+    ],
+    events: [['item-click', '{ item, originalEvent } — the item’s own command runs first'], ['show / hide', '— popup only']],
+    slots: [['item', 'Replaces a row’s contents; receives { item, depth, branch } — the row keeps its click, hover and submenu behaviour']],
+    /* The gallery writes `serviceFn: 'ref'` here, which is its way of saying
+       the table below lists ref methods rather than a service. Ours carries
+       that in the title, and has no such field — copying it verbatim was a
+       typecheck error, not parity. */
+    serviceTitle: 'Methods',
+    serviceRows: [
+      ['toggle(event) / show(event) / hide()', 'void', 'Popup mode — anchored to the event’s element'],
+      ['visible', 'boolean', 'Popup open state'],
     ],
   },
   {

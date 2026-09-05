@@ -24,13 +24,15 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, useApexToast, ApexPopover } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu } from '@exorgroup/apex-ui';
+import type { MenuItem } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
 import DirectiveStage from './demos/DirectiveStage.vue';
 import ServiceStage from './demos/ServiceStage.vue';
 import OverlayStage from './demos/OverlayStage.vue';
+import MenuStage from './demos/MenuStage.vue';
 /* The dynamic-dialog and confirm-popup demos appear in the stage AND in a
    section below it. One module holds their state so both report through the
    same line — see demos/overlayDemos.ts. */
@@ -188,6 +190,73 @@ const msgEmail = ref('');
  * anchor. `povShared` is the exception that proves the point — one popover
  * serving four triggers, which only works because the anchor is the event.
  */
+/* ── ApexTieredMenu page ─────────────────────────────────── */
+const tmPop = ref<InstanceType<typeof ApexTieredMenu> | null>(null);
+const tmPop2 = ref<InstanceType<typeof ApexTieredMenu> | null>(null);
+const tmPicked = ref('');
+
+const tmBasic: MenuItem[] = [
+  { label: 'New file', icon: 'note_add', hint: '⌘N' },
+  { label: 'Open recent', icon: 'history', items: [
+    { label: 'invoice-2024.pdf' },
+    { label: 'contract.docx' },
+    { separator: true },
+    { label: 'Clear list', icon: 'delete_sweep' },
+  ] },
+  { separator: true },
+  { header: 'Share' },
+  { label: 'Email', icon: 'mail' },
+  { label: 'Export', icon: 'download', items: [
+    { label: 'PDF' }, { label: 'CSV' },
+    { label: 'Print…', icon: 'print', hint: '⌘P' },
+  ] },
+  { separator: true },
+  { label: 'Delete', icon: 'delete', disabled: true },
+];
+
+/* Carries a `count` the item slot renders as a badge — the slot replaces the
+   row's contents, so anything on the item is available to it. */
+const tmTemplate: MenuItem[] = [
+  { label: 'Inbox', icon: 'inbox', count: 12 },
+  { label: 'Drafts', icon: 'edit_note', count: 3 },
+  { label: 'Folders', icon: 'folder', items: [
+    { label: 'Clients', count: 8 },
+    { label: 'Archive', count: 240 },
+  ] },
+  { separator: true },
+  { label: 'Trash', icon: 'delete' },
+];
+
+const tmCommand: MenuItem[] = [
+  { label: 'Save', icon: 'save', command: () => { tmPicked.value = 'Save (its own command ran first)'; } },
+  { label: 'Documentation', icon: 'open_in_new', href: 'https://example.com/docs', target: '_blank' },
+  { separator: true },
+  { label: 'More', icon: 'more_horiz', items: [
+    { label: 'Duplicate', icon: 'content_copy' },
+    { label: 'Archive', icon: 'archive' },
+  ] },
+];
+
+/*
+ * The gated model. Every `can` here is resolved through the same docsCan the
+ * whole page uses, so the role switch drives it rather than a local flag.
+ *
+ * Written so the cascade is visible: deny `reports` and the branch goes with
+ * its children, which leaves the Admin header labelling nothing and the rules
+ * around it framing a gap — so those go too.
+ */
+const tmGated: MenuItem[] = [
+  { label: 'Open', icon: 'folder_open' },
+  { label: 'Export', icon: 'download', can: { action: 'export', resource: 'events' } },
+  { separator: true },
+  { header: 'Admin' },
+  { label: 'Settings', icon: 'settings', can: 'settings' },
+  { label: 'Reports', icon: 'bar_chart', items: [
+    { label: 'Sales', can: 'reports' },
+    { label: 'Attendance', can: 'reports' },
+  ] },
+];
+
 const povBasic = ref<InstanceType<typeof ApexPopover> | null>(null);
 const povCtl = ref<InstanceType<typeof ApexPopover> | null>(null);
 const povShared = ref<InstanceType<typeof ApexPopover> | null>(null);
@@ -1121,6 +1190,15 @@ async function copyUsage() {
                    stage supplies the trigger. OverlayStage holds all three. -->
               <OverlayStage
                 v-else-if="entry.demo === 'overlay'"
+                :id="entry.id"
+                :bind="live"
+              />
+
+              <!-- A menu needs a model to be worth looking at, and one of them
+                   renders nothing at all until a trigger opens it. MenuStage
+                   holds the shape each one needs. -->
+              <MenuStage
+                v-else-if="entry.demo === 'menu'"
                 :id="entry.id"
                 :bind="live"
               />
@@ -2858,6 +2936,135 @@ function pick(city) {
         <!-- Ported from the gallery, five sections. The popover is reached
              through its ref throughout, which is how it is meant to be used —
              so each example declares its own ref rather than sharing one. -->
+        <template v-if="entry.id === 'tieredmenu'">
+          <h2>Basic</h2>
+          <p class="note">
+            Rows are data. Nest an <code>items</code> array on one and it becomes a branch,
+            opening its submenu to the side — no extra component, and the overlay handles
+            its own flip when it runs out of room.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexTieredMenu :items="items" /&gt;
+
+const items = [
+  { label: 'New file', icon: 'note_add', hint: '⌘N' },
+  { label: 'Export', icon: 'download', items: [
+    { label: 'PDF' }, { label: 'CSV' },
+  ] },
+  { separator: true },
+  { header: 'Danger' },
+  { label: 'Delete', icon: 'delete', disabled: true },
+]</pre>
+          <div class="tmenu-row">
+            <ApexTieredMenu :items="tmBasic" width="240px" />
+          </div>
+
+          <h2>Popup</h2>
+          <p class="note">
+            With <code>popup</code> the panel renders nothing until
+            <code>toggle(event)</code> is called, and anchors to whatever was clicked —
+            the same placement the popover uses, so it flips and shifts to stay on screen.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexButton @click="tm.toggle($event)"&gt;File&lt;/ApexButton&gt;
+&lt;ApexTieredMenu ref="tm" :items="items" popup side="bottom" align="start" /&gt;</pre>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton icon="folder_open" @click="tmPop?.toggle($event)">File</ApexButton>
+            <ApexButton severity="secondary" variant="outlined" icon="more_horiz"
+                        @click="tmPop2?.toggle($event)">Anchored right</ApexButton>
+          </div>
+          <ApexTieredMenu ref="tmPop" :items="tmBasic" popup side="bottom" align="start" />
+          <ApexTieredMenu ref="tmPop2" :items="tmBasic" popup side="bottom" align="end" />
+
+          <h2>Template</h2>
+          <p class="note">
+            The <code>item</code> slot replaces a row's contents and nothing else — the row
+            keeps its click, its hover, and its submenu, so a custom row never has to
+            reimplement the menu.
+          </p>
+          <div class="tmenu-row">
+            <ApexTieredMenu :items="tmTemplate" width="260px">
+              <template #item="{ item, branch }">
+                <ApexIcon v-if="item.icon" :name="item.icon" :size="18" />
+                <span class="tmenu-tpl__label">{{ item.label }}</span>
+                <ApexBadge v-if="item.count" :value="item.count" severity="info" />
+                <ApexIcon v-if="branch" name="chevron_right" :size="18" class="tmenu-tpl__chev" />
+              </template>
+            </ApexTieredMenu>
+          </div>
+
+          <h2>Colour</h2>
+          <p class="note">
+            Every row state is a prop, so a menu can sit on a dark panel or a coloured
+            surface without a stylesheet override.
+          </p>
+          <div class="tmenu-row">
+            <ApexTieredMenu
+              :items="tmBasic" width="230px"
+              background="#101828" borderColor="#1f2a3c" textColor="#e6edf7"
+              iconColor="#7aa2ff" hoverBackground="#182338" hoverTextColor="#ffffff"
+              headerColor="#7d8aa3" hintColor="#5f6b82" separatorColor="#1f2a3c"
+              radius="12px" rowRadius="8px" padding="8px"
+            />
+            <ApexTieredMenu
+              :items="tmBasic" width="230px"
+              background="#f4f0ff" borderColor="#ddd3ff" textColor="#2b1a5e"
+              iconColor="#7c3aed" hoverBackground="#e9e0ff" hoverTextColor="#1a0f3d"
+              radius="12px" rowRadius="8px"
+            />
+          </div>
+
+          <h2>Command and router</h2>
+          <p class="note">
+            A row runs its own <code>command</code> first, then the menu emits
+            <code>item-click</code>. Give a row an <code>href</code> instead and it renders
+            as a real link — right-click, middle-click and copy-address all keep working.
+          </p>
+          <pre class="doc-pre" v-pre>{ label: 'Docs', href: '/docs', target: '_blank' }
+{ label: 'Save', command: ({ item }) =&gt; save(item) }</pre>
+          <div class="tmenu-row">
+            <ApexTieredMenu :items="tmCommand" width="240px" @item-click="tmPicked = $event.item.label || ''" />
+          </div>
+          <p class="pov-state">item-click: <code>{{ tmPicked || 'nothing yet' }}</code></p>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            Give a row <code>can</code> and it is hidden from anyone the resolver denies.
+            A bare string is the resource, asked about with <code>read</code>; the long form
+            names the action. Hidden, not disabled — a greyed-out Delete still tells someone
+            the action exists and that they do not have it.
+          </p>
+          <p class="note">
+            The removals cascade, which is most of the work: a branch whose children all go
+            is dropped with them, a header left over nothing goes, and the separators that
+            framed the gap collapse. Nothing here authorises anything — the endpoint behind
+            the row still has to.
+          </p>
+          <pre class="doc-pre" v-pre>app.use(ApexUI, {
+  can: (action, resource) =&gt; auth.can(resource, action),
+})
+
+const items = [
+  { label: 'Open' },
+  { label: 'Settings', can: 'settings' },
+  { label: 'Delete', can: { action: 'delete', resource: 'events' } },
+]</pre>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <div class="tmenu-row">
+            <ApexTieredMenu :items="tmGated" width="250px" />
+          </div>
+          <p class="pov-state">
+            Nothing on this page is hard-coded to a role: the switch above changes one
+            resolver, and the menu re-gates because the filter runs in a computed that
+            reads it.
+          </p>
+        </template>
+
         <template v-if="entry.id === 'popover'">
           <h2>Basic</h2>
           <p class="note">
