@@ -49,6 +49,19 @@ const ALIAS = {
   cascadeselect: 'cascade',
 };
 
+/**
+ * Gallery controls we deliberately do not have, so the coverage check below
+ * does not report them for ever.
+ *
+ * Only for a decision that was actually taken. Anything absent because nobody
+ * has got to it yet belongs in the report, not here.
+ */
+const RETIRED = new Set([
+  /* AF2-186: the confirm service became the alert service, and the centred
+     component became ApexAlert — Pando's, which is better designed. */
+  'confirmdialog',
+]);
+
 // ---------------------------------------------------------------- reading
 
 function read(p, label) {
@@ -362,6 +375,38 @@ function main() {
 
   if (notInGallery.length) {
     console.log(`\n${notInGallery.length} of ours are not in the gallery (nothing to compare): ${notInGallery.join(' ')}`);
+  }
+
+  /*
+   * The other direction.
+   *
+   * Everything above walks OUR entries and asks what the gallery has that we
+   * lack. It is structurally blind to a control the gallery documents that we
+   * never added at all: that control is not in the loop, so the run ends
+   * "65 compared, 0 with something missing" — which reads like full coverage
+   * and is the exact shape of a checker that checked nothing.
+   *
+   * Asking it by hand in AF2-196 found 23, 22 of them components that exist in
+   * the library and are simply undocumented. Reported on a full run only;
+   * naming controls on the command line is a deliberately narrow question.
+   */
+  if (!wanted.length) {
+    const ourSet = new Set(ourIds.map((id) => ALIAS[id] || id));
+    const theirs = [...galleryJs.matchAll(/^\s*id: '([a-z0-9-]+)', name: '(Apex\w+)'/gm)]
+      .map((m) => ({ id: m[1], name: m[2] }));
+
+    /* A pattern that stops matching would report zero absent controls, which
+       is the same false all-clear this check exists to prevent. */
+    if (theirs.length < 50) {
+      console.error(`\nOnly ${theirs.length} gallery entries parsed — the id/name pattern has moved.`);
+      process.exit(2);
+    }
+
+    const absent = theirs.filter((t) => !ourSet.has(t.id) && !RETIRED.has(t.id));
+    if (absent.length) {
+      console.log(`\n${absent.length} of the gallery's ${theirs.length} controls have NO entry of ours:`);
+      console.log(`  ${absent.map((a) => a.name).join(', ')}`);
+    }
   }
 
   console.log(`\n${checked} compared, ${failures} with something missing.`);
