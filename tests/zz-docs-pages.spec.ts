@@ -53,6 +53,32 @@ describe('every control page renders', () => {
   });
 });
 
+describe('a directive page documents a directive', () => {
+  /*
+   * A directive has no tag, so its usage snippet has to be a host element
+   * carrying `v-<name>`. Nothing else here would notice if the snippet fell
+   * back to the component form and told the reader to write
+   * `<ApexRipple v-model="value" />`, which does not exist.
+   */
+  const DIRECTIVES = ENTRIES.filter((e) => e.directiveName);
+
+  it('there are directive entries to check', () => {
+    expect(DIRECTIVES.length).toBeGreaterThan(0);
+  });
+
+  it.each(DIRECTIVES.map((e) => [e.name, e.directiveName!] as const))(
+    '%s uses v-%s',
+    async (name, directive) => {
+      const { wrapper, open } = await harness();
+      await open(name);
+      const snippet = wrapper.find('.usage').text();
+      expect(snippet, `${name}'s usage snippet`).toContain(`v-${directive}`);
+      expect(snippet, `${name} must not be shown as a component`).not.toContain(`<${name}`);
+      wrapper.unmount();
+    },
+  );
+});
+
 describe('the ported gallery examples are on the page', () => {
   /* Headings taken from APEX UI Gallery.html. A build cannot tell you a
      section is missing — only reading the rendered page can. */
