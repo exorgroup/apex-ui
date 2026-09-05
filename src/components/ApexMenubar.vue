@@ -15,6 +15,8 @@
 import { computed, nextTick, onBeforeUnmount, ref } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexMenuItem, { type MenuItem } from './ApexMenuItem';
+import { useCan } from '../core/can';
+import { filterMenu } from '../core/menuPermissions';
 
 const props = withDefaults(defineProps<{
   items?: MenuItem[];
@@ -41,6 +43,18 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (e: 'item-click', payload: { item: MenuItem; originalEvent: MouseEvent }): void;
 }>();
+
+/*
+ * Rows the resolver denies never reach the renderer, along with the submenus,
+ * headings and rules they leave hanging.
+ *
+ * Inside a computed because useCan() injects at setup, and because a resolver
+ * that reads reactive state — permissions arriving with the page — must be
+ * able to change the menu when it does. openIndex indexes into this, so a
+ * hidden root item cannot be opened by index either.
+ */
+const can = useCan();
+const shown = computed(() => filterMenu(props.items, can));
 
 const openIndex = ref(-1);
 const root = ref<HTMLElement | null>(null);
@@ -136,7 +150,7 @@ defineExpose({ close: () => { openIndex.value = -1; }, openIndex });
     <div v-if="slots.start" class="apex-mbar__edge"><slot name="start" /></div>
 
     <ul class="apex-mbar__list" role="menubar">
-      <li v-for="(item, i) in items || []" :key="i" class="apex-mbar__root"
+      <li v-for="(item, i) in shown" :key="i" class="apex-mbar__root"
           :data-open="openIndex === i ? 'true' : 'false'"
           @mouseenter="onEnter(i, item)">
         <component :is="item.href && !hasMenu(item) ? 'a' : 'button'" class="apex-mbar__rootlink"

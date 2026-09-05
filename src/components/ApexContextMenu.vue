@@ -11,6 +11,8 @@
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import ApexMenuItem, { type MenuItem } from './ApexMenuItem';
+import { useCan } from '../core/can';
+import { filterMenu } from '../core/menuPermissions';
 import { resolveTarget } from '../core/anchor';
 
 const props = withDefaults(defineProps<{
@@ -34,8 +36,6 @@ const props = withDefaults(defineProps<{
   headerColor?: string;
   hintColor?: string;
   separatorColor?: string;
-  /** Panel inner padding, and the radius of a row. */
-  padding?: string;
   rowRadius?: string;
   zIndex?: number;
 }>(), { padding: 8, zIndex: 1200 });
@@ -44,6 +44,17 @@ const emit = defineEmits<{
   (e: 'show' | 'hide'): void;
   (e: 'item-click', payload: { item: MenuItem; originalEvent: MouseEvent }): void;
 }>();
+
+/*
+ * Rows the resolver denies never reach the renderer, along with the submenus,
+ * headings and rules they leave hanging.
+ *
+ * Inside a computed because useCan() injects at setup, and because a resolver
+ * that reads reactive state — permissions arriving with the page — must be
+ * able to change the menu when it does.
+ */
+const can = useCan();
+const shown = computed(() => filterMenu(props.items, can));
 
 const open = ref(false);
 const panel = ref<HTMLElement | null>(null);
@@ -171,7 +182,10 @@ const panelStyle = computed(() => {
   if (props.hintColor) s['--amn-hint-fg'] = props.hintColor;
   if (props.separatorColor) s['--amn-sep'] = props.separatorColor;
   if (props.rowRadius) s['--amn-radius'] = props.rowRadius;
-  if (props.padding) s.padding = props.padding;
+  /* No CSS padding here. `padding` on this control is the viewport gap, a
+     number — a stray copy of ApexTieredMenu's chrome block once declared a
+     second, string `padding` in the same interface and wrote it into the
+     style, which shadowed the real one and emitted `padding: 8` as CSS. */
   return s;
 });
 
@@ -186,7 +200,7 @@ defineExpose({ show, hide, toggle, visible: open, target: context });
   <Teleport to="body">
     <Transition name="apex-pop-fade">
       <ul v-if="open" ref="panel" class="apex-menu apex-ctxmenu" :style="panelStyle" role="menu">
-        <ApexMenuItem v-for="(item, i) in items || []" :key="i" :item="item"
+        <ApexMenuItem v-for="(item, i) in shown" :key="i" :item="item"
                       :item-render="slots.item ? (ctx) => slots.item!(ctx) : undefined"
                       @pick="onPick" />
       </ul>

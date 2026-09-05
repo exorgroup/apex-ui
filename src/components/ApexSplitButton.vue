@@ -12,6 +12,8 @@
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexMenuItem, { type MenuItem } from './ApexMenuItem';
+import { useCan } from '../core/can';
+import { filterMenu } from '../core/menuPermissions';
 import type { ApexSeverity, ApexButtonVariant } from './ApexButton.vue';
 import type { ApexSize, ApexButtonAppearance } from '../types';
 
@@ -97,7 +99,13 @@ const emit = defineEmits<{
 
 const open = ref(false);
 const root = ref<HTMLElement | null>(null);
-const items = computed(() => props.model || []);
+/*
+ * Actions the resolver denies never reach the menu, along with the headings and
+ * rules they leave hanging. A split button whose whole menu is denied still
+ * shows its primary action — that button is not part of the model.
+ */
+const can = useCan();
+const items = computed(() => filterMenu(props.model, can));
 
 function toggle() {
   if (props.disabled) return;

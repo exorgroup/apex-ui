@@ -8,6 +8,8 @@
  */
 import { computed, nextTick, onBeforeUnmount, ref, Teleport, watch } from 'vue';
 import ApexMenuItem, { type MenuItem } from './ApexMenuItem';
+import { useCan } from '../core/can';
+import { filterMenu } from '../core/menuPermissions';
 import { anchorPosition, resolveTarget, type AnchorAlign, type AnchorSide } from '../core/anchor';
 
 const props = withDefaults(defineProps<{
@@ -39,6 +41,17 @@ const emit = defineEmits<{
   (e: 'item-click', payload: { item: MenuItem; originalEvent: MouseEvent }): void;
   (e: 'show' | 'hide'): void;
 }>();
+
+/*
+ * Rows the resolver denies never reach the renderer, along with the submenus,
+ * headings and rules they leave hanging.
+ *
+ * Inside a computed because useCan() injects at setup, and because a resolver
+ * that reads reactive state — permissions arriving with the page — must be
+ * able to change the menu when it does.
+ */
+const can = useCan();
+const shown = computed(() => filterMenu(props.items, can));
 
 const open = ref(false);
 const panel = ref<HTMLElement | null>(null);
@@ -154,7 +167,7 @@ defineExpose({ show, hide, toggle, visible: open });
   <component :is="popup ? Teleport : 'div'" :to="popup ? 'body' : undefined">
     <Transition :name="popup ? 'apex-pop-fade' : 'apex-none'">
       <ul v-if="!popup || open" ref="panel" class="apex-menu apex-tmenu" :style="panelStyle" role="menu">
-        <ApexMenuItem v-for="(item, i) in items || []" :key="i" :item="item"
+        <ApexMenuItem v-for="(item, i) in shown" :key="i" :item="item"
                       :item-render="slots.item ? (ctx) => slots.item!(ctx) : undefined"
                       @pick="onPick" />
       </ul>
