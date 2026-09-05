@@ -677,3 +677,23 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
   margin: 0; max-inline-size: 42ch;
   font-size: 12.5px; line-height: 1.5; color: var(--fg-subtle);
 }
+
+/* ── ApexAlert page ────────────────────────────────────────────────────── */
+.alert-row { display: flex; gap: 10px; flex-wrap: wrap; margin-block: 12px 4px; }
+.alert-outcome {
+  margin: 10px 0 0; font-family: var(--font-mono); font-size: 12.5px;
+  color: var(--accent-primary);
+}
+.alert-role { display: flex; align-items: center; gap: 10px; margin-block-start: 12px; }
+.alert-role__label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--fg-subtle);
+}
+.doc-note { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--fg-muted); max-width: 70ch; }
+/* The authorisation caveat is the one paragraph on the page that must not be
+   skimmed past, so it is marked rather than left as another grey note. */
+.doc-note--warn {
+  margin-block-start: 14px; padding: 12px 14px;
+  border-inline-start: 3px solid var(--accent-warning);
+  background: color-mix(in srgb, var(--accent-warning) 8%, transparent);
+  border-radius: var(--r-sm); color: var(--fg-default);
+}

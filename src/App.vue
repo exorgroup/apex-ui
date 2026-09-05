@@ -20,7 +20,8 @@ import {
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
 } from './registry';
 import type { AddNewKind, DocEntry, DocPage } from './registry';
-import { useApexDialog } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert } from '@exorgroup/apex-ui';
+import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
 import DirectiveStage from './demos/DirectiveStage.vue';
@@ -265,6 +266,116 @@ const baseline = (extra: Record<string, unknown> = {}) => ({
 function reset() {
   overrides[current.value] = startingProps(entry.value);
   model[current.value] = JSON.parse(JSON.stringify(entry.value.model ?? null));
+}
+
+/* ── ApexAlert page ─────────────────────────────────────────── */
+const alert = useApexAlert();
+const alertOutcome = ref('');
+
+async function alertAsk() {
+  const yes = await alert.confirm({
+    tone: 'warn',
+    title: 'Delete area?',
+    message: '“Main Hall” will be deleted. This cannot be undone.',
+    cancelText: 'Cancel',
+    acceptLabel: 'Delete',
+  });
+  alertOutcome.value = yes ? 'confirm() resolved true' : 'confirm() resolved false';
+}
+
+async function alertReport() {
+  await alert.notify({ tone: 'success', title: 'Saved', message: 'Three areas updated.' });
+  alertOutcome.value = 'notify() resolved';
+}
+
+/** A fake request, so the progress stage lasts long enough to be seen. */
+const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function alertRun() {
+  const ok = await alert.run({
+    confirm: {
+      tone: 'danger',
+      title: 'Delete area?',
+      message: '“Main Hall” will be deleted.',
+      cancelText: 'Cancel',
+      acceptLabel: 'Delete',
+    },
+    progressTitle: 'Deleting…',
+    action: async () => {
+      await wait(1400);
+      return { ok: true, title: 'Deleted', message: '“Main Hall” is gone.' };
+    },
+  });
+  alertOutcome.value = ok ? 'run() resolved true' : 'run() resolved false';
+}
+
+async function alertRefused() {
+  const ok = await alert.run({
+    progressTitle: 'Deleting…',
+    action: async () => {
+      await wait(1200);
+      /* The request finished. It was still refused, and saying "Done" here
+         would be the lie this exists to prevent. */
+      return { ok: false, title: 'Couldn’t delete that', message: 'The area is in use by two events.' };
+    },
+  });
+  alertOutcome.value = `run() resolved ${ok}`;
+}
+
+async function alertChanges() {
+  await alert.confirm({
+    title: 'Save changes?',
+    message: 'Two fields will change.',
+    changes: [
+      { label: 'Capacity', from: 120, to: 180 },
+      { label: 'Notes', from: '', to: 'Step-free access' },
+    ],
+    cancelText: 'Keep editing',
+    acceptLabel: 'Save',
+  });
+}
+
+async function alertCopy() {
+  await alert.notify({
+    tone: 'info',
+    title: 'Pairing key',
+    message: 'It is shown once. Copy it now.',
+    copyText: 'APX-4417-9930-KE2',
+  });
+}
+
+async function alertCustomButtons() {
+  await alert.confirm({
+    title: 'How would you like to proceed?',
+    message: 'Each button does its own thing.',
+    buttons: [
+      { label: 'Read more', close: false, action: () => { alertOutcome.value = 'stayed open'; } },
+      { label: 'Cancel', role: 'reject', severity: 'secondary', variant: 'outlined' },
+      { label: 'Continue', role: 'accept' },
+    ],
+  });
+}
+
+async function alertGated() {
+  await alert.confirm({
+    title: 'Main Hall',
+    message: 'Only what your role allows is offered.',
+    buttons: [
+      { label: 'Export', can: 'export', resource: 'areas', severity: 'secondary', variant: 'outlined' },
+      { label: 'Rename', can: 'update', resource: 'areas', severity: 'secondary', variant: 'outlined' },
+      { label: 'Delete', can: 'delete', resource: 'areas', severity: 'danger', role: 'accept' },
+      { label: 'Close', role: 'cancel', variant: 'text' },
+    ],
+  });
+}
+
+function alertAnchored(e: MouseEvent) {
+  alert.confirm({
+    message: 'Delete this row?',
+    target: e.currentTarget,
+    cancelText: 'No',
+    acceptLabel: 'Delete',
+  });
 }
 
 /** The usage snippet, generated from whatever the playground currently shows. */
@@ -4520,6 +4631,110 @@ async function copyUsage() {
             </div>
           </div>
         </template>
+
+        <!-- ── ApexAlert ─────────────────────────────────────────── -->
+        <template v-if="entry.id === 'alert'">
+          <h2>The three calls</h2>
+          <p class="doc-note">
+            <code>confirm()</code> asks and resolves true or false.
+            <code>notify()</code> reports and waits for an acknowledgement.
+            <code>run()</code> does both with the work in between — and that is
+            the one worth having: the alert never closes between stages, so a
+            delete reads as one continuous act instead of a question, a blank
+            pause, and then an unrelated message in the corner.
+          </p>
+          <div class="alert-row">
+            <ApexButton @click="alertAsk">confirm()</ApexButton>
+            <ApexButton severity="success" @click="alertReport">notify()</ApexButton>
+            <ApexButton severity="danger" @click="alertRun">run() — the staged flow</ApexButton>
+          </div>
+          <p v-if="alertOutcome" class="alert-outcome">{{ alertOutcome }}</p>
+
+          <h2>Reading an outcome</h2>
+          <p class="doc-note">
+            A resolved promise is not a successful outcome: a request can
+            complete and still have been refused. Return <code>{ ok: false }</code>
+            from the action — or register one <code>setAlertInterpreter</code> for
+            the whole app, which is how an Inertia app reads its flash bag
+            without a single call site changing.
+          </p>
+          <div class="alert-row">
+            <ApexButton variant="outlined" @click="alertRefused">An action that completes, and was refused</ApexButton>
+          </div>
+
+          <h2>Showing what changes</h2>
+          <p class="doc-note">
+            An edit-confirm that lists its own changes can be read rather than
+            trusted. Values render as text, never as markup — they come from
+            records someone typed.
+          </p>
+          <div class="alert-row">
+            <ApexButton variant="outlined" @click="alertChanges">Save changes?</ApexButton>
+          </div>
+
+          <h2>Copying a value</h2>
+          <p class="doc-note">
+            <code>copyText</code> adds a Copy button and leaves the alert
+            standing, because the value is usually being read as well as copied.
+          </p>
+          <div class="alert-row">
+            <ApexButton variant="outlined" @click="alertCopy">Show the generated key</ApexButton>
+          </div>
+
+          <h2>Buttons that do their own work</h2>
+          <p class="doc-note">
+            A button carries its own <code>action</code>, so one can open a form
+            or route somewhere while another just closes. <code>role</code> is
+            what <code>run()</code> reads: accept proceeds, reject aborts, and
+            one with no role does its thing and stops there.
+            <code>close: false</code> keeps the alert up.
+          </p>
+          <div class="alert-row">
+            <ApexButton variant="outlined" @click="alertCustomButtons">Three buttons</ApexButton>
+          </div>
+
+          <h2>Hiding what this user may not do</h2>
+          <p class="doc-note">
+            Give a button a <code>can</code> and a <code>resource</code> and the
+            app's resolver decides whether it appears. Hidden, not disabled — a
+            greyed-out Delete still tells someone the action exists and that
+            they do not have it.
+          </p>
+          <div class="alert-role">
+            <span class="alert-role__label">Viewing as</span>
+            <div class="seg">
+              <button
+                v-for="r in ROLES"
+                :key="r"
+                type="button"
+                :aria-pressed="docsRole === r"
+                @click="docsRole = r"
+              >{{ r }}</button>
+            </div>
+          </div>
+          <div class="alert-row">
+            <ApexButton variant="outlined" @click="alertGated">Manage this area</ApexButton>
+          </div>
+          <p class="doc-note doc-note--warn">
+            <b>This is presentation, not authorisation.</b> Hiding the button
+            does not stop the delete: the handler is still in the shipped
+            bundle and the endpoint behind it is still reachable. What it buys
+            is an interface that tells the truth about what a user can do. The
+            endpoint has to authorise the request itself.
+          </p>
+
+          <h2>Anchoring a small question</h2>
+          <p class="doc-note">
+            A <code>target</code> routes <code>confirm()</code> to
+            <code>ApexConfirmPopup</code> instead — one service, two hosts, and
+            the caller never picks a component. <code>run()</code> ignores it: a
+            staged flow cannot follow a popup anchored to the button that was
+            just pressed.
+          </p>
+          <div class="alert-row">
+            <ApexButton ref="alertAnchorRef" variant="outlined" @click="alertAnchored($event)">Delete this row</ApexButton>
+          </div>
+        </template>
       </div>
     </main>
   </div>
@@ -4529,4 +4744,5 @@ async function copyUsage() {
        would put a toast inside the scrolling stage and stack duplicates. -->
   <ApexDynamicDialog />
   <ApexToast />
+  <ApexAlert />
 </template>
