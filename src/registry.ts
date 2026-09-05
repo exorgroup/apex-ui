@@ -4225,6 +4225,51 @@ export const ENTRIES: DocEntry[] = [
     ],
   },
   {
+    id: 'sidebar', name: 'ApexSidebar', group: 'Menu',
+    blurb: 'A navigation panel that collapses to an icon rail or slides away entirely, inside an ApexSidebarLayout. Width is one custom property, so collapsing, hovering open and the offcanvas slide are the same transition rather than three code paths — and each panel registers under an id, so a trigger can sit in a header nowhere near it.',
+    noField: true, demo: 'menu',
+    /* The gallery's own lead reads :items="items", but ApexSidebar has no such
+       prop and its own props table does not list one — it is a container, and
+       the menu goes inside it. Copying that verbatim would have printed a
+       snippet telling the reader to write a prop the component ignores. */
+    lead: ['id="primary"', 'collapsible="icon"'],
+    tail: '\n/>',
+    base: { variant: 'sidebar', collapsible: 'icon', side: 'left', width: '260px', iconWidth: '58px' },
+    controls: [
+      { key: 'variant', type: 'select', options: ['sidebar', 'floating', 'inset'] },
+      { key: 'collapsible', type: 'select', options: ['icon', 'offcanvas', 'none'] },
+      { key: 'side', type: 'select', options: ['left', 'right'] },
+      { key: 'overlay', type: 'bool' }, { key: 'openOnHover', type: 'bool' }, { key: 'backdrop', type: 'bool' },
+      { key: 'width', type: 'text' }, { key: 'iconWidth', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'borderColor', type: 'color' }, { key: 'textColor', type: 'color' },
+    ],
+    props: [
+      ['id', 'string', "'primary'", 'Registry key an ApexSidebarTrigger targets'],
+      ['open', 'boolean', 'true', 'v-model:open — also driven by the registry, so a trigger and a binding stay in step'],
+      ['variant', "'sidebar' | 'floating' | 'inset'", "'sidebar'", 'Flush panel, detached card, or a card inside an inset layout'],
+      ['collapsible', "'icon' | 'offcanvas' | 'none'", "'icon'", 'Collapse to a rail of icons, slide away entirely, or stay open'],
+      ['side', "'left' | 'right'", "'left'", ''],
+      ['overlay', 'boolean', 'false', 'Float over the content instead of pushing it — an offcanvas panel without it pushes, so the trigger that closes it stays reachable'],
+      ['openOnHover', 'boolean', 'false', 'Expand an icon rail while the pointer is over it, without changing the state'],
+      ['backdrop', 'boolean', 'false', 'Dim the page behind an overlay panel; clicking it closes'],
+      ['width / iconWidth', 'string', "'260px' / '58px'", 'Open width, and the collapsed rail'],
+      ['background / borderColor / textColor', 'string', 'tokens', 'Panel chrome'],
+      ['zIndex', 'number', '40', 'Overlay panel and backdrop stack order'],
+    ],
+    events: [['update:open', 'boolean']],
+    slots: [
+      ['header / default / footer', 'Panel regions. Each receives { collapsed }, so a header can swap a wordmark for a monogram in icon mode'],
+    ],
+    serviceTitle: 'Family and service',
+    serviceRows: [
+      ['ApexSidebarLayout', 'variant, height, background, radius', 'The shell: a row of panels and one content region, so panels push content by layout rather than by margins you maintain'],
+      ['ApexSidebarInset', 'scroll', 'The content region beside the panels'],
+      ['ApexSidebarTrigger', 'target, icon, label, size', 'Toggles a sidebar by id, from anywhere in the tree'],
+      ['useApexSidebar(id)', '{ state, show, hide, toggle, set }', 'The same registry the panels and triggers read — for a keyboard shortcut, a route guard, or a media query'],
+      ['[data-sbar-label]', 'attribute', 'Put it on your own text inside the panel and icon mode hides it with the rest'],
+    ],
+  },
+  {
     id: 'breadcrumb', name: 'ApexBreadcrumb', group: 'Menu',
     blurb: 'The trail to the current page. Items are data, so a crumb is text, an icon, or both, from one shape — and a long trail collapses in the middle behind an ellipsis rather than wrapping, since the first and last crumbs are the ones that carry meaning.',
     noField: true, demo: 'menu',

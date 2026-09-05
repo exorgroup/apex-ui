@@ -64,6 +64,30 @@
                       @item-click="onPick" />
       <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
+
+    <!-- A sidebar only means anything inside its layout shell: the panel and
+         the content region are siblings, and the panel pushes the content by
+         layout rather than by margins. So the stage supplies the whole shell,
+         and a trigger, since a collapsed panel is the interesting state. -->
+    <template v-else-if="id === 'sidebar'">
+      <div class="menu-stage__shell">
+        <ApexSidebarLayout height="260px">
+          <ApexSidebar id="stage" v-bind="bind">
+            <template #header="{ collapsed }">
+              <span class="sb-brand">{{ collapsed ? 'A' : 'Apex' }}</span>
+            </template>
+            <ApexMenu :items="LIST_ITEMS" @item-click="onPick" />
+          </ApexSidebar>
+          <ApexSidebarInset>
+            <div class="sb-content">
+              <ApexSidebarTrigger target="stage" />
+              <p>Content sits beside the panel, and moves when it collapses.</p>
+            </div>
+          </ApexSidebarInset>
+        </ApexSidebarLayout>
+      </div>
+      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+    </template>
   </div>
 </template>
 
@@ -81,7 +105,8 @@
  * other check, which is exactly how two overlay stages once shipped blank.
  */
 import { ref } from 'vue';
-import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu, ApexBreadcrumb } from '@exorgroup/apex-ui';
+import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu, ApexBreadcrumb,
+  ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger } from '@exorgroup/apex-ui';
 import type { MenuItem, MegaItem, CrumbItem } from '@exorgroup/apex-ui';
 
 defineProps<{
