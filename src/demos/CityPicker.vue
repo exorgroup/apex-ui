@@ -1,45 +1,81 @@
 <template>
-  <div class="dyn-picker">
-    <p class="dyn-picker__lead">{{ prompt }}</p>
-    <div class="dyn-picker__list">
-      <button
-        v-for="c in cities"
-        :key="c.value"
-        type="button"
-        class="dyn-picker__row"
-        @click="dialogRef?.close(c.label)"
-      >
-        <span>{{ c.label }}</span>
-        <em>{{ c.help }}</em>
-      </button>
-    </div>
-    <ApexButton size="sm" variant="text" @click="dialogRef?.close()">Cancel</ApexButton>
+  <div class="dyn-demo">
+    <p v-if="note">{{ note }}</p>
+    <ul class="dyn-list">
+      <li v-for="c in cities" :key="c.value">
+        <button type="button" @click="pick(c)">
+          <strong>{{ c.label }}</strong><em>{{ c.help }}</em>
+        </button>
+      </li>
+    </ul>
+    <ApexButton
+      severity="secondary"
+      variant="text"
+      size="sm"
+      icon="layers"
+      @click="openNested"
+    >Open another over this one</ApexButton>
   </div>
 </template>
 
 <script setup lang="ts">
 /**
- * The component the ApexDynamicDialog examples open.
+ * The component the ApexDynamicDialog examples open. Ported from the gallery's
+ * CityPickerDemo, which does more than the version this replaced.
  *
- * Deliberately knows nothing about dialogs: no visible state, no header, no
- * close button of its own. Everything it needs arrives through the injected
- * `dialogRef` — which is the whole point of the service, and only shows if the
- * demo opens a real component rather than inlining markup.
+ * It knows nothing about dialogs beyond the injected `dialogRef`: no visible
+ * state, no header, no close button of its own. That is the point of the
+ * service, and it only shows if the demo opens a real component rather than
+ * inlining markup.
  *
- * Cancelling closes with no value, so `onClose` can tell "nothing chosen" from
- * a choice: close() with undefined, close(city) with one.
+ * Between them, the three things it does cover every option worth showing:
+ *
+ *   `note` arrives through contentProps — a prop of this component, distinct
+ *   from the ApexDialog props that make the frame around it.
+ *
+ *   `cities` arrives through data, read off dialogRef.
+ *
+ *   openNested opens another of itself, with its own header, position and
+ *   note. That is what makes the stack real: the second dialog is opened from
+ *   inside the first, which is what a picker-over-a-form actually is, and each
+ *   instance keeps its own options and z-index.
+ *
+ * Closing passes the whole city object rather than a label, so onClose shows
+ * what a real caller would receive.
  */
 import { inject, computed } from 'vue';
-import { CITIES } from '../registry';
+import { useApexDialog } from '@exorgroup/apex-ui';
+/* Self-import: openNested opens this very component, and a <script setup>
+   block has no other way to name itself. Vue resolves the cycle. */
+import CityPicker from './CityPicker.vue';
+
+defineProps<{
+  /** Arrives through contentProps, not through the dialog's own props. */
+  note?: string;
+}>();
+
+interface City { value: string; label: string; help: string }
 
 /** What the service provides per dialog. `data` is whatever open() was given. */
 interface DialogRef {
-  data?: { prompt?: string };
+  data?: { cities?: City[] };
   close: (value?: unknown) => void;
 }
 
 const dialogRef = inject<DialogRef | null>('dialogRef', null);
+const dlg = useApexDialog();
 
-const cities = CITIES.slice(0, 5);
-const prompt = computed(() => dialogRef?.data?.prompt ?? 'Choose one.');
+const cities = computed<City[]>(() => dialogRef?.data?.cities ?? []);
+
+function pick(c: City) {
+  dialogRef?.close(c);
+}
+
+function openNested() {
+  dlg.open(CityPicker, {
+    props: { header: 'A dialog over a dialog', position: 'topright', width: '320px' },
+    contentProps: { note: 'Each instance keeps its own options and z-index.' },
+    data: { cities: cities.value.slice(0, 3) },
+  });
+}
 </script>

@@ -24,6 +24,55 @@
       </ApexDrawer>
     </template>
 
+    <!-- The dialog service has nothing to place: the stage is the trigger, and
+         what it opens renders at the app-root host. Note there is no
+         <ApexDynamicDialog /> here — the gallery puts one in its stage because
+         that is its only host; ours is mounted at the root already, and a
+         second would render every dialog twice. -->
+    <template v-else-if="id === 'dynamicdialog'">
+      <div class="ovl-stage__row">
+        <ApexButton icon="open_in_new" @click="openDynamic()">Select a city</ApexButton>
+        <ApexButton
+          severity="secondary"
+          variant="outlined"
+          icon="layers"
+          @click="openDynamic('nested')"
+        >Open over a dialog</ApexButton>
+      </div>
+      <p class="ovl-stage__text">Last outcome: <code>{{ dynLog || 'none yet' }}</code></p>
+    </template>
+
+    <!-- The confirm popup anchors to whatever was clicked, so the stage is two
+         real triggers. The rail feeds the request, which is what makes its
+         controls live — side, align, width and the labels all reach the popup. -->
+    <template v-else-if="id === 'confirmpopup'">
+      <div class="ovl-stage__row">
+        <ApexButton
+          severity="secondary"
+          variant="outlined"
+          @click="askConfirm({
+            target: $event,
+            message: bind?.message || 'Are you sure you want to proceed?',
+            icon: bind?.icon || 'warning',
+            side: bind?.side, align: bind?.align,
+            width: bind?.width, iconColor: bind?.iconColor,
+            acceptLabel: bind?.acceptLabel, rejectLabel: bind?.rejectLabel,
+          })"
+        >Save</ApexButton>
+        <ApexButton
+          severity="danger"
+          icon="delete"
+          @click="askConfirm({
+            target: $event,
+            message: 'Delete this record?', icon: 'delete', iconColor: '#C41E1E',
+            side: bind?.side, align: bind?.align,
+            acceptLabel: 'Delete', acceptSeverity: 'danger',
+          })"
+        >Delete</ApexButton>
+      </div>
+      <p class="ovl-stage__text">Last outcome: <code>{{ cfmLog || 'none yet' }}</code></p>
+    </template>
+
     <!-- A toast container renders an empty stack until something is queued,
          so the stage needs both a trigger and its own container. The group
          keeps these out of the app-root host and vice versa: without it the
@@ -70,6 +119,9 @@
  */
 import { ref, watch } from 'vue';
 import { ApexPopover, useApexToast } from '@exorgroup/apex-ui';
+/* Shared with the sections on the same pages, so both report through one
+   "Last outcome" line rather than each keeping its own. */
+import { openDynamic, dynLog, askConfirm, cfmLog } from './overlayDemos';
 
 const props = defineProps<{
   /** The registry id, which decides which overlay is shown. */

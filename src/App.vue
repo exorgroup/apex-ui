@@ -27,11 +27,14 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 import { useApexDialog, useApexAlert, useApexToast, ApexPopover } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
-import CityPicker from './demos/CityPicker.vue';
 import ContainerStage from './demos/ContainerStage.vue';
 import DirectiveStage from './demos/DirectiveStage.vue';
 import ServiceStage from './demos/ServiceStage.vue';
 import OverlayStage from './demos/OverlayStage.vue';
+/* The dynamic-dialog and confirm-popup demos appear in the stage AND in a
+   section below it. One module holds their state so both report through the
+   same line — see demos/overlayDemos.ts. */
+import { openDynamic, dynLog, askConfirm, cfmLog } from './demos/overlayDemos';
 
 const current = ref('input');
 const theme = ref<'light' | 'dark'>('dark');
@@ -44,30 +47,6 @@ const copied = ref(false);
 const model = reactive<Record<string, unknown>>({});
 
 /* ── The directives ──────────────────────────────────────────────────── */
-
-/* ── ApexConfirmPopup ────────────────────────────────────────────────── */
-
-/** What the last confirmation resolved to, shown live under the buttons. */
-const cfmLog = ref('');
-
-/**
- * Ask through the alert service.
- *
- * Every option here is an AlertOptions field; `target` is the one that decides
- * where the request lands — with it the popup answers, without it ApexAlert
- * does. The demos all pass the click event, which core/anchor resolves to the
- * button that was pressed.
- *
- * accept and reject are supplied here rather than per call site so all four
- * sections report through the same line.
- */
-function askConfirm(options: Record<string, unknown>) {
-  alert.confirm({
-    ...options,
-    accept: () => { cfmLog.value = 'accepted'; },
-    reject: () => { cfmLog.value = 'rejected'; },
-  });
-}
 
 /* ── ApexFileUpload ──────────────────────────────────────────────────── */
 
@@ -105,45 +84,6 @@ async function fuCustom({ files, clear, setProgress }: {
 /** "In a form": the uploader bound as a plain File[], beside a real field. */
 const fuTitle = ref('');
 const fuFiles = ref<File[]>([]);
-
-/* ── ApexDynamicDialog ───────────────────────────────────────────────── */
-
-/** What the last dialog returned, or that it was dismissed. */
-const dynLog = ref('');
-
-/**
- * Open CityPicker through the service.
- *
- * `nested` opens a second one over the first, which is what makes the Stacking
- * section observable: each instance gets its own z-index, so the newer picker
- * sits above the older rather than behind it.
- *
- * onClose distinguishes a choice from a dismissal, because dialogRef.close()
- * with no argument is how the component says "nothing chosen" — treating
- * undefined as a value would report a cancel as a selection.
- */
-function openPicker(header: string, prompt: string) {
-  dialog.open(CityPicker, {
-    props: { header, width: '380px' },
-    data: { prompt },
-    /* Typed explicitly: the service resolves to dist/apex-ui.js, which ships
-       no .d.ts, so an untyped callback's destructured params are implicit any
-       and error under noImplicitAny. */
-    onClose({ data }: { data?: unknown }) {
-      dynLog.value = data ? `chose ${data}` : 'dismissed with no value';
-    },
-  });
-}
-
-function openDynamic(kind?: 'nested') {
-  openPicker('Pick a city', 'Choose a city, or cancel.');
-  /* Order matters: the second open() must come after the first, because the
-     stack's z-index follows the index in it. Opening the "second" one first
-     would put it underneath, which shows the opposite of what it claims. */
-  if (kind === 'nested') {
-    openPicker('A second picker', 'This one opened over the first — note it sits above it.');
-  }
-}
 
 /* ── ApexToast ───────────────────────────────────────────────────────── */
 
