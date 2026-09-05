@@ -156,7 +156,8 @@ describe('every menu entry has a stage that renders a menu', () => {
        still an affordance the reader can act on, and MenuStage marks it
        data-stage-target explicitly rather than the guard guessing. */
     const rows = wrapper.findAll(
-      '.stage__demo .apex-menu__row, .stage__demo button, .stage__demo [data-stage-target]');
+      '.stage__demo .apex-menu__row, .stage__demo button, .stage__demo [data-stage-target],'
+      + ' .stage__demo .apex-bc__crumb');
     expect(rows.length, `${name}'s stage is empty — is its MenuStage branch missing?`)
       .toBeGreaterThan(0);
     wrapper.unmount();
@@ -228,6 +229,8 @@ describe('the ported gallery examples are on the page', () => {
       'Command and router', 'Permissions'],
     ApexMenu: ['Basic', 'Group — checkbox and radio rows', 'Toggleable', 'Controlled',
       'Popup', 'Template', 'Colour', 'Router and active state', 'Permissions'],
+    ApexBreadcrumb: ['Basic', 'Text, icons, or both', 'Route', 'Custom separator',
+      'Ellipsis', 'Custom item', 'Sizes and chrome', 'Permissions'],
     ApexContextMenu: ['Basic', 'Submenus', 'Global', 'Command', 'Template',
       'Router and links', 'Permissions'],
     ApexDock: ['Basic', 'Single action, or a speed dial', 'Badges and disabled',
