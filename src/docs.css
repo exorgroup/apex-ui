@@ -548,6 +548,69 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .dir-hint { font-size: 13px; color: var(--fg-subtle); margin: 0; }
 .dir-gap { block-size: 150px; }
 
+/* ── The overlays' examples ────────────────────────────────────────────── */
+
+/* A row of triggers that wraps, for the side/position pickers. */
+.cpop-grid { display: flex; flex-wrap: wrap; gap: 8px; max-inline-size: 520px; }
+
+/* The dialog's nine positions read as a grid, not a row — the 3×3 shape is
+   the point. */
+.cfm-grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px; max-inline-size: 420px;
+}
+.cfm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+/* Popover "Rich content": a real surface rather than a paragraph, which is
+   what makes padding="0" and the container slot worth showing. */
+.pov-card { display: flex; flex-direction: column; }
+.pov-card__head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 10px; padding: 14px 14px 10px;
+}
+.pov-card__head strong { display: block; font-size: 14px; color: var(--fg-default); }
+.pov-card__head em { font-style: normal; font-size: 12px; color: var(--fg-subtle); }
+.pov-card__tag {
+  font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 3px 7px; border-radius: 999px;
+  background: var(--bg-muted); color: var(--fg-muted);
+}
+.pov-card__leg {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  gap: 10px; padding: 4px 14px 12px;
+}
+.pov-card__leg b { display: block; font-size: 22px; letter-spacing: -0.02em; color: var(--fg-default); }
+.pov-card__leg em { font-style: normal; display: block; font-size: 11.5px; color: var(--fg-subtle); }
+.pov-card__leg i { font-style: normal; display: block; margin-block-start: 6px; font-size: 13px; color: var(--fg-default); }
+.pov-card__dur {
+  font-size: 11.5px; color: var(--fg-subtle); text-align: center; min-inline-size: 64px;
+  border-block-start: 1px dashed var(--border-default); padding-block-start: 6px;
+}
+.pov-card__to { text-align: right; }
+.pov-card__foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 10px 10px 14px; border-block-start: 1px solid var(--border-subtle);
+}
+.pov-card__foot em { font-style: normal; font-size: 12px; color: var(--fg-subtle); }
+
+/* The headless drawer supplies its own padding, because the container slot
+   replaces the body that would otherwise carry it. */
+.drw-headless {
+  display: flex; flex-direction: column; align-items: flex-start;
+  justify-content: center; gap: 10px; padding: 22px; block-size: 100%;
+}
+.drw-headless strong { font-size: 16px; color: var(--fg-default); }
+.drw-headless p { margin: 0; font-size: 13.5px; color: var(--fg-muted); }
+
+/* The playground stage's own copy, and the drawer form's column. */
+.ovl-stage__text { margin: 0; font-size: 13.5px; color: var(--fg-muted); }
+.drw-form { display: flex; flex-direction: column; gap: 14px; }
+
+/* Popover body copy: a lead line and the text under it. */
+.pov-lead { margin: 0 0 6px; font-weight: 650; color: var(--fg-default); }
+.pov-body { margin: 0; }
+.pov-state { font-size: 13px; margin-block-start: 8px; }
+
 /* ── The directives' examples ──────────────────────────────────────────── */
 
 /* Tooltip's Basic example needs a non-control host, to show the directive

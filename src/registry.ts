@@ -57,7 +57,8 @@ export interface DocEntry {
    * all — ApexIcon, ApexBadge, ApexAvatar.
    */
   demo?: 'plain' | 'chip' | 'meter' | 'inplace' | 'block' | 'scrolltop'
-    | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container';
+    | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container'
+    | 'overlay';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -649,6 +650,16 @@ export const ICON_RESOLVER_SNIPPET = `app.use(ApexUI, {
 });`;
 
 /** Used by the ApexSelect in ApexIcon's "In context" section. */
+/**
+ * ApexDialog's nine placements, in the reading order the 3×3 grid needs —
+ * corners and edges interleaved, so the buttons sit where the dialog will.
+ */
+export const DLG_POSITIONS = [
+  'topleft', 'top', 'topright',
+  'left', 'center', 'right',
+  'bottomleft', 'bottom', 'bottomright',
+] as const;
+
 export const ZONE_OPTIONS = [
   { value: 'full', label: 'Full area', icon: 'crop_free', help: 'One advert, whole screen' },
   { value: 'split', label: 'Split — 2 up', icon: 'vertical_split', help: 'Two zones side by side' },
@@ -4166,5 +4177,124 @@ export const ENTRIES: DocEntry[] = [
       ['v-apex-tooltip="{ value, … }"', 'object', 'Every option above, and reactive — a live tooltip picks up new text without a re-hover'],
       ['app.use(ApexUI)', 'plugin', 'Registers the directive; import { apexTooltip } to register it yourself'],
     ],
+  },
+  {
+    id: 'popover', name: 'ApexPopover', group: 'Overlays',
+    blurb: 'A panel anchored to whatever opened it. Driven through its ref — toggle(event), show(event) and hide() — so one popover can serve several triggers, with v-model:visible available when the state must live outside.',
+    noField: true, demo: 'overlay',
+    lead: ['ref="pov"'],
+    tail: '\n>\n  <p>Popover content.</p>\n</ApexPopover>',
+    base: { side: 'bottom', align: 'center', gap: 10, showArrow: true, width: '260px' },
+    controls: [
+      { key: 'side', type: 'select', options: ['bottom', 'top', 'left', 'right'] },
+      { key: 'align', type: 'select', options: ['center', 'start', 'end'] },
+      { key: 'gap', type: 'number' }, { key: 'showArrow', type: 'bool' },
+      { key: 'dismissable', type: 'bool' }, { key: 'closeOnEscape', type: 'bool' },
+      { key: 'autoFocus', type: 'bool' }, { key: 'trapFocus', type: 'bool' },
+      { key: 'width', type: 'text' }, { key: 'maxHeight', type: 'text' },
+      { key: 'padding', type: 'text' }, { key: 'radius', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'borderColor', type: 'color' },
+    ],
+    props: [
+      ['visible', 'boolean', 'false', 'v-model:visible — optional; the ref methods are the usual route'],
+      ['target', 'Element | string | ref', '—', 'A default anchor, when no event is passed to show()'],
+      ['side', "'top' | 'bottom' | 'left' | 'right'", "'bottom'", 'Preferred side; flips when it will not fit'],
+      ['align', "'start' | 'center' | 'end'", "'center'", 'Along the target’s cross axis'],
+      ['gap', 'number', '10', 'Distance from the target, in pixels'],
+      ['showArrow', 'boolean', 'true', 'The arrow tracks the target’s centre even after a shift'],
+      ['dismissable / closeOnEscape', 'boolean', 'true / true', 'Outside click and Escape'],
+      ['autoFocus / trapFocus', 'boolean', 'true / false', 'Focus [data-autofocus] or the first control on open; keep Tab inside'],
+      ['width / maxHeight / padding / radius / background / borderColor', 'string', 'tokens', 'Sizing and chrome'],
+      ['zIndex', 'number', '1100', 'Above a dialog, so a popover can open over one'],
+      /* Declared on the component but absent from the gallery's table, which
+         left it undocumented; the coverage checker is right to want it. */
+      ['contentClass', 'string', '—', 'Your own class on the panel'],
+    ],
+    events: [['update:visible', 'boolean'], ['show / hide', '—']],
+    slots: [['default', 'Popover content; receives { hide } so your own controls can close it']],
+    serviceTitle: 'Methods',
+    serviceRows: [
+      ['show(event, target?)', 'void', 'Opens, anchored to the event’s element — or to `target` when given'],
+      ['hide()', 'void', 'Closes'],
+      ['toggle(event, target?)', 'void', 'The usual trigger handler'],
+      ['reposition()', 'void', 'Re-measures against the current anchor, e.g. after the content changed'],
+      ['visible', 'boolean', 'Read the open state off the ref'],
+    ],
+  },
+  {
+    id: 'drawer', name: 'ApexDrawer', group: 'Overlays',
+    blurb: 'A panel that slides in from an edge of the screen. Shares the dialog’s overlay mechanics — mask, focus trap, Escape and mask dismissal, scroll lock — but moves along an axis, so `size` is the panel’s thickness on that axis.',
+    noField: true, demo: 'overlay',
+    lead: ['v-model:visible="open"'],
+    tail: '\n>\n  <p>Drawer content.</p>\n</ApexDrawer>',
+    base: { header: 'Drawer Title', position: 'left', size: '320px', modal: true, dismissableMask: true },
+    controls: [
+      { key: 'header', type: 'text' }, { key: 'subtitle', type: 'text' }, { key: 'icon', type: 'text' },
+      { key: 'position', type: 'select', options: ['left', 'right', 'top', 'bottom', 'full'] },
+      { key: 'size', type: 'text' }, { key: 'responsiveSize', type: 'text' }, { key: 'breakpoint', type: 'text' },
+      { key: 'modal', type: 'bool' }, { key: 'closable', type: 'bool' },
+      { key: 'dismissableMask', type: 'bool' }, { key: 'maskBlur', type: 'bool' },
+      { key: 'showHeader', type: 'bool' },
+      { key: 'inset', type: 'text' }, { key: 'radius', type: 'text' }, { key: 'padding', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'maskColor', type: 'color' },
+    ],
+    props: [
+      ['visible', 'boolean', 'false', 'v-model:visible'],
+      ['header / subtitle / icon', 'string', '—', 'Header content; the header slot replaces all three'],
+      ['position', "'left' | 'right' | 'top' | 'bottom' | 'full'", "'left'", 'Which edge it slides from; full covers the viewport'],
+      ['size', 'string', "'320px'", 'Thickness on its own axis — width for left and right, height for top and bottom'],
+      ['responsiveSize / breakpoint', 'string', "— / '640px'", 'Thickness below the breakpoint, for narrow screens'],
+      ['modal', 'boolean', 'true', 'Blocks the page behind, traps focus, and locks page scroll'],
+      ['closable / closeOnEscape / dismissableMask', 'boolean', 'true / true / false', 'Dismissal routes'],
+      ['showHeader', 'boolean', 'true', 'Set false to drop the header row entirely'],
+      ['inset', 'string', '0', 'Gap between the panel and the viewport edges — pair with radius for a floating drawer'],
+      ['padding / radius / background / borderColor', 'string', 'tokens', 'Chrome'],
+      ['maskColor / maskBlur', 'string / boolean', 'tokens / false', 'The overlay behind'],
+      ['zIndex', 'number', '1000', 'Stack order for a drawer opened over a dialog'],
+      ['contentClass', 'string', '—', 'Your own class on the panel'],
+    ],
+    events: [['update:visible', 'boolean'], ['show / hide', '—'], ['after-hide', 'once the leave transition ends']],
+    slots: [
+      ['default', 'Body'],
+      ['header', 'Replaces the header content'],
+      ['footer', 'Footer, usually actions'],
+      ['container', 'Headless — replaces header, body and footer; receives { close }'],
+    ],
+  },
+  {
+    id: 'dialog', name: 'ApexDialog', group: 'Overlays',
+    blurb: 'A modal window, teleported to the body. Owns the overlay mechanics every dialog needs — nine positions, focus trap and restore, Escape and mask dismissal, dragging, and the enter and leave animation.',
+    noField: true, demo: 'overlay',
+    lead: ['v-model:visible="open"'],
+    tail: '\n>\n  <p>Dialog content.</p>\n</ApexDialog>',
+    base: { header: 'Confirm', subtitle: 'This cannot be undone', position: 'center', modal: true },
+    controls: [
+      { key: 'header', type: 'text' }, { key: 'subtitle', type: 'text' }, { key: 'icon', type: 'text' },
+      { key: 'position', type: 'select', options: ['center', 'top', 'bottom', 'left', 'right', 'topleft', 'topright', 'bottomleft', 'bottomright'] },
+      { key: 'transition', type: 'select', options: ['scale', 'slide', 'fade', 'none'] },
+      { key: 'modal', type: 'bool' }, { key: 'draggable', type: 'bool' },
+      { key: 'closable', type: 'bool' }, { key: 'dismissableMask', type: 'bool' },
+      { key: 'maskBlur', type: 'bool' },
+      { key: 'autoClose', type: 'number' }, { key: 'showTimer', type: 'bool' },
+      { key: 'width', type: 'text' }, { key: 'padding', type: 'text' }, { key: 'radius', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'maskColor', type: 'color' },
+    ],
+    props: [
+      ['visible', 'boolean', 'false', 'v-model:visible'],
+      ['header / subtitle / icon', 'string', '—', 'Header content; the header slot replaces all three'],
+      ['position', '9 values', "'center'", 'center, top, bottom, left, right and the four corners'],
+      ['modal', 'boolean', 'true', 'Blocks the page behind, traps focus, and locks page scroll'],
+      ['draggable', 'boolean', 'false', 'Drag by the header'],
+      ['closable / closeOnEscape / dismissableMask', 'boolean', 'true / true / false', 'Dismissal routes'],
+      ['autoClose / showTimer', 'number / boolean', '—', 'Close after n ms, with an optional countdown bar'],
+      ['transition', "'scale' | 'slide' | 'fade' | 'none'", "'scale'", ''],
+      ['enterClass / leaveClass', 'string', '—', 'Your own transition classes'],
+      ['width / maxWidth / padding / radius / background / borderColor', 'string', 'tokens', 'Sizing and chrome'],
+      ['maskColor / maskBlur', 'string / boolean', 'tokens / false', 'The overlay behind'],
+      ['zIndex', 'number', '1000', 'Stack order for a dialog opened over another'],
+      ['contentClass', 'string', '—', 'Your own class on the panel'],
+    ],
+    events: [['update:visible', 'boolean'], ['show / hide', '—'], ['after-hide', 'once the leave transition ends']],
+    slots: [['default', 'Body'], ['header', 'Replaces the header'], ['footer', 'Footer, usually actions']],
   },
 ];

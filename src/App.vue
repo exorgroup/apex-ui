@@ -17,15 +17,19 @@ import {
   BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS,
   AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
-  TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS,
+  TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS, DLG_POSITIONS,
 } from './registry';
 import type { AddNewKind, DocEntry, DocPage } from './registry';
-import { useApexDialog, useApexAlert } from '@exorgroup/apex-ui';
+/* ApexPopover is imported for its type: the five popover examples are driven
+   through refs, and a ref to a component needs the component to type it. The
+   tags themselves come from the plugin's global registration. */
+import { useApexDialog, useApexAlert, ApexPopover } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
 import DirectiveStage from './demos/DirectiveStage.vue';
 import ServiceStage from './demos/ServiceStage.vue';
+import OverlayStage from './demos/OverlayStage.vue';
 
 const current = ref('input');
 const theme = ref<'light' | 'dark'>('dark');
@@ -36,6 +40,49 @@ const copied = ref(false);
 
 /** v-model per control, so switching away and back keeps what you typed. */
 const model = reactive<Record<string, unknown>>({});
+
+/* ── The directives ──────────────────────────────────────────────────── */
+
+/* ── The three overlays ──────────────────────────────────────────────── */
+
+/**
+ * ApexPopover's five examples.
+ *
+ * Each has its own ref because that is the API: the popover is opened by
+ * calling toggle() or show() on it, and the event passed in becomes the
+ * anchor. `povShared` is the exception that proves the point — one popover
+ * serving four triggers, which only works because the anchor is the event.
+ */
+const povBasic = ref<InstanceType<typeof ApexPopover> | null>(null);
+const povCtl = ref<InstanceType<typeof ApexPopover> | null>(null);
+const povShared = ref<InstanceType<typeof ApexPopover> | null>(null);
+const povPlace = ref<InstanceType<typeof ApexPopover> | null>(null);
+const povRich = ref<InstanceType<typeof ApexPopover> | null>(null);
+/** The Controlled example's outside state, shown live next to the buttons. */
+const povOn = ref(false);
+/** Which row the shared popover is currently describing. */
+const povRow = ref(CITIES[0]);
+const povSide = ref<'top' | 'bottom' | 'left' | 'right'>('bottom');
+
+/** ApexDrawer's four examples. */
+const drwPos = ref<'left' | 'right' | 'top' | 'bottom' | 'full'>('left');
+const drwEx = ref(false);
+const drwResp = ref(false);
+const drwTpl = ref(false);
+const drwFloat = ref(false);
+const drwHeadless = ref(false);
+/** The Template example's form — real controls, so the drawer holds a surface. */
+const drwForm = reactive({ name: '', zone: null as unknown, notes: '' });
+
+/**
+ * ApexDialog's two examples.
+ *
+ * `dlgPos` doubles as the open state: null is closed, and any position both
+ * opens the dialog and places it, so the nine buttons need no separate flag.
+ */
+const dlgPos = ref<string | null>(null);
+const dlgDrag = ref(false);
+const dlgTimer = ref(false);
 
 /* ── The directives ──────────────────────────────────────────────────── */
 
@@ -929,6 +976,14 @@ async function copyUsage() {
                 :spec="entry.service"
                 :bind="live"
                 :hint="entry.hostLabel"
+              />
+
+              <!-- An overlay renders nothing until something opens it, so the
+                   stage supplies the trigger. OverlayStage holds all three. -->
+              <OverlayStage
+                v-else-if="entry.demo === 'overlay'"
+                :id="entry.id"
+                :bind="live"
               />
 
               <!-- An Inplace is two states, and only the closed one shows
@@ -1951,6 +2006,308 @@ async function copyUsage() {
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
           </div>
+        </template>
+
+        <!-- Ported from the gallery, five sections. The popover is reached
+             through its ref throughout, which is how it is meant to be used —
+             so each example declares its own ref rather than sharing one. -->
+        <template v-if="entry.id === 'popover'">
+          <h2>Basic</h2>
+          <p class="note">
+            The popover is reached through its ref, and the trigger's own event is the anchor —
+            so nothing has to hold visible state or know where the panel will sit.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexButton @click="pov.toggle($event)"&gt;Show popover&lt;/ApexButton&gt;
+&lt;ApexPopover ref="pov" width="280px"&gt;
+  &lt;p&gt;Anything can go in here.&lt;/p&gt;
+&lt;/ApexPopover&gt;</pre>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton icon="info" @click="povBasic?.toggle($event)">Show popover</ApexButton>
+          </div>
+          <ApexPopover ref="povBasic" width="280px">
+            <p class="pov-lead">Anything can go in here</p>
+            <p class="pov-body">
+              Text, controls, a small form. The panel scrolls once it passes
+              <code>maxHeight</code>.
+            </p>
+          </ApexPopover>
+
+          <h2>Controlled</h2>
+          <p class="note">
+            Bind <code>v-model:visible</code> when the state belongs elsewhere — a keyboard
+            shortcut, a route, another component. Pass the trigger element to
+            <code>show()</code> to keep it anchored.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <span id="pov-anchor">
+              <ApexButton severity="secondary" variant="outlined" icon="my_location">Anchor</ApexButton>
+            </span>
+            <ApexButton size="sm" variant="text" @click="povCtl?.show()">show()</ApexButton>
+            <ApexButton size="sm" variant="text" @click="povCtl?.hide()">hide()</ApexButton>
+            <ApexButton size="sm" variant="text" @click="povOn = !povOn">toggle v-model</ApexButton>
+          </div>
+          <p class="pov-state">visible: <code>{{ povOn }}</code></p>
+          <ApexPopover ref="povCtl" v-model:visible="povOn" target="#pov-anchor" width="260px" side="right">
+            <p class="pov-body">Open state lives outside, so the popover follows it either way.</p>
+          </ApexPopover>
+
+          <h2>One popover, several triggers</h2>
+          <p class="note">
+            Because the anchor comes from the event, a list needs one popover rather than one
+            per row.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="c in CITIES.slice(0, 4)"
+              :key="c.value"
+              severity="secondary"
+              variant="outlined"
+              size="sm"
+              @click="povRow = c; povShared?.show($event)"
+            >{{ c.label }}</ApexButton>
+          </div>
+          <ApexPopover ref="povShared" width="240px">
+            <p class="pov-lead">{{ povRow.label }}</p>
+            <p class="pov-body">{{ povRow.help }}</p>
+          </ApexPopover>
+
+          <h2>Placement</h2>
+          <p class="note">
+            A preferred <code>side</code> and <code>align</code>, but the panel flips to the
+            opposite side when the preferred one will not hold it, then shifts along the cross
+            axis to stay on screen — the arrow keeps pointing at the trigger.
+          </p>
+          <div class="cpop-grid" style="margin-top: 12px">
+            <ApexButton
+              v-for="s in (['top', 'bottom', 'left', 'right'] as const)"
+              :key="s"
+              severity="secondary"
+              variant="outlined"
+              size="sm"
+              @click="povSide = s; povPlace?.show($event)"
+            >{{ s }}</ApexButton>
+          </div>
+          <ApexPopover ref="povPlace" :side="povSide" width="200px">
+            <p class="pov-body">side="{{ povSide }}"</p>
+          </ApexPopover>
+
+          <h2>Rich content</h2>
+          <p class="note">
+            The default slot receives <code>hide</code>, so controls inside can close the panel.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              severity="secondary"
+              variant="outlined"
+              icon="flight"
+              @click="povRich?.toggle($event)"
+            >Track flight</ApexButton>
+          </div>
+          <ApexPopover ref="povRich" width="320px" padding="0" trap-focus>
+            <template #default="{ hide }">
+              <div class="pov-card">
+                <div class="pov-card__head">
+                  <span><strong>British Airways</strong><em>BA 178</em></span>
+                  <span class="pov-card__tag">On time</span>
+                </div>
+                <div class="pov-card__leg">
+                  <div><b>LHR</b><em>London</em><i>14:30</i></div>
+                  <div class="pov-card__dur">8h 15m</div>
+                  <div class="pov-card__to"><b>JFK</b><em>New York</em><i>18:45</i></div>
+                </div>
+                <div class="pov-card__foot">
+                  <em>Gate B12 · Terminal 5</em>
+                  <ApexButton size="sm" variant="text" icon="arrow_forward" @click="hide()">Done</ApexButton>
+                </div>
+              </div>
+            </template>
+          </ApexPopover>
+        </template>
+
+        <!-- Ported from the gallery, four sections. -->
+        <template v-if="entry.id === 'drawer'">
+          <h2>Position</h2>
+          <p class="note">
+            Four edges, plus <code>full</code> for a drawer that covers the viewport.
+            <code>size</code> is the thickness on the panel's own axis, so the same value reads
+            as width on the sides and height on the top and bottom.
+          </p>
+          <div class="cpop-grid" style="margin-top: 12px">
+            <ApexButton
+              v-for="p in (['left', 'right', 'top', 'bottom', 'full'] as const)"
+              :key="p"
+              severity="secondary"
+              variant="outlined"
+              size="sm"
+              @click="drwPos = p; drwEx = true"
+            >{{ p }}</ApexButton>
+          </div>
+          <ApexDrawer
+            v-model:visible="drwEx"
+            :position="drwPos"
+            :header="`position='${drwPos}'`"
+            size="340px"
+            dismissable-mask
+          >
+            <p>Click the mask, press Escape, or use the close button.</p>
+          </ApexDrawer>
+
+          <h2>Responsive</h2>
+          <p class="note">
+            <code>responsiveSize</code> takes over below <code>breakpoint</code> — a 380px
+            sidebar that becomes near full-width on a phone. Narrow the window to see it swap.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton severity="secondary" variant="outlined" icon="resize" @click="drwResp = true">
+              Open responsive drawer
+            </ApexButton>
+          </div>
+          <ApexDrawer
+            v-model:visible="drwResp"
+            header="Filters"
+            size="380px"
+            responsive-size="92vw"
+            breakpoint="820px"
+            dismissable-mask
+          >
+            <p>Below 820px this panel is 92vw wide; above it, 380px.</p>
+          </ApexDrawer>
+
+          <h2>Template</h2>
+          <p class="note">
+            Header, body and footer are slots, so a drawer holds a real working surface — here
+            controls from the kit.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton severity="secondary" variant="outlined" icon="tune" @click="drwTpl = true">
+              Open with a form
+            </ApexButton>
+          </div>
+          <ApexDrawer
+            v-model:visible="drwTpl"
+            position="right"
+            size="400px"
+            header="New project"
+            subtitle="Everything can be changed later"
+            icon="folder"
+            dismissable-mask
+          >
+            <div class="drw-form">
+              <ApexInput v-model="drwForm.name" label="Project name" placeholder="Northwind" />
+              <ApexSelect v-model="drwForm.zone" label="Region" :options="ZONE_OPTIONS" />
+              <ApexTextarea v-model="drwForm.notes" label="Notes" :rows="3" />
+            </div>
+            <template #footer>
+              <div class="cfm-actions">
+                <ApexButton severity="secondary" variant="outlined" @click="drwTpl = false">Cancel</ApexButton>
+                <ApexButton icon="check" @click="drwTpl = false">Create</ApexButton>
+              </div>
+            </template>
+          </ApexDrawer>
+
+          <h2>Floating and headless</h2>
+          <p class="note">
+            <code>inset</code> lifts the panel off the viewport edges and pairs with
+            <code>radius</code> for a floating drawer. A <code>container</code> slot replaces
+            header, body and footer outright, receiving <code>close</code>.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton severity="secondary" variant="outlined" icon="crop_free" @click="drwFloat = true">
+              Floating
+            </ApexButton>
+            <ApexButton severity="secondary" variant="outlined" icon="code" @click="drwHeadless = true">
+              Headless
+            </ApexButton>
+          </div>
+          <ApexDrawer
+            v-model:visible="drwFloat"
+            position="right"
+            size="360px"
+            inset="16px"
+            radius="16px"
+            header="Floating"
+            mask-blur
+            dismissable-mask
+          >
+            <p>An inset of 16px and a matching radius, with the page behind blurred.</p>
+          </ApexDrawer>
+          <ApexDrawer v-model:visible="drwHeadless" position="bottom" size="220px" dismissable-mask>
+            <template #container="{ close }">
+              <div class="drw-headless">
+                <strong>Your own surface</strong>
+                <p>No header row, no body padding — just the panel and its slide-in.</p>
+                <ApexButton
+                  size="sm"
+                  icon="close"
+                  severity="secondary"
+                  variant="outlined"
+                  @click="close()"
+                >Dismiss</ApexButton>
+              </div>
+            </template>
+          </ApexDrawer>
+        </template>
+
+        <!-- Ported from the gallery, two sections. -->
+        <template v-if="entry.id === 'dialog'">
+          <h2>Positions</h2>
+          <p class="note">
+            Nine positions from one flex box — no per-position offsets to keep in step.
+          </p>
+          <div class="cfm-grid" style="margin-top: 12px">
+            <ApexButton
+              v-for="p in DLG_POSITIONS"
+              :key="p"
+              size="sm"
+              severity="secondary"
+              variant="outlined"
+              @click="dlgPos = p"
+            >{{ p }}</ApexButton>
+          </div>
+          <ApexDialog
+            :visible="!!dlgPos"
+            :position="dlgPos || 'center'"
+            :header="dlgPos || ''"
+            subtitle="Opened at this position"
+            @update:visible="dlgPos = null"
+          >
+            <p>
+              The panel is placed by <code>align-items</code> and <code>justify-content</code>
+              on the mask.
+            </p>
+          </ApexDialog>
+
+          <h2>Draggable, non-modal and timed</h2>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton severity="secondary" variant="outlined" icon="drag_pan" @click="dlgDrag = true">
+              Draggable
+            </ApexButton>
+            <ApexButton severity="secondary" variant="outlined" icon="timer" @click="dlgTimer = true">
+              Auto close
+            </ApexButton>
+          </div>
+          <ApexDialog
+            v-model:visible="dlgDrag"
+            header="Drag me"
+            subtitle="Grab the header"
+            draggable
+            icon="open_with"
+            :modal="false"
+          >
+            <p>
+              A non-modal dialog leaves the page behind interactive, so this one can be moved
+              and left open while you scroll.
+            </p>
+          </ApexDialog>
+          <ApexDialog
+            v-model:visible="dlgTimer"
+            header="Closing shortly"
+            :auto-close="5000"
+            show-timer
+            icon="schedule"
+          >
+            <p>The bar at the foot drains as the timer runs.</p>
+          </ApexDialog>
         </template>
 
         <!-- Ported from the gallery, seven sections. Prose and bindings are the
