@@ -219,6 +219,8 @@ describe('the ported gallery examples are on the page', () => {
       'Template'],
     ApexTieredMenu: ['Basic', 'Popup', 'Template', 'Colour', 'Command and router',
       'Permissions'],
+    ApexMenubar: ['Basic and submenus', 'Colour', 'Template — bar edges',
+      'Command and router', 'Permissions'],
     ApexInput: ['Autocomplete', 'Icon slots', 'Affixes and transforms'],
     /* "Severity × variant" carries a real multiplication sign. It was once
        written as the six characters of its escape, which Vue renders
