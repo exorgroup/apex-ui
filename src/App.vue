@@ -24,8 +24,8 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu } from '@exorgroup/apex-ui';
-import type { MenuItem, MegaItem } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu, ApexBreadcrumb } from '@exorgroup/apex-ui';
+import type { MenuItem, MegaItem, CrumbItem } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
@@ -190,6 +190,60 @@ const msgEmail = ref('');
  * anchor. `povShared` is the exception that proves the point — one popover
  * serving four triggers, which only works because the anchor is the event.
  */
+/* ── ApexBreadcrumb page ───────────────────────── */
+const bcHome: CrumbItem = { icon: 'home', href: '#' };
+
+const bcBasic: CrumbItem[] = [
+  { label: 'Venues', href: '#' },
+  { label: 'Teatru Manoel', href: '#' },
+  { label: 'Seating' },
+];
+
+const bcIcons: CrumbItem[] = [
+  { label: 'Venues', icon: 'place', href: '#' },
+  { icon: 'theater_comedy', href: '#' },
+  { label: 'Seating', icon: 'event_seat' },
+];
+
+const bcLong: CrumbItem[] = [
+  { label: 'Venues', href: '#' },
+  { label: 'Malta', href: '#' },
+  { label: 'Valletta', href: '#' },
+  { label: 'Teatru Manoel', href: '#' },
+  { label: 'La Traviata', href: '#' },
+  { label: 'Seating' },
+];
+
+/*
+ * A stand-in for RouterLink or Inertia's Link. The real one comes from the
+ * app; what matters here is that a crumb with `to` goes through it rather
+ * than reloading the page.
+ */
+const BcLink = {
+  name: 'BcLink',
+  props: { to: { type: [String, Object], default: undefined } },
+  template: '<a class="bc-routed" href="javascript:void(0)"><slot /></a>',
+};
+
+const bcRoute: CrumbItem[] = [
+  { label: 'Venues', to: { name: 'venues' } },
+  { label: 'Teatru Manoel', to: '/venues/manoel' },
+  { label: 'Seating' },
+];
+
+/*
+ * Shows is gated, and it sits in the middle: the trail stops there rather
+ * than skipping it, which is the whole difference between a path and a list.
+ */
+const bcGated: CrumbItem[] = [
+  { label: 'Venues', href: '#' },
+  { label: 'Teatru Manoel', href: '#' },
+  { label: 'Events', href: '#' },
+  { label: 'Shows', href: '#', can: 'reports' },
+  { label: 'La Traviata', href: '#' },
+  { label: 'Seating' },
+];
+
 /* ── ApexContextMenu page ──────────────────────── */
 const cxBasicZone = ref<HTMLElement | null>(null);
 const cxSubZone = ref<HTMLElement | null>(null);
@@ -3318,6 +3372,136 @@ function pick(city) {
         <!-- Ported from the gallery, five sections. The popover is reached
              through its ref throughout, which is how it is meant to be used —
              so each example declares its own ref rather than sharing one. -->
+        <template v-if="entry.id === 'breadcrumb'">
+          <h2>Basic</h2>
+          <p class="note">
+            The trail to the page you are on. <code>home</code> is a leading crumb, and it
+            counts as the first one. By default the last crumb reads as the current page:
+            bold, not a link, and <code>aria-current="page"</code>.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexBreadcrumb :home="home" :items="items" /&gt;
+
+const home = { icon: 'home', href: '/' }
+const items = [
+  { label: 'Venues', href: '/venues' },
+  { label: 'Teatru Manoel', href: '/venues/manoel' },
+  { label: 'Seating' },
+]</pre>
+          <ApexBreadcrumb :home="bcHome" :items="bcBasic" />
+
+          <h2>Text, icons, or both</h2>
+          <p class="note">
+            A crumb is <code>label</code>, <code>icon</code>, or both, from one shape — so
+            an icon-only root and a text trail need no special case between them.
+          </p>
+          <ApexBreadcrumb :home="bcHome" :items="bcIcons" class="bc-demo" />
+
+          <h2>Route</h2>
+          <p class="note">
+            <code>href</code> is a URL; <code>to</code> is a route. A crumb naming a route
+            is rendered through whatever the app passes as <code>linkComponent</code> —
+            RouterLink, Inertia’s Link, anything taking a <code>to</code> — so the trail
+            navigates without reloading the page.
+          </p>
+          <p class="note">
+            Without a link component a string <code>to</code> falls back to an href, so it
+            still navigates rather than rendering an attribute nothing acts on.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexBreadcrumb :items="items" :link-component="RouterLink" /&gt;
+
+const items = [
+  { label: 'Venues', to: { name: 'venues' } },
+  { label: 'Seating' },
+]</pre>
+          <ApexBreadcrumb :items="bcRoute" :link-component="BcLink" class="bc-demo" />
+
+          <h2>Custom separator</h2>
+          <p class="note">
+            <code>separator</code> takes an icon name or any text at all —
+            <code>/</code>, <code>›</code>, an em dash. The <code>separator</code> slot
+            replaces every one of them when a glyph is not enough.
+          </p>
+          <ApexBreadcrumb :items="bcBasic" separator="/" class="bc-demo" />
+          <ApexBreadcrumb :items="bcBasic" separator="›" class="bc-demo" />
+          <ApexBreadcrumb :items="bcBasic" class="bc-demo">
+            <template #separator><span class="bc-sep">::</span></template>
+          </ApexBreadcrumb>
+
+          <h2>Ellipsis</h2>
+          <p class="note">
+            Past <code>maxItems</code> the middle collapses behind an ellipsis rather than
+            wrapping, keeping the first crumb and the last two — enough to say where you
+            are and how you got in. Clicking it expands the trail. The
+            <code>ellipsis</code> slot replaces that control and receives
+            <code>expand</code>.
+          </p>
+          <ApexBreadcrumb :home="bcHome" :items="bcLong" :max-items="4" class="bc-demo" />
+          <ApexBreadcrumb :home="bcHome" :items="bcLong" :max-items="4" class="bc-demo">
+            <template #ellipsis="{ expand }">
+              <ApexButton size="sm" variant="text" @click="expand()">show all</ApexButton>
+            </template>
+          </ApexBreadcrumb>
+
+          <h2>Custom item</h2>
+          <p class="note">
+            The <code>item</code> slot replaces a crumb and receives
+            <code>{ item, index, isCurrent }</code> — the hook for a router link, or for
+            a crumb that carries something other than text.
+          </p>
+          <ApexBreadcrumb :home="bcHome" :items="bcBasic" class="bc-demo">
+            <template #item="{ item, isCurrent }">
+              <span :class="isCurrent ? 'bc-here' : 'bc-link'">
+                <ApexIcon v-if="item.icon" :name="String(item.icon)" :size="16" />
+                {{ item.label }}
+              </span>
+            </template>
+          </ApexBreadcrumb>
+
+          <h2>Sizes and chrome</h2>
+          <p class="note">
+            Three sizes, and enough chrome props to make the trail a bar of its own. A long
+            trail scrolls sideways by default; <code>wrap</code> lets it wrap instead.
+          </p>
+          <ApexBreadcrumb :home="bcHome" :items="bcBasic" size="sm" class="bc-demo" />
+          <ApexBreadcrumb :home="bcHome" :items="bcBasic" size="lg" class="bc-demo" />
+          <ApexBreadcrumb
+            :home="bcHome" :items="bcBasic" class="bc-demo"
+            background="#101828" color="#9fb0c9" activeColor="#ffffff"
+            hoverColor="#7aa2ff" separatorColor="#3a4a63"
+            padding="8px 14px" radius="999px" gap="10px"
+          />
+
+          <h2>Permissions</h2>
+          <p class="note">
+            This is the one control in the family that does not filter. A trail is a path,
+            not a list: each crumb is reachable only through the one before it, so a denied
+            crumb truncates it. Dropping just that crumb would leave a trail offering a
+            route that does not exist.
+          </p>
+          <p class="note">
+            So it stops there and shows the walkable prefix — no ellipsis, nothing to
+            suggest something was elided. Deny the first crumb, or <code>home</code>, and
+            there is no trail at all: the component renders nothing rather than an empty
+            bar. And a truncated trail marks nothing as the current page, because you are
+            not on the crumb it stops at; that crumb stays a link, since it is somewhere
+            you can actually go.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <ApexBreadcrumb :home="bcHome" :items="bcGated" :max-items="4" class="bc-demo" />
+          <p class="pov-state">
+            Shows is gated. A Viewer’s trail stops at Events — and the collapse runs on
+            what is left, not on the full trail, so nothing hides behind an ellipsis that
+            was never walkable.
+          </p>
+        </template>
+
         <template v-if="entry.id === 'contextmenu'">
           <h2>Basic</h2>
           <p class="note">

@@ -57,6 +57,13 @@
       <ApexContextMenu :items="MENU_ITEMS" :target="ctxZone" v-bind="bind" @item-click="onPick" />
       <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
+
+    <!-- A trail long enough that the rail's maxItems has something to collapse. -->
+    <template v-else-if="id === 'breadcrumb'">
+      <ApexBreadcrumb :home="CRUMB_HOME" :items="CRUMB_ITEMS" v-bind="bind"
+                      @item-click="onPick" />
+      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+    </template>
   </div>
 </template>
 
@@ -74,8 +81,8 @@
  * other check, which is exactly how two overlay stages once shipped blank.
  */
 import { ref } from 'vue';
-import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu } from '@exorgroup/apex-ui';
-import type { MenuItem, MegaItem } from '@exorgroup/apex-ui';
+import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu, ApexBreadcrumb } from '@exorgroup/apex-ui';
+import type { MenuItem, MegaItem, CrumbItem } from '@exorgroup/apex-ui';
 
 defineProps<{
   /** The registry id, which decides which control is shown. */
@@ -192,6 +199,15 @@ const DOCK_ITEMS: MenuItem[] = [
   ] },
   { icon: 'settings', label: 'Settings' },
   { icon: 'delete', label: 'Trash', disabled: true },
+];
+
+const CRUMB_HOME: CrumbItem = { icon: 'home', href: '#' };
+const CRUMB_ITEMS: CrumbItem[] = [
+  { label: 'Venues', href: '#' },
+  { label: 'Teatru Manoel', href: '#' },
+  { label: 'Events', href: '#' },
+  { label: 'La Traviata', href: '#' },
+  { label: 'Seating' },
 ];
 
 const ctxZone = ref<HTMLElement | null>(null);
