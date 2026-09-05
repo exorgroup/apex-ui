@@ -3579,6 +3579,7 @@ export const ENTRIES: DocEntry[] = [
     ],
     props: [
       ['image', 'string', '—', 'Falls back to label initials, then icon, then a person glyph'],
+      ['alt', 'string', 'the label', "Alternative text for the image. Falls back to label, then to an empty string — the right answer when the avatar sits beside the same person's name, which a screen reader would otherwise read twice"],
       ['label / initials', 'string', '—', 'Initials derive from the label unless set explicitly'],
       ['icon', 'string', '—', 'Shown when there is no image or label'],
       ['shape', "'circle' | 'rounded' | 'square'", "'circle'", ''],
