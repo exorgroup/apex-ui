@@ -24,8 +24,8 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu } from '@exorgroup/apex-ui';
-import type { MenuItem } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu } from '@exorgroup/apex-ui';
+import type { MenuItem, MegaItem } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
@@ -190,6 +190,126 @@ const msgEmail = ref('');
  * anchor. `povShared` is the exception that proves the point — one popover
  * serving four triggers, which only works because the anchor is the event.
  */
+/* ── ApexMegaMenu page ─────────────────────────── */
+const mgPicked = ref('');
+
+/* Inline SVG tiles rather than remote files: the docs must render with no
+   network, and a broken image would look like a component fault. */
+const tile = (hex: string, text: string) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90">`
+    + `<rect width="160" height="90" fill="${hex}"/>`
+    + `<text x="80" y="50" font-family="sans-serif" font-size="14" fill="#fff"`
+    + ` text-anchor="middle">${text}</text></svg>`)}`;
+
+const mgBasic: MegaItem[] = [
+  { label: 'Shop', icon: 'storefront', columns: [
+    { header: 'Camping', items: [
+      { label: 'Tents', help: 'One to six berth' },
+      { label: 'Sleeping bags' },
+      { label: 'Stoves' },
+    ], footer: { label: 'Shop all camping' } },
+    { header: 'Climbing', items: [
+      { label: 'Ropes' },
+      { label: 'Harnesses', badge: 'New' },
+      { label: 'Helmets' },
+    ] },
+    { header: 'Trail', items: [
+      { label: 'Boots' },
+      { label: 'Packs' },
+    ], footer: { label: 'Shop all trail' } },
+  ] },
+  { label: 'Guides', icon: 'menu_book', columns: [
+    { header: 'By region', items: [{ label: 'Alps' }, { label: 'Dolomites' }] },
+    { header: 'By season', items: [{ label: 'Winter' }, { label: 'Summer' }] },
+  ] },
+  { label: 'Support', icon: 'help', href: '#' },
+];
+
+const mgThumbs: MegaItem[] = [
+  { label: 'Departments', icon: 'category', columns: [
+    { header: 'Camping', image: tile('#2f6f4f', 'Camping'), items: [
+      { label: 'Tents' }, { label: 'Stoves' },
+    ] },
+    { header: 'Climbing', image: tile('#3b5b8c', 'Climbing'), items: [
+      { label: 'Ropes' }, { label: 'Harnesses' },
+    ] },
+    { header: 'Brands', items: [
+      { label: 'Northwind', image: tile('#7a4b8c', 'NW') },
+      { label: 'Cairn', image: tile('#8c5a2b', 'CA') },
+    ] },
+  ] },
+];
+
+const mgCards: MegaItem[] = [
+  { label: 'Featured', icon: 'grid_view', columns: [
+    { header: 'This season', layout: 'cards', span: 2, items: [
+      { label: 'Winter kit', image: tile('#22405c', 'Winter') },
+      { label: 'Trail running', image: tile('#4c6b2f', 'Trail') },
+      { label: 'Bouldering', image: tile('#6c3b3b', 'Boulder') },
+      { label: 'Travel', image: tile('#3f3f6b', 'Travel') },
+    ] },
+    { header: 'Quick links', items: [
+      { label: 'Gift cards' }, { label: 'Returns' },
+    ] },
+  ] },
+];
+
+const mgPanel: MegaItem[] = [
+  { label: 'Shop', icon: 'storefront', columns: [
+    { header: 'Camping', items: [{ label: 'Tents' }, { label: 'Stoves' }] },
+    { header: 'Climbing', items: [{ label: 'Ropes' }, { label: 'Helmets' }] },
+  ], panel: {
+    image: tile('#1f4d3a', 'Season'),
+    title: 'Season sale',
+    text: 'Up to 40% off last year’s ranges, while stocks last.',
+    linkLabel: 'See the sale',
+    href: '#',
+    cards: [
+      { label: 'Northwind', image: tile('#7a4b8c', 'NW') },
+      { label: 'Cairn', image: tile('#8c5a2b', 'CA') },
+      { label: 'Fjell', image: tile('#2b6c8c', 'FJ') },
+    ],
+  } },
+];
+
+const mgCommand: MegaItem[] = [
+  { label: 'Shop', icon: 'storefront', columns: [
+    { header: 'Camping', items: [
+      { label: 'Tents', href: '#tents' },
+      { label: 'Track this', command: () => { mgPicked.value = 'Track this (its own command ran first)'; } },
+    ] },
+  ], panel: { cards: [{ label: 'Northwind', image: tile('#7a4b8c', 'NW') }] } },
+  { label: 'Docs', icon: 'open_in_new', href: 'https://example.com/docs', target: '_blank' },
+];
+
+/*
+ * Gated at all three levels, and arranged so the two exceptions show:
+ *   Promotions keeps its promo panel after its only column is emptied;
+ *   Lookbook is a heading and an image with no links, so it is not "empty"
+ *   and stands on its own can.
+ */
+const mgGated: MegaItem[] = [
+  { label: 'Shop', icon: 'storefront', columns: [
+    { header: 'Camping', items: [{ label: 'Tents' }, { label: 'Stoves' }] },
+    { header: 'Reports', items: [
+      { label: 'Sales', can: 'reports' },
+      { label: 'Stock', can: 'reports' },
+    ] },
+    { header: 'Lookbook', image: tile('#4a4a6a', 'Lookbook') },
+    { header: 'Account', items: [
+      { label: 'Orders' },
+      { label: 'Settings', can: 'settings' },
+    ] },
+  ] },
+  { label: 'Promotions', icon: 'campaign', columns: [
+    { header: 'Campaigns', items: [{ label: 'Planner', can: 'settings' }] },
+  ], panel: { title: 'Season sale', text: 'Still worth opening — the panel has copy of its own.' } },
+  { label: 'Admin', icon: 'shield', can: 'settings', columns: [
+    { header: 'Users', items: [{ label: 'Roles' }] },
+  ] },
+];
+
 /* ── ApexMenu page ────────────────────────────── */
 const vmCtl = ref<InstanceType<typeof ApexMenu> | null>(null);
 const vmPop = ref<InstanceType<typeof ApexMenu> | null>(null);
@@ -3068,6 +3188,122 @@ function pick(city) {
         <!-- Ported from the gallery, five sections. The popover is reached
              through its ref throughout, which is how it is meant to be used —
              so each example declares its own ref rather than sharing one. -->
+        <template v-if="entry.id === 'megamenu'">
+          <h2>Basic</h2>
+          <p class="note">
+            The panel is the model. A root item holds <code>columns</code>, and a column
+            holds links, an optional heading and an optional footer link — so a link grid
+            is data rather than rebuilt markup. The grid is auto-fit, so the column count
+            follows <code>columnMinWidth</code> rather than a fixed number.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexMegaMenu :items="items" /&gt;
+
+const items = [
+  { label: 'Shop', columns: [
+    { header: 'Camping', items: [
+      { label: 'Tents', help: 'One to six berth' },
+      { label: 'Stoves' },
+    ], footer: { label: 'Shop all camping' } },
+  ] },
+]</pre>
+          <ApexMegaMenu :items="mgBasic" />
+
+          <h2>Trigger — hover or click</h2>
+          <p class="note">
+            <code>trigger</code> decides what opens the <em>first</em> panel. Either way,
+            once one is open, hovering another root item switches to it, and hovering a
+            plain link closes it — a bar that needed a second click for every sibling
+            reads as broken. Hover keeps a short grace period so the pointer can cross the
+            gap to the panel without it vanishing.
+          </p>
+          <ApexMegaMenu :items="mgBasic" trigger="click" class="mega-demo" />
+
+          <h2>Images — category thumbnails</h2>
+          <p class="note">
+            A column takes an <code>image</code>, which sits above its links the way a
+            category thumbnail does; a link takes one too, replacing its icon.
+          </p>
+          <ApexMegaMenu :items="mgThumbs" class="mega-demo" />
+
+          <h2>Images — card grid</h2>
+          <p class="note">
+            <code>layout: 'cards'</code> turns a column's items into image tiles instead
+            of stacked links. That grid is auto-fit as well, on
+            <code>cardMinWidth</code>.
+          </p>
+          <ApexMegaMenu :items="mgCards" class="mega-demo" />
+
+          <h2>Images — featured panel</h2>
+          <p class="note">
+            <code>panel</code> adds a promo region beside the columns — a featured
+            image, a title, a line of copy and a call to action — plus an optional row
+            of image cards beneath them. <code>panelImagePosition</code> chooses the side.
+          </p>
+          <ApexMegaMenu :items="mgPanel" class="mega-demo" />
+
+          <h2>Vertical</h2>
+          <p class="note">
+            <code>orientation="vertical"</code> stacks the root items and opens each panel
+            to the side, flipping to the other side when there is no room.
+          </p>
+          <div class="mega-vert">
+            <ApexMegaMenu :items="mgBasic" orientation="vertical" trigger="click" />
+          </div>
+
+          <h2>Template — bar edges</h2>
+          <p class="note">
+            <code>start</code> and <code>end</code> are the bar's edges. The
+            <code>item</code> slot replaces a link, and <code>panel</code> replaces a
+            whole panel — it receives <code>close</code>, so a custom panel can dismiss
+            itself.
+          </p>
+          <ApexMegaMenu :items="mgBasic" class="mega-demo">
+            <template #start>
+              <span class="mbar-brand"><ApexIcon name="hiking" :size="18" /> Outfitters</span>
+            </template>
+            <template #end>
+              <ApexButton size="sm" variant="text" icon="search">Search</ApexButton>
+            </template>
+          </ApexMegaMenu>
+
+          <h2>Command and router</h2>
+          <p class="note">
+            <code>item-click</code> fires for a root item, a link or a card alike, and the
+            item's own <code>command</code> runs first. A link with an <code>href</code>
+            is a real anchor.
+          </p>
+          <ApexMegaMenu :items="mgCommand" class="mega-demo"
+                        @item-click="mgPicked = $event.item.label || ''" />
+          <p class="pov-state">item-click: <code>{{ mgPicked || 'nothing yet' }}</code></p>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            <code>can</code> works at three levels here — link, column, and root item —
+            and they cascade upward. A column whose links have all gone is a heading over
+            blank space, so it goes; a root item whose columns have all gone would open
+            onto nothing, so it goes with them.
+          </p>
+          <p class="note">
+            Two things the cascade deliberately does not do. A column that never had links
+            — a heading and a category image — is not empty, so it stands on its own
+            <code>can</code>. And a root item whose columns are gone but whose promo panel
+            still has something to show is worth opening, so it stays.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <ApexMegaMenu :items="mgGated" trigger="click" class="mega-demo" />
+          <p class="pov-state">
+            A Viewer loses the Reports column from Shop, the whole Admin item, and the
+            Settings link — but keeps Promotions, whose panel still has copy to show.
+          </p>
+        </template>
+
         <template v-if="entry.id === 'menu'">
           <h2>Basic</h2>
           <p class="note">

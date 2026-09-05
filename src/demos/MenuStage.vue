@@ -31,6 +31,14 @@
                 v-bind="bind" @item-click="onPick" />
       <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
+
+    <!-- The bar renders inline and its panels open from the root items. The
+         rail can flip it vertical, which changes where the panel goes but not
+         what the stage has to provide. -->
+    <template v-else-if="id === 'megamenu'">
+      <ApexMegaMenu :items="MEGA_ITEMS" v-bind="bind" @item-click="onPick" />
+      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+    </template>
   </div>
 </template>
 
@@ -48,8 +56,8 @@
  * other check, which is exactly how two overlay stages once shipped blank.
  */
 import { ref } from 'vue';
-import { ApexTieredMenu, ApexMenubar, ApexMenu } from '@exorgroup/apex-ui';
-import type { MenuItem } from '@exorgroup/apex-ui';
+import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu } from '@exorgroup/apex-ui';
+import type { MenuItem, MegaItem } from '@exorgroup/apex-ui';
 
 defineProps<{
   /** The registry id, which decides which control is shown. */
@@ -126,6 +134,34 @@ const LIST_ITEMS: MenuItem[] = [
 /* Bound so the rail's popup switch and the stage's own toggling agree. */
 const stageKeys = ref<Record<string, boolean>>({ reports: true });
 const vmenu = ref<InstanceType<typeof ApexMenu> | null>(null);
+
+/**
+ * A panel with columns, a footer link and a promo block — enough that the
+ * rail's columnMinWidth, cardMinWidth and panelImagePosition all visibly do
+ * something.
+ */
+const MEGA_ITEMS: MegaItem[] = [
+  { label: 'Shop', icon: 'storefront', columns: [
+    { header: 'Camping', items: [
+      { label: 'Tents', help: 'One to six berth' },
+      { label: 'Sleeping bags' },
+      { label: 'Stoves' },
+    ], footer: { label: 'Shop all camping' } },
+    { header: 'Climbing', items: [
+      { label: 'Ropes' },
+      { label: 'Harnesses', badge: 'New' },
+      { label: 'Helmets' },
+    ] },
+  ], panel: { title: 'Season sale', text: 'Up to 40% off last year’s ranges.', linkLabel: 'See the sale' } },
+  { label: 'Brands', icon: 'label', columns: [
+    { header: 'Featured', layout: 'cards', items: [
+      { label: 'Northwind' },
+      { label: 'Cairn' },
+      { label: 'Fjell' },
+    ] },
+  ] },
+  { label: 'Support', icon: 'help', href: '#' },
+];
 
 const tmenu = ref<InstanceType<typeof ApexTieredMenu> | null>(null);
 const picked = ref('');
