@@ -145,6 +145,8 @@ describe('the ported gallery examples are on the page', () => {
       'Rich content'],
     ApexDrawer: ['Position', 'Responsive', 'Template', 'Floating and headless'],
     ApexDialog: ['Positions', 'Draggable, non-modal and timed'],
+    ApexToast: ['Service', 'Severity', 'Timed close', 'Sticky', 'Promise', 'Position',
+      'Expanded and stacked', 'Custom content and actions'],
     ApexMessage: ['Severity', 'Variant', 'Icon', 'Sizes', 'Blur', 'Closable and life',
       'Dynamic', 'In a form'],
     ApexBlockUI: ['Basic', 'Timed release', 'Styling', 'Document'],
