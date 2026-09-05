@@ -663,3 +663,17 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .aos-name { font-size: 16px; }
 .aos-blurb { font-size: 13px; color: var(--fg-subtle); text-align: center; }
 .aos-blurb--on { color: inherit; opacity: .88; }
+
+/* ── Service stage ─────────────────────────────────────────────────────── */
+/* A service has nothing to show until it is called, and what it then shows
+   appears at the host rather than here. The stage is the trigger plus a line
+   saying where to look, so an otherwise empty box does not read as broken. */
+.svc-stage {
+  display: flex; flex-direction: column; gap: 12px;
+  align-items: center; justify-content: center; text-align: center;
+}
+.svc-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.svc-hint {
+  margin: 0; max-inline-size: 42ch;
+  font-size: 12.5px; line-height: 1.5; color: var(--fg-subtle);
+}

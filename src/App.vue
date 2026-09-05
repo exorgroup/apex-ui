@@ -24,6 +24,7 @@ import { useApexDialog } from '@exorgroup/apex-ui';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
 import DirectiveStage from './demos/DirectiveStage.vue';
+import ServiceStage from './demos/ServiceStage.vue';
 
 const current = ref('input');
 const theme = ref<'light' | 'dark'>('dark');
@@ -269,6 +270,23 @@ function reset() {
 /** The usage snippet, generated from whatever the playground currently shows. */
 const usage = computed(() => {
   const bind = overrides[current.value] ?? {};
+
+  /* A service is called, not placed, so its snippet is script rather than
+     template — and it has to show the host mount too. Leaving that out is how
+     someone ends up calling add() correctly and seeing nothing at all, with
+     no clue that a component is missing from their shell. */
+  const svc = entry.value.service;
+  if (svc) {
+    const opts = Object.entries(bind)
+      .filter(([, v]) => v !== '' && v !== null && v !== undefined)
+      .map(([k, v]) => `  ${k}: ${typeof v === 'string' ? `'${v}'` : String(v)},`);
+    const host = svc.host ? `<!-- once, in your app shell -->\n<${svc.host} />\n\n` : '';
+    const handle = svc.handle || 'service';
+    const call = opts.length
+      ? `${handle}.${svc.method}({\n${opts.join('\n')}\n})`
+      : `${handle}.${svc.method}()`;
+    return `${host}const ${handle} = ${svc.composable}()\n\n${call}`;
+  }
 
   /* A directive has no tag of its own, so its snippet is a host element with
      the binding object spelled out — which is also how you would really write
@@ -780,6 +798,15 @@ async function copyUsage() {
                 :id="entry.id"
                 :bind="live"
                 :label="entry.hostLabel"
+              />
+
+              <!-- A service has no tag at all: the stage holds the trigger,
+                   and what it produces appears at the singleton host. -->
+              <ServiceStage
+                v-else-if="entry.service"
+                :spec="entry.service"
+                :bind="live"
+                :hint="entry.hostLabel"
               />
 
               <!-- An Inplace is two states, and only the closed one shows
@@ -4496,6 +4523,10 @@ async function copyUsage() {
       </div>
     </main>
   </div>
-  <!-- Renders every dialog opened through useApexDialog. -->
+  <!-- Singleton hosts for the service-backed controls. One each, at the root,
+       which is exactly how an app mounts them: the service is a module-level
+       store and these are its only renderer. Mounting one per page instead
+       would put a toast inside the scrolling stage and stack duplicates. -->
   <ApexDynamicDialog />
+  <ApexToast />
 </template>

@@ -11,6 +11,36 @@
  * The gallery carries 84; the rest come across as each is reviewed.
  */
 
+/**
+ * How to drive a service-backed control from the playground.
+ *
+ * Four of these exist and they differ only in which composable and method to
+ * call, so naming them beats a branch per control in the stage.
+ */
+export interface ServiceSpec {
+  /** Composable to call, e.g. 'useApexToast'. Resolved from a fixed map. */
+  composable: string;
+  /**
+   * The options interface the call takes, e.g. 'ToastMessage'. This is what
+   * the props table documents — a service has no props — so the guard checks
+   * the page against this rather than against the host component.
+   */
+  optionsType?: string;
+  /** What the snippet names the returned handle, e.g. 'toast'. */
+  handle?: string;
+  /** The method the trigger fires, e.g. 'add'. Receives the rail's options. */
+  method: string;
+  /** Singleton host the harness mounts once at the app root, e.g. 'ApexToast'. */
+  host?: string;
+  /** Trigger label. Default 'Show'. */
+  trigger?: string;
+  /**
+   * Further buttons, as [label, method]. A service that queues needs a way to
+   * clear the queue, or a few clicks bury the page in toasts.
+   */
+  extras?: string[][];
+}
+
 /** One editable control in the playground rail. */
 export interface DocControl {
   key: string;
@@ -56,6 +86,17 @@ export interface DocEntry {
   directiveName?: string;
   hostTag?: 'div' | 'button';
   hostLabel?: string;
+  /**
+   * An imperative service rather than a component you place: the API is a
+   * function you call, and the visible part is a singleton host mounted once
+   * near the app root. ApexToast, ApexAlert, ApexDynamicDialog.
+   *
+   * The playground still works, but it means something different. There is no
+   * tag to bind props to, so the rail assembles the *options object* the call
+   * takes, and a trigger button makes the call. What appears is transient, and
+   * appears wherever the host is — not inside the stage.
+   */
+  service?: ServiceSpec;
   /** Opening attributes for the usage snippet, before the playground props. */
   lead?: string[];
   /**
@@ -3955,6 +3996,51 @@ export const ENTRIES: DocEntry[] = [
       ['apex-spin-45 / apex-spin-n45 / apex-spin-90', 'rotation', 'The rotation it starts from'],
       ['apex-dur-200 … apex-dur-1000', 'duration', ''],
       ['apex-delay-100 / -200 / -300', 'delay', 'Stagger a row of cards'],
+    ],
+  },
+
+  {
+    id: 'toast', name: 'ApexToast', group: 'Overlays',
+    blurb: 'Announces something without owning any visible state: mount one ApexToast in the app shell and every add() call anywhere in the app lands in it. A queue rather than one current message, so a second toast stacks instead of replacing the first — and each carries its own id, so a late remove() can never close the wrong one.',
+    noField: true,
+    service: {
+      composable: 'useApexToast', handle: 'toast', method: 'add',
+      optionsType: 'ToastMessage',
+      host: 'ApexToast', trigger: 'Add toast',
+      extras: [['Clear all', 'removeAll']],
+    },
+    hostLabel: 'Toasts appear at the corner of the window, not in this box — the host is mounted once at the app root.',
+    base: { severity: 'success', summary: 'Saved', detail: 'Your changes are safe.', life: 3000 },
+    controls: [
+      { key: 'severity', type: 'select', options: ['success', 'info', 'warn', 'danger', 'secondary', 'contrast'] },
+      { key: 'summary', type: 'text' }, { key: 'detail', type: 'text' },
+      { key: 'icon', type: 'text' },
+      { key: 'life', type: 'number' },
+      { key: 'sticky', type: 'bool' }, { key: 'closable', type: 'bool' },
+      { key: 'showTimer', type: 'bool' },
+      { key: 'group', type: 'text' },
+    ],
+    props: [
+      ['id', 'number | string', 'auto', 'Assigned by add(); pass your own to update or remove a specific toast'],
+      ['severity', "'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'", '—', ''],
+      ['summary', 'string', '—', 'The headline'],
+      ['detail', 'string', '—', 'The line under it'],
+      ['icon', 'string', 'from severity', ''],
+      ['life', 'number', '3000', 'Milliseconds before it dismisses itself. Ignored when sticky'],
+      ['sticky', 'boolean', 'false', 'Stays until removed — for a loading state, or anything needing a decision'],
+      ['closable', 'boolean', 'true', ''],
+      ['showTimer', 'boolean', 'false', 'A bar counting the life down'],
+      ['group', 'string', '—', 'Routes a message to a named <ApexToast group="…"> container'],
+      ['data', 'unknown', '—', 'Anything your own template needs'],
+    ],
+    events: [],
+    serviceTitle: 'Service',
+    serviceRows: [
+      ['add(message)', 'number | string', 'Queues a toast and returns its id, so it can be updated or removed later'],
+      ['update(id, patch)', 'void', 'Replaces a queued toast in place — a loading toast becoming a result'],
+      ['remove(id)', 'void', 'Closes one toast'],
+      ['removeAll(group?)', 'void', 'Clears everything, or just one group'],
+      ['state', 'readonly', 'The live queue, if you want to render your own'],
     ],
   },
 ];
