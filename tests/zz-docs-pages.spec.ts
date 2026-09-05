@@ -114,6 +114,8 @@ describe('the ported gallery examples are on the page', () => {
     ApexRipple: ['Default', 'Custom', 'On real controls', 'Disabled'],
     ApexFocusTrap: ['Basic', 'Initial focus', 'Disabled'],
     ApexAnimateOnScroll: ['Enter and leave', 'Once'],
+    ApexTooltip: ['Basic', 'Position', 'Delay', 'Event', 'Auto hide', 'Custom',
+      'Disabled and reactive'],
     ApexBlockUI: ['Basic', 'Timed release', 'Styling', 'Document'],
     ApexScrollTop: ['Basic', 'Target element', 'Styling and placement'],
     ApexProgressSpinner: ['Indeterminate', 'Determinate', 'Size, stroke and colour',
