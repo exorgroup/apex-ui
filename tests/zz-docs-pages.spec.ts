@@ -1,8 +1,10 @@
-import { describe, it, expect, beforeAll, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
+import { mount, type VueWrapper } from '@vue/test-utils';
+import type { Plugin } from 'vue';
 import ApexUI from '../src/index';
 import App from '../../apex-ui-docs/src/App.vue';
 import { ENTRIES } from '../../apex-ui-docs/src/registry';
+import { docsRole, docsCan } from '../../apex-ui-docs/src/docsCan';
 
 /**
  * Every docs page must actually render.
@@ -169,7 +171,7 @@ describe('the ported gallery examples are on the page', () => {
      section is missing — only reading the rendered page can. */
   const EXPECTED: Record<string, string[]> = {
     ApexToolbar: ['Basic', 'Sizes and chrome', 'Centred content',
-      'Custom — navigation bar', 'Sticky and wrapping'],
+      'Custom — navigation bar', 'Sticky and wrapping', 'Permissions'],
     ApexTabs: ['Basic and dynamic', 'Controlled', 'Scrollable', 'Select on focus',
       'Lazy', 'Disabled', 'Variants and placement', 'Badges and custom indicator',
       'Template', 'Tab menu'],
@@ -248,6 +250,12 @@ describe('the ported gallery examples are on the page', () => {
        reader. Keeping it here means that cannot come back unnoticed. */
     ApexButton: ['Severity × variant', 'Raised', 'Rounded and icon-only', 'Icon position',
       'Badge', 'Link', 'Sizes and states'],
+    /* These two were built before the guard existed and were never listed.
+       Adding them with their Permissions sections covers both at once. */
+    ApexSplitButton: ['Severity', 'Variants', 'Menu content', 'Sizes and states',
+      'Permissions', 'Permissions — the default action'],
+    ApexSpeedDial: ['Types', 'Linear direction', 'Quarter-circle corners',
+      'Transition delay', 'Mask', 'Permissions'],
   };
 
   it.each(Object.entries(EXPECTED))('%s', async (name, headings) => {
@@ -256,6 +264,72 @@ describe('the ported gallery examples are on the page', () => {
     const found = wrapper.findAll('main h2').map((h) => h.text());
     const missing = headings.filter((h) => !found.includes(h));
     expect(missing, `${name} is missing gallery sections`).toEqual([]);
+    wrapper.unmount();
+  });
+});
+
+describe('the Permissions demos actually gate', () => {
+  /*
+   * A Permissions section is only worth having if the demo inside it is wired.
+   * A model with no `can`, a role strip bound to nothing, or a resolver that
+   * answers yes to everything all render the same page, warn about nothing,
+   * and pass the section check above — the reader clicks Viewer and watches
+   * nothing happen.
+   *
+   * Two pages cover both mechanisms: a control that filters its own model, and
+   * a caller doing it with v-if. The demos are marked data-gated so this does
+   * not have to guess which of several dials or bars on the page is the one.
+   */
+  /*
+   * Its own mount: harness() registers the plugin bare, and with no resolver
+   * the seam defaults to allow — so every one of these demos would show its
+   * full model and the assertions below would pass for the wrong reason. The
+   * real docs app wires docsCan in main.ts; this mounts it the same way.
+   */
+  const gatedHarness = async () => {
+    const wrapper = mount(App, {
+      global: { plugins: [[ApexUI, { can: docsCan }] as [Plugin, unknown]] },
+      attachTo: document.body,
+    });
+    const open = async (name: string) => {
+      const link = wrapper.findAll('.navitem').find((b) => b.text() === name);
+      if (!link) throw new Error(`no sidebar link named ${name}`);
+      await link.trigger('click');
+    };
+    return { wrapper, open };
+  };
+
+  const asRole = async (wrapper: VueWrapper, role: string) => {
+    const btn = wrapper.findAll('main button').find((b) => b.text() === role);
+    if (!btn) throw new Error(`no ${role} button on the page`);
+    await btn.trigger('click');
+  };
+
+  /* docsRole is module state shared by every mount, so leaving it on Viewer
+     would gate the pages the later tests open. */
+  afterEach(() => { docsRole.value = 'Admin'; });
+
+  it('ApexSpeedDial — the dial itself drops denied actions', async () => {
+    const { wrapper, open } = await gatedHarness();
+    await open('ApexSpeedDial');
+    const count = () => wrapper.findAll('[data-gated] .apex-dial__item').length;
+
+    /* Two dials showing the same four-item model. */
+    expect(count(), 'the Admin sees every action').toBe(8);
+    await asRole(wrapper, 'Viewer');
+    expect(count(), 'the Viewer keeps only the ungated one').toBe(2);
+    wrapper.unmount();
+  });
+
+  it('ApexToolbar — the caller gates with v-if', async () => {
+    const { wrapper, open } = await gatedHarness();
+    await open('ApexToolbar');
+    const bar = () => wrapper.find('[data-gated]').text();
+
+    expect(bar(), 'the Admin may delete').toContain('Delete');
+    await asRole(wrapper, 'Viewer');
+    expect(bar(), 'the Viewer may not, so the button is not there')
+      .not.toContain('Delete');
     wrapper.unmount();
   });
 });
