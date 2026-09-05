@@ -1,4 +1,5 @@
 /** Item placement maths for ApexSpeedDial. Angles in degrees, screen coords in px. */
+import type { ApexPermission } from '../types';
 
 export type SpeedDialType = 'linear' | 'circle' | 'semi-circle' | 'quarter-circle';
 export type SpeedDialDirection =
@@ -13,6 +14,8 @@ export interface SpeedDialItem {
   disabled?: boolean;
   href?: string;
   target?: string;
+  /** Hide this action unless the permission resolver allows it. */
+  can?: ApexPermission;
   /** Any payload you want back on @item-click. */
   [key: string]: unknown;
 }

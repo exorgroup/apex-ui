@@ -11,6 +11,7 @@
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import type { ApexPermission } from '../types';
 
 export interface MegaLink {
   label?: string;
@@ -25,6 +26,8 @@ export interface MegaLink {
   target?: string;
   command?: (payload: unknown) => void;
   disabled?: boolean;
+  /** Hide this link unless the permission resolver allows it. */
+  can?: ApexPermission;
 }
 
 export interface MegaColumn {
@@ -40,6 +43,11 @@ export interface MegaColumn {
   items?: MegaLink[];
   /** A link under the column, e.g. "Shop all". */
   footer?: MegaLink;
+  /**
+   * Hide the whole column unless the resolver allows it. A column left with no
+   * links after its own items are filtered goes too — see core/menuPermissions.
+   */
+  can?: ApexPermission;
 }
 
 export interface MegaPanel {
@@ -63,6 +71,11 @@ export interface MegaItem {
   disabled?: boolean;
   columns?: MegaColumn[];
   panel?: MegaPanel;
+  /**
+   * Hide this root item unless the resolver allows it. An item whose columns
+   * all go is dropped with them — see core/menuPermissions.
+   */
+  can?: ApexPermission;
 }
 
 const props = withDefaults(defineProps<{

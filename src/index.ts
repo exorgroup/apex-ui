@@ -293,6 +293,7 @@ export type { TabItem } from './components/ApexTabs.vue';
 export type { DialogPosition } from './components/ApexDialog.vue';
 export type { UploadFile } from './components/ApexFileUpload.vue';
 export type { MegaItem, MegaColumn, MegaLink, MegaPanel } from './components/ApexMegaMenu.vue';
+export type { CrumbItem } from './components/ApexBreadcrumb.vue';
 export type { MessageSeverity } from './components/ApexMessage.vue';
 export type { ToastPosition } from './components/ApexToast.vue';
 export type { CarouselCtx } from './core/carousel';

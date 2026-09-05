@@ -8,12 +8,44 @@
  */
 import { computed, ref } from 'vue';
 import ApexIcon from './ApexIcon.vue';
-import type { MenuItem } from './ApexMenuItem';
+import type { ApexPermission } from '../types';
+
+/**
+ * One crumb.
+ *
+ * A trail is not a menu — it has no submenus, no separators of its own, no
+ * headers — so it gets its own shape rather than borrowing MenuItem and
+ * leaving half of it inapplicable.
+ *
+ * `href` is a URL and `to` is a route: a crumb that names a route hands it to
+ * the app's link component rather than reloading the page.
+ */
+export interface CrumbItem {
+  label?: string;
+  icon?: string;
+  /** A plain URL. */
+  href?: string;
+  /** A route, for whatever router the app passes as `linkComponent`. */
+  to?: string | Record<string, unknown>;
+  target?: string;
+  disabled?: boolean;
+  /** Force — or forbid — the "you are here" treatment on this crumb. */
+  current?: boolean;
+  command?: (payload: unknown) => void;
+  /**
+   * Hide this crumb unless the permission resolver allows it. A trail is a
+   * path, so a denied crumb truncates it: everything after it goes too, since
+   * you cannot walk past a step you are not allowed to take.
+   */
+  can?: ApexPermission;
+  /** Any payload you want back on the click event. */
+  [key: string]: unknown;
+}
 
 const props = withDefaults(defineProps<{
-  items?: MenuItem[];
+  items?: CrumbItem[];
   /** A leading crumb, usually the site root — typically icon-only. */
-  home?: MenuItem;
+  home?: CrumbItem;
   /** An icon name, or any text: '/', '›', '—'. */
   separator?: string;
   /** Collapse the middle behind an ellipsis past this many crumbs. */
@@ -37,7 +69,7 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
-  (e: 'item-click', payload: { item: MenuItem; index: number; originalEvent: MouseEvent }): void;
+  (e: 'item-click', payload: { item: CrumbItem; index: number; originalEvent: MouseEvent }): void;
 }>();
 
 const expanded = ref(false);
@@ -58,18 +90,18 @@ const shown = computed(() => {
   const tail = list.slice(-Math.max(1, max - 2));
   return [
     ...head.map((e) => ({ ...e, gap: false })),
-    { item: {} as MenuItem, index: -1, last: false, gap: true },
+    { item: {} as CrumbItem, index: -1, last: false, gap: true },
     ...tail.map((e) => ({ ...e, gap: false })),
   ];
 });
 
-const isCurrent = (entry: { item: MenuItem; last: boolean }) =>
+const isCurrent = (entry: { item: CrumbItem; last: boolean }) =>
   entry.item.current === true || (props.markCurrent && entry.last && entry.item.current !== false);
 
-const tagFor = (entry: { item: MenuItem; last: boolean }) =>
+const tagFor = (entry: { item: CrumbItem; last: boolean }) =>
   (!isCurrent(entry) && (entry.item.href || entry.item.command) ? 'a' : 'span');
 
-function onClick(e: MouseEvent, item: MenuItem, index: number) {
+function onClick(e: MouseEvent, item: CrumbItem, index: number) {
   if (item.disabled) { e.preventDefault(); return; }
   if (typeof item.command === 'function') {
     e.preventDefault();

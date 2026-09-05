@@ -12,6 +12,29 @@ export type ApexLabelPlacement =
   | 'float-over' | 'float-on' | 'float-in' | 'floating'
   | 'inline' | 'hidden';
 
+/**
+ * What an item asks of the permission resolver, so it can be hidden from
+ * someone who may not use it.
+ *
+ * Three forms, in the order you will reach for them:
+ *
+ *   'delete:events'          action and resource — the usual case
+ *   { action, resource }     the same, spelled out
+ *   false                    hide regardless; true shows regardless
+ *
+ * Resolved through the same `useCan()` seam every other gated control uses,
+ * so an app wires one resolver — Autentica, Spatie, anything — and every menu
+ * follows it. An item with no `can` is always shown, which is what keeps this
+ * inert for callers who do not use it.
+ *
+ * Presentation only. Hiding an item does not stop the action being invoked;
+ * the endpoint behind it still has to authorise the request.
+ */
+export type ApexPermission =
+  | string
+  | { action: string; resource?: string }
+  | boolean;
+
 export interface ApexOption<V = unknown> {
   value: V;
   label: string;

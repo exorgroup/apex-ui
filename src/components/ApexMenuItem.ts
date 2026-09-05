@@ -1,5 +1,5 @@
 import { defineComponent, h, nextTick, ref, type PropType } from 'vue';
-import type { ApexButtonClasses } from '../types';
+import type { ApexButtonClasses, ApexPermission } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
 export interface MenuItem {
@@ -16,6 +16,12 @@ export interface MenuItem {
   target?: string;
   /** Nested submenu. */
   items?: MenuItem[];
+  /**
+   * Hide this row unless the permission resolver allows it. A branch whose
+   * children all go is dropped with them, and the separators and headers left
+   * framing nothing go too — see core/menuPermissions.
+   */
+  can?: ApexPermission;
   /** Any payload you want back on the click event. */
   [key: string]: unknown;
 }
