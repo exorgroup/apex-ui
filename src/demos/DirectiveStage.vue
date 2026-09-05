@@ -31,12 +31,36 @@
       <ApexButton size="sm">Submit</ApexButton>
     </div>
 
-    <!-- AnimateOnScroll needs somewhere to scroll from, so the card starts
-         below the fold of its own scroller rather than already in view. -->
-    <div v-else-if="id === 'animateonscroll'" class="dir-scroller">
+    <!-- AnimateOnScroll needs somewhere to scroll from, so the cards start
+         below the fold of their own scroller rather than already in view, with
+         empty space after them too — otherwise they can be scrolled into view
+         but never back out, and the leave animation never plays.
+
+         Three things here are the stage's business rather than the rail's:
+
+         `root` pins the observer to this scroller. Left off, it observes the
+         viewport, and then `threshold` and `rootMargin` are measured against
+         the window rather than the panel being scrolled — the two controls
+         would appear to do nothing.
+
+         `key` rebuilds the cards when an option changes. A threshold lives
+         inside the IntersectionObserver, which is constructed once on mount;
+         the directive's `updated` hook can swap the classes but cannot change
+         the observer. Without a remount those two controls really are inert. -->
+    <div v-else-if="id === 'animateonscroll'" id="dir-scroller" class="dir-scroller">
       <p class="dir-hint">Scroll down ↓</p>
       <div class="dir-gap"></div>
-      <div v-apex-animate-on-scroll="bind" class="dir-host dir-host--card">{{ label }}</div>
+      <div class="dir-row">
+        <div
+          v-for="n in 3"
+          :key="`${optionKey}-${n}`"
+          v-apex-animate-on-scroll="{ ...bind, root: '#dir-scroller' }"
+          class="dir-host dir-host--card"
+        >
+          <strong>{{ label }} {{ n }}</strong>
+          <span class="dir-note">Enters on scroll</span>
+        </div>
+      </div>
       <div class="dir-gap"></div>
     </div>
   </div>
@@ -56,7 +80,9 @@
  * to the directive — which is how a directive is used in practice, so the demo
  * and the usage snippet above it agree.
  */
-defineProps<{
+import { computed } from 'vue';
+
+const props = defineProps<{
   /** The registry id, which decides which directive is applied. */
   id: string;
   /** Live options from the playground rail, passed as the binding value. */
@@ -64,4 +90,17 @@ defineProps<{
   /** Text for the host element. */
   label?: string;
 }>();
+
+/**
+ * Changes to any AnimateOnScroll option, as a string — used as a :key so the
+ * cards remount and the directive runs again from scratch.
+ *
+ * Needed because the observer is built once, in the directive's `mounted`
+ * hook. `updated` can replace the stored classes, so enterClass, leaveClass
+ * and once take effect live; threshold and rootMargin cannot, because both are
+ * arguments to the IntersectionObserver constructor and are fixed for its
+ * lifetime. Remounting is the honest way to show a new threshold, and is
+ * cheap for three cards.
+ */
+const optionKey = computed(() => JSON.stringify(props.bind ?? {}));
 </script>

@@ -520,7 +520,18 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
   display: flex; flex-direction: column; gap: 10px; align-items: stretch;
   inline-size: 100%; max-inline-size: 300px; place-items: stretch;
 }
-.dir-host--card { min-block-size: 90px; inline-size: 100%; }
+.dir-host--card {
+  min-block-size: 90px; inline-size: 100%;
+  display: flex; flex-direction: column; gap: 4px;
+  align-items: center; justify-content: center;
+}
+.dir-note { font-size: 12px; color: var(--fg-subtle); }
+/* Stacked with space between, not side by side: cards in a row all cross the
+   threshold at the same moment, which shows the animation once. Separated
+   vertically, each one enters and leaves on its own, so scrolling either way
+   always has something animating — and `once` becomes visible, because the
+   cards already seen stop reacting while the rest still do. */
+.dir-row { display: flex; flex-direction: column; gap: 110px; }
 
 .dir-target {
   padding: 14px 18px; border-radius: var(--r-md);
