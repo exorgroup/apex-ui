@@ -286,6 +286,36 @@ export interface ApexButtonClasses {
  * part's ROLE, not its class — `head` reaches ApexAccordion's `__header` as
  * readily as ApexCard's `__head`.
  */
+/**
+ * Your own class on any part of ApexAlert.
+ *
+ * ApexConfirmDialog, which this replaces, had no ui map and no variable layer
+ * — the one control family that never got the AF2-133/140/169 treatment. Since
+ * it was being rebuilt anyway, this was the moment to bring it into line
+ * rather than leave a hole to file later.
+ */
+export interface ApexAlertClasses {
+  /** The full-screen backdrop. */
+  overlay?: string;
+  /** The panel itself. */
+  panel?: string;
+  /** The close control, when `closable`. */
+  close?: string;
+  /** The figure well, whether it holds the drawn mark, an icon or an image. */
+  figure?: string;
+  /** Everything below the figure, re-keyed per stage. */
+  content?: string;
+  title?: string;
+  text?: string;
+  /** The from→to list on an edit-confirm. */
+  changes?: string;
+  /** The button row, and the note under it. */
+  actions?: string;
+  footnote?: string;
+  /** The autoClose countdown bar. */
+  timer?: string;
+}
+
 export interface ApexContainerClasses {
   /** The outermost element. */
   root?: string;

@@ -3,6 +3,7 @@
     <div
       v-if="state.open"
       class="apex-alert-overlay"
+      :class="ui?.overlay"
       :style="overlayStyle"
       @mousedown.self="onMaskDown"
     >
@@ -21,7 +22,7 @@
         v-else
         ref="alertEl"
         class="apex-alert"
-        :class="[state.enterClass, transitionClass]"
+        :class="[state.enterClass, transitionClass, ui?.panel]"
         :style="panelStyle"
         :data-tone="state.stage === 'progress' ? 'info' : state.tone"
         :data-icon-pos="state.iconPosition || 'top'"
@@ -33,6 +34,7 @@
           v-if="state.closable"
           type="button"
           class="apex-alert-close"
+          :class="ui?.close"
           :aria-label="t('apexui.clear')"
           @click="onDismiss"
         ><ApexIcon name="close" :size="18" /></button>
@@ -41,13 +43,13 @@
              this the tick is drawn once and every later stage shows it already
              complete — the same replay-by-remount trick the scroll directive
              needs, for the same reason. -->
-        <div :key="figureKey" class="apex-alert-figure" :style="figureStyle">
+        <div :key="figureKey" class="apex-alert-figure" :class="ui?.figure" :style="figureStyle">
           <slot name="icon" :state="state">
             <ApexProgressSpinner
               v-if="state.stage === 'progress'"
               :size="88"
               :stroke-width="6"
-              color="var(--ring)"
+              color="var(--apex-alert-ring)"
             />
 
             <!-- An image or an icon replaces the drawn figure. The tone figure
@@ -66,7 +68,7 @@
               :name="state.icon"
               :size="64"
               :data-anim="state.iconAnimation || 'none'"
-              :style="{ color: state.iconColor || 'var(--ring)' }"
+              :style="{ color: state.iconColor || 'var(--apex-alert-ring)' }"
             />
 
             <template v-else>
@@ -110,16 +112,16 @@
           </slot>
         </div>
 
-        <div :key="stageSig" class="apex-alert-content">
-          <h2 class="apex-alert-title">{{ state.title }}</h2>
+        <div :key="stageSig" class="apex-alert-content" :class="ui?.content">
+          <h2 class="apex-alert-title" :class="ui?.title">{{ state.title }}</h2>
 
           <slot name="message" :state="state">
-            <p v-if="state.message" class="apex-alert-text">{{ state.message }}</p>
+            <p v-if="state.message" class="apex-alert-text" :class="ui?.text">{{ state.message }}</p>
           </slot>
 
           <!-- Values are rendered as text, never as markup: they come from
                records a user typed. -->
-          <ul v-if="state.changes && state.changes.length" class="apex-alert-changes">
+          <ul v-if="state.changes && state.changes.length" class="apex-alert-changes" :class="ui?.changes">
             <li v-for="(c, i) in state.changes" :key="i">
               <span class="apex-alert-changes__label">{{ c.label }}:</span>
               <span class="apex-alert-changes__from">{{ c.from ?? '—' }}</span>
@@ -129,7 +131,7 @@
           </ul>
 
           <!-- Nothing to press while the work runs. -->
-          <div v-if="state.stage !== 'progress'" class="apex-alert-actions">
+          <div v-if="state.stage !== 'progress'" class="apex-alert-actions" :class="ui?.actions">
             <slot name="footer" :buttons="buttons" :press="press">
               <ApexButton
                 v-for="(b, i) in buttons"
@@ -149,9 +151,9 @@
             </slot>
           </div>
 
-          <p v-if="state.footnote" class="apex-alert-footnote">{{ state.footnote }}</p>
+          <p v-if="state.footnote" class="apex-alert-footnote" :class="ui?.footnote">{{ state.footnote }}</p>
 
-          <div v-if="showTimer" class="apex-alert-timer" :style="{ '--apex-alert-life': `${state.autoClose}ms` }"></div>
+          <div v-if="showTimer" class="apex-alert-timer" :class="ui?.timer" :style="{ '--apex-alert-life': `${state.autoClose}ms` }"></div>
         </div>
       </div>
     </div>
@@ -175,6 +177,7 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import { useApexAlert } from '../core/alert';
 import type { AlertButton } from '../core/alert';
+import type { ApexAlertClasses } from '../types';
 import { useApexI18n } from '../core/i18n';
 import { useCan } from '../core/can';
 import ApexButton from './ApexButton.vue';
@@ -200,6 +203,8 @@ const props = withDefaults(defineProps<{
   acceptLabel?: string;
   rejectLabel?: string;
   width?: string;
+  /** Your own class on any part. See ApexAlertClasses. */
+  ui?: ApexAlertClasses;
 }>(), {
   iconPosition: 'top',
   iconAnimation: 'none',

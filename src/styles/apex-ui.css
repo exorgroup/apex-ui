@@ -3109,11 +3109,11 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
  * app stylesheet next to the component; here they belong with everything else
  * the package ships, or a consumer gets the markup and none of the motion.
  */
-.apex-alert-overlay{position:fixed;inset:0;z-index:11000;display:grid;place-items:center;padding:5vh 4vw;
-background:rgba(15,20,28,.5);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
-.apex-alert{position:relative;width:100%;max-width:480px;background:var(--bg-elevated);border-radius:var(--r-xl);
-box-shadow:0 5px 5px rgba(8,12,20,.28),0 24px 60px -24px rgba(8,12,20,.45),0 0 0 1px var(--border-subtle);
-display:flex;flex-direction:column;align-items:center;text-align:center;padding:34px 36px 28px;
+.apex-alert-overlay{position:fixed;inset:0;z-index:var(--apex-alert-z,11000);display:grid;place-items:center;padding:5vh 4vw;
+background:var(--apex-alert-mask,rgba(15,20,28,.5));backdrop-filter:blur(var(--apex-alert-mask-blur,7px));-webkit-backdrop-filter:blur(var(--apex-alert-mask-blur,7px))}
+.apex-alert{position:relative;width:100%;max-width:var(--apex-alert-width,480px);background:var(--apex-alert-bg,var(--bg-elevated));border-radius:var(--apex-alert-radius,var(--r-xl));
+box-shadow:var(--apex-alert-shadow,0 5px 5px rgba(8,12,20,.28),0 24px 60px -24px rgba(8,12,20,.45),0 0 0 1px var(--border-subtle));
+display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--apex-alert-pad,34px 36px 28px);
 animation:apex-alert-pop var(--dur-slow) var(--ease-spring) both}
 @keyframes apex-alert-pop{from{transform:translateY(14px) scale(.96)}to{transform:none}}
 @media (max-width:600px){.apex-alert{padding:30px 24px 24px}}
@@ -3121,8 +3121,8 @@ animation:apex-alert-pop var(--dur-slow) var(--ease-spring) both}
 /* Re-keyed per stage, so this fade replays while the height eases. */
 .apex-alert-content{width:100%;min-width:0;animation:apex-alert-fade var(--dur-mid) var(--ease-out) both}
 @keyframes apex-alert-fade{from{opacity:0}to{opacity:1}}
-.apex-alert-title{margin:0 0 10px;font-size:var(--t-2xl);font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--fg-default)}
-.apex-alert-text{margin:0;font-size:var(--t-md);line-height:1.55;color:var(--fg-muted)}
+.apex-alert-title{margin:0 0 10px;font-size:var(--apex-alert-title-fs,var(--t-2xl));font-weight:600;letter-spacing:-.02em;line-height:1.15;color:var(--apex-alert-title-fg,var(--fg-default))}
+.apex-alert-text{margin:0;font-size:var(--apex-alert-text-fs,var(--t-md));line-height:1.55;color:var(--apex-alert-text-fg,var(--fg-muted))}
 .apex-alert-text b{color:var(--fg-default);font-weight:600}
 
 /* The edit-confirm diff. Left-aligned inside a centred panel, because a
@@ -3136,28 +3136,28 @@ font-size:var(--t-sm);text-align:left}
 .apex-alert-changes__arrow{color:var(--fg-subtle)}
 
 .apex-alert-actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center}
-.apex-alert-actions .apex-btn{min-width:120px}
+.apex-alert-actions .apex-btn{min-width:var(--apex-alert-btn-min,120px)}
 
 /* ─── the figure ─── */
-.apex-alert-figure{width:88px;height:88px;flex-shrink:0;position:relative;display:grid;place-items:center;margin:0 auto 18px}
+.apex-alert-figure{width:var(--apex-alert-figure-size,88px);height:var(--apex-alert-figure-size,88px);flex-shrink:0;position:relative;display:grid;place-items:center;margin:0 auto 18px}
 
-.apex-alert-pulse{position:absolute;inset:0;border-radius:50%;background:var(--ring,var(--apex-blue-500));opacity:.12;
+.apex-alert-pulse{position:absolute;inset:0;border-radius:50%;background:var(--apex-alert-ring,var(--apex-blue-500));opacity:.12;
 animation:apex-alert-pulse 2.4s var(--ease-out) infinite}
 @keyframes apex-alert-pulse{0%{transform:scale(.82);opacity:.18}70%{transform:scale(1.12);opacity:0}100%{transform:scale(1.12);opacity:0}}
 
-.apex-alert-svg{position:relative;width:88px;height:88px;overflow:visible}
+.apex-alert-svg{position:relative;width:var(--apex-alert-figure-size,88px);height:var(--apex-alert-figure-size,88px);overflow:visible}
 
-.apex-alert-circle{fill:none;stroke:var(--ring,var(--apex-blue-500));stroke-width:5;stroke-linecap:round;
+.apex-alert-circle{fill:none;stroke:var(--apex-alert-ring,var(--apex-blue-500));stroke-width:5;stroke-linecap:round;
 stroke-dasharray:472;stroke-dashoffset:0;transform:rotate(-90deg);transform-origin:center}
 @keyframes apex-alert-draw{from{stroke-dashoffset:472}to{stroke-dashoffset:0}}
 
 /* --len is set inline per path: its own length, so the dash covers exactly
    its own geometry rather than a number that happens to be long enough. */
-.apex-alert-mark{fill:none;stroke:var(--ring,var(--apex-blue-500));stroke-width:6;stroke-linecap:round;
+.apex-alert-mark{fill:none;stroke:var(--apex-alert-ring,var(--apex-blue-500));stroke-width:6;stroke-linecap:round;
 stroke-linejoin:round;stroke-dasharray:var(--len,120);stroke-dashoffset:0}
 @keyframes apex-alert-draw-mark{from{stroke-dashoffset:var(--len,120)}to{stroke-dashoffset:0}}
 
-.apex-alert-dot{fill:var(--ring,var(--apex-blue-500));transform-box:fill-box;transform-origin:center;opacity:1}
+.apex-alert-dot{fill:var(--apex-alert-ring,var(--apex-blue-500));transform-box:fill-box;transform-origin:center;opacity:1}
 @keyframes apex-alert-dot{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
 
 /* Everything is drawn only when motion is welcome. The marks sit at their
@@ -3172,14 +3172,14 @@ stroke-linejoin:round;stroke-dasharray:var(--len,120);stroke-dashoffset:0}
   .apex-alert,.apex-alert-content,.apex-alert-pulse{animation:none}
 }
 
-.apex-alert[data-tone="success"]{--ring:var(--apex-green-500)}
-.apex-alert[data-tone="danger"]{--ring:var(--apex-red-500)}
-.apex-alert[data-tone="warn"]{--ring:var(--apex-orange-500)}
-.apex-alert[data-tone="info"]{--ring:var(--apex-blue-500)}
-[data-theme="dark"] .apex-alert[data-tone="success"]{--ring:#2ba864}
-[data-theme="dark"] .apex-alert[data-tone="danger"]{--ring:#e8595a}
-[data-theme="dark"] .apex-alert[data-tone="warn"]{--ring:#f37e1f}
-[data-theme="dark"] .apex-alert[data-tone="info"]{--ring:#3b7ffe}
+.apex-alert[data-tone="success"]{--apex-alert-ring:var(--apex-green-500)}
+.apex-alert[data-tone="danger"]{--apex-alert-ring:var(--apex-red-500)}
+.apex-alert[data-tone="warn"]{--apex-alert-ring:var(--apex-orange-500)}
+.apex-alert[data-tone="info"]{--apex-alert-ring:var(--apex-blue-500)}
+[data-theme="dark"] .apex-alert[data-tone="success"]{--apex-alert-ring:#2ba864}
+[data-theme="dark"] .apex-alert[data-tone="danger"]{--apex-alert-ring:#e8595a}
+[data-theme="dark"] .apex-alert[data-tone="warn"]{--apex-alert-ring:#f37e1f}
+[data-theme="dark"] .apex-alert[data-tone="info"]{--apex-alert-ring:#3b7ffe}
 
 /* Icon or image in place of the drawn figure, and where the figure sits. */
 .apex-alert-image{max-width:100%;max-height:88px;object-fit:contain;border-radius:var(--r-md)}
@@ -3204,16 +3204,16 @@ stroke-linejoin:round;stroke-dasharray:var(--len,120);stroke-dashoffset:0}
 .apex-alert[data-icon-pos="right"] .apex-alert-actions{justify-content:flex-start}
 
 .apex-alert-close{position:absolute;inset-block-start:10px;inset-inline-end:10px;display:grid;place-items:center;
-inline-size:30px;block-size:30px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--fg-subtle);cursor:pointer}
-.apex-alert-close:hover{background:var(--bg-muted);color:var(--fg-default)}
+inline-size:30px;block-size:30px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--apex-alert-close-fg,var(--fg-subtle));cursor:pointer}
+.apex-alert-close:hover{background:var(--apex-alert-close-hover-bg,var(--bg-muted));color:var(--fg-default)}
 
-.apex-alert-footnote{margin:14px 0 0;font-size:var(--t-sm);color:var(--fg-subtle)}
+.apex-alert-footnote{margin:14px 0 0;font-size:var(--t-sm);color:var(--apex-alert-footnote-fg,var(--fg-subtle))}
 .apex-alert-footnote a{color:var(--accent-primary)}
 
 /* The autoClose countdown, drawn rather than described — a bar that empties is
    read at a glance where "closing in 4s" has to be re-read every second. */
-.apex-alert-timer{margin-block-start:16px;block-size:3px;border-radius:999px;background:var(--bg-muted);overflow:hidden}
-.apex-alert-timer::after{content:"";display:block;block-size:100%;background:var(--ring,var(--accent-primary));
+.apex-alert-timer{margin-block-start:16px;block-size:3px;border-radius:999px;background:var(--apex-alert-timer-track,var(--bg-muted));overflow:hidden}
+.apex-alert-timer::after{content:"";display:block;block-size:100%;background:var(--apex-alert-timer-fill,var(--apex-alert-ring,var(--accent-primary)));
 transform-origin:left;animation:apex-alert-countdown var(--apex-alert-life,3000ms) linear forwards}
 @keyframes apex-alert-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 

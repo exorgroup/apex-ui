@@ -31,6 +31,7 @@
   "exclude": [
     "tests/zz-docs-pages.spec.ts",
     "tests/zz-hidden-reset.spec.ts",
-    "tests/service-stage.spec.ts"
+    "tests/service-stage.spec.ts",
+    "tests/alert-ui.spec.ts"
   ]
 }
