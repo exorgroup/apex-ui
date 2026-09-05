@@ -343,3 +343,80 @@ describe('ApexSpeedDial filters, and the arc closes up', () => {
     w.unmount();
   });
 });
+
+describe('a hidden row is unreachable by keyboard, not merely unseen', () => {
+  /*
+   * No control in this family navigates by indexing into its model. The
+   * context menu is the only one with arrow keys at all, and it walks the
+   * rendered rows; the rest handle Escape and leave the order to the DOM. So
+   * filtering the model already removes a denied row from the keyboard path,
+   * and nothing here needed changing.
+   *
+   * These guards exist because that is a property of HOW the controls are
+   * written, not a rule anyone declared. Someone who later hides rows with
+   * v-show or display:none — a reasonable-looking way to keep the markup
+   * stable — would leave every denied row focusable and tabbable while
+   * invisible, which is worse than showing it: the action is reachable and
+   * unlabelled. That change would pass every other test in this file.
+   */
+  const KEYS: MenuItem[] = [
+    { label: 'First' },
+    { label: 'Denied', can: 'secret' },
+    { label: 'Last' },
+  ];
+
+  it('the context menu’s arrow keys skip it, because it is not there', async () => {
+    const w = mount(ApexContextMenu, {
+      props: { items: KEYS }, global: gated, attachTo: document.body,
+    });
+    w.vm.show({ clientX: 5, clientY: 5, preventDefault() {} } as unknown as MouseEvent);
+    await w.vm.$nextTick();
+
+    const rows = [...document.querySelectorAll('.apex-menu__row')]
+      .map((n) => n.textContent || '');
+    expect(rows.length, 'two rows, not three').toBe(2);
+
+    /* Walking the whole cycle must never land on the denied row. */
+    const seen: string[] = [];
+    for (let i = 0; i < rows.length + 1; i += 1) {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      await w.vm.$nextTick();
+      seen.push(document.activeElement?.textContent || '');
+    }
+    expect(seen.some((t) => t.includes('Denied')), 'never focused').toBe(false);
+    expect(seen.some((t) => t.includes('First')), 'the allowed rows are reachable').toBe(true);
+    w.unmount();
+  });
+
+  it('nothing focusable carries a denied label, in any of the controls', async () => {
+    /* The general form: whatever the navigation model, a denied item must not
+       exist as something the user can tab to. */
+    const focusables = (w: ReturnType<typeof mount>) =>
+      w.findAll('button, a, [tabindex]')
+        .filter((n) => n.attributes('tabindex') !== '-1')
+        .map((n) => n.text());
+
+    const tiered = mount(ApexTieredMenu, {
+      props: { items: KEYS }, global: gated, attachTo: document.body,
+    });
+    expect(focusables(tiered).join(' ')).not.toContain('Denied');
+    tiered.unmount();
+
+    const dock = mount(ApexDock, {
+      props: { items: [{ icon: 'home', label: 'First' }, { icon: 'lock', label: 'Denied', can: 'secret' }] },
+      global: gated,
+      attachTo: document.body,
+    });
+    expect(focusables(dock).join(' ')).not.toContain('Denied');
+    dock.unmount();
+
+    const dial = mount(ApexSpeedDial, {
+      props: { items: [{ icon: 'add', label: 'First' }, { icon: 'lock', label: 'Denied', can: 'secret' }] },
+      global: gated,
+      attachTo: document.body,
+    });
+    await dial.find('.apex-dial__trigger').trigger('click');
+    expect(focusables(dial).join(' ')).not.toContain('Denied');
+    dial.unmount();
+  });
+});
