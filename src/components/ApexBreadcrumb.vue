@@ -6,8 +6,10 @@
  * trails collapse in the middle behind an ellipsis rather than wrapping, since
  * the first and last crumbs are the ones that carry meaning.
  */
-import { computed, ref } from 'vue';
+import { computed, markRaw, ref, toRaw } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import { useCan } from '../core/can';
+import { allows } from '../core/menuPermissions';
 import type { ApexPermission } from '../types';
 
 /**
@@ -55,6 +57,12 @@ const props = withDefaults(defineProps<{
   size?: 'sm' | 'md' | 'lg';
   /** Let a long trail wrap instead of scrolling. */
   wrap?: boolean;
+  /**
+   * What to render a crumb's `to` through — RouterLink, Inertia's Link, or any
+   * component taking a `to` prop. Without it a string `to` falls back to an
+   * href, so plain URLs still work with no router in the app.
+   */
+  linkComponent?: unknown;
   /* chrome */
   color?: string;
   activeColor?: string;
@@ -73,10 +81,37 @@ const emit = defineEmits<{
 }>();
 
 const expanded = ref(false);
+const can = useCan();
 
-/** The full trail, home first, each crumb tagged with its real index. */
+/** The trail as written, home first — home counts as the first crumb. */
+const full = computed(() =>
+  (props.home ? [props.home, ...(props.items || [])] : [...(props.items || [])]));
+
+/**
+ * The trail this user may walk.
+ *
+ * A breadcrumb is not a menu, so it does not filter — it truncates. The trail
+ * is a path: Venue › Events › Shows › Seats says how you got here, and each
+ * crumb is only reachable through the one before it. Deny Shows and the honest
+ * answer is Venue › Events, stopping there. Dropping just the denied crumb
+ * would leave Venue › Events › Seats, which offers a way in that does not
+ * exist — and would be a lie about the route even when the user can reach
+ * Seats by some other path, because that is not the path this trail describes.
+ *
+ * Deny the first crumb and there is no trail at all.
+ */
+const walkable = computed(() => {
+  const list = full.value;
+  const stop = list.findIndex((it) => !allows(it.can, can));
+  return stop === -1 ? list : list.slice(0, stop);
+});
+
+/** True when the trail was cut short — the page you are on is not in it. */
+const cutShort = computed(() => walkable.value.length < full.value.length);
+
+/** The walkable trail, each crumb tagged with its index within it. */
 const all = computed(() => {
-  const list = props.home ? [props.home, ...(props.items || [])] : [...(props.items || [])];
+  const list = walkable.value;
   return list.map((item, i) => ({ item, index: i, last: i === list.length - 1 }));
 });
 
@@ -95,11 +130,48 @@ const shown = computed(() => {
   ];
 });
 
+/*
+ * The last crumb is "you are here" — unless the trail was truncated, in which
+ * case it is not. Marking the last surviving crumb as the current page would
+ * tell this user they are on Events when they are on Seats. It stays a plain
+ * link instead: a place they can actually go. An explicit `current` on an item
+ * still wins, since that is the author saying so outright.
+ */
 const isCurrent = (entry: { item: CrumbItem; last: boolean }) =>
-  entry.item.current === true || (props.markCurrent && entry.last && entry.item.current !== false);
+  entry.item.current === true
+  || (props.markCurrent && entry.last && !cutShort.value && entry.item.current !== false);
 
-const tagFor = (entry: { item: CrumbItem; last: boolean }) =>
-  (!isCurrent(entry) && (entry.item.href || entry.item.command) ? 'a' : 'span');
+/*
+ * A component arriving through a prop has been wrapped in the reactive proxy
+ * that props are, and Vue warns when it is asked to render one. Unwrapping it
+ * here means the caller passes RouterLink or Inertia's Link plainly, rather
+ * than having to know to wrap it in markRaw() first.
+ */
+const linkAs = computed(() => {
+  const c = props.linkComponent;
+  return c ? markRaw(toRaw(c) as object) : undefined;
+});
+
+/** A string `to` doubles as an href, so a route works without a router wired. */
+const hrefFor = (item: CrumbItem) =>
+  item.href || (typeof item.to === 'string' ? item.to : undefined);
+
+/**
+ * A crumb is a routed link, a plain link, or text.
+ *
+ * `to` only becomes a routed link when the app passed something to render it
+ * through; otherwise it degrades to the href above rather than rendering a
+ * `to` attribute nothing will act on.
+ */
+function tagFor(entry: { item: CrumbItem; last: boolean }) {
+  if (isCurrent(entry)) return 'span';
+  if (entry.item.to !== undefined && linkAs.value) return linkAs.value;
+  return hrefFor(entry.item) || entry.item.command ? 'a' : 'span';
+}
+
+/** True when this crumb is going through the app's own link component. */
+const isRouted = (entry: { item: CrumbItem; last: boolean }) =>
+  !isCurrent(entry) && entry.item.to !== undefined && !!linkAs.value;
 
 function onClick(e: MouseEvent, item: CrumbItem, index: number) {
   if (item.disabled) { e.preventDefault(); return; }
@@ -128,7 +200,10 @@ const rootStyle = computed(() => {
 </script>
 
 <template>
-  <nav class="apex-bc" :style="rootStyle" :data-size="size" :data-wrap="wrap ? 'true' : 'false'"
+  <!-- Nothing walkable means nothing to draw: an empty trail rendered as an
+       empty bar is chrome describing a path this user has none of. -->
+  <nav v-if="all.length" class="apex-bc" :style="rootStyle" :data-size="size"
+       :data-wrap="wrap ? 'true' : 'false'" :data-truncated="cutShort ? 'true' : 'false'"
        aria-label="Breadcrumb">
     <ol class="apex-bc__list">
       <template v-for="(entry, i) in shown" :key="entry.gap ? 'gap' : entry.index">
@@ -144,7 +219,8 @@ const rootStyle = computed(() => {
             :data-disabled="entry.item.disabled ? 'true' : 'false'">
           <slot name="item" :item="entry.item" :index="entry.index" :is-current="isCurrent(entry)">
             <component :is="tagFor(entry)" class="apex-bc__link"
-                       :href="tagFor(entry) === 'a' ? (entry.item.href || '#') : undefined"
+                       :href="tagFor(entry) === 'a' ? (hrefFor(entry.item) || '#') : undefined"
+                       :to="isRouted(entry) ? entry.item.to : undefined"
                        :target="entry.item.target"
                        :aria-current="isCurrent(entry) ? 'page' : undefined"
                        @click="onClick($event, entry.item, entry.index)">
