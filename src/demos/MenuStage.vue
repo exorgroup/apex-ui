@@ -18,6 +18,19 @@
       <ApexMenubar :items="BAR_ITEMS" v-bind="bind" @item-click="onPick" />
       <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
+
+    <!-- Inline by default; in popup mode it renders nothing until toggle(), so
+         that branch needs a trigger of its own. -->
+    <template v-else-if="id === 'menu'">
+      <template v-if="bind?.popup">
+        <ApexButton icon="menu" @click="vmenu?.toggle($event)">Open menu</ApexButton>
+        <ApexMenu ref="vmenu" :items="LIST_ITEMS" v-model:expandedKeys="stageKeys"
+                  v-bind="bind" @item-click="onPick" />
+      </template>
+      <ApexMenu v-else :items="LIST_ITEMS" v-model:expandedKeys="stageKeys"
+                v-bind="bind" @item-click="onPick" />
+      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+    </template>
   </div>
 </template>
 
@@ -35,7 +48,7 @@
  * other check, which is exactly how two overlay stages once shipped blank.
  */
 import { ref } from 'vue';
-import { ApexTieredMenu, ApexMenubar } from '@exorgroup/apex-ui';
+import { ApexTieredMenu, ApexMenubar, ApexMenu } from '@exorgroup/apex-ui';
 import type { MenuItem } from '@exorgroup/apex-ui';
 
 defineProps<{
@@ -88,6 +101,31 @@ const BAR_ITEMS: MenuItem[] = [
   ] },
   { label: 'Help', icon: 'help', href: '#' },
 ];
+
+/**
+ * A sidebar-shaped model: a top-level group renders as a static section label
+ * with its children shown, a nested one collapses — and `active` marks the row
+ * you are on.
+ */
+const LIST_ITEMS: MenuItem[] = [
+  { key: 'main', label: 'Workspace', items: [
+    { label: 'Dashboard', icon: 'dashboard', active: true },
+    { label: 'Events', icon: 'event', badge: '4' },
+    { key: 'reports', label: 'Reports', icon: 'bar_chart', items: [
+      { label: 'Sales' },
+      { label: 'Attendance' },
+    ] },
+  ] },
+  { separator: true },
+  { key: 'account', label: 'Account', items: [
+    { label: 'Profile', icon: 'person', help: 'Name, email, password' },
+    { label: 'Sign out', icon: 'logout' },
+  ] },
+];
+
+/* Bound so the rail's popup switch and the stage's own toggling agree. */
+const stageKeys = ref<Record<string, boolean>>({ reports: true });
+const vmenu = ref<InstanceType<typeof ApexMenu> | null>(null);
 
 const tmenu = ref<InstanceType<typeof ApexTieredMenu> | null>(null);
 const picked = ref('');

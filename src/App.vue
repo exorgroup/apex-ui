@@ -24,7 +24,7 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu } from '@exorgroup/apex-ui';
 import type { MenuItem } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
@@ -190,6 +190,92 @@ const msgEmail = ref('');
  * anchor. `povShared` is the exception that proves the point — one popover
  * serving four triggers, which only works because the anchor is the event.
  */
+/* ── ApexMenu page ────────────────────────────── */
+const vmCtl = ref<InstanceType<typeof ApexMenu> | null>(null);
+const vmPop = ref<InstanceType<typeof ApexMenu> | null>(null);
+const vmGate = ref<InstanceType<typeof ApexMenu> | null>(null);
+const vmPicked = ref('');
+const vmRadio = ref('recent');
+const vmChecks = ref<Record<string, boolean>>({ paid: true });
+const vmKeys = ref<Record<string, boolean>>({ reports: true });
+const vmGateKeys = ref<Record<string, boolean>>({});
+
+const vmBasic: MenuItem[] = [
+  { key: 'main', label: 'Workspace', items: [
+    { label: 'Dashboard', icon: 'dashboard', active: true },
+    { label: 'Events', icon: 'event', badge: '4' },
+    { label: 'Venues', icon: 'place' },
+  ] },
+  { separator: true },
+  { key: 'account', label: 'Account', items: [
+    { label: 'Profile', icon: 'person', help: 'Name, email, password' },
+    { label: 'Sign out', icon: 'logout' },
+  ] },
+];
+
+/* `kind` is the demo's own field, read by the item slot. MenuItem carries an
+   index signature, so anything the caller puts on a row reaches the slot. */
+const vmChoice: MenuItem[] = [
+  { key: 'filters', label: 'Filters', items: [
+    { key: 'paid', label: 'Paid', kind: 'check' },
+    { key: 'comp', label: 'Complimentary', kind: 'check' },
+    { key: 'refunded', label: 'Refunded', kind: 'check' },
+  ] },
+  { separator: true },
+  { key: 'sort', label: 'Sort by', items: [
+    { key: 'recent', label: 'Most recent', kind: 'radio' },
+    { key: 'name', label: 'Name', kind: 'radio' },
+  ] },
+];
+
+/* Both defaults overridden: a top-level group that collapses, and a nested one
+   left open as a plain label. */
+const vmToggle: MenuItem[] = [
+  { key: 'reports', label: 'Reports', toggleable: true, items: [
+    { label: 'Sales', icon: 'payments' },
+    { label: 'Attendance', icon: 'groups' },
+    { key: 'exports', label: 'Exports', toggleable: false, items: [
+      { label: 'CSV' },
+      { label: 'PDF' },
+    ] },
+  ] },
+  { key: 'admin', label: 'Administration', toggleable: true, items: [
+    { label: 'Users', icon: 'person' },
+    { label: 'Roles', icon: 'shield' },
+  ] },
+];
+
+const vmRouter: MenuItem[] = [
+  { key: 'nav', label: 'Navigation', items: [
+    { label: 'Overview', icon: 'home', href: '#overview' },
+    { label: 'Events', icon: 'event', href: '#events', active: true },
+    { label: 'Docs', icon: 'open_in_new', href: 'https://example.com/docs', target: '_blank' },
+  ] },
+  { separator: true },
+  { key: 'actions', label: 'Actions', items: [
+    { label: 'Refresh', icon: 'refresh', command: () => { vmPicked.value = 'Refresh (its own command ran first)'; } },
+  ] },
+];
+
+/*
+ * Gated, and written so expandAll() tells the story: Reports is a toggleable
+ * group whose children are gated, so for a role without them the group goes and
+ * its key never reaches expandedKeys.
+ */
+const vmGated: MenuItem[] = [
+  { key: 'main', label: 'Workspace', items: [
+    { label: 'Dashboard', icon: 'dashboard' },
+    { label: 'Settings', icon: 'settings', can: 'settings' },
+  ] },
+  { key: 'reports', label: 'Reports', toggleable: true, items: [
+    { label: 'Sales', can: 'reports' },
+    { label: 'Attendance', can: 'reports' },
+  ] },
+  { key: 'admin', label: 'Administration', toggleable: true, can: 'settings', items: [
+    { label: 'Users' },
+  ] },
+];
+
 /* ── ApexMenubar page ────────────────────────────────────── */
 const mbPicked = ref('');
 
@@ -2982,6 +3068,172 @@ function pick(city) {
         <!-- Ported from the gallery, five sections. The popover is reached
              through its ref throughout, which is how it is meant to be used —
              so each example declares its own ref rather than sharing one. -->
+        <template v-if="entry.id === 'menu'">
+          <h2>Basic</h2>
+          <p class="note">
+            Rows are data. A row with its own <code>items</code> is a group, and the
+            default depends on depth: a top-level group is a static section label with its
+            children shown, a nested one collapses. Sections are separated by
+            <code>separator</code> rows, exactly as in the overlay menus.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexMenu :items="items" width="260px" /&gt;
+
+const items = [
+  { key: 'main', label: 'Workspace', items: [
+    { label: 'Dashboard', icon: 'dashboard', active: true },
+    { label: 'Events', icon: 'event', badge: '4' },
+  ] },
+  { separator: true },
+  { key: 'account', label: 'Account', items: [
+    { label: 'Profile', icon: 'person', help: 'Name, email, password' },
+  ] },
+]</pre>
+          <div class="tmenu-row">
+            <ApexMenu :items="vmBasic" width="260px" />
+          </div>
+
+          <h2>Group — checkbox and radio rows</h2>
+          <p class="note">
+            A row is only markup until you put a control in it. The <code>item</code> slot
+            keeps the row's behaviour and replaces its contents, so a filter list or a
+            single-choice group lives in the menu rather than beside it.
+          </p>
+          <div class="tmenu-row">
+            <ApexMenu :items="vmChoice" width="260px">
+              <template #item="{ item }">
+                <ApexCheckbox v-if="item.kind === 'check'"
+                              v-model="vmChecks[String(item.key)]" :label="item.label" />
+                <ApexRadio v-else-if="item.kind === 'radio'"
+                           v-model="vmRadio" :value="String(item.key)" :label="item.label" />
+                <span v-else class="vm-plain">
+                  <ApexIcon v-if="item.icon" :name="item.icon" :size="18" />{{ item.label }}
+                </span>
+              </template>
+            </ApexMenu>
+          </div>
+          <p class="pov-state">sort: <code>{{ vmRadio }}</code></p>
+
+          <h2>Toggleable</h2>
+          <p class="note">
+            <code>toggleable</code> on the item overrides the depth default either way: a
+            top-level group that collapses, or a nested one that stays open as a plain
+            label.
+          </p>
+          <div class="tmenu-row">
+            <ApexMenu :items="vmToggle" width="260px" />
+          </div>
+
+          <h2>Controlled</h2>
+          <p class="note">
+            Open state is an <code>expandedKeys</code> map with two-way binding, keyed by
+            an item's <code>key</code> (or its label). Bind it and the menu can be driven
+            from outside — expand all, collapse all, or restore what the user had
+            last time.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexMenu :items="items" v-model:expandedKeys="open" /&gt;</pre>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton size="sm" variant="text" @click="vmCtl?.expandAll()">expandAll()</ApexButton>
+            <ApexButton size="sm" variant="text" @click="vmCtl?.collapseAll()">collapseAll()</ApexButton>
+          </div>
+          <div class="tmenu-row">
+            <ApexMenu ref="vmCtl" :items="vmToggle" v-model:expandedKeys="vmKeys" width="260px" />
+          </div>
+          <p class="pov-state">expandedKeys: <code>{{ JSON.stringify(vmKeys) }}</code></p>
+
+          <h2>Popup</h2>
+          <p class="note">
+            With <code>popup</code> the menu renders nothing until
+            <code>toggle(event)</code> is called, and anchors to whatever was clicked
+            — the same placement the popover uses.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton icon="account_circle" @click="vmPop?.toggle($event)">Account</ApexButton>
+          </div>
+          <ApexMenu ref="vmPop" :items="vmBasic" popup width="240px" side="bottom" align="start" />
+
+          <h2>Template</h2>
+          <p class="note">
+            <code>start</code> and <code>end</code> bracket the list — a profile
+            block above, a footer action below — and <code>submenulabel</code>
+            replaces a group's label without touching its rows.
+          </p>
+          <div class="tmenu-row">
+            <ApexMenu :items="vmBasic" width="260px">
+              <template #start>
+                <div class="vm-profile">
+                  <ApexAvatar label="DD" size="sm" shape="circle" />
+                  <span class="vm-profile__name">Duncan</span>
+                </div>
+              </template>
+              <template #submenulabel="{ item }">
+                <span class="vm-label">{{ item.label }}</span>
+              </template>
+              <template #end>
+                <ApexButton size="sm" variant="text" icon="add">New workspace</ApexButton>
+              </template>
+            </ApexMenu>
+          </div>
+
+          <h2>Colour</h2>
+          <p class="note">
+            Every row state is a prop — resting, hovered, and the row marked
+            <code>active</code> — so the menu can sit on a dark rail or a tinted
+            panel without a stylesheet override. The icon follows the text colour on hover.
+          </p>
+          <div class="tmenu-row">
+            <ApexMenu
+              :items="vmBasic" width="240px"
+              background="#101828" borderColor="#1f2a3c" textColor="#c7d2e4"
+              labelColor="#7d8aa3" iconColor="#7aa2ff"
+              hoverBackground="#182338" hoverTextColor="#ffffff"
+              activeColor="#ffffff" activeBackground="#233250" radius="12px"
+            />
+          </div>
+
+          <h2>Router and active state</h2>
+          <p class="note">
+            A row with an <code>href</code> renders as a real link, so middle-click and
+            copy-address keep working; <code>active</code> marks the one you are on. A row
+            runs its own <code>command</code> first, then the menu emits
+            <code>item-click</code>.
+          </p>
+          <pre class="doc-pre" v-pre>{ label: 'Events', href: '/events', active: route.path === '/events' }</pre>
+          <div class="tmenu-row">
+            <ApexMenu :items="vmRouter" width="260px"
+                      @item-click="vmPicked = $event.item.label || ''" />
+          </div>
+          <p class="pov-state">item-click: <code>{{ vmPicked || 'nothing yet' }}</code></p>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            <code>can</code> hides a row from anyone the resolver denies, and the removals
+            cascade: a group whose children have all gone is dropped with them, since
+            opening it would show nothing.
+          </p>
+          <p class="note">
+            This menu has a second consequence the others do not.
+            <code>expandAll()</code> and <code>collapseAll()</code> build the
+            <code>expandedKeys</code> map by walking the model, and they walk the
+            <em>filtered</em> one — so a group this user cannot see never appears in
+            the map either. A consumer persisting that map to restore a sidebar between
+            visits would otherwise save, and later reload, state for a menu it never
+            showed.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+            <ApexButton size="sm" variant="text" @click="vmGate?.expandAll()">expandAll()</ApexButton>
+          </div>
+          <div class="tmenu-row">
+            <ApexMenu ref="vmGate" :items="vmGated" v-model:expandedKeys="vmGateKeys" width="260px" />
+          </div>
+          <p class="pov-state">expandedKeys: <code>{{ JSON.stringify(vmGateKeys) }}</code></p>
+        </template>
+
         <template v-if="entry.id === 'menubar'">
           <h2>Basic and submenus</h2>
           <p class="note">
