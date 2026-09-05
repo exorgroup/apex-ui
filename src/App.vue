@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import {
   AFFIX_CASES, AUTOCOMPLETE_SNIPPET, CITIES, COMMON_CONTROLS, ENTRIES, FORMATTING_RULE,
   ICON_SLOT_CASES, KEY_FILTER_CASES, LABEL_PLACEMENTS, PLAYGROUND_DEFAULTS,
@@ -17,7 +17,7 @@ import {
   BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS,
   AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
-  TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS, DLG_POSITIONS,
+  TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS, DLG_POSITIONS, MSG_TEXT,
 } from './registry';
 import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
@@ -42,6 +42,47 @@ const copied = ref(false);
 const model = reactive<Record<string, unknown>>({});
 
 /* ── The directives ──────────────────────────────────────────────────── */
+
+/* ── ApexMessage ─────────────────────────────────────────────────────── */
+
+/**
+ * The "Closable and life" pair, and the last event either of them reported.
+ *
+ * Both are v-model:visible so a dismissed message can be brought back, which
+ * is the whole point of that section — a message that could only be closed
+ * would need no bindable state at all.
+ */
+const msgLife = ref(true);
+const msgManual = ref(true);
+const msgLog = ref('');
+
+/**
+ * Restart the timed message.
+ *
+ * Setting visible back to true while it is already true changes nothing, so
+ * the timer never restarts and the button looks broken on a second press. It
+ * has to go false first, and the component has to see that — hence nextTick
+ * rather than two assignments in a row, which Vue would batch into no change
+ * at all.
+ */
+async function restartMsgLife() {
+  msgLife.value = false;
+  await nextTick();
+  msgLife.value = true;
+}
+
+/** The Dynamic section's own array, and the counter that keeps keys unique. */
+const msgList = ref<Array<{ id: number; severity: string; text: string }>>([]);
+let msgSeq = 0;
+const MSG_SEVERITIES = ['success', 'info', 'warn', 'error'] as const;
+function addMsg() {
+  msgSeq += 1;
+  const severity = MSG_SEVERITIES[msgSeq % MSG_SEVERITIES.length];
+  msgList.value.push({ id: msgSeq, severity, text: `Message ${msgSeq} — ${MSG_TEXT[severity]}` });
+}
+
+/** "In a form": empty is the error case, so it starts empty deliberately. */
+const msgEmail = ref('');
 
 /* ── The three overlays ──────────────────────────────────────────────── */
 
@@ -957,7 +998,11 @@ async function copyUsage() {
                    v-model, and in some cases slot content or room to fan out. -->
               <!-- "plain" is the whole treatment for a control that renders
                    from its props: ApexIcon, ApexBadge, ApexAvatar. -->
-              <component v-if="entry.demo === 'plain'" :is="entry.name" v-bind="live" />
+              <component v-if="entry.demo === 'plain'" :is="entry.name" v-bind="live">
+                <!-- Only for the controls that are a box around content; the
+                     rest pass nothing and render from props alone. -->
+                <template v-if="entry.slotText">{{ entry.slotText }}</template>
+              </component>
 
               <!-- A directive has no tag of its own, so it needs a host — and
                    two of the four need more than that. DirectiveStage holds
@@ -2005,6 +2050,162 @@ async function copyUsage() {
               <span class="cell__tag dial-cell__tag">:arc="{{ a }}"</span>
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
+          </div>
+        </template>
+
+        <!-- Ported from the gallery, eight sections. -->
+        <template v-if="entry.id === 'message'">
+          <h2>Severity</h2>
+          <p class="note">Six severities, each with its own tint and default icon.</p>
+          <div class="msg-stack" style="margin-top: 12px">
+            <ApexMessage severity="success" closable>Your account is now ready.</ApexMessage>
+            <ApexMessage severity="info" closable>Upgrade now and save 5%.</ApexMessage>
+            <ApexMessage severity="warn" closable>Your subscription is about to expire.</ApexMessage>
+            <ApexMessage severity="error" closable>Something went wrong.</ApexMessage>
+            <ApexMessage severity="secondary" closable>Processing may take a few moments.</ApexMessage>
+            <ApexMessage severity="contrast" closable>You are currently in offline mode.</ApexMessage>
+          </div>
+
+          <h2>Variant</h2>
+          <p class="note">
+            <code>outlined</code> keeps the page behind it; <code>simple</code> drops the frame
+            entirely, which is what belongs under a field.
+          </p>
+          <div class="grid grid--2" style="margin-top: 12px">
+            <div class="cell">
+              <span class="cell__tag">outlined</span>
+              <div class="msg-stack">
+                <ApexMessage
+                  v-for="s in (['success', 'info', 'warn', 'error'] as const)"
+                  :key="s"
+                  :severity="s"
+                  variant="outlined"
+                  closable
+                >{{ MSG_TEXT[s] }}</ApexMessage>
+              </div>
+            </div>
+            <div class="cell">
+              <span class="cell__tag">simple</span>
+              <div class="msg-stack">
+                <ApexMessage
+                  v-for="s in (['success', 'info', 'warn', 'error'] as const)"
+                  :key="s"
+                  :severity="s"
+                  variant="simple"
+                  closable
+                >{{ MSG_TEXT[s] }}</ApexMessage>
+              </div>
+            </div>
+          </div>
+
+          <h2>Icon</h2>
+          <p class="note">
+            Override with the <code>icon</code> prop, remove it with an empty string, or replace
+            it outright with the <code>icon</code> slot — an avatar, an image, a spinner.
+          </p>
+          <div class="msg-stack msg-narrow" style="margin-top: 12px">
+            <ApexMessage severity="warn" icon="receipt_long">Your subscription is about to expire.</ApexMessage>
+            <ApexMessage severity="info" icon="">No icon at all.</ApexMessage>
+            <ApexMessage severity="info">
+              <template #icon><ApexAvatar label="Amy Elsner" size="sm" /></template>
+              How may I help you?
+            </ApexMessage>
+            <ApexMessage severity="secondary">
+              <template #icon><ApexIcon name="progress_activity" spin :size="18" /></template>
+              Processing may take a few moments.
+            </ApexMessage>
+          </div>
+
+          <h2>Sizes</h2>
+          <div class="msg-stack msg-narrow" style="margin-top: 12px">
+            <ApexMessage
+              v-for="s in (['sm', 'md', 'lg'] as const)"
+              :key="s"
+              :size="s"
+              severity="success"
+              closable
+            >Size {{ s }} — your account is now ready.</ApexMessage>
+          </div>
+
+          <h2>Blur</h2>
+          <p class="note">
+            <code>blur</code> frosts whatever sits behind the message — the dialog's mask blur
+            applied to an inline surface. It implies <code>translucent</code>, since a solid tint
+            has nothing to show through; pass a number or CSS length for the radius. Useful over
+            imagery or a busy panel.
+          </p>
+          <div class="msg-glass" style="margin-top: 12px">
+            <div class="msg-stack">
+              <ApexMessage severity="success" blur closable>Frosted at the default 8px.</ApexMessage>
+              <ApexMessage severity="warn" :blur="16" closable>A heavier 16px blur.</ApexMessage>
+              <ApexMessage severity="contrast" blur closable>Contrast severity, translucent and frosted.</ApexMessage>
+              <ApexMessage severity="info" translucent closable>Translucent with no blur.</ApexMessage>
+            </div>
+          </div>
+
+          <h2>Closable and life</h2>
+          <p class="note">
+            <code>closable</code> adds the dismiss button; <code>life</code> dismisses after n
+            milliseconds, with <code>showTimer</code> for a countdown bar.
+            <code>v-model:visible</code> means a dismissed message can be brought back.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              size="sm"
+              severity="secondary"
+              variant="outlined"
+              @click="restartMsgLife()"
+            >Show a timed message</ApexButton>
+            <ApexButton size="sm" variant="text" @click="msgManual = true">Restore the dismissed one</ApexButton>
+          </div>
+          <div class="msg-stack msg-narrow" style="margin-top: 12px">
+            <ApexMessage
+              v-model:visible="msgLife"
+              severity="info"
+              :life="4000"
+              show-timer
+              closable
+              @life-end="msgLog = 'life ended'"
+            >Gone in four seconds.</ApexMessage>
+            <ApexMessage
+              v-model:visible="msgManual"
+              severity="success"
+              closable
+              @close="msgLog = 'dismissed'"
+            >Dismiss me, then restore me.</ApexMessage>
+          </div>
+          <p class="msg-event">Last event: <code>{{ msgLog || 'none yet' }}</code></p>
+
+          <h2>Dynamic</h2>
+          <p class="note">
+            Nothing special is needed for a list — a <code>v-for</code> over your own array, each
+            message closing itself out of it.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton size="sm" @click="addMsg()">Add message</ApexButton>
+            <ApexButton size="sm" severity="secondary" variant="outlined" @click="msgList = []">Clear</ApexButton>
+          </div>
+          <div class="msg-stack msg-narrow" style="margin-top: 12px">
+            <ApexMessage
+              v-for="m in msgList"
+              :key="m.id"
+              :severity="m.severity"
+              closable
+              @close="msgList = msgList.filter((x) => x.id !== m.id)"
+            >{{ m.text }}</ApexMessage>
+          </div>
+
+          <h2>In a form</h2>
+          <p class="note">
+            The <code>simple</code> variant under a field is the validation case — the same
+            component, no frame.
+          </p>
+          <div class="card msg-form" style="margin-top: 12px">
+            <ApexInput v-model="msgEmail" label="Email address" placeholder="you@company.com" />
+            <ApexMessage v-if="!msgEmail" severity="error" variant="simple" size="sm">
+              An email address is required.
+            </ApexMessage>
+            <ApexMessage v-else severity="success" variant="simple" size="sm">Looks good.</ApexMessage>
           </div>
         </template>
 

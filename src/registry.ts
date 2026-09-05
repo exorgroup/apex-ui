@@ -102,6 +102,13 @@ export interface DocEntry {
    * against, so nothing is checked and everything reads as clean.
    */
   optionsType?: string;
+  /**
+   * Default-slot text for the playground stage, where the control renders
+   * nothing without children. ApexMessage is a box around its content: bound
+   * to props alone it is an empty tinted strip, and every rail control looks
+   * like it does nothing.
+   */
+  slotText?: string;
   /** Opening attributes for the usage snippet, before the playground props. */
   lead?: string[];
   /**
@@ -650,6 +657,17 @@ export const ICON_RESOLVER_SNIPPET = `app.use(ApexUI, {
 });`;
 
 /** Used by the ApexSelect in ApexIcon's "In context" section. */
+/**
+ * One line per severity, so the Variant section can show the same four
+ * messages twice without repeating their text in the template.
+ */
+export const MSG_TEXT: Record<string, string> = {
+  success: 'Your account is now ready.',
+  info: 'Upgrade now and save 5%.',
+  warn: 'Your subscription is about to expire.',
+  error: 'Something went wrong.',
+};
+
 /**
  * ApexDialog's nine placements, in the reading order the 3×3 grid needs —
  * corners and edges interleaved, so the buttons sit where the dialog will.
@@ -4296,5 +4314,44 @@ export const ENTRIES: DocEntry[] = [
     ],
     events: [['update:visible', 'boolean'], ['show / hide', '—'], ['after-hide', 'once the leave transition ends']],
     slots: [['default', 'Body'], ['header', 'Replaces the header'], ['footer', 'Footer, usually actions']],
+  },
+  {
+    id: 'message', name: 'ApexMessage', group: 'Messages',
+    blurb: 'An inline message for feedback next to the thing it concerns. Three variants over one box — filled tints the surface, outlined keeps the page background with a coloured edge, simple drops the frame for a line of coloured text under a field — plus an optional blur that frosts whatever sits behind it, the same idea as the dialog’s mask blur.',
+    noField: true, demo: 'plain', slotText: 'Your account is now ready.',
+    lead: [], tail: '>Your account is now ready.</ApexMessage>',
+    base: { severity: 'success', variant: 'filled', size: 'md', closable: true },
+    controls: [
+      { key: 'severity', type: 'select', options: ['info', 'success', 'warn', 'error', 'secondary', 'contrast'] },
+      { key: 'variant', type: 'select', options: ['filled', 'outlined', 'simple'] },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'icon', type: 'text' },
+      { key: 'closable', type: 'bool' }, { key: 'block', type: 'bool' },
+      { key: 'life', type: 'number' }, { key: 'showTimer', type: 'bool' },
+      { key: 'blur', type: 'bool' }, { key: 'translucent', type: 'bool' },
+      { key: 'radius', type: 'text' }, { key: 'padding', type: 'text' },
+      { key: 'background', type: 'color' }, { key: 'textColor', type: 'color' },
+      { key: 'borderColor', type: 'color' }, { key: 'iconColor', type: 'color' },
+    ],
+    props: [
+      ['visible', 'boolean', 'true', 'v-model:visible — so a closed message can be brought back'],
+      ['severity', "'info' | 'success' | 'warn' | 'error' | 'secondary' | 'contrast'", "'info'", 'Sets the tint and the default icon'],
+      ['variant', "'filled' | 'outlined' | 'simple'", "'filled'", ''],
+      ['size', "'sm' | 'md' | 'lg'", "'md'", ''],
+      ['icon', 'string', 'per severity', 'Overrides the icon; an empty string removes it, and the icon slot replaces it outright'],
+      ['closable', 'boolean', 'false', 'Adds the dismiss button'],
+      ['life / showTimer', 'number / boolean', '— / false', 'Dismiss after n milliseconds, with an optional countdown bar'],
+      ['blur', 'boolean | number | string', 'false', 'Frosts what sits behind the message — true for 8px, or give a radius. Implies translucent, since a solid surface has nothing to show through'],
+      ['translucent', 'boolean', 'false', 'Makes the surface see-through without blurring'],
+      ['background / textColor / borderColor / iconColor', 'string', 'per severity', 'Chrome'],
+      ['radius / padding', 'string', 'tokens', ''],
+      ['block', 'boolean', 'true', 'false hugs the content instead of filling the container'],
+    ],
+    events: [['update:visible', 'boolean'], ['close', '— the dismiss button'], ['life-end', '— the timer ran out']],
+    slots: [
+      ['default', 'The message'],
+      ['icon', 'Replaces the icon — an avatar, an image, a spinner'],
+      ['actions', 'Between the text and the close button — a link or a small button'],
+    ],
   },
 ];

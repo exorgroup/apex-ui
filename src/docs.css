@@ -548,6 +548,22 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .dir-hint { font-size: 13px; color: var(--fg-subtle); margin: 0; }
 .dir-gap { block-size: 150px; }
 
+/* ── ApexMessage's examples ────────────────────────────────────────────── */
+
+.msg-stack { display: flex; flex-direction: column; gap: 10px; }
+.msg-narrow { max-inline-size: 460px; }
+
+/* The Blur section needs something worth frosting: a flat panel would show
+   nothing through a translucent surface, so the backdrop is a gradient. */
+.msg-glass {
+  padding: 18px; border-radius: var(--r-lg);
+  background: linear-gradient(135deg, #F0574B 0%, #E8823C 38%, #5B9BD5 78%, #2E6FA8 100%);
+}
+
+/* "In a form" is a card holding a field and its message. */
+.msg-form { max-inline-size: 420px; display: flex; flex-direction: column; gap: 12px; }
+.msg-event { font-size: 13px; margin-block-start: 8px; }
+
 /* ── The overlays' examples ────────────────────────────────────────────── */
 
 /* A row of triggers that wraps, for the side/position pickers. */
