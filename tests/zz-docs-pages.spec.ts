@@ -229,6 +229,8 @@ describe('the ported gallery examples are on the page', () => {
       'Command and router', 'Permissions'],
     ApexMenu: ['Basic', 'Group — checkbox and radio rows', 'Toggleable', 'Controlled',
       'Popup', 'Template', 'Colour', 'Router and active state', 'Permissions'],
+    ApexSidebar: ['Variants', 'With menu', 'Responsive', 'Dual sidebar', 'Multi sidebar',
+      'Nested menu', 'Chat application', 'Permissions'],
     ApexBreadcrumb: ['Basic', 'Text, icons, or both', 'Route', 'Custom separator',
       'Ellipsis', 'Custom item', 'Sizes and chrome', 'Permissions'],
     ApexContextMenu: ['Basic', 'Submenus', 'Global', 'Command', 'Template',
