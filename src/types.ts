@@ -538,6 +538,26 @@ export interface ApexUiOptions {
    * authorise the request itself.
    */
   canCreate?: (resource: string) => boolean;
+  /**
+   * The same idea for any action, not just creating: may this user `delete` an
+   * `events` record, `export` a `reports` one. Register it once and every
+   * control that offers a gated action — an alert's Delete button today, menu
+   * items and toolbar actions next — asks the same question.
+   *
+   * `canCreate` is the special case. When both are registered `canCreate` wins
+   * for the create action, so an app that wired only the older one keeps the
+   * behaviour it already had.
+   *
+   * With apex-autentica this is `can: (a, r) => can(permissions, r, a)`; with a
+   * plain map it is `can: (a, r) => allowed[r]?.includes(a)`.
+   *
+   * Also UX only, and the distinction matters more here than it does for an
+   * "Add new" row: hiding a Delete button does not stop anyone deleting. The
+   * action is still in the shipped bundle and the endpoint behind it is still
+   * reachable. What this buys is an interface that tells the truth about what
+   * a user can do — the endpoint must authorise the request itself.
+   */
+  can?: (action: string, resource: string) => boolean;
 }
 
 export interface ApexStrings {

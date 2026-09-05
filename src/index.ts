@@ -356,6 +356,9 @@ export type { ConfirmOptions, ConfirmButton } from './core/confirm';
 export type { ColorFormat, Channel } from './core/color';
 export type { ApexDateLocale } from './core/dates';
 export { useApexI18n, APEX_FALLBACK_STRINGS } from './core/i18n';
+/* Exported so an app can ask the same question its controls are asking, with
+   the same precedence, rather than reimplementing the rule beside them. */
+export { useCan } from './core/can';
 export { APEX_UI_OPTIONS, APEX_ADAPTER } from './core/symbols';
 export { zodAdapter } from './adapters/zod';
 export { precognitionAdapter } from './adapters/precognition';

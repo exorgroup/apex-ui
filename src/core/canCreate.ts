@@ -1,6 +1,4 @@
-import { inject } from 'vue';
-import { APEX_UI_OPTIONS } from './symbols';
-import type { ApexUiOptions } from '../types';
+import { useCan } from './can';
 
 /**
  * Resolves whether a chooser may show its "Add new" row.
@@ -14,13 +12,18 @@ import type { ApexUiOptions } from '../types';
  * The row is hidden rather than disabled when the answer is no — a greyed-out
  * "Add new" still tells someone the feature exists and that they are not
  * allowed to use it, which is rarely what you want.
+ *
+ * Now a thin call onto `useCan`, which asks the same question about any
+ * action. Kept under its own name because six controls and any app wiring
+ * already use it, and because "may this chooser offer Add new" reads better at
+ * a call site than the general form. Delegating rather than duplicating is
+ * what lets an app that registered only the general `can` resolver gate these
+ * six as well.
  */
 export function useCanCreate() {
-  const opts = inject<ApexUiOptions>(APEX_UI_OPTIONS, {});
+  const can = useCan();
 
   return function canCreate(explicit?: boolean, resource?: string): boolean {
-    if (explicit !== undefined) return explicit;
-    if (opts.canCreate && resource) return !!opts.canCreate(resource);
-    return true;
+    return can('create', resource, explicit);
   };
 }
