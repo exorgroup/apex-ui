@@ -27,6 +27,7 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 import { useApexDialog, useApexAlert, useApexToast, ApexPopover } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
+import CityPicker from './demos/CityPicker.vue';
 import ContainerStage from './demos/ContainerStage.vue';
 import DirectiveStage from './demos/DirectiveStage.vue';
 import ServiceStage from './demos/ServiceStage.vue';
@@ -43,6 +44,45 @@ const copied = ref(false);
 const model = reactive<Record<string, unknown>>({});
 
 /* ── The directives ──────────────────────────────────────────────────── */
+
+/* ── ApexDynamicDialog ───────────────────────────────────────────────── */
+
+/** What the last dialog returned, or that it was dismissed. */
+const dynLog = ref('');
+
+/**
+ * Open CityPicker through the service.
+ *
+ * `nested` opens a second one over the first, which is what makes the Stacking
+ * section observable: each instance gets its own z-index, so the newer picker
+ * sits above the older rather than behind it.
+ *
+ * onClose distinguishes a choice from a dismissal, because dialogRef.close()
+ * with no argument is how the component says "nothing chosen" — treating
+ * undefined as a value would report a cancel as a selection.
+ */
+function openPicker(header: string, prompt: string) {
+  dialog.open(CityPicker, {
+    props: { header, width: '380px' },
+    data: { prompt },
+    /* Typed explicitly: the service resolves to dist/apex-ui.js, which ships
+       no .d.ts, so an untyped callback's destructured params are implicit any
+       and error under noImplicitAny. */
+    onClose({ data }: { data?: unknown }) {
+      dynLog.value = data ? `chose ${data}` : 'dismissed with no value';
+    },
+  });
+}
+
+function openDynamic(kind?: 'nested') {
+  openPicker('Pick a city', 'Choose a city, or cancel.');
+  /* Order matters: the second open() must come after the first, because the
+     stack's z-index follows the index in it. Opening the "second" one first
+     would put it underneath, which shows the opposite of what it claims. */
+  if (kind === 'nested') {
+    openPicker('A second picker', 'This one opened over the first — note it sits above it.');
+  }
+}
 
 /* ── ApexToast ───────────────────────────────────────────────────────── */
 
@@ -82,6 +122,16 @@ function burstToasts() {
     toast.add({ group: 'stackdemo', severity: 'info', summary: `Message ${burstSeq}`, detail: 'One of five sent together.' });
   }
 }
+
+/**
+ * The custom-toast demo's payload, read as its real shape.
+ *
+ * ToastMessage.data is `unknown`, so the template has to narrow it. Doing that
+ * with an inline `as { … }` inside a mustache is what vue-tsc's template
+ * parser cannot read — it bails on the file and stops reporting, which drops
+ * the error count and reads like an improvement.
+ */
+const uploadInfo = (m: { data?: unknown }) => m.data as { file: string; size: string };
 
 /** What the actions slot last did, shown live under the buttons. */
 const toastLog = ref('');
@@ -2096,6 +2146,64 @@ async function copyUsage() {
           </div>
         </template>
 
+        <!-- Ported from the gallery, three sections. -->
+        <template v-if="entry.id === 'dynamicdialog'">
+          <h2>The service</h2>
+          <p class="note">
+            Mount one <code>&lt;ApexDynamicDialog /&gt;</code> in the app shell and open any
+            component from anywhere. The caller keeps no visible state, and the component it
+            opens needs no dialog markup.
+          </p>
+          <pre class="doc-pre" v-pre>import { useApexDialog } from '@exorgroup/apex-ui';
+import CityPicker from './CityPicker.vue';
+
+const dialog = useApexDialog();
+
+function pickCity() {
+  dialog.open(CityPicker, {
+    props: { header: 'Pick a city', width: '380px' },
+    data: { cities },
+    onClose({ data }) { if (data) selected.value = data; },
+  });
+}</pre>
+
+          <h2>Passing data, and returning a value</h2>
+          <p class="note">
+            The loaded component injects <code>dialogRef</code>: it reads what it was opened
+            with, and returns a value by closing with it. Whatever it passes reaches
+            <code>onClose</code> — after the leave transition, so the caller never sees a
+            half-closed dialog.
+          </p>
+          <pre class="doc-pre" v-pre>const dialogRef = inject('dialogRef');
+const cities = dialogRef.data.cities;
+
+function pick(city) {
+  dialogRef.close(city);   // → onClose({ data: city })
+}</pre>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton icon="open_in_new" @click="openDynamic()">Select a city</ApexButton>
+            <ApexButton
+              severity="secondary"
+              variant="outlined"
+              icon="layers"
+              @click="openDynamic('nested')"
+            >Open over a dialog</ApexButton>
+          </div>
+          <p class="msg-event">Last outcome: <code>{{ dynLog || 'none yet' }}</code></p>
+
+          <h2>Stacking</h2>
+          <p class="note">
+            Every <code>open()</code> pushes an instance, each with its own options and
+            z-index — base 1000, ten per level — so a picker over a form is ordinary.
+            <code>closeAll()</code> clears the stack, e.g. on a route change.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton severity="secondary" variant="outlined" size="sm" @click="dialog.closeAll()">
+              closeAll()
+            </ApexButton>
+          </div>
+        </template>
+
         <!-- Ported from the gallery, eight sections. Each demo that needs its
              own container gives it a group, so its toasts cannot land in the
              app-root host or in another section's stack. -->
@@ -2252,10 +2360,7 @@ async function copyUsage() {
                 <ApexIcon name="folder_zip" :size="26" class="toast-custom__icon" />
                 <div class="toast-custom__body">
                   <strong>{{ message.summary }}</strong>
-                  <span>
-                    {{ (message.data as { file: string; size: string }).file }} ·
-                    {{ (message.data as { file: string; size: string }).size }}
-                  </span>
+                  <span>{{ uploadInfo(message).file }} · {{ uploadInfo(message).size }}</span>
                   <ApexProgressBar :value="100" class="toast-custom__bar" />
                 </div>
                 <ApexButton size="sm" variant="text" icon="close" aria-label="Dismiss" @click="close()" />
