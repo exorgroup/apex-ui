@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div
-      v-if="state.open && !state.target"
+      v-if="state.open && !state.target && mine"
       class="apex-alert-overlay"
       :class="ui?.overlay"
       :style="overlayStyle"
@@ -25,10 +25,10 @@
         :class="[state.enterClass, transitionClass, ui?.panel]"
         :style="panelStyle"
         :data-tone="state.stage === 'progress' ? 'info' : state.tone"
-        :data-icon-pos="state.iconPosition || 'top'"
+        :data-icon-pos="iconPosition"
         role="alertdialog"
         aria-modal="true"
-        :aria-label="state.title"
+        :aria-label="title"
       >
         <button
           v-if="state.closable"
@@ -63,11 +63,11 @@
             />
 
             <ApexIcon
-              v-else-if="state.icon"
+              v-else-if="icon"
               class="apex-alert-icon"
-              :name="state.icon"
+              :name="icon"
               :size="64"
-              :data-anim="state.iconAnimation || 'none'"
+              :data-anim="iconAnimation"
               :style="{ color: state.iconColor || 'var(--apex-alert-ring)' }"
             />
 
@@ -113,10 +113,10 @@
         </div>
 
         <div :key="stageSig" class="apex-alert-content" :class="ui?.content">
-          <h2 class="apex-alert-title" :class="ui?.title">{{ state.title }}</h2>
+          <h2 class="apex-alert-title" :class="ui?.title">{{ title }}</h2>
 
           <slot name="message" :state="state">
-            <p v-if="state.message" class="apex-alert-text" :class="ui?.text">{{ state.message }}</p>
+            <p v-if="message" class="apex-alert-text" :class="ui?.text">{{ message }}</p>
           </slot>
 
           <!-- Values are rendered as text, never as markup: they come from
@@ -213,6 +213,22 @@ const { state, settle, press, close } = useApexAlert();
 const t = useApexI18n();
 
 const alertEl = ref<HTMLElement | null>(null);
+
+/*
+ * Props are fallbacks; a per-call option always wins. Six of these were
+ * declared and never read — the exact failure this component's own tests
+ * warned about, missed because they exercised the options and never the props.
+ */
+
+/** Only answer requests for this host's group, so a per-kind host can exist. */
+const mine = computed(() =>
+  (props.group ? state.group === props.group : !state.group));
+
+const title = computed(() => state.title ?? props.header);
+const message = computed(() => state.message || props.message);
+const icon = computed(() => state.icon ?? props.icon);
+const iconPosition = computed(() => state.iconPosition ?? props.iconPosition);
+const iconAnimation = computed(() => state.iconAnimation ?? props.iconAnimation);
 
 /* ── the button row ─────────────────────────────────────────── */
 

@@ -93,7 +93,8 @@ describe('the popup shares the alert\'s buttons', () => {
     const p = alert.confirm({ message: 'Delete?', cancelText: 'Keep', target: btn });
     await hosts.vm.$nextTick();
 
-    const accept = [...document.querySelectorAll('.apex-cpop__actions button')].at(-1) as HTMLElement;
+    const all = [...document.querySelectorAll('.apex-cpop__actions button')];
+    const accept = all[all.length - 1] as HTMLElement;
     accept.click();
     expect(await p).toBe(true);
     expect(__alertState.open).toBe(false);
