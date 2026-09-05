@@ -29,7 +29,7 @@
  * a broken page.
  */
 import { computed } from 'vue';
-import { useApexToast, useApexConfirm, useApexDialog } from '@exorgroup/apex-ui';
+import { useApexToast, useApexAlert, useApexDialog } from '@exorgroup/apex-ui';
 import type { ServiceSpec } from '../registry';
 
 const props = defineProps<{
@@ -46,7 +46,7 @@ const props = defineProps<{
    and typechecking both. */
 const SERVICES: Record<string, () => Record<string, any>> = {
   useApexToast,
-  useApexConfirm,
+  useApexAlert,
   useApexDialog,
 };
 
