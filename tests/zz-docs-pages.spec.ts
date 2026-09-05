@@ -79,6 +79,31 @@ describe('a directive page documents a directive', () => {
   );
 });
 
+describe('a slotText entry puts that text in the stage', () => {
+  /*
+   * Some controls are a box around their content — ApexMessage is nothing but
+   * a tinted strip without children. `slotText` supplies that content, and if
+   * the stage failed to pass it through, the page would still render, still
+   * warn about nothing, and still pass every other test here: the reader would
+   * just see an empty strip whose rail controls all looked inert.
+   */
+  const WITH_TEXT = ENTRIES.filter((e) => e.slotText);
+
+  it('there are slotText entries to check', () => {
+    expect(WITH_TEXT.length).toBeGreaterThan(0);
+  });
+
+  it.each(WITH_TEXT.map((e) => [e.name, e.slotText!] as const))(
+    '%s',
+    async (name, text) => {
+      const { wrapper, open } = await harness();
+      await open(name);
+      expect(wrapper.find('.stage__demo').text(), `${name}'s stage`).toContain(text);
+      wrapper.unmount();
+    },
+  );
+});
+
 describe('the ported gallery examples are on the page', () => {
   /* Headings taken from APEX UI Gallery.html. A build cannot tell you a
      section is missing — only reading the rendered page can. */
@@ -120,6 +145,8 @@ describe('the ported gallery examples are on the page', () => {
       'Rich content'],
     ApexDrawer: ['Position', 'Responsive', 'Template', 'Floating and headless'],
     ApexDialog: ['Positions', 'Draggable, non-modal and timed'],
+    ApexMessage: ['Severity', 'Variant', 'Icon', 'Sizes', 'Blur', 'Closable and life',
+      'Dynamic', 'In a form'],
     ApexBlockUI: ['Basic', 'Timed release', 'Styling', 'Document'],
     ApexScrollTop: ['Basic', 'Target element', 'Styling and placement'],
     ApexProgressSpinner: ['Indeterminate', 'Determinate', 'Size, stroke and colour',
