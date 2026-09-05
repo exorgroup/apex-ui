@@ -10,8 +10,10 @@
  * Magnification is CSS-driven off :hover and the two neighbouring siblings, so
  * there is no pointer tracking and no work on scroll.
  */
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import { useCan } from '../core/can';
+import { filterMenu } from '../core/menuPermissions';
 import type { MenuItem } from './ApexMenuItem';
 
 const props = withDefaults(defineProps<{
@@ -42,8 +44,30 @@ const emit = defineEmits<{
   (e: 'item-click', payload: { item: MenuItem; index: number; originalEvent: MouseEvent }): void;
 }>();
 
+/*
+ * Slots the resolver denies never reach the strip, and a group left with no
+ * children goes with them — an empty fan is a slot that opens onto nothing.
+ *
+ * Inside a computed because useCan() injects at setup, and because a resolver
+ * that reads reactive state — permissions arriving with the page — must be
+ * able to change the dock when it does.
+ *
+ * Magnification needs nothing here: it is CSS off :hover and the adjacent
+ * siblings, so it follows whatever the DOM ends up holding.
+ */
+const can = useCan();
+const shown = computed(() => filterMenu(props.items, can));
+
 /** Index of the open group, or -1. Only one fans at a time. */
 const openGroup = ref(-1);
+
+/*
+ * The open index points into the rendered strip, so it has to close when that
+ * strip changes shape. Permissions arriving after first paint would otherwise
+ * leave the fan open on whatever slot inherited the index. The filter returns
+ * the same array when nothing was denied, so this fires only on a real change.
+ */
+watch(shown, () => { openGroup.value = -1; });
 
 const vertical = computed(() => props.position === 'left' || props.position === 'right');
 const isGroup = (item: MenuItem) => !!(item.items && item.items.length);
@@ -97,7 +121,7 @@ const rootStyle = computed(() => {
        :data-magnify="magnify ? 'true' : 'false'" :data-blur="blur ? 'true' : 'false'"
        :data-disabled="disabled ? 'true' : 'false'">
     <ul class="apex-dock__list" role="menubar" :aria-orientation="vertical ? 'vertical' : 'horizontal'">
-      <li v-for="(item, i) in items || []" :key="i" class="apex-dock__slot"
+      <li v-for="(item, i) in shown" :key="i" class="apex-dock__slot"
           :data-open="openGroup === i ? 'true' : 'false'">
         <!-- a group's children, fanned out speed-dial style -->
         <template v-if="isGroup(item)">

@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { mount } from '@vue/test-utils';
-import type { Plugin } from 'vue';
+import { ref, type Plugin } from 'vue';
 import ApexUI from '../src/index';
 import ApexTieredMenu from '../src/components/ApexTieredMenu.vue';
 import ApexMenubar from '../src/components/ApexMenubar.vue';
 import ApexContextMenu from '../src/components/ApexContextMenu.vue';
 import ApexSplitButton from '../src/components/ApexSplitButton.vue';
 import ApexMenu from '../src/components/ApexMenu.vue';
+import ApexDock from '../src/components/ApexDock.vue';
 import type { MenuItem } from '../src/components/ApexMenuItem';
 
 /**
@@ -191,6 +192,83 @@ describe('ApexMenu filters, and its expandedKeys follow', () => {
     const emitted = w.emitted('update:expandedKeys');
     const map = emitted![emitted!.length - 1][0] as Record<string, boolean>;
     expect(Object.keys(map).sort()).toEqual(['admin', 'gone', 'reports']);
+    w.unmount();
+  });
+});
+
+describe('ApexDock filters its strip', () => {
+  /*
+   * A dock slot is an icon with no text, so a denied one that stayed would be
+   * an unlabelled button that does nothing — worse than a hidden row in a
+   * menu, not better. A group is a fan: with no children left it opens onto
+   * nothing, so it goes too.
+   */
+  const DOCK: MenuItem[] = [
+    { icon: 'home', label: 'Home' },
+    { icon: 'lock', label: 'Admin', can: 'secret' },
+    { icon: 'folder', label: 'Files', items: [{ icon: 'delete', label: 'Purge', can: 'secret' }] },
+    { icon: 'star', label: 'Tools', items: [{ icon: 'build', label: 'Build' }] },
+  ];
+
+  it('drops the denied slot and the group it emptied', () => {
+    const w = mount(ApexDock, {
+      props: { items: DOCK }, global: gated, attachTo: document.body,
+    });
+    const labels = w.findAll('.apex-dock__label').map((n) => n.text());
+    expect(labels).toContain('Home');
+    expect(labels, 'denied outright').not.toContain('Admin');
+    expect(labels, 'its only child was denied').not.toContain('Files');
+    expect(labels, 'a group that kept a child stays').toContain('Tools');
+    expect(labels, 'and so does that child').toContain('Build');
+    w.unmount();
+  });
+
+  it('closes an open fan when the filtered strip changes shape', async () => {
+    /*
+     * openGroup is an index into the RENDERED strip, so it has to be cleared
+     * when that strip changes shape.
+     *
+     * The order here is deliberate. Denying 'Admin' shifts everything after it
+     * one slot left, so the index of the open group — 'Tools' at 1 — becomes
+     * the index of 'Extras'. Without the watch the fan does not merely close:
+     * it reopens on a different slot, showing this user a menu they never
+     * asked for. Checking "nothing is open" alone would not catch that, since
+     * a shorter list makes most stale indices simply overshoot.
+     */
+    const denied = ref(false);
+    const SHIFTING: MenuItem[] = [
+      { icon: 'lock', label: 'Admin', can: 'secret' },
+      { icon: 'star', label: 'Tools', items: [{ icon: 'build', label: 'Build' }] },
+      { icon: 'more_horiz', label: 'Extras', items: [{ icon: 'science', label: 'Labs' }] },
+    ];
+
+    const w = mount(ApexDock, {
+      props: { items: SHIFTING },
+      global: {
+        plugins: [[ApexUI, {
+          can: (action: string, resource: string) =>
+            !(denied.value && resource === 'secret' && action === 'read'),
+        }] as [Plugin, unknown]],
+      },
+      attachTo: document.body,
+    });
+
+    const openIndex = () => w.findAll('.apex-dock__slot')
+      .findIndex((n) => n.attributes('data-open') === 'true');
+
+    /* Open 'Tools', which sits at index 1 while everything is allowed. */
+    await w.findAll('.apex-dock__slot')[1]
+      .find('.apex-dock__item[data-group="true"]').trigger('click');
+    expect(openIndex(), 'the Tools fan is open').toBe(1);
+
+    denied.value = true;
+    await w.vm.$nextTick();
+
+    expect(openIndex(), 'no fan is open after the strip changes').toBe(-1);
+    /* Index 1 is now 'Extras' — the slot a stale index would have opened. */
+    const labels = w.findAll('.apex-dock__slot')[1].findAll('.apex-dock__label')
+      .map((n) => n.text());
+    expect(labels, 'and index 1 is now a different group').toContain('Extras');
     w.unmount();
   });
 });
