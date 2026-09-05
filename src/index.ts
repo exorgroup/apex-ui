@@ -366,8 +366,10 @@ export { useAlertButtons } from './core/alertButtons';
 export { useCan } from './core/can';
 /* The same filter the menu family runs on its items, so an app building its own
    navigation on top of useCan() hides rows by the identical rules. */
-export { allows, filterItems, filterMenu } from './core/menuPermissions';
-export type { CanFn, PermissionedRow } from './core/menuPermissions';
+export { allows, filterItems, filterMenu, filterMega } from './core/menuPermissions';
+export type {
+  CanFn, PermissionedRow, PermissionedLink, PermissionedColumn, PermissionedMegaItem,
+} from './core/menuPermissions';
 export { APEX_UI_OPTIONS, APEX_ADAPTER } from './core/symbols';
 export { zodAdapter } from './adapters/zod';
 export { precognitionAdapter } from './adapters/precognition';

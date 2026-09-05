@@ -11,6 +11,8 @@
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import { useCan } from '../core/can';
+import { filterMega } from '../core/menuPermissions';
 import type { ApexPermission } from '../types';
 
 export interface MegaLink {
@@ -107,7 +109,27 @@ const emit = defineEmits<{
   (e: 'item-click', payload: { item: MegaItem | MegaLink; originalEvent: MouseEvent }): void;
 }>();
 
+/*
+ * The panel is filtered at all three levels — root item, column, link — and the
+ * levels cascade: a column emptied of its links is a heading over blank space,
+ * and a root item emptied of its columns opens onto nothing.
+ *
+ * Inside a computed because useCan() injects at setup, and because a resolver
+ * that reads reactive state — permissions arriving with the page — must be
+ * able to change the bar when it does.
+ */
+const can = useCan();
+const shown = computed(() => filterMega(props.items, can));
+
 const openIndex = ref(-1);
+
+/*
+ * openIndex points into the rendered bar, so it has to close when that bar
+ * changes shape. Denying a root item shifts the ones after it left, and a
+ * stale index would open a different item's panel. The filter returns the same
+ * array when nothing was denied, so this fires only on a real change.
+ */
+watch(shown, () => { openIndex.value = -1; });
 const root = ref<HTMLElement | null>(null);
 
 /* A panel is pinned to its root item, so one opened from the right-hand end of
@@ -225,7 +247,7 @@ const rootStyle = computed(() => {
     <div v-if="$slots.start" class="apex-mega__edge"><slot name="start" /></div>
 
     <ul class="apex-mega__bar" role="menubar">
-      <li v-for="(item, i) in items || []" :key="i" class="apex-mega__root"
+      <li v-for="(item, i) in shown" :key="i" class="apex-mega__root"
           :data-open="openIndex === i ? 'true' : 'false'"
           @mouseenter="onEnter(i, item)" @mouseleave="close()">
         <component :is="item.href && !hasPanel(item) ? 'a' : 'button'" class="apex-mega__rootlink"
