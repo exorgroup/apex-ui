@@ -548,6 +548,20 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
 .dir-hint { font-size: 13px; color: var(--fg-subtle); margin: 0; }
 .dir-gap { block-size: 150px; }
 
+/* ── ApexToast's examples ──────────────────────────────────────────────── */
+
+/* The message slot replaces the toast outright, so this row is the whole
+   surface — icon, body, dismiss — and supplies its own layout. */
+.toast-custom { display: flex; align-items: flex-start; gap: 10px; }
+.toast-custom__icon { color: var(--accent-success); }
+.toast-custom__body { flex: 1; min-inline-size: 0; }
+.toast-custom__body strong { display: block; font-size: 13.5px; }
+.toast-custom__body span { font-size: 12.5px; color: var(--fg-subtle); }
+.toast-custom__bar { margin-block-start: 8px; }
+
+/* The stage's trigger row, above its own toast container. */
+.ovl-stage__row { display: flex; flex-wrap: wrap; gap: 10px; }
+
 /* ── ApexMessage's examples ────────────────────────────────────────────── */
 
 .msg-stack { display: flex; flex-direction: column; gap: 10px; }

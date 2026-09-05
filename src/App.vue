@@ -18,12 +18,13 @@ import {
   AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS, DLG_POSITIONS, MSG_TEXT,
+  TOAST_POSITIONS, TOAST_LINES,
 } from './registry';
 import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, ApexPopover } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert, useApexToast, ApexPopover } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
@@ -42,6 +43,48 @@ const copied = ref(false);
 const model = reactive<Record<string, unknown>>({});
 
 /* ── The directives ──────────────────────────────────────────────────── */
+
+/* ── ApexToast ───────────────────────────────────────────────────────── */
+
+/** The service every toast example calls; the host is mounted at the app root. */
+const toast = useApexToast();
+
+/** Severity section: one call per tint, with a line that suits it. */
+function fireToast(severity: string) {
+  toast.add({ severity: severity as never, summary: severity, detail: TOAST_LINES[severity] });
+}
+
+/**
+ * Promise section: a sticky loading toast that becomes its own result.
+ *
+ * update() is what makes this one toast rather than two — the id from add()
+ * is the handle, which is also why add() returning it matters. Without that,
+ * the result would appear as a second toast beside a loading one that never
+ * goes away.
+ */
+async function runToastTask(succeeds: boolean) {
+  const id = toast.add({ severity: 'secondary', summary: 'Working…', detail: 'Uploading the archive.', sticky: true });
+  await new Promise((r) => setTimeout(r, 1400));
+  toast.update(id, succeeds
+    ? { severity: 'success', summary: 'Done', detail: 'The archive is uploaded.', sticky: false, life: 3000 }
+    : { severity: 'error', summary: 'Failed', detail: 'The connection dropped.', sticky: false, life: 4000 });
+}
+
+/** Position section: which container placement the demo host is using. */
+const toastPos = ref<string>('top-right');
+
+/** Expanded-and-stacked section: the mode switch, and a burst worth stacking. */
+const toastStacked = ref(false);
+let burstSeq = 0;
+function burstToasts() {
+  for (let n = 1; n <= 5; n += 1) {
+    burstSeq += 1;
+    toast.add({ group: 'stackdemo', severity: 'info', summary: `Message ${burstSeq}`, detail: 'One of five sent together.' });
+  }
+}
+
+/** What the actions slot last did, shown live under the buttons. */
+const toastLog = ref('');
 
 /* ── ApexMessage ─────────────────────────────────────────────────────── */
 
@@ -2051,6 +2094,174 @@ async function copyUsage() {
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
           </div>
+        </template>
+
+        <!-- Ported from the gallery, eight sections. Each demo that needs its
+             own container gives it a group, so its toasts cannot land in the
+             app-root host or in another section's stack. -->
+        <template v-if="entry.id === 'toast'">
+          <h2>Service</h2>
+          <p class="note">
+            Mount one <code>ApexToast</code> in the app shell; every <code>add()</code> call
+            anywhere in the app lands in it, so a caller announces something without owning any
+            visible state. <code>add()</code> returns the toast's id, which is what makes
+            <code>update()</code> and <code>remove()</code> safe when several are in flight.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              size="sm"
+              @click="toast.add({ severity: 'success', summary: 'Saved', detail: 'Your changes are live.' })"
+            >Show a toast</ApexButton>
+            <ApexButton size="sm" severity="secondary" variant="outlined" @click="toast.removeAll()">
+              Clear all
+            </ApexButton>
+          </div>
+
+          <h2>Severity</h2>
+          <p class="note">
+            The same six severities as ApexMessage, each with its tint and default icon.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="s in (['success', 'info', 'warn', 'error', 'secondary', 'contrast'] as const)"
+              :key="s"
+              size="sm"
+              variant="outlined"
+              severity="secondary"
+              @click="fireToast(s)"
+            >{{ s }}</ApexButton>
+          </div>
+
+          <h2>Timed close</h2>
+          <p class="note">
+            Every toast dismisses itself after <code>life</code> milliseconds — 3000 by default,
+            or set it per message. <code>showTimer</code> draws the countdown. Hovering the stack
+            pauses every timer, since a toast that vanishes under the cursor is a toast you were
+            about to read.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              size="sm"
+              variant="outlined"
+              severity="secondary"
+              @click="toast.add({ severity: 'info', summary: 'One second', life: 1000 })"
+            >life 1000</ApexButton>
+            <ApexButton
+              size="sm"
+              variant="outlined"
+              severity="secondary"
+              @click="toast.add({ severity: 'info', summary: 'Eight seconds', detail: 'Hover me to hold it open.', life: 8000, showTimer: true })"
+            >life 8000 with timer</ApexButton>
+          </div>
+
+          <h2>Sticky</h2>
+          <p class="note">
+            <code>sticky</code> overrides the life entirely — the toast waits for the user or for
+            a <code>remove()</code>. Use it for anything needing a decision, or for a loading
+            state.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              size="sm"
+              variant="outlined"
+              severity="secondary"
+              @click="toast.add({ severity: 'warn', summary: 'Sticky', detail: 'This one waits for you.', sticky: true })"
+            >Show a sticky toast</ApexButton>
+          </div>
+
+          <h2>Promise</h2>
+          <p class="note">
+            A sticky loading toast, then <code>update()</code> in place when the task settles —
+            the same toast becomes the result rather than a second one appearing beside it.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton size="sm" @click="runToastTask(true)">Task that succeeds</ApexButton>
+            <ApexButton size="sm" severity="danger" variant="outlined" @click="runToastTask(false)">
+              Task that fails
+            </ApexButton>
+          </div>
+
+          <h2>Position</h2>
+          <p class="note">
+            Seven positions. Bottom stacks grow upward, so the newest is always nearest the edge.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="p in TOAST_POSITIONS"
+              :key="p"
+              size="sm"
+              variant="text"
+              @click="toastPos = p; toast.add({ group: 'posdemo', severity: 'info', summary: p, detail: `Positioned at ${p}.` })"
+            >{{ p }}</ApexButton>
+          </div>
+          <ApexToast group="posdemo" :position="toastPos" />
+
+          <h2>Expanded and stacked</h2>
+          <p class="note">
+            <code>expanded</code> lays every toast out in a column. <code>stacked</code> keeps the
+            newest in front with the rest peeking behind it, and fans the pile out on hover —
+            useful when a burst of messages would otherwise fill the screen. Timers pause while
+            the pile is hovered in either mode.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexSwitch v-model="toastStacked" label="Stacked mode" />
+            <ApexButton size="sm" variant="outlined" severity="secondary" @click="burstToasts()">
+              Send five at once
+            </ApexButton>
+          </div>
+          <ApexToast
+            group="stackdemo"
+            :mode="toastStacked ? 'stacked' : 'expanded'"
+            position="bottom-right"
+            :life="9000"
+          />
+
+          <h2>Custom content and actions</h2>
+          <p class="note">
+            The <code>actions</code> slot keeps the default toast and adds to it; the
+            <code>message</code> slot replaces it outright. Both receive the message and its
+            <code>close</code> function, so a button can act and dismiss in one go.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              size="sm"
+              variant="outlined"
+              severity="secondary"
+              @click="toast.add({ group: 'actiondemo', severity: 'info', summary: 'File deleted', detail: 'report-q3.pdf', sticky: true })"
+            >Toast with an action</ApexButton>
+            <ApexButton
+              size="sm"
+              variant="outlined"
+              severity="secondary"
+              @click="toast.add({ group: 'customdemo', severity: 'success', summary: 'Upload complete', data: { file: 'assets.zip', size: '4.2 MB' }, sticky: true })"
+            >Fully custom toast</ApexButton>
+          </div>
+          <p class="msg-event">Last action: <code>{{ toastLog || 'none yet' }}</code></p>
+          <ApexToast group="actiondemo" position="top-center">
+            <template #actions="{ message, close }">
+              <ApexButton
+                size="sm"
+                variant="text"
+                @click="toastLog = `undo ${message.detail}`; close()"
+              >Undo</ApexButton>
+            </template>
+          </ApexToast>
+          <ApexToast group="customdemo" position="bottom-center" width="320px">
+            <template #message="{ message, close }">
+              <div class="toast-custom">
+                <ApexIcon name="folder_zip" :size="26" class="toast-custom__icon" />
+                <div class="toast-custom__body">
+                  <strong>{{ message.summary }}</strong>
+                  <span>
+                    {{ (message.data as { file: string; size: string }).file }} ·
+                    {{ (message.data as { file: string; size: string }).size }}
+                  </span>
+                  <ApexProgressBar :value="100" class="toast-custom__bar" />
+                </div>
+                <ApexButton size="sm" variant="text" icon="close" aria-label="Dismiss" @click="close()" />
+              </div>
+            </template>
+          </ApexToast>
         </template>
 
         <!-- Ported from the gallery, eight sections. -->

@@ -657,6 +657,25 @@ export const ICON_RESOLVER_SNIPPET = `app.use(ApexUI, {
 });`;
 
 /** Used by the ApexSelect in ApexIcon's "In context" section. */
+/** Every placement ApexToast's position union allows. */
+export const TOAST_POSITIONS = [
+  'top-left', 'top-center', 'top-right',
+  'bottom-left', 'bottom-center', 'bottom-right', 'center',
+] as const;
+
+/**
+ * A line per severity for the toast Severity section. Six buttons firing the
+ * same sentence would show the tints but say nothing about when each is used.
+ */
+export const TOAST_LINES: Record<string, string> = {
+  success: 'Your changes are live.',
+  info: 'A new version is available.',
+  warn: 'Two seats are still unassigned.',
+  error: 'The upload could not be completed.',
+  secondary: 'Processing may take a few moments.',
+  contrast: 'You are currently in offline mode.',
+};
+
 /**
  * One line per severity, so the Variant section can show the same four
  * messages twice without repeating their text in the template.
@@ -4033,48 +4052,57 @@ export const ENTRIES: DocEntry[] = [
   },
 
   {
-    id: 'toast', name: 'ApexToast', group: 'Overlays', optionsType: 'ToastMessage',
-    blurb: 'Announces something without owning any visible state: mount one ApexToast in the app shell and every add() call anywhere in the app lands in it. A queue rather than one current message, so a second toast stacks instead of replacing the first — and each carries its own id, so a late remove() can never close the wrong one.',
-    noField: true,
-    service: {
-      composable: 'useApexToast', handle: 'toast', method: 'add',
-      host: 'ApexToast', trigger: 'Add toast',
-      extras: [['Clear all', 'removeAll']],
-    },
-    hostLabel: 'Toasts appear at the corner of the window, not in this box — the host is mounted once at the app root.',
-    base: { severity: 'success', summary: 'Saved', detail: 'Your changes are safe.', life: 3000 },
+    id: 'toast', name: 'ApexToast', group: 'Messages',
+    blurb: 'Service-driven messages in a fixed overlay stack. Built on ApexMessage — severity tints, variants, the blur, the close button all inherited — so a toast is that component in a positioned stack with a life timer around it. Mount one in the app shell and every add() call in the app lands in it.',
+    noField: true, demo: 'overlay',
+    lead: [],
+    tail: '\n/>',
+    base: { position: 'top-right', mode: 'expanded', variant: 'filled', size: 'md' },
     controls: [
-      { key: 'severity', type: 'select', options: ['success', 'info', 'warn', 'danger', 'secondary', 'contrast'] },
-      { key: 'summary', type: 'text' }, { key: 'detail', type: 'text' },
-      { key: 'icon', type: 'text' },
-      { key: 'life', type: 'number' },
-      { key: 'sticky', type: 'bool' }, { key: 'closable', type: 'bool' },
-      { key: 'showTimer', type: 'bool' },
-      { key: 'group', type: 'text' },
+      { key: 'position', type: 'select', options: ['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right', 'center'] },
+      { key: 'mode', type: 'select', options: ['expanded', 'stacked'] },
+      { key: 'variant', type: 'select', options: ['filled', 'outlined', 'simple'] },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'max', type: 'number' }, { key: 'life', type: 'number' },
+      { key: 'blur', type: 'bool' }, { key: 'newestOnTop', type: 'bool' },
+      { key: 'width', type: 'text' }, { key: 'offset', type: 'text' },
     ],
     props: [
-      ['id', 'number | string', 'auto', 'Assigned by add(); pass your own to update or remove a specific toast'],
-      ['severity', "'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast'", '—', ''],
-      ['summary', 'string', '—', 'The headline'],
-      ['detail', 'string', '—', 'The line under it'],
-      ['icon', 'string', 'from severity', ''],
-      ['life', 'number', '3000', 'Milliseconds before it dismisses itself. Ignored when sticky'],
-      ['sticky', 'boolean', 'false', 'Stays until removed — for a loading state, or anything needing a decision'],
-      ['closable', 'boolean', 'true', ''],
-      ['showTimer', 'boolean', 'false', 'A bar counting the life down'],
-      ['group', 'string', '—', 'Routes a message to a named <ApexToast group="…"> container'],
-      ['data', 'unknown', '—', 'Anything your own template needs'],
+      ['position', "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center'", "'top-right'", 'Bottom stacks grow upward, so the newest is always nearest the edge'],
+      ['mode', "'stacked' | 'expanded'", "'expanded'", 'stacked keeps the newest on top with the rest peeking behind, and fans them out on hover'],
+      ['group', 'string', '—', 'Only renders messages carrying this group, so one app can have several containers'],
+      ['max', 'number', '5', 'Caps the visible column'],
+      ['life', 'number', '3000', 'Fallback for messages that set none — a message’s own life wins'],
+      ['variant / size / blur', 'string / string / boolean | number | string', "'filled' / 'md' / false", 'Passed through to ApexMessage'],
+      ['width / offset', 'string', "'360px' / '20px'", 'Stack width, and its distance from the viewport edge'],
+      ['newestOnTop', 'boolean', 'true', 'false appends below instead'],
+      ['zIndex', 'number', '1200', ''],
     ],
-    events: [],
-    serviceTitle: 'Service',
+    events: [['close', 'ToastMessage — the dismiss button'], ['life-end', 'ToastMessage — the timer ran out']],
+    slots: [
+      ['message', 'Replaces a toast outright; receives { message, close, index } — for links, buttons, or any markup'],
+      ['actions', 'Keeps the default toast and adds to it; receives { message, close }'],
+    ],
+    serviceTitle: 'Service options',
     serviceRows: [
-      ['add(message)', 'number | string', 'Queues a toast and returns its id, so it can be updated or removed later'],
+      ['add(message)', 'number | string', 'Queues a toast and returns its id'],
       ['update(id, patch)', 'void', 'Replaces a queued toast in place — a loading toast becoming a result'],
-      ['remove(id)', 'void', 'Closes one toast'],
-      ['removeAll(group?)', 'void', 'Clears everything, or just one group'],
-      ['state', 'readonly', 'The live queue, if you want to render your own'],
+      ['remove(id)', 'void', ''],
+      ['removeAll(group?)', 'void', 'Clears everything, or one group'],
+      ['message.severity', "'info' | 'success' | 'warn' | 'error' | 'secondary' | 'contrast'", 'Tint and default icon'],
+      ['message.summary / detail', 'string', 'Bold first line, and the body under it'],
+      ['message.life / sticky', 'number / boolean', 'Auto-dismiss delay; sticky stays until removed'],
+      ['message.icon / closable', 'string / boolean', 'Overrides the severity icon; closable defaults to true'],
+      ['message.group', 'string', 'Routes it to a named container'],
+      ['message.data', 'unknown', 'Anything your own template needs'],
+      /* Two fields on ToastMessage the gallery's table omits. The Timed close
+         section below uses showTimer, so leaving it out would demonstrate an
+         option the reader cannot look up. */
+      ['message.id', 'number | string', 'Assigned by add(); pass your own to update or remove a specific toast'],
+      ['message.showTimer', 'boolean', 'Draws a bar counting the life down'],
     ],
   },
+
   {
     id: 'alert', name: 'ApexAlert', group: 'Overlays', optionsType: 'AlertOptions',
     blurb: 'One centred alert that says something and waits. confirm() asks a yes/no question, notify() reports an outcome, and run() carries a single alert through confirm → progress → result without closing in between — so a delete reads as one continuous act rather than a dialog, a pause, and then an unrelated message in the corner. The figure is drawn from the tone rather than being an icon with an effect applied.',
