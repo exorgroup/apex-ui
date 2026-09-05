@@ -13,6 +13,8 @@
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import { itemOffset, tooltipSide, type SpeedDialDirection, type SpeedDialItem, type SpeedDialType } from '../core/speedDial';
+import { useCan } from '../core/can';
+import { filterItems } from '../core/menuPermissions';
 import type { ApexSize, ApexButtonAppearance } from '../types';
 
 export type { SpeedDialItem };
@@ -101,7 +103,22 @@ const emit = defineEmits<{
 
 const open = ref(false);
 const root = ref<HTMLElement | null>(null);
-const list = computed(() => props.items || []);
+
+/*
+ * Actions the resolver denies never reach the dial.
+ *
+ * Filtering here rather than in the template is what keeps the fan intact:
+ * `offsets` and the stagger delays are both derived from this list, and they
+ * are positional — itemOffset spaces `count` actions evenly around the arc.
+ * Hiding an action anywhere else would leave its slot reserved, so the dial
+ * would open with a gap in it and, on a circle, would no longer close.
+ *
+ * Inside a computed because useCan() injects at setup, and because a resolver
+ * that reads reactive state — permissions arriving with the page — must be
+ * able to change the dial when it does.
+ */
+const can = useCan();
+const list = computed(() => filterItems(props.items, can));
 const side = computed(() => tooltipSide(props.type, props.direction));
 
 const offsets = computed(() =>

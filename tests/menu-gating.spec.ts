@@ -8,6 +8,7 @@ import ApexContextMenu from '../src/components/ApexContextMenu.vue';
 import ApexSplitButton from '../src/components/ApexSplitButton.vue';
 import ApexMenu from '../src/components/ApexMenu.vue';
 import ApexDock from '../src/components/ApexDock.vue';
+import ApexSpeedDial from '../src/components/ApexSpeedDial.vue';
 import type { MenuItem } from '../src/components/ApexMenuItem';
 
 /**
@@ -269,6 +270,76 @@ describe('ApexDock filters its strip', () => {
     const labels = w.findAll('.apex-dock__slot')[1].findAll('.apex-dock__label')
       .map((n) => n.text());
     expect(labels, 'and index 1 is now a different group').toContain('Extras');
+    w.unmount();
+  });
+});
+
+describe('ApexSpeedDial filters, and the arc closes up', () => {
+  /*
+   * The dial is the one control where hiding an item is geometry, not just
+   * markup. itemOffset spaces `count` actions evenly around the arc, so both
+   * the positions and the stagger delays are positional. Filter anywhere other
+   * than the list those are derived from and the denied action's slot stays
+   * reserved: the fan opens with a hole in it, and on a circle it no longer
+   * closes, which looks like a layout bug rather than a permissions one.
+   */
+  const ACTIONS = [
+    { icon: 'add', label: 'Add' },
+    { icon: 'lock', label: 'Admin', can: 'secret' },
+    { icon: 'edit', label: 'Edit' },
+    { icon: 'share', label: 'Share' },
+  ];
+
+  it('drops the denied action', () => {
+    const w = mount(ApexSpeedDial, {
+      props: { items: ACTIONS }, global: gated, attachTo: document.body,
+    });
+    const shown = w.findAll('.apex-dial__item');
+    expect(shown.length, 'three of the four').toBe(3);
+    expect(w.html()).not.toContain('Admin');
+    w.unmount();
+  });
+
+  it('spaces the survivors as three, not as four with a gap', async () => {
+    /*
+     * A quarter-circle pins its first and last actions to the arc's ends and
+     * spreads the rest between them, so the error from a reserved slot shows
+     * up in the middle one: three actions sit at 0, 45 and 90 degrees, but a
+     * fourth still counted would put them at 0, 30 and 60.
+     *
+     * The dial has to be OPENED for this to mean anything — while closed every
+     * action sits at translate(0,0) and only the stagger delay differs, which
+     * would let a template-only filter pass a comparison of the closed state.
+     */
+    const props = {
+      items: ACTIONS, type: 'quarter-circle' as const,
+      direction: 'up' as const, radius: 100,
+    };
+    const denied = mount(ApexSpeedDial, { props, global: gated, attachTo: document.body });
+    const all = mount(ApexSpeedDial, {
+      props: { ...props, items: ACTIONS.filter((a) => !a.can) },
+      global: { plugins: [ApexUI] },
+      attachTo: document.body,
+    });
+    await denied.find('.apex-dial__trigger').trigger('click');
+    await all.find('.apex-dial__trigger').trigger('click');
+
+    const middle = (w: ReturnType<typeof mount>) =>
+      w.findAll('.apex-dial__item')[1].attributes('style') || '';
+
+    expect(middle(denied), 'the arc is open, so this is a real position')
+      .toContain('translate(');
+    expect(middle(denied), 'the same three actions, spaced the same way')
+      .toBe(middle(all));
+    denied.unmount();
+    all.unmount();
+  });
+
+  it('shows every action when nothing is denied', () => {
+    const w = mount(ApexSpeedDial, {
+      props: { items: ACTIONS }, global: { plugins: [ApexUI] }, attachTo: document.body,
+    });
+    expect(w.findAll('.apex-dial__item').length).toBe(4);
     w.unmount();
   });
 });
