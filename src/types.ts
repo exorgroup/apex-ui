@@ -18,9 +18,13 @@ export type ApexLabelPlacement =
  *
  * Three forms, in the order you will reach for them:
  *
- *   'delete:events'          action and resource — the usual case
- *   { action, resource }     the same, spelled out
+ *   'events'                 the resource, asked about with `read`
+ *   { action, resource }     when the action is something else
  *   false                    hide regardless; true shows regardless
+ *
+ * The bare string is the resource rather than the action because that is what
+ * a hidden row nearly always means — "may this user see this thing at all" —
+ * and because the resource is the half the resolver cannot answer without.
  *
  * Resolved through the same `useCan()` seam every other gated control uses,
  * so an app wires one resolver — Autentica, Spatie, anything — and every menu
@@ -32,7 +36,7 @@ export type ApexLabelPlacement =
  */
 export type ApexPermission =
   | string
-  | { action: string; resource?: string }
+  | { action: string; resource: string }
   | boolean;
 
 export interface ApexOption<V = unknown> {

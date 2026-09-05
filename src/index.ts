@@ -364,6 +364,10 @@ export { useAlertButtons } from './core/alertButtons';
 /* Exported so an app can ask the same question its controls are asking, with
    the same precedence, rather than reimplementing the rule beside them. */
 export { useCan } from './core/can';
+/* The same filter the menu family runs on its items, so an app building its own
+   navigation on top of useCan() hides rows by the identical rules. */
+export { allows, filterItems, filterMenu } from './core/menuPermissions';
+export type { CanFn, PermissionedRow } from './core/menuPermissions';
 export { APEX_UI_OPTIONS, APEX_ADAPTER } from './core/symbols';
 export { zodAdapter } from './adapters/zod';
 export { precognitionAdapter } from './adapters/precognition';
