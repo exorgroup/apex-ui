@@ -85,8 +85,8 @@ describe('every prop the docs name is declared by the component', () => {
   it.each(CONTROLS.map((e) => [e.name, e] as const))('%s', (name, entry) => {
     let declared: Set<string>;
     try {
-      declared = entry.service?.optionsType
-        ? interfaceFields(entry.service.optionsType)
+      declared = entry.optionsType
+        ? interfaceFields(entry.optionsType)
         : declaredProps(name);
     } catch {
       return; // ApexField and friends live elsewhere; covered by their own pages
@@ -121,8 +121,8 @@ describe('every playground control edits a real prop', () => {
     try {
       /* A service's rail edits the options object, not the host's props, so it
          is checked against the same interface the props table documents. */
-      declared = entry.service?.optionsType
-        ? interfaceFields(entry.service.optionsType)
+      declared = entry.optionsType
+        ? interfaceFields(entry.optionsType)
         : declaredProps(name);
     } catch {
       return;
