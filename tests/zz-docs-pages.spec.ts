@@ -104,6 +104,34 @@ describe('a slotText entry puts that text in the stage', () => {
   );
 });
 
+describe('every overlay entry has a stage that does something', () => {
+  /*
+   * OverlayStage is one branch per id. An entry with demo: 'overlay' and no
+   * matching branch renders an empty div — and nothing else notices. The page
+   * renders, warns about nothing, has all its sections, and its props table is
+   * perfect; the playground is just silently blank, with every rail control
+   * apparently inert.
+   *
+   * That is exactly what shipped for ApexDynamicDialog and ApexConfirmPopup,
+   * and the user found it, not the suite. A stage that opens something needs a
+   * trigger, so requiring one button is the cheap version of the check.
+   */
+  const OVERLAYS = ENTRIES.filter((e) => e.demo === 'overlay');
+
+  it('there are overlay entries to check', () => {
+    expect(OVERLAYS.length).toBeGreaterThan(0);
+  });
+
+  it.each(OVERLAYS.map((e) => [e.name] as const))('%s', async (name) => {
+    const { wrapper, open } = await harness();
+    await open(name);
+    const buttons = wrapper.findAll('.stage__demo button');
+    expect(buttons.length, `${name}'s stage offers no trigger — is its OverlayStage branch missing?`)
+      .toBeGreaterThan(0);
+    wrapper.unmount();
+  });
+});
+
 describe('the ported gallery examples are on the page', () => {
   /* Headings taken from APEX UI Gallery.html. A build cannot tell you a
      section is missing — only reading the rendered page can. */
