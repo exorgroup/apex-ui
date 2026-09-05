@@ -3500,7 +3500,7 @@ export const ENTRIES: DocEntry[] = [
     ],
     props: [
       ['label / icon', 'string', '\u2014', 'The default action'],
-      ['model', 'MenuItem[]', '[]', '{ label, icon?, hint?, disabled?, href?, items? }, { separator: true }, { header }'],
+      ['model', 'MenuItem[]', '[]', '{ label, icon?, hint?, disabled?, href?, items?, can? }, { separator: true }, { header }'],
       ['severity', 'ApexSeverity', "'primary'", 'Same eight roles as ApexButton'],
       ['variant', "'solid' | 'outlined' | 'text' | 'link'", "'solid'", ''],
       ['raised / rounded', 'boolean', 'false', 'Elevation, circular radius'],
@@ -3530,7 +3530,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'disabled', type: 'bool' },
     ],
     props: [
-      ['items', 'SpeedDialItem[]', '[]', '{ icon?, label?, tooltip?, disabled?, href?, target? } \u2014 plus anything else, returned on @item-click'],
+      ['items', 'SpeedDialItem[]', '[]', '{ icon?, label?, tooltip?, disabled?, href?, target?, can? } \u2014 plus anything else, returned on @item-click'],
       ['type', "'linear' | 'circle' | 'semi-circle' | 'quarter-circle'", "'linear'", 'Item layout'],
       ['direction', "'up' | 'down' | 'left' | 'right' | four diagonals", "'up'", 'Diagonals apply to linear and quarter-circle'],
       ['radius', 'number', '92', 'Arc radius in pixels \u2014 circle, semi-circle, quarter-circle'],
@@ -4319,7 +4319,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'radius', type: 'text' }, { key: 'background', type: 'color' },
     ],
     props: [
-      ['items', 'MenuItem[]', '[]', 'Each takes { label, icon, hint, href, target, command, disabled, items, separator, header }'],
+      ['items', 'MenuItem[]', '[]', 'Each takes { label, icon, hint, href, target, command, disabled, items, separator, header, can }'],
       ['target', 'Element | string | ref', '—', 'What the right click is listened for on'],
       ['global', 'boolean', 'false', 'Attach to the document instead of one element'],
       ['disabled', 'boolean', 'false', 'Lets the native menu through again'],
@@ -4354,7 +4354,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'background', type: 'color' }, { key: 'borderColor', type: 'color' },
     ],
     props: [
-      ['items', 'MenuItem[]', '[]', 'Each takes { icon, label, badge, href, target, command, disabled, items } — a nested items array turns the slot into a speed dial'],
+      ['items', 'MenuItem[]', '[]', 'Each takes { icon, label, badge, href, target, command, disabled, items, can } — a nested items array turns the slot into a speed dial'],
       ['position', "'bottom' | 'top' | 'left' | 'right'", "'bottom'", 'Which edge it sits on; children fan away from it'],
       ['magnify', 'boolean', 'true', 'Grows the hovered icon and its two neighbours — CSS only, no pointer tracking'],
       ['size', 'number', '46', 'Icon box size in pixels; the glyph scales with it'],
@@ -4384,9 +4384,9 @@ export const ENTRIES: DocEntry[] = [
       { key: 'borderColor', type: 'color' }, { key: 'activeColor', type: 'color' },
     ],
     props: [
-      ['items', 'MegaItem[]', '[]', 'Root items: { label, icon, href, command, disabled, columns, panel }'],
-      [' columns', 'MegaColumn[]', '—', '{ header, headerIcon, image, imageAlt, layout, span, items, footer } — image puts a thumbnail above the column, layout: "cards" turns its items into image tiles, span widens it'],
-      [' columns[].items', 'MegaLink[]', '—', '{ label, help, icon, image, badge, href, target, command, disabled } — image replaces the icon with a thumbnail'],
+      ['items', 'MegaItem[]', '[]', 'Root items: { label, icon, href, command, disabled, columns, panel, can }'],
+      [' columns', 'MegaColumn[]', '—', '{ header, headerIcon, image, imageAlt, layout, span, items, footer, can } — image puts a thumbnail above the column, layout: "cards" turns its items into image tiles, span widens it'],
+      [' columns[].items', 'MegaLink[]', '—', '{ label, help, icon, image, badge, href, target, command, disabled, can } — image replaces the icon with a thumbnail'],
       [' panel', 'MegaPanel', '—', '{ image, imageAlt, title, text, href, linkLabel, cards } — a featured image and copy beside the columns, plus an image-card row beneath them'],
       ['orientation', "'horizontal' | 'vertical'", "'horizontal'", 'Vertical opens each panel to the side'],
       ['trigger', "'hover' | 'click'", "'hover'", 'What opens the FIRST panel. Either way, once a panel is open, hovering another root item switches to it — and hovering a plain link closes it. Hover keeps a grace period so the pointer can reach the panel'],
@@ -4423,7 +4423,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'background', type: 'color' }, { key: 'borderColor', type: 'color' },
     ],
     props: [
-      ['items', 'MenuItem[]', '[]', 'Each takes { key, label, icon, help, hint, badge, href, target, command, disabled, active, separator, items, toggleable }'],
+      ['items', 'MenuItem[]', '[]', 'Each takes { key, label, icon, help, hint, badge, href, target, command, disabled, active, separator, items, toggleable, can }'],
       ['expandedKeys', 'Record<string, boolean>', '{}', 'v-model:expandedKeys — which toggleable groups are open, keyed by the item’s key (or its label)'],
       [' item.toggleable', 'boolean', 'depth > 0', 'Overrides the default: a nested group collapses, a top-level one is a static label'],
       [' item.active', 'boolean', 'false', 'Marks the current page — tinted row'],
@@ -4471,7 +4471,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'iconColor', type: 'color' },
     ],
     props: [
-      ['items', 'MenuItem[]', '[]', 'Root items; an item with its own items drops a menu. Children take { label, icon, hint, href, target, command, disabled, separator, header, items }'],
+      ['items', 'MenuItem[]', '[]', 'Root items; an item with its own items drops a menu. Children take { label, icon, hint, href, target, command, disabled, separator, header, items, can }'],
       ['trigger', "'hover' | 'click'", "'hover'", 'What opens the FIRST menu; hover always switches once one is open'],
       ['size', "'sm' | 'md' | 'lg'", "'md'", ''],
       ['textColor', 'string', 'tokens', 'Root item text'],
@@ -4507,7 +4507,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'separatorColor', type: 'color' },
     ],
     props: [
-      ['items', 'MenuItem[]', '[]', 'Nest an items array on a row and it opens a submenu overlay to the side; also takes { icon, hint, href, target, command, disabled, separator, header }'],
+      ['items', 'MenuItem[]', '[]', 'Nest an items array on a row and it opens a submenu overlay to the side; also takes { icon, hint, href, target, command, disabled, separator, header, can }'],
       ['popup', 'boolean', 'false', 'Overlay anchored to whatever called toggle(event)'],
       ['side / align / gap', 'string / string / number', "'bottom' / 'start' / 6", 'Popup placement, flipping and shifting like the popover'],
       ['width', 'string', "'220px'", 'Minimum panel width'],

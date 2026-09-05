@@ -24,9 +24,9 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu, ApexBreadcrumb,
+import { useApexDialog, useApexAlert, useApexToast, useCan, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu, ApexBreadcrumb,
   ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger } from '@exorgroup/apex-ui';
-import type { MenuItem, MegaItem, CrumbItem } from '@exorgroup/apex-ui';
+import type { MenuItem, MegaItem, CrumbItem, SpeedDialItem } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
@@ -191,6 +191,50 @@ const msgEmail = ref('');
  * anchor. `povShared` is the exception that proves the point — one popover
  * serving four triggers, which only works because the anchor is the event.
  */
+/* ── The three pages the pack gated afterwards ──── */
+/*
+ * ApexSplitButton and ApexSpeedDial had docs pages before the menu family
+ * learned `can`, so their models are gated here for the Permissions section
+ * each page gained. ApexToolbar is with them because it is the one control in
+ * the group that does NOT gate — its contents are slots, not a model — and
+ * that is worth saying where people would look for it.
+ */
+
+/*
+ * Written so all three roles differ: `reports` is read, which the Coordinator
+ * has and the Viewer does not; the Admin group needs `settings` and a delete,
+ * which only the Admin has. So the Viewer is left with the one ungated row,
+ * and the header and rule that framed the rest go with them.
+ */
+const splitGated: MenuItem[] = [
+  { label: 'Save as…', icon: 'save_as' },
+  { label: 'Export', icon: 'download', can: 'reports' },
+  { separator: true },
+  { header: 'Admin' },
+  { label: 'Settings', icon: 'settings', can: 'settings' },
+  { label: 'Delete', icon: 'delete', can: { action: 'delete', resource: 'events' } },
+];
+
+/* Every row denied, to show the primary action surviving an empty menu. */
+const splitAllDenied: MenuItem[] = [
+  { label: 'Delete', icon: 'delete', can: { action: 'delete', resource: 'events' } },
+  { label: 'Purge', icon: 'delete_forever', can: 'settings' },
+];
+
+/* The dial is a flat list, so there is no cascade to show. What it does show
+   is the fan closing up: the offsets are computed from the filtered list, so
+   three items sit at three-item spacing rather than leaving gaps. */
+const dialGated: SpeedDialItem[] = [
+  { icon: 'edit', label: 'Edit' },
+  { icon: 'download', label: 'Export', can: 'reports' },
+  { icon: 'settings', label: 'Settings', can: 'settings' },
+  { icon: 'delete', label: 'Delete', can: { action: 'delete', resource: 'events' } },
+];
+
+/* The toolbar has no model, so its Permissions section gates the way a caller
+   would: the same resolver, read directly, driving a v-if. */
+const pageCan = useCan();
+
 /* ── ApexSidebar page ──────────────────────────── */
 const sbKeys = ref<Record<string, boolean>>({ reports: true });
 
@@ -2449,6 +2493,52 @@ async function copyUsage() {
             <ApexSplitButton label="Disabled" icon="lock" disabled :model="SPLIT_MODEL.slice(1, 4)" />
             <ApexSplitButton label="Opens left" icon="check" menu-align="start" severity="contrast" :model="SPLIT_MODEL.slice(1, 4)" />
           </div>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            A row carrying <code>can</code> is hidden from anyone the resolver denies, and
+            the removals cascade — a section header left labelling nothing goes with its
+            rows, and the rule that framed them collapses. Nothing is greyed out: a command
+            you may not run is not a command you should have to read past.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexSplitButton label="Save" :model="[
+  { label: 'Export', can: 'reports' },
+  { header: 'Admin' },
+  { label: 'Settings', can: 'settings' },
+  { label: 'Delete', can: { action: 'delete', resource: 'events' } },
+]" /&gt;</pre>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <div class="card iconstrip">
+            <ApexSplitButton label="Save" icon="check" :model="splitGated" @item-click="onMenuClick" />
+          </div>
+          <p class="note">
+            As the Viewer only <em>Save as…</em> is left, and the header and separator that
+            framed the rest have gone with it.
+          </p>
+
+          <h2>Permissions — the default action</h2>
+          <p class="note">
+            The primary action is not part of the model, so denying every row still leaves a
+            working button. That is the behaviour you want when Save is allowed and only the
+            extras are not — the filter must never take away the thing the button is for.
+          </p>
+          <p class="note">
+            The chevron stays as well, and opens onto an empty menu. It is the one place in
+            the family where a doorway to nothing survives the filter, because the toggle
+            belongs to the button rather than to the model — hide it with a
+            <code>v-if</code> if an empty menu would confuse the role that sees it.
+          </p>
+          <div class="card iconstrip">
+            <ApexSplitButton label="Save" icon="check" :model="splitAllDenied" @item-click="onMenuClick" />
+          </div>
+
         </template>
 
         <!-- ApexSpeedDial: every cell needs height for the items to fan into. -->
@@ -2502,6 +2592,46 @@ async function copyUsage() {
               <ApexSpeedDial :items="DIAL_ITEMS" type="semi-circle" mask :mask-opacity="0.75" severity="contrast" tooltip />
             </div>
           </div>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            The dial takes the same <code>can</code> as the menus, resolved through the same
+            seam. Its list is flat, so there is no cascade to watch — what there is instead
+            is geometry: the offsets are computed from the filtered list, so the remaining
+            actions fan at their own spacing rather than leaving holes where the denied ones
+            would have sat.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexSpeedDial :items="[
+  { icon: 'edit', label: 'Edit' },
+  { icon: 'download', label: 'Export', can: 'reports' },
+  { icon: 'delete', label: 'Delete', can: { action: 'delete', resource: 'events' } },
+]" type="circle" /&gt;</pre>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <!-- data-gated marks the demo the docs guard reads, so it does not have to
+               guess which dial on the page is the gated one. -->
+          <div class="grid grid--2" data-gated>
+            <div class="cell dial-cell">
+              <span class="cell__tag dial-cell__tag">type="circle"</span>
+              <ApexSpeedDial :items="dialGated" type="circle" :radius="82" tooltip />
+            </div>
+            <div class="cell dial-cell">
+              <span class="cell__tag dial-cell__tag">type="linear"</span>
+              <ApexSpeedDial :items="dialGated" type="linear" direction="up" tooltip />
+            </div>
+          </div>
+          <p class="note">
+            Open both as the Admin and again as the Viewer: four actions become one, and the
+            one sits where the first of four did. A dial that kept the gaps would tell the
+            user something had been taken away, which is the opposite of hiding it.
+          </p>
+
         </template>
 
         <!-- ApexButtonGroup -->
@@ -6486,6 +6616,53 @@ const items = [
               </ApexToolbar>
             </div>
           </div>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            The toolbar has no <code>can</code>, because it has no model — its three regions
+            are slots, and a slot's contents belong to the caller. So the gating here is
+            yours, written the way you would write any other conditional: ask the resolver
+            and use a <code>v-if</code>.
+          </p>
+          <pre class="doc-pre" v-pre>const can = useCan();
+
+&lt;ApexToolbar&gt;
+  &lt;template #start&gt;
+    &lt;ApexButton v-if="can('delete', 'events')" icon="delete"&gt;Delete&lt;/ApexButton&gt;
+  &lt;/template&gt;
+&lt;/ApexToolbar&gt;</pre>
+          <p class="note">
+            The other half is composition: a control that <em>does</em> gate keeps gating
+            inside a toolbar. The split button below is the same one from its own page, and
+            it filters here for the same reason it filters there — the bar is not involved.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <div style="margin-top:12px" data-gated>
+            <ApexToolbar>
+              <template #start>
+                <ApexButton severity="secondary" variant="text" icon="add" size="sm">New</ApexButton>
+                <ApexButton v-if="pageCan('delete', 'events')" severity="danger" variant="text"
+                            icon="delete" size="sm">Delete</ApexButton>
+              </template>
+              <template #end>
+                <ApexSplitButton label="Save" icon="check" size="sm" :model="splitGated"
+                                 @item-click="onMenuClick" />
+              </template>
+            </ApexToolbar>
+          </div>
+          <p class="note">
+            As the Viewer the Delete button is gone from the bar and the split button's menu
+            is down to one row. Two mechanisms, one resolver — which is the point of the
+            resolver being an app-level function rather than a prop on each control.
+          </p>
+
         </template>
 
         <template v-if="entry.id === 'tabs'">
