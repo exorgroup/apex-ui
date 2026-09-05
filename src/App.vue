@@ -24,7 +24,7 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
-import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock } from '@exorgroup/apex-ui';
+import { useApexDialog, useApexAlert, useApexToast, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu } from '@exorgroup/apex-ui';
 import type { MenuItem, MegaItem } from '@exorgroup/apex-ui';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
@@ -190,6 +190,76 @@ const msgEmail = ref('');
  * anchor. `povShared` is the exception that proves the point — one popover
  * serving four triggers, which only works because the anchor is the event.
  */
+/* ── ApexContextMenu page ──────────────────────── */
+const cxBasicZone = ref<HTMLElement | null>(null);
+const cxSubZone = ref<HTMLElement | null>(null);
+const cxTplZone = ref<HTMLElement | null>(null);
+const cxLinkZone = ref<HTMLElement | null>(null);
+const cxGateZone = ref<HTMLElement | null>(null);
+const cxRowZone = ref<HTMLElement | null>(null);
+const cxPicked = ref('');
+const cxTarget = ref('');
+const cxRows = ['Invoice 1041', 'Invoice 1042', 'Invoice 1043'];
+
+const cxBasic: MenuItem[] = [
+  { label: 'Open', icon: 'folder_open' },
+  { label: 'Rename', icon: 'edit', hint: 'F2' },
+  { separator: true },
+  { label: 'Delete', icon: 'delete' },
+];
+
+const cxSub: MenuItem[] = [
+  { label: 'Open', icon: 'folder_open' },
+  { header: 'Send to' },
+  { label: 'Share', icon: 'share', items: [
+    { label: 'Email', icon: 'mail' },
+    { label: 'Link', icon: 'link' },
+    { separator: true },
+    { label: 'More…', icon: 'more_horiz', items: [
+      { label: 'Slack' },
+      { label: 'Teams' },
+    ] },
+  ] },
+  { separator: true },
+  { label: 'Properties', icon: 'info', hint: '⌘I' },
+];
+
+/*
+ * The command reads the element the menu was opened on, so one menu serves
+ * every row — which is the whole point of attaching to the container rather
+ * than to each row in turn.
+ */
+const named = (e: unknown) => {
+  const el = (e as { target?: HTMLElement } | undefined)?.target;
+  return el?.closest?.('.ctx-row')?.getAttribute('data-row') || 'the container';
+};
+const cxRowItems: MenuItem[] = [
+  { label: 'Mark as paid', icon: 'check', command: (p: unknown) => { cxTarget.value =`paid: ${named(p)}`; } },
+  { label: 'Send reminder', icon: 'mail', command: (p: unknown) => { cxTarget.value =`reminder: ${named(p)}`; } },
+];
+
+const cxLinks: MenuItem[] = [
+  { label: 'Open in a new tab', icon: 'open_in_new', href: 'https://example.com', target: '_blank' },
+  { label: 'Documentation', icon: 'menu_book', href: 'https://example.com/docs' },
+  { separator: true },
+  { label: 'Copy link', icon: 'link' },
+];
+
+/* Reports is a submenu whose children are both gated, so for a role without
+   them it goes — and the header above it, having nothing left to label, goes
+   with it. */
+const cxGated: MenuItem[] = [
+  { label: 'Open', icon: 'folder_open' },
+  { separator: true },
+  { header: 'Reporting' },
+  { label: 'Reports', icon: 'bar_chart', items: [
+    { label: 'Sales', can: 'reports' },
+    { label: 'Attendance', can: 'reports' },
+  ] },
+  { separator: true },
+  { label: 'Settings', icon: 'settings', can: 'settings' },
+];
+
 /* ── ApexDock page ─────────────────────────────── */
 const dkPicked = ref('');
 
@@ -3248,6 +3318,98 @@ function pick(city) {
         <!-- Ported from the gallery, five sections. The popover is reached
              through its ref throughout, which is how it is meant to be used —
              so each example declares its own ref rather than sharing one. -->
+        <template v-if="entry.id === 'contextmenu'">
+          <h2>Basic</h2>
+          <p class="note">
+            Point <code>target</code> at an element and a right click inside it opens the
+            menu at the pointer, shifting only as far as it must to stay on screen. The
+            native menu is suppressed there and nowhere else.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;div ref="zone"&gt;Right-click me&lt;/div&gt;
+&lt;ApexContextMenu :items="items" :target="zone" /&gt;</pre>
+          <div ref="cxBasicZone" class="ctx-zone">Right-click anywhere in this box</div>
+          <ApexContextMenu :items="cxBasic" :target="cxBasicZone"
+                           @item-click="cxPicked = $event.item.label || ''" />
+          <p class="pov-state">item-click: <code>{{ cxPicked || 'nothing yet' }}</code></p>
+
+          <h2>Submenus</h2>
+          <p class="note">
+            Rows come from the shared overlay renderer, so nesting, separators, headers
+            and hints behave exactly as they do in the tiered menu — including the flip
+            when a submenu would run off the edge.
+          </p>
+          <div ref="cxSubZone" class="ctx-zone">Right-click for a nested menu</div>
+          <ApexContextMenu :items="cxSub" :target="cxSubZone" />
+
+          <h2>Global</h2>
+          <p class="note">
+            <code>global</code> attaches to the document instead of one element, which is
+            what an application-wide menu wants. <code>disabled</code> lets the browser’s
+            own menu through again — worth keeping reachable, since replacing it
+            everywhere takes away copy, paste and inspect.
+          </p>
+          <pre class="doc-pre" v-pre>&lt;ApexContextMenu :items="items" global :disabled="!appMenuEnabled" /&gt;</pre>
+
+          <h2>Command</h2>
+          <p class="note">
+            A row runs its own <code>command</code> first, then the menu emits
+            <code>item-click</code>. The command also receives the element the menu was
+            opened on, so one menu can act on whichever row was right-clicked.
+          </p>
+          <div ref="cxRowZone" class="ctx-rows">
+            <div v-for="r in cxRows" :key="r" class="ctx-row" :data-row="r">{{ r }}</div>
+          </div>
+          <ApexContextMenu :items="cxRowItems" :target="cxRowZone" />
+          <p class="pov-state">acted on: <code>{{ cxTarget || 'nothing yet' }}</code></p>
+
+          <h2>Template</h2>
+          <p class="note">
+            The <code>item</code> slot replaces a row’s contents and nothing else. The row
+            keeps its click, its hover and its submenu, so a custom row never has to
+            reimplement the menu.
+          </p>
+          <div ref="cxTplZone" class="ctx-zone">Right-click for custom rows</div>
+          <ApexContextMenu :items="cxBasic" :target="cxTplZone">
+            <template #item="{ item, branch }">
+              <ApexIcon v-if="item.icon" :name="item.icon" :size="18" />
+              <span class="tmenu-tpl__label">{{ item.label }}</span>
+              <ApexBadge v-if="item.hint" :value="String(item.hint)" severity="secondary" />
+              <ApexIcon v-if="branch" name="chevron_right" :size="18" class="tmenu-tpl__chev" />
+            </template>
+          </ApexContextMenu>
+
+          <h2>Router and links</h2>
+          <p class="note">
+            A row with an <code>href</code> renders as a real anchor, so middle-click,
+            right-click and copy-address all keep working — which matters more in a
+            context menu than anywhere else, since the user is already right-clicking.
+          </p>
+          <div ref="cxLinkZone" class="ctx-zone">Right-click for links</div>
+          <ApexContextMenu :items="cxLinks" :target="cxLinkZone" />
+
+          <h2>Permissions</h2>
+          <p class="note">
+            <code>can</code> hides a row from anyone the resolver denies, and the removals
+            cascade: a submenu whose children have all gone is dropped with them, the
+            header left over nothing goes, and the rules that framed the gap collapse.
+          </p>
+          <p class="note">
+            This is the one control in the family with arrow-key navigation, and it walks
+            the rendered rows rather than the model — so a denied row is not merely
+            invisible, it is not in the cycle either.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              v-for="r in ROLES" :key="r" size="sm"
+              :variant="docsRole === r ? 'filled' : 'outlined'"
+              :severity="docsRole === r ? 'primary' : 'secondary'"
+              @click="docsRole = r"
+            >{{ r }}</ApexButton>
+          </div>
+          <div ref="cxGateZone" class="ctx-zone">Right-click as the role above</div>
+          <ApexContextMenu :items="cxGated" :target="cxGateZone" />
+        </template>
+
         <template v-if="entry.id === 'dock'">
           <h2>Basic</h2>
           <p class="note">

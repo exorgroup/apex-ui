@@ -48,6 +48,15 @@
       </div>
       <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
+
+    <!-- A context menu renders nothing until something is right-clicked, so
+         the stage has to supply a target to right-click ON. Without it the
+         playground would look inert however the rail is set. -->
+    <template v-else-if="id === 'contextmenu'">
+      <div ref="ctxZone" class="menu-stage__ctx" data-stage-target>Right-click anywhere in this box</div>
+      <ApexContextMenu :items="MENU_ITEMS" :target="ctxZone" v-bind="bind" @item-click="onPick" />
+      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+    </template>
   </div>
 </template>
 
@@ -65,7 +74,7 @@
  * other check, which is exactly how two overlay stages once shipped blank.
  */
 import { ref } from 'vue';
-import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock } from '@exorgroup/apex-ui';
+import { ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu } from '@exorgroup/apex-ui';
 import type { MenuItem, MegaItem } from '@exorgroup/apex-ui';
 
 defineProps<{
@@ -184,6 +193,8 @@ const DOCK_ITEMS: MenuItem[] = [
   { icon: 'settings', label: 'Settings' },
   { icon: 'delete', label: 'Trash', disabled: true },
 ];
+
+const ctxZone = ref<HTMLElement | null>(null);
 
 const tmenu = ref<InstanceType<typeof ApexTieredMenu> | null>(null);
 const picked = ref('');
