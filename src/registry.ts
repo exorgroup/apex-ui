@@ -4488,4 +4488,57 @@ export const ENTRIES: DocEntry[] = [
       ['formatSize(bytes)', 'string', 'The same formatter the control uses'],
     ],
   },
+  {
+    id: 'confirmpopup', name: 'ApexConfirmPopup', group: 'Overlays',
+    /*
+     * The gallery's blurb says this shares the confirm service with
+     * ApexConfirmDialog. AF2-186 replaced that pair: the service is now the
+     * alert one, and the centred component is ApexAlert. Everything else about
+     * the description held, so only the two names changed — keeping the old
+     * ones would point the reader at a composable and a component that no
+     * longer exist.
+     */
+    blurb: 'A confirmation anchored to the control that triggered it. Shares the alert service with ApexAlert — a request carrying a target lands here, one without lands in the alert, so the caller never picks a component.',
+    noField: true, demo: 'overlay',
+    lead: [],
+    tail: '\n/>',
+    base: { side: 'bottom', align: 'center', showArrow: true },
+    controls: [
+      { key: 'message', type: 'text' }, { key: 'icon', type: 'text' },
+      { key: 'side', type: 'select', options: ['bottom', 'top', 'left', 'right'] },
+      { key: 'align', type: 'select', options: ['center', 'start', 'end'] },
+      { key: 'gap', type: 'number' }, { key: 'showArrow', type: 'bool' },
+      { key: 'width', type: 'text' }, { key: 'iconColor', type: 'color' },
+      { key: 'acceptLabel', type: 'text' }, { key: 'rejectLabel', type: 'text' },
+    ],
+    props: [
+      ['group', 'string', '—', 'Only respond to require() calls carrying this group'],
+      ['message / icon / iconColor', 'string', '—', 'Declarative defaults; a require() value overrides them'],
+      ['side', "'top' | 'bottom' | 'left' | 'right'", "'bottom'", 'Preferred side; flips when it will not fit'],
+      ['align', "'start' | 'center' | 'end'", "'center'", 'Along the target’s cross axis'],
+      ['gap', 'number', '10', 'Distance from the target, in pixels'],
+      ['showArrow', 'boolean', 'true', 'The arrow tracks the target’s centre even after a shift'],
+      ['acceptLabel / rejectLabel', 'string', "'Yes' / 'Cancel'", ''],
+      ['width', 'string', 'auto', ''],
+      ['zIndex', 'number', '1100', 'Above a dialog, so a popup can open over one'],
+    ],
+    events: [],
+    slots: [
+      ['container', 'Headless — replaces the whole popup; receives { options, accept, reject, close, buttons }'],
+      ['message', 'Replaces the icon and message; receives { options }'],
+    ],
+    serviceTitle: 'Request options',
+    serviceRows: [
+      ['target', 'Element | string | Event | ref', 'Required. Its presence is what routes the request here rather than to the dialog — pass the click event and it resolves to the button'],
+      ['side / align', 'string', 'Preferred placement; the popup flips and shifts to stay on screen'],
+      ['message / icon / iconColor', 'string', 'The prompt'],
+      ['acceptLabel / rejectLabel', 'string', 'Button text'],
+      ['acceptIcon / rejectIcon', 'string', 'Button icons'],
+      ['acceptSeverity / rejectSeverity', 'severity', 'Button colours'],
+      ['buttons', 'ConfirmButton[]', 'Replaces the default pair'],
+      ['width / padding / background / radius', 'string', 'Popup sizing and chrome'],
+      ['group', 'string', 'Routes the request to a matching popup'],
+      ['accept / reject / onCustom', 'callback', 'Resolved the same way as the dialog'],
+    ],
+  },
 ];

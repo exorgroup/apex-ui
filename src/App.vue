@@ -45,6 +45,30 @@ const model = reactive<Record<string, unknown>>({});
 
 /* ── The directives ──────────────────────────────────────────────────── */
 
+/* ── ApexConfirmPopup ────────────────────────────────────────────────── */
+
+/** What the last confirmation resolved to, shown live under the buttons. */
+const cfmLog = ref('');
+
+/**
+ * Ask through the alert service.
+ *
+ * Every option here is an AlertOptions field; `target` is the one that decides
+ * where the request lands — with it the popup answers, without it ApexAlert
+ * does. The demos all pass the click event, which core/anchor resolves to the
+ * button that was pressed.
+ *
+ * accept and reject are supplied here rather than per call site so all four
+ * sections report through the same line.
+ */
+function askConfirm(options: Record<string, unknown>) {
+  alert.confirm({
+    ...options,
+    accept: () => { cfmLog.value = 'accepted'; },
+    reject: () => { cfmLog.value = 'rejected'; },
+  });
+}
+
 /* ── ApexFileUpload ──────────────────────────────────────────────────── */
 
 /** What the custom-upload handler is doing, shown live under the demo. */
@@ -2181,6 +2205,133 @@ async function copyUsage() {
               <ApexKnob v-model="arcDemo[a]" :arc="a" :diameter="120" />
             </div>
           </div>
+        </template>
+
+        <!-- Ported from the gallery, four sections. The prose is the gallery's;
+             the code snippet is not, because its useApexConfirm().require()
+             was replaced by the alert service in AF2-186 and would no longer
+             run. A snippet that cannot be pasted is worse than none. -->
+        <template v-if="entry.id === 'confirmpopup'">
+          <h2>Basic</h2>
+          <p class="note">
+            Pass the click event as <code>target</code> and the popup anchors to whatever was
+            clicked. That <code>target</code> is also what routes the request here — the same
+            call without one opens the alert instead.
+          </p>
+          <pre class="doc-pre" v-pre>const alert = useApexAlert();
+
+function save(event) {
+  alert.confirm({
+    target: event,            // anchors here, and routes to ApexConfirmPopup
+    message: 'Are you sure you want to proceed?',
+    icon: 'warning',
+    accept: () =&gt; form.submit(),
+  });
+}</pre>
+          <div class="iconstrip" style="margin-top: 14px">
+            <ApexButton
+              severity="secondary"
+              variant="outlined"
+              @click="askConfirm({ target: $event, message: 'Are you sure you want to proceed?', icon: 'warning' })"
+            >Save</ApexButton>
+            <ApexButton
+              severity="danger"
+              icon="delete"
+              @click="askConfirm({ target: $event, message: 'Delete this record?', icon: 'delete', iconColor: '#C41E1E', acceptLabel: 'Delete', acceptSeverity: 'danger' })"
+            >Delete</ApexButton>
+          </div>
+          <p class="msg-event">Last outcome: <code>{{ cfmLog || 'none yet' }}</code></p>
+
+          <h2>Placement</h2>
+          <p class="note">
+            A preferred <code>side</code> and <code>align</code>, but the popup flips to the
+            opposite side when the preferred one will not hold it, then shifts along the cross
+            axis to stay on screen. Try the edge buttons — several will flip.
+          </p>
+          <div class="cpop-grid" style="margin-top: 12px">
+            <ApexButton
+              v-for="s in (['top', 'bottom', 'left', 'right'] as const)"
+              :key="s"
+              size="sm"
+              severity="secondary"
+              variant="outlined"
+              @click="askConfirm({ target: $event, message: `side='${s}'`, icon: 'my_location', side: s })"
+            >{{ s }}</ApexButton>
+            <ApexButton
+              v-for="a in (['start', 'center', 'end'] as const)"
+              :key="a"
+              size="sm"
+              severity="secondary"
+              variant="text"
+              @click="askConfirm({ target: $event, message: `align='${a}'`, icon: 'align_horizontal_left', align: a })"
+            >align {{ a }}</ApexButton>
+          </div>
+          <div class="cpop-edges" style="margin-top: 14px">
+            <ApexButton
+              size="sm"
+              severity="secondary"
+              variant="outlined"
+              @click="askConfirm({ target: $event, message: 'Flipped upward — no room below.', icon: 'swap_vert', side: 'bottom' })"
+            >Near the bottom edge</ApexButton>
+            <ApexButton
+              size="sm"
+              severity="secondary"
+              variant="outlined"
+              class="cpop-edges__right"
+              @click="askConfirm({ target: $event, message: 'Shifted back on screen, arrow still on target.', icon: 'swap_horiz', side: 'bottom', align: 'start' })"
+            >Near the right edge</ApexButton>
+          </div>
+
+          <h2>Template</h2>
+          <p class="note">
+            The <code>message</code> slot replaces the icon and text while keeping the popup's
+            frame and buttons.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              severity="secondary"
+              variant="outlined"
+              icon="inventory_2"
+              @click="askConfirm({ group: 'tpl', target: $event, acceptLabel: 'Archive', rejectLabel: 'Keep' })"
+            >Custom message</ApexButton>
+          </div>
+          <ApexConfirmPopup group="tpl" width="260px">
+            <template #message>
+              <div class="cpop-tpl">
+                <ApexAvatar label="Lobby totem" size="sm" auto-color />
+                <div>
+                  <strong>Archive this display?</strong>
+                  <span>It stops playing immediately and moves to the archive.</span>
+                </div>
+              </div>
+            </template>
+          </ApexConfirmPopup>
+
+          <h2>Headless</h2>
+          <p class="note">
+            A <code>container</code> slot replaces the entire popup. It receives
+            <code>accept</code> and <code>reject</code>, so your own controls still resolve the
+            request.
+          </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexButton
+              severity="secondary"
+              variant="outlined"
+              icon="dashboard_customize"
+              @click="askConfirm({ group: 'cpop-headless', target: $event })"
+            >Open headless</ApexButton>
+          </div>
+          <ApexConfirmPopup group="cpop-headless" width="240px">
+            <template #container="{ accept, reject }">
+              <div class="cpop-headless">
+                <p>Move this item to the bin?</p>
+                <button type="button" class="cpop-headless__go" @click="accept">
+                  <ApexIcon name="delete" :size="17" /> Move to bin
+                </button>
+                <button type="button" class="cpop-headless__no" @click="reject">Not now</button>
+              </div>
+            </template>
+          </ApexConfirmPopup>
         </template>
 
         <!-- Ported from the gallery, nine sections. None of these sets a url:
@@ -6015,4 +6166,8 @@ function pick(city) {
   <ApexDynamicDialog />
   <ApexToast />
   <ApexAlert />
+  <!-- The groupless popup, which is what a confirm() carrying a target but no
+       group lands in. The Template and Headless sections mount their own,
+       grouped, so those requests reach them instead of this one. -->
+  <ApexConfirmPopup />
 </template>
