@@ -88,9 +88,19 @@ function declaredSlots(name: string): { fixed: Set<string>; templated: boolean }
   return { fixed, templated };
 }
 
-/** A docs row may name several things at once: "height / maxHeight / width". */
+/**
+ * A docs row may name several things at once: "height / maxHeight / width".
+ *
+ * A row indented with an em space is not a prop at all. The gallery uses that
+ * indent to describe a field of the type named on the row above — MegaItem's
+ * `columns` and `panel`, ApexMenu's `item.toggleable` — and a component
+ * obviously does not declare those. Trimming erased the marker, so `columns`
+ * read as an undeclared prop of ApexMegaMenu; the ones carrying a dot escaped
+ * only because the name pattern happened to reject them.
+ */
 const namesIn = (cell: string) =>
-  cell.split('/').map((s) => s.trim().replace(/\(.*\)$/, '').trim())
+  (cell.startsWith(' ') ? [] : cell.split('/'))
+    .map((s) => s.trim().replace(/\(.*\)$/, '').trim())
     .filter((s) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(s));
 
 const CONTROLS = ENTRIES.filter((e) => !('demo' in e && e.demo === 'field'));
