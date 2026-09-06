@@ -454,16 +454,51 @@ function detectDirection(): boolean {
 watch(() => props.direction, () => { if (detectDirection()) commit(false); });
 
 /* ─── scales ─────────────────────────────────────────────── */
-/** An area fill implies magnitude from a baseline, so it earns a zero. */
-const anyFill = computed(() => (merged.series.value || []).some((s) => (s.fillOpacity ?? 0) > 0)
+/**
+ * An area fill implies magnitude from a baseline, so it earns a zero.
+ *
+ * AF2-236: this was `anyFill`, and the two places that read it call it
+ * needsZeroBaseline — so it was both "declared but never read" and "cannot
+ * find name" at once. The name the callers use wins; the rule is unchanged.
+ */
+const needsZeroBaseline = computed(() => (merged.series.value || []).some((s) => (s.fillOpacity ?? 0) > 0)
   || props.stackMode !== 'none'
   /* 'zero' turns every null into a real zero on screen, so zero has to be inside
      the domain or those points plot outside the plot area entirely. */
   || props.connectNulls === 'zero');
 
+/**
+ * Every visible series is a cloud of points rather than a trace.
+ *
+ * AF2-236: derived, not invented. `entranceMode` computes the identical
+ * expression under the local name `pointy`, and the three readers here want
+ * the same thing \u2014 a scatter has no shared x to snap a tooltip to, and a drag
+ * over one means a box rather than a span.
+ */
+const pointsOnly = computed(() => live.value.length > 0
+  && live.value.every((s) => s.type === 'scatter' || s.type === 'bubble'));
+
 /* ─── zoom ───────────────────────────────────────────────── */
-const localZoom = ref<ZoomRange | null>(merged.zoom.valueRange ?? null);
-const zoomRange = computed<ZoomRange | null>(() => (group ? group.state.zoom : localZoom.value));
+const localZoom = ref<ZoomRange | ZoomWindow | null>(null);
+
+/**
+ * The zoom as stored: a window, with an x range and optionally a y one.
+ *
+ * AF2-236: derived from what writes and reads it. setZoom stores the result of
+ * clampWindow, which is a ZoomWindow; currentWindow reads `.x` and `.y` off
+ * this. The stored value was typed ZoomRange, which is why assigning to it was
+ * also a type error \u2014 one wrong type and two missing names, all the same
+ * mistake. toWindow normalises either shape, and it was already imported for
+ * setZoom.
+ */
+const zoomWindow = computed<ZoomWindow | null>(() =>
+  toWindow(group ? group.state.zoom : localZoom.value));
+
+/** The x half \u2014 what windowing and decimation mean by "the zoom". */
+const zoomRange = computed<ZoomRange | null>(() => zoomWindow.value?.x ?? null);
+
+/** The y half, which exists only for a 2-D zoom; it is what clips the plot. */
+const zoomY = computed<ZoomRange | null>(() => zoomWindow.value?.y ?? null);
 
 /** The full extent, which every zoom operation is clamped against. */
 const xBounds = computed<ZoomRange>(() => {
@@ -574,6 +609,10 @@ function windowed(series: ResolvedSeries[]): ResolvedSeries[] {
 
 function buildScales() {
   const series = live.value;
+  /* AF2-236: paneScales reads `inWindow` and nothing declared it. windowed()
+     directly above is what it means — the same restriction the x scale applies
+     — so a pane's y domain comes from the points actually on screen. */
+  const inWindow = windowed(series);
   const hasRight = series.some((s) => !s.hidden && s.axis === 'right');
 
   /* Scales are built against a provisional rect, the rect is measured from the

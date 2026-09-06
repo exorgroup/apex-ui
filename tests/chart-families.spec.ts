@@ -3,21 +3,17 @@ import { mount } from '@vue/test-utils';
 import ApexChart from '../src/components/ApexChart.vue';
 
 /*
- * SKIPPED, and it must stay skipped until ApexChart can mount.
- *
- * AF2-236 found the component references five identifiers that are never
- * declared — inWindow, needsZeroBaseline, pointsOnly, zoomWindow, zoomY — so
- * setup throws on the first render. Pando's original has the same five, so
- * this is not an import defect; the component has never run. The skip is here
- * rather than the file deleted because these two cases are the coverage the
- * split needs the moment those bindings exist.
- *
  * The chart families, checked where they draw.
  *
  * AF2-236 moves each family out of ApexChart into its own renderer. Nothing
  * covered them before — the docs page does not exist yet and the suite had no
  * chart test at all — so the refactor could have silently stopped drawing a
  * treemap and every gate would still have been green.
+ *
+ * These two spent one commit skipped: writing them is what found that
+ * ApexChart could not mount at all. That is the argument for a test that
+ * mounts the thing, however shallow — the build, the typecheck and every
+ * other gate had been green over a component that threw on first render.
  *
  * These are deliberately shallow: one assertion that the family's own elements
  * are on the page, and one that the interaction it owns still works. Geometry
@@ -42,7 +38,7 @@ const TREE = [
 /** A size, because a treemap laid out in a zero-width frame has no tiles. */
 const SIZED = { width: 600, height: 400 };
 
-describe.skip('the treemap family renders', () => {
+describe('the treemap family renders', () => {
   it('draws a tile per node', async () => {
     const w = mount(ApexChart, {
       props: { ...SIZED, series: [{ id: 't', type: 'treemap', nodes: TREE }] },

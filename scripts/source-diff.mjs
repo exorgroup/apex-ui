@@ -74,6 +74,17 @@ const INTENDED = [
   { why: 'AF2-62/64/67/68: the shared appearance props and their style block', test: (l) => /ApexButtonAppearance|ApexContainerProps|ApexDisplayProps|ApexMediaProps|(menu|action)[A-Z]\w*\?:|withDefaults\(defineProps<|btnStyle|Record<string, string>|Array<\[string \| undefined, string\]>|map\.forEach|^\s*(out|return out|\]|\);|\}\);)/.test(l) },
   { why: 'AF2-203: the breadcrumb’s routing helpers, and hiding an empty trail', test: (l) => /hrefFor|isRouted|linkAs|tagFor|all\.length|entry\.item|item\.to\b/.test(l) },
   { why: 'AF2-131/141/170: variables renamed to --apex-*', test: (l) => /--apex-[a-z]+-/.test(l) || /--(tbar|mnu|sbar|bc|dial|dock|mbar|mega)-/.test(l) },
+  /* The chart could not mount: five identifiers were referenced and never
+     declared, and one const was read eighty lines above its own line. Each
+     definition is derived from an existing use site, helper or type — see the
+     comments on them in the component. */
+  { why: 'AF2-236: the bindings that made ApexChart mountable', test: (l) => /needsZeroBaseline|pointsOnly|zoomWindow|const zoomY|const inWindow = windowed|const uid = Math\.random|const uidClip|localZoom = ref<ZoomRange \| ZoomWindow/.test(l) },
+  /* The treemap moved to its own renderer; the drill path and its breadcrumb
+     stayed, because the nav renders outside the svg. */
+  { why: 'AF2-236a: the treemap extraction', test: (l) => /ApexChartTreemap|const crumbs = computed|const allSeries = computed|crumbs\.length|c in crumbs|hasTreemap|drillPath\.value\.map|:width="size\.width"|@drill="drillInto"|^candleGeometry, candleTones, heatBand, heatGrid, heatIntensity,$/.test(l.trim()) },
+  /* Continuation lines of the two definitions above. The matcher reads one
+     line at a time, so a wrapped expression has to name both halves. */
+  { why: 'AF2-236: continuations of those bindings', test: (l) => /^(&& live\.value\.every|toWindow\(group \? group\.state\.zoom)/.test(l.trim()) },
   { why: 'AF2-202: the watch that closes a group the filter emptied', test: (l) => /^import \{ computed, ref(, watch)? \} from 'vue';$/.test(l.trim()) },
 ];
 
