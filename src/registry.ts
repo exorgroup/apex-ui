@@ -58,7 +58,7 @@ export interface DocEntry {
    */
   demo?: 'plain' | 'chip' | 'meter' | 'inplace' | 'block' | 'scrolltop'
     | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container'
-    | 'overlay' | 'menu' | 'media' | 'board';
+    | 'overlay' | 'menu' | 'media' | 'board' | 'chart';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -102,6 +102,17 @@ export interface DocEntry {
    * against, so nothing is checked and everything reads as clean.
    */
   optionsType?: string;
+
+  /**
+   * A second interface whose fields this entry's props table also documents.
+   *
+   * ApexChart is the case: the gallery's table lists the chart's own props and
+   * the per-series options together, because a reader configuring a heatmap
+   * does not care which object `cellGap` hangs off. Both are real API, so the
+   * guard resolves a name against either rather than the table lying about
+   * where twenty-four of them live.
+   */
+  alsoDeclaredIn?: string;
   /**
    * Default-slot text for the playground stage, where the control renders
    * nothing without children. ApexMessage is a box around its content: bound
@@ -352,6 +363,12 @@ export const MTR_ICONS = [
  * The people the context menu's per-row example acts on. Ported from the
  * gallery, where the same list backs several controls.
  */
+/** The chart's twelve months, and the trial curve every line example uses. */
+export const CHT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+export const CHT_TRIAL = [41, 46, 49, 45, 53, 58, 57, 61, 64, 62, 68, 72]
+  .map((value, i) => ({ month: CHT_MONTHS[i], value }));
+
 /* ── ApexTaskBoard demo data ──────────────────────────────────────
    Ported from the gallery. Every board on the page copies its seed, so one
    demo's drags never show up in another. */
@@ -4406,6 +4423,164 @@ export const ENTRIES: DocEntry[] = [
       ['app.use(ApexUI)', 'plugin', 'Registers the directive; import { apexTooltip } to register it yourself'],
     ],
   },
+  {
+    id: 'chart', name: 'ApexChart', group: 'Charts', alsoDeclaredIn: 'ChartSeries',
+    blurb: 'The chart root \u2014 series, scales, plot rect, layers and the animation clock. Slice 1 is the engine plus the line series: everything shared lives on one root, which is what will later make a combo chart behave as one chart rather than three overlaid, and cross-chart sync a matter of sharing one store. SVG by default for DOM hit testing, CSS-variable theming and real accessibility; a canvas series layer takes over past a density threshold.',
+    noField: true, demo: 'chart',
+    lead: [':series="series"'],
+    tail: '\n/>',
+    base: {
+      curve: 'linear', tension: 0.5, connectNulls: 'gap', lineStrokeWidth: 2,
+      markerSize: 3.5, height: 320, renderer: 'auto', animation: true,
+    },
+    controls: [
+      { key: 'curve', type: 'select', options: ['linear', 'smooth', 'spline', 'step', 'step-before', 'step-after'] },
+      { key: 'tension', type: 'number' },
+      { key: 'connectNulls', type: 'select', options: ['gap', 'connect', 'zero'] },
+      { key: 'stackMode', type: 'select', options: ['none', 'normal', 'percent'] },
+      { key: 'markerShape', type: 'select', options: ['circle', 'square', 'triangle', 'cross', 'star', 'diamond'] },
+      { key: 'dataLabels', type: 'bool' },
+      { key: 'zoom', type: 'bool' }, { key: 'navigator', type: 'bool' },
+      { key: 'toolbar', type: 'bool' },
+      { key: 'referenceLabelPosition', type: 'select', options: ['end', 'start'] },
+      { key: 'orientation', type: 'select', options: ['vertical', 'horizontal'] },
+      { key: 'categoryGap', type: 'number' }, { key: 'barGap', type: 'number' },
+      { key: 'barThickness', type: 'number' }, { key: 'maxBarThickness', type: 'number' },
+      { key: 'minBarLength', type: 'number' },
+      { key: 'barMode', type: 'select', options: ['group', 'overlap'] },
+      { key: 'overlapRatio', type: 'number' },
+      { key: 'borderSkipped', type: 'select', options: ['start', 'end', 'middle'] },
+      { key: 'barBorderColor', type: 'color' }, { key: 'barBorderWidth', type: 'number' },
+      { key: 'barPadding', type: 'number' }, { key: 'barRadius', type: 'number' },
+      { key: 'innerRadius', type: 'number' }, { key: 'outerRadius', type: 'number' },
+      { key: 'padAngle', type: 'number' },
+      { key: 'centerValue', type: 'text' }, { key: 'centerLabel', type: 'text' },
+      { key: 'locale', type: 'text' },
+      { key: 'direction', type: 'select', options: ['auto', 'ltr', 'rtl'] },
+      { key: 'lineStrokeWidth', type: 'number' }, { key: 'markerSize', type: 'number' },
+      { key: 'showMarkers', type: 'bool' },
+      { key: 'renderer', type: 'select', options: ['auto', 'svg', 'canvas'] },
+      { key: 'pointHitRadius', type: 'number' },
+      { key: 'animation', type: 'bool' }, { key: 'animationDuration', type: 'number' },
+      { key: 'entrance', type: 'select', options: ['auto', 'draw', 'sweep', 'scale', 'grow', 'none'] },
+      { key: 'pointBorderColor', type: 'color' }, { key: 'pointBorderStrokeWidth', type: 'number' },
+      { key: 'entranceDirection', type: 'select', options: ['cw', 'ccw'] },
+      { key: 'entranceDuration', type: 'number' },
+      { key: 'dataTable', type: 'bool' },
+      { key: 'title', type: 'text' }, { key: 'caption', type: 'text' },
+    ],
+    props: [
+      ['series', 'ChartSeries[]', '[]', '{ id, name, data, xKey, yKey, color?, fillOpacity?, lineStrokeWidth?, lineDash?, showMarkers?, axis?, hidden? }. xKey and yKey are property names or accessor functions, so app data is never reshaped to suit the chart. A series array rather than compound children makes a combo chart the default case rather than a mode'],
+      ['xAxis / yAxis / y2Axis', 'AxisSpec', '{}', "{ type: 'linear' | 'log' | 'time' | 'category', label, min, max, nice, includeZero, padding, tickCount, format, grid, line, ticks, rotate }. includeZero defaults false for lines \u2014 forcing zero flattens the shape a line chart exists to show \u2014 and true when any series has a fill, where the fill implies magnitude from a baseline"],
+      ['title / caption', 'string', '\u2014', 'Both reduce the plot rect rather than floating over it'],
+      ['legend', 'object', '{}', "{ show, position: 'top' | 'bottom', align, interactive }. Click an entry to hide that series"],
+      ['tooltip', 'object', '{}', "{ show, mode: 'nearest' | 'shared-x' | 'series', snap: 'x' | 'y' | 'band' | 'xy' | 'none', crosshair, format }. A point chart defaults to nearest / 'xy', because picking by horizontal distance alone makes two points at the same x and far apart in y indistinguishable. A bar chart defaults to 'band' \u2014 the category the pointer is INSIDE, which is the only correct answer for bars, since at a band edge the nearest centre belongs to the neighbour. A turned chart snaps on 'y', because \u201csame x\u201d means \u201csame category\u201d. One hit-testing service feeds tooltip, crosshair and hover together \u2014 per-series hit logic is the reliable way to get a combo chart that snaps inconsistently between its layers"],
+      ['series.type', "'line' | 'bar' | 'scatter' | 'bubble' | 'pie' | 'gauge' | 'radar' | 'polar' | 'heatmap' | 'candlestick' | 'treemap'", "'line'", 'Every type shares one root, one hit-testing service and one animation clock, which is what makes a combo chart behave as one chart rather than three overlaid \u2014 and why combo is the default case here rather than a mode'],
+      ['heatmap: groupKey / colorStops / cellRadius / cellGap / showCellLabels', 'string | fn / string[] / number', '\u2014', 'xKey gives the columns, groupKey the rows, yKey the value. Columns and rows come from the data in first-seen order rather than sorted, because a heatmap\u2019s axes are usually meaningful sequences \u2014 hours, weekdays, stages \u2014 and sorting them destroys the order the reader came for. Without colorStops, intensity is opacity on a token colour: parsing oklch out of a custom property to interpolate a hue would tie the heatmap to a colour format and break theming'],
+      ['candlestick: openKey / highKey / lowKey / closeKey / candleVariant / upColor / downColor', 'string | fn / string', "\u2014 / 'candle'", "candle, hollow or ohlc. Direction colours a candle rather than the palette \u2014 the reader is looking for up or down, and a palette hue would say nothing. A doji keeps a one-pixel body rather than vanishing, since \u201cno change\u201d is information, and the wick is part of the domain so highs and lows are never clipped. y resolves to the close, so hit testing, the shared crosshair and the tooltip all work without knowing the series is a candlestick"],
+      ['treemap: nodes / depth / tilePadding', 'unknown[] / number / number', '\u2014 / 1 / 2', 'Squarified rather than sliced, because aspect ratio is what makes a tile comparable: a long thin sliver of equal area reads as smaller, so a layout ignoring it misreports its own data. Tiles with children are clickable to drill in, with a breadcrumb back out; depth above 1 nests inline instead'],
+      ['innerRadius', 'number', '0', 'Fraction of the outer radius left hollow \u2014 0 is a pie, 0.6 a donut. A fraction rather than pixels, so a chart stays a donut at any size. Several pie series become concentric rings rather than overlays'],
+      ['padAngle / startAngle / endAngle', 'number', '0 / 0 / 2\u03c0', 'Angles run from twelve o\u2019clock, clockwise \u2014 the way people read a dial. Mathematical convention would put every caller\u2019s startAngle at \u2212\u03c0/2. A partial sweep makes a gauge, and a shallow one is centred on the arc it occupies rather than on the box'],
+      ['series.min / max', 'number', '0 / 100', 'Gauge bounds'],
+      ['outerRadius', 'number', '1', 'Fraction of the fitted radius the ring occupies. Below 1 it leaves room for external labels \u2014 which is why the two arrived together: labels outside a ring sized to fill the box would run off the edge'],
+      ['dataLabels.position', "'inside' | 'outside'", "'inside'", "Radial only. 'outside' places labels beyond the rim with leader lines. Labels cluster wherever slices are thin, so they are split by side, sorted, and pushed apart \u2014 DISPLACED rather than culled, because on a pie the collisions ARE the small slices and those are the ones most needing a label. The anchor stays on the slice\u2019s own rim and only the text end moves, so the connector always originates at the correct slice however far the text travels"],
+      ['dataLabels.display', "'value' | 'percentage' | 'both' | 'label' | 'label-percentage'", "'percentage'", ''],
+      ['dataLabels.labelKey', 'string', '\u2014', "Which property names a point for display 'label'. A numeric x axis has no category to fall back on, so without it the label would silently be the x value \u2014 which is already on the axis"],
+      ['dataLabels.minPercentage', 'number', '0', 'The honest cull: a slice under this share carries no label at all, because displacing one would put its text a long way from the wedge it describes'],
+      ['dataLabels.lineStyle', "'angled' | 'straight'", "'angled'", "Angled levels the elbow with the displaced text, so the connector reaches it; straight keeps the radial elbow, which is cleaner when nothing needed displacing"],
+      ['radarRings', 'number', '4', 'Rings behind a radar. Polygons, not circles: a value is read along a spoke, and a circular ring crosses the spokes where there is nothing to read'],
+      ['centerLabel / centerValue', 'string', '\u2014', 'Text in the middle of a donut or gauge'],
+      ['orientation', "'vertical' | 'horizontal'", "'vertical'", 'Swaps the axes: categories run down the left and values across. A chart-level choice rather than per series, because two series cannot share a category axis pointing in different directions. Gridlines follow the value axis, since a gridline exists to read a value against'],
+      ['categoryGap / barGap', 'number', '0.28 / 0.1', 'Space between CATEGORIES and space between bars WITHIN a group. Two knobs rather than one, because conflating them means you cannot tighten a group without also opening the categories. barPadding remains as an alias for categoryGap'],
+      ['barThickness / maxBarThickness', 'number', '\u2014', 'Fixed width in pixels, and a cap on the computed width so a wide chart with three categories does not draw slabs'],
+      ['minBarLength', 'number', '\u2014 (off)', 'Floor in pixels so a tiny value stays visible. Off by default: it helps reading and mildly hurts measuring, so it is a choice rather than a default. The floor grows AWAY from the baseline, so a tiny negative bar still hangs below zero'],
+      ['barMode / overlapRatio', "'group' | 'overlap' / number", "'group' / 0.6", 'Overlap gives every series the full band at a decreasing width, painted back to front \u2014 a target reads behind an actual without the two sitting side by side. Group divides the band between STACK groups, which is why a grouped-stacked layout needs no extra concept: two stack ids give two side-by-side stacks'],
+      ['series.color (per bar)', 'string | string[] | (ctx) => string | undefined', 'palette', 'An array cycles by index; a callback receives { point, index, value, category, negative, series } and returning undefined falls through to the series colour \u2014 the same contract as segmentColor, so conditional paint has one rule across the library'],
+      ['barRadius', 'number | { tl, tr, br, bl }', '3', 'A number rounds the VALUE END only, because a bar rounded at the axis reads as floating above it. An object addresses visual corners directly. Under horizontal orientation the value end is remapped from an explicit table rather than computed, since a turned chart rounding the wrong edge is precisely what arithmetic would hide'],
+      ['barBorderColor / barBorderWidth / barBorderDash', 'string / number / string | number[]', '\u2014 / 1', 'Strokes each bar'],
+      ['borderSkipped', "'start' | 'end' | 'middle' | false", "'start'", 'Which edge omits the stroke. start is the baseline, so a bar reads as continuous with the axis. The stroke is a separate open path from the fill, since a closed path cannot express a missing edge'],
+      ['barPadding / barRadius', 'number', '0.28 / 3', 'Fraction of each band left empty, and the corner radius on the value end only \u2014 a bar rounded at the axis reads as floating above it. A band is divided between STACK GROUPS rather than series, since stacked bars occupy the same ground by definition'],
+      ['series.waterfall / totalKey', 'boolean / string', 'false / \u2014', 'Each bar starts where the previous ended. A row flagged by totalKey resets to the baseline, which is what makes it a subtotal rather than another step'],
+      ['series.renderBar', '(ctx) => string', '\u2014', 'Replaces the bar shape; receives { x, y, width, height, point, series, index } and returns a path'],
+      ['series.color (per point)', 'string | string[] | (ctx) => string | undefined', 'palette', 'Same contract as bars and line segments \u2014 an array cycles by index, a callback receives { point, index, value, category, series }, and undefined falls through to the series colour. One rule for conditional paint across every family'],
+      ['pointBorderColor / pointBorderStrokeWidth', 'string / number', 'series colour / 1.25', 'Per series or chart-wide. A white border is what separates overlapping points, and it was previously unreachable because the stroke was hard-coded to the series colour'],
+      ['series.color as radial gradient', "{ type: 'radial', stops }", '\u2014', 'Centred on each point and sized to it. A plot-wide linear gradient gives thirty bubbles a flat slice of the ramp each, which reads as noise rather than depth. Emitted as ONE def per series using objectBoundingBox, so it serves every point at its own radius rather than needing a def per point'],
+      ['series.renderMarker', '(ctx) => string', '\u2014', 'Replaces the marker shape; receives { r, point, index, series, color } and returns a path drawn AT ORIGIN, because the chart keeps the translation \u2014 the same division as renderBar: chart owns geometry, caller owns shape'],
+      ['series.rKey / minSize / maxSize', 'string | fn / number / number', '\u2014 / 4 / 22', 'Bubble radius. AREA is scaled, not radius \u2014 the eye reads a circle by its area, so mapping value to radius exaggerates large values by their square'],
+      ['stackMode', "'none' | 'normal' | 'percent'", "'none'", 'Stacks series sharing a stack id. Computed across the series list rather than per series, because stacking is a relationship between series \u2014 which is also why the same code will serve stacked bars unchanged. Negatives stack downward from zero'],
+      ['series.y0Key', 'string | fn', '\u2014', 'Lower edge of the band. A range area, a confidence interval and a stacked slice are the same primitive \u2014 a fill between two values \u2014 so one field serves all three and a fill to zero is just the case where every lower edge is the baseline'],
+      ['series.color', 'string | ChartGradient', 'palette', 'A CSS colour, or { x1, y1, x2, y2, stops } in normalized plot coordinates. A gradient gets two defs, not one: along a stroke it reads as progression through time, under a fill as fading toward the baseline, so the default directions differ'],
+      ['series.borderColor / borderStrokeWidth / borderDash / borderCap', 'string / number / string / string', '\u2014', 'A halo painted behind the line and wider than it, which keeps a series legible where it crosses area fills or other series'],
+      ['series.segmentColor / segmentStrokeWidth / segmentDash / segmentFillColor', 'value | (ctx) => value | undefined', '\u2014', 'Per-segment styling. The callback receives { p0, p1, index, series }, and returning undefined falls back to the series default so only what you mean to override is. Tangents are computed from the whole run before it is cut into pieces, so a styled segment keeps the curve rather than being a straight line'],
+      ['series.lineDashOffset / lineCap / lineJoin', 'number / string / string', '\u2014', ''],
+      ['series.curve / tension', 'string / number', 'chart value', 'Per-series override'],
+      ['markerShape / series.markerShape', "'circle' | 'square' | 'triangle' | 'cross' | 'star' | 'diamond'", "'circle'", 'With series.pointRotation to turn the shape'],
+      ['dataLabels.placement', "'outside-end' | 'inside-end' | 'inside-center' | 'inside-base'", "'outside-end'", 'Bars only. Outside-end never covers the data, which is why it is the default; dense charts want inside-end. A stacked segment has nowhere outside itself to put a label, so a stacked series defaults to inside-center rather than inheriting. Placement is derived from the DRAWN RECT, so a floor-adjusted or stacked bar labels its actual geometry, and it accounts for orientation and sign together \u2014 an outside-end label on a negative bar goes past the baseline the other way. Inside labels stay legible by separating the glyph from its background rather than by guessing a contrasting colour, which is not derivable from an arbitrary token'],
+      ['dataLabels', 'boolean | object', 'false', '{ show, format, offset, collision, sparse, placement }. Collisions are culled rather than overlapped \u2014 telling the caller to "label sparsely" puts the burden on them for something the component can see, and an unreadable label is worse than a missing one. Endpoints and local extremes survive first; sparse keeps only those'],
+      ['hover', 'object', '{}', '{ brightness, dimOpacity, radiusMultiplier, color, borderColor, borderWidth }. One object rather than nine top-level props with overlapping names'],
+      ['curve', "'linear' | 'smooth' | 'spline' | 'step' | 'step-before' | 'step-after'", "'linear'", 'smooth is monotone cubic, which never overshoots, so it cannot invent a peak that is not in the data; spline is Catmull-Rom with a tension knob for a looser curve'],
+      ['connectNulls', "'gap' | 'connect' | 'zero' | boolean", "'gap'", 'A null breaks the line by default, because real data has holes and a chart that silently interpolates across them lies. zero is only honest when zero is a real value rather than missing data'],
+      ['showMarkers / markerSize', 'boolean / number', 'auto / 3.5', 'Markers appear automatically at 40 points or fewer \u2014 500 markers in 600px is noise'],
+      ['lineStrokeWidth / markerSize / markerShape', 'number / number / string', '2 / 3.5 / circle', 'Chart-level defaults for every line series; each series may override its own'],
+      ['pointHitRadius', 'number', '12', 'Hit area, independent of drawn size, so a 2px marker is still hoverable'],
+      ['renderer', "'svg' | 'canvas' | 'auto'", "'auto'", 'A prop rather than a separate root component, so the choice stays data-driven. Both renderers draw the same computed geometry \u2014 one source of truth for the shape'],
+      ['decimation / decimationThreshold', 'boolean | number / number', 'true / 2000', 'LTTB downsampling, which preserves visual shape including spikes where stride sampling and averaging destroy it. Runs before the renderer choice, which is why most large datasets never need canvas. Hit testing always uses full-resolution points, so the tooltip never reports a neighbour'],
+      ['entrance', "'auto' | 'draw' | 'sweep' | 'scale' | 'grow' | 'none'", "'auto'", "'draw' sweeps a reveal along the category axis so the series looks drawn; 'grow' interpolates up from the baseline; 'auto' draws when every series is a line and grows otherwise, since a sweep says nothing about a pie. It is a REVEAL rather than a value interpolation \u2014 a drawn line has to show its real shape as it appears, where interpolating toward it would move the whole curve, which is a different gesture. Implemented as one clip sweeping the plot, so the fill, markers and labels are uncovered with the line, no per-path length has to be measured, and the canvas layer applies the same rectangle"],
+      ['entranceDuration', 'number', '900', ''],
+      ['entrance \u2014 points', "'scale'", 'per family', 'Scatter and bubble scale in place from zero radius. Lifting a point from the baseline reads as the data moving rather than the chart arriving'],
+      ['entrance \u2014 radial', "'sweep'", 'per family', "A clockwise reveal for pie, donut, gauge and rose: slices are CLAMPED to a moving cursor rather than covered by a rotating clip, so nothing exists ahead of it and an unrevealed slice cannot be hovered \u2014 a clip would leave every slice full-size and invisible-but-hoverable. A gauge FILLS from its start angle rather than appearing full-length and shrinking. Radar keeps 'grow', because an angular cursor across a polygon distorts the shape as it crosses \u2014 triangle to quadrilateral \u2014 which reads as the data changing rather than the chart arriving. The sweep eases LINEARLY, since easeOutCubic over 360\u00b0 spends most of its time crawling through the last few degrees, and its duration scales with the angle actually swept so a 90\u00b0 gauge is not as slow as a full pie"],
+      ['entranceDirection', "'cw' | 'ccw'", "'cw'", 'Free, since our angles already run clockwise from twelve o\u2019clock. The clamp works in progress along the ring rather than in angles, so ccw is the same arithmetic read the other way round rather than a second code path'],
+      ['entranceOnVisible', 'boolean', 'true', 'Plays when the chart is actually on screen, and only once \u2014 a chart three screens down that finished animating before it was scrolled to has not been seen to animate. Honours prefers-reduced-motion by revealing instantly'],
+      ['animation / animationDuration', 'boolean / number', 'true / 620', 'Interpolation between datasets, matched per point key \u2014 so a removed point collapses and a new one grows. Entrance is the same code from a synthetic baseline frame, which is why no separate entrance animation exists'],
+      ['zoom', 'boolean | object', 'false', '{ wheel, drag, pan, touch }. Wheel zooms about the cursor rather than the centre \u2014 the value under the pointer is the one you are interested in, so it stays put. Drag rubber-bands a range; shift-drag or two-finger drag pans; pinch zooms. A drag under a few pixels is treated as a click, or a stray click would zoom to nothing and trap the reader'],
+      ['zoom.mode', "'x' | 'y' | 'xy'", "'xy' for points, 'x' otherwise", 'Which axes a drag selects. A scatter cluster is two-dimensional, so narrowing x alone gives a vertical slab containing everything rather than isolating the group \u2014 which is why a point chart defaults to 2D. The marquee spans the full plot on any axis the mode does not select, so it shows exactly what will be kept'],
+      ['zoomRange', '[number, number] | { x, y? } | null', 'null', 'v-model:zoomRange \u2014 the visible window. An [lo, hi] pair still means x only, so callers written before two-axis zoom keep working; the emitted payload is always { x, y? }. One object rather than a second zoomRangeY prop, which would split one concept across two props that must be kept consistent. A y window overrides the derived y domain outright, and points outside it are CLIPPED rather than filtered out \u2014 dropping them would silently reduce the rendered count, which looks exactly like a working zoom. Zooming re-decimates within the window, which is what makes zooming into a large series reveal detail rather than magnify an approximation, and the y domain follows the window so a zoomed line does not sit in a domain sized by data off screen'],
+      ['navigator', 'boolean | object', 'false', '{ height, series, curve } \u2014 a mini overview with a draggable window. For a point chart it draws mini points and the handle becomes a RECT that pans both axes, because a horizontal strip can only express one axis and would misreport a 2D view. Draws mini bars when the series is a bar type, since an area overview under a bar chart misrepresents what you are panning across. It always draws the full extent, that being its whole job, so it gets its own scales rather than the zoomed ones. Drag the window to pan, its edges to resize'],
+      ['referenceLines', 'ChartReferenceLine[]', '[]', "{ axis: 'x' | 'y', value, label, color, dash, width }. A value may be a category name rather than an index, so a line on \u201cMar\u201d follows Mar wherever it moves to. Labels sit at the far end of the line, out of the data\u2019s way"],
+      ['referenceBands', 'ChartReferenceBand[]', '[]', "{ axis, from, to, label, color, opacity }. Bands paint under the gridlines and lines over them \u2014 a band is background, a threshold line is a statement about the data"],
+      ['toolbar', "boolean | { items }", 'false', "A download menu on the chart \u2014 png, svg, csv, reset-zoom. Off by default, because it is the first piece of APPLICATION chrome inside a chart and a dashboard tile rarely wants it. It calls the same export methods the ref exposes rather than duplicating them, and reset-zoom is dropped when zoom is off rather than shown disabled: a menu of things that cannot happen is worse than a shorter menu"],
+      ['referenceLabelPosition / line.labelPosition', "'start' | 'end'", "'end'", "Which end a reference label sits at. 'end' keeps it out of rising data; 'start' reads as a named threshold you scan down to. Neither is universally right, so it is a choice rather than a default we hide"],
+      ['plugins', 'ChartPlugin[]', '[]', '{ name, below?, above?, onHover? }. A plugin returns overlay primitives rather than drawing: direct drawing would mean one implementation per renderer and a plugin that only works in SVG, where a declarative vocabulary paints identically through both and stays inspectable in the DOM. Ships with watermarkPlugin, trendlinePlugin, statsPlugin and thresholdPlugin'],
+      ['locale', 'string', 'browser default', 'BCP 47 tag for every number and date the chart formats. Passed explicitly rather than read from the document, so a chart can be formatted for its data\u2019s locale \u2014 a euro revenue chart on an English page is a real case'],
+      ['direction', "'ltr' | 'rtl' | 'auto'", "'auto'", 'auto reads the rendered element\u2019s computed direction, so a chart inside a [dir=rtl] subtree follows it without being told. RTL reverses the category axis and swaps the margins so the value axis moves to the right edge \u2014 rather than mirroring the chart with a transform, which would reverse the text too'],
+      ['responsive', '{ maxWidth, \u2026overrides }[]', '[]', 'Width-keyed overrides, narrowest match winning. Keyed on the chart\u2019s own measured width rather than a media query, because a query measures the viewport and says nothing about how much room this chart was given \u2014 which is the reason a legend keeps overflowing a narrow column on a wide screen'],
+      ['height', 'string | number', '320', ''],
+      ['dataTable / ariaLabel', 'boolean / string', 'false / auto', 'A screen-reader table of the plotted values, and the summary announced for the chart'],
+    ],
+    events: [
+      ['point-click', '{ series, point, originalEvent }'],
+      ['hover-change', 'HitResult | null \u2014 { x, entries: [{ series, point, px, py }] }'],
+      ['legend-toggle', '{ series, hidden }'],
+      ['update:zoomRange / zoom-change', '[number, number] | null / { range, full }'],
+    ],
+    slots: [
+      ['legend', 'Replaces the legend entries; receives { series, colors, hidden, toggle }. The default rendering is unchanged, so this is for stat pills, grouped legends and the like rather than a variant to configure'],
+      ['tooltip', 'Replaces the tooltip rows; receives { entries, category, rows, hit }. A computed total or a delta against a threshold cannot come out of a value formatter, which is why this is a slot and format stays for the simple case'],
+      ['annotation', 'Custom SVG over the plot; receives { plot, scales, x, y } where x and y map data values to pixels \u2014 so content is placed in data coordinates rather than pixels the caller has to guess at'],
+    ],
+    serviceTitle: 'Compound parts, engine and export',
+    serviceRows: [
+      ['ApexChartSeries, ApexChartXAxis, ApexChartYAxis, ApexChartY2Axis', 'compound', 'Markup-first authoring. Every part is renderless \u2014 it registers configuration and draws nothing \u2014 so the markup form and the props form arrive at exactly the same inputs. One engine, two ways of writing the same chart, rather than a second implementation behind a nicer surface'],
+      ['ApexChartLegend, ApexChartTooltip, ApexChartHover, ApexChartDataLabels, ApexChartZoom, ApexChartNavigator, ApexChartTitle, ApexChartCaption', 'compound', 'The option objects, as elements. A declared part wins over the equivalent prop, being the more specific declaration'],
+      ['ApexChartReferenceLine, ApexChartReferenceBand', 'compound', 'Declared in order; declaring any replaces the prop array rather than adding to it'],
+      ['series order', 'declaration order', 'Vue mounts children in order and a Map preserves insertion, so paint order and legend order follow the markup. Series are all-or-nothing between the two forms \u2014 mixing them would make paint order ambiguous'],
+      ['createScale / numberTicks / timeTicks', 'exported', 'A tick generator per scale type rather than one generic algorithm: nice ticks for numbers want powers of ten, for time they want calendar boundaries that are not uniform in length'],
+      ['computeLayout', 'exported', 'Label widths decide the plot rect and the rect decides rotation and culling \u2014 measured with a real text measurement, not a character-count guess'],
+      ['lttb / findHit / applyFrame', 'exported', 'Decimation, hit testing and dataset interpolation, reusable outside the component'],
+      ['seriesColor', 'exported', 'One palette from tokens (--apex-cht-series-1\u20268), never a per-chart colour array, so a hundred charts restyle at once and dark mode is free'],
+      ['keyboard', 'arrows, Home, End, Esc', 'Moves the read-out point by point with a live announcement \u2014 built in from the first slice, because retrofitting accessibility into a chart is miserable'],
+      ['exportSvg()', 'string', 'Serializes what is rendered, resolving custom properties to literal colours \u2014 a standalone file has no design system to look them up in, so an export keeping var(--apex-cht-series-1) would come out black'],
+      ['exportImage({ scale, type, background, quality })', 'Promise<Blob>', 'Rasterises that SVG through an image, so the PNG is what renders. JPEG gets an opaque backdrop, since it has no alpha'],
+      ['exportCsv() / exportRows()', 'string / object[]', 'One row per category, one column per series. Every CSV field is wrapped and quotes doubled \u2014 a series named \u201cRevenue, net\u201d is ordinary and would otherwise gain a column'],
+      ['zoomTo(range) / resetZoom() / zoomRange()', 'ref methods', 'Programmatic window, so a toolbar or a URL can drive it'],
+      ['ApexChartGroup syncY', 'boolean', 'false', 'Shares the y window as well as x. Off by default because two charts in a group usually plot different quantities \u2014 sessions above errors \u2014 and forcing one y window onto both would zoom a range that means nothing on the other. When off, a 2D zoom on one chart still pans the group in x rather than being refused outright'],
+      ['ApexChartGroup', 'wrapper', 'Coordinates independent charts through one provided store rather than events between siblings \u2014 a chart added later joins automatically and declaration order does not matter. { zoom, crosshair, legend } choose which channels are shared, and a channel is opted out by making its setter a no-op so the charts stay unaware of what the group shares'],
+      ['geometry()', 'ref method', 'Plot rect and scales, for your own overlays'],
+      ['CSS variables', '--apex-cht-series-1\u20268, --apex-cht-grid, --apex-cht-axis, --apex-cht-tick', 'Structural styles, theme variables and state hooks are separate layers: restyling means overriding variables, not selectors'],
+      ['state attributes', 'data-family, data-orientation, data-dir, data-zoomed, data-renderer, data-hovered, data-decimated', 'Stable hooks on the root for theming and tests \u2014 so a stylesheet or an assertion never has to inspect internals to know what the chart is doing'],
+      ['element classes', '.apex-cht__line, __area, __bar, __candle, __slice, __cell, __tile, __tick, __grid, __tip, __legend', 'Named parts, each doing one job'],
+    ],
+    },
   {
     id: 'taskboard', name: 'ApexTaskBoard', group: 'Board',
     blurb: 'A kanban board over data the application owns. Nothing here mutates items \u2014 every interaction emits a payload describing the change, so optimistic update, rollback, undo and multi-user sync stay in the app where they belong. Items are a flat array rather than nested column arrays, which is what makes a move one field on one object instead of two splices and a rebuild of both columns, and leaves filtering and sorting to the app with no restructuring on the way in.',

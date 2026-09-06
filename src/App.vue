@@ -39,6 +39,7 @@ import OverlayStage from './demos/OverlayStage.vue';
 import MenuStage from './demos/MenuStage.vue';
 import MediaStage from './demos/MediaStage.vue';
 import BoardStage from './demos/BoardStage.vue';
+import ChartStage from './demos/ChartStage.vue';
 /* The dynamic-dialog and confirm-popup demos appear in the stage AND in a
    section below it. One module holds their state so both report through the
    same line — see demos/overlayDemos.ts. */
@@ -2123,6 +2124,13 @@ async function copyUsage() {
 
               <!-- A comparison, a carousel and a gallery each need their own
                    shape of host — see MediaStage. -->
+              <!-- One series would leave stackMode and the legend inert, so the
+                   chart's stage carries two. -->
+              <ChartStage
+                v-else-if="entry.demo === 'chart'"
+                :bind="live"
+              />
+
               <!-- A board with no items, columns or lanes is an empty frame with a
                    rail of inert controls, every one of them apparently dead. -->
               <BoardStage
