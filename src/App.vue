@@ -31,7 +31,11 @@ import { useApexDialog, useApexAlert, useApexToast, useCan, ApexPopover, ApexTie
   ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger } from '@exorgroup/apex-ui';
 import type { MenuItem, MegaItem, CrumbItem, SpeedDialItem } from '@exorgroup/apex-ui';
 import { watermarkPlugin, trendlinePlugin, statsPlugin, thresholdPlugin } from '@exorgroup/apex-ui';
-import { CHT_TRIAL, CHT_REVENUE, CHT_SHAPE, CHT_GAPPY, CHT_LOG, CHT_REGIONS,
+import { CHT_TRIAL, CHT_SEVERITY, CHT_DELTA, CHT_SIZING, CHT_BORDER,
+  CHT_TARGET, CHT_GROUPED_STACK, CHT_GANTT, CHT_DAILY_BARS, CHT_PYRAMID,
+  CHT_WATERFALL, CHT_SCATTER, CHT_BUBBLE, CHT_COMBO, CHT_MIX, CHT_CLUSTERS,
+  CHT_TURNAROUND, CHT_RENEWAL, CHT_OVERLAP, CHT_DEPTH, CHT_BETS, CHT_HUBS,
+  CHT_LONGTAIL, CHT_REVENUE, CHT_SHAPE, CHT_GAPPY, CHT_LOG, CHT_REGIONS,
   CHT_CHANNELS, CHT_WEATHER, CHT_DAILY, CHT_BIG, CHT_STACK, CHT_BAND, CHT_TREND,
   CHT_CROSSING, CHT_CROSSING_HALO, CHT_GRADIENT, CHT_SHAPES, CHT_STYLES,
   CHT_SYNC_A, CHT_SYNC_B, CHT_RD } from './chartData';
@@ -416,6 +420,102 @@ const chtPlugins = computed(() => {
   if (chtPlugThreshold.value) list.push(thresholdPlugin(25, 55));
   return list;
 });
+
+
+/* ── The bar, scatter and combo sections (27-47) ─────────────────────────── */
+
+/** Bar geometry. categoryGap is the space between category slots, barGap the
+    space between bars within one slot — two different questions that a single
+    "gap" prop would conflate. */
+const chtBarMode = ref('grouped');
+const chtOrient = ref('vertical');
+const chtCatGap = ref(0.28);
+const chtBarGap = ref(0.1);
+const chtFloor = ref(false);
+const chtBarLayout = ref('overlap');
+const chtOverlap = ref(0.6);
+
+const chtBarSeries = computed(() => {
+  const stacked = chtBarMode.value !== 'grouped';
+  return CHT_STACK.map((sr: any) => ({
+    ...sr,
+    type: 'bar',
+    fillOpacity: 1,
+    /* One stack id groups the series; distinct ids leave them side by side.
+       Grouping is a property of the data, not a mode flag on the chart. */
+    stack: stacked ? 'traffic' : sr.id,
+  }));
+});
+
+/** A pyramid plots one side negative, so every label has to lose the sign —
+    the axis is a magnitude even though the value is not. */
+function chtAbsFormat(v: number) { return Math.abs(v).toFixed(1) + 'B'; }
+function chtAbsLabel(v: number) { return Math.abs(v).toFixed(2) + 'B'; }
+
+/** Per-bar and per-point colour: the same context contract in both cases, so
+    a threshold rule reads the same whichever mark it colours. */
+function chtBandColor(ctx: any) {
+  if (ctx.value >= 80) return 'oklch(0.66 0.15 150)';
+  if (ctx.value >= 60) return 'oklch(0.75 0.15 85)';
+  return 'oklch(0.62 0.19 25)';
+}
+function chtSignColor(ctx: any) {
+  return ctx.negative ? 'oklch(0.60 0.19 25)' : 'oklch(0.62 0.16 150)';
+}
+
+/** Drawn at the origin: the chart has already translated to the point, so a
+    marker path never has to know where it is. */
+function chtRingMarker(ctx: any) {
+  const r = ctx.r;
+  const inner = r * 0.45;
+  return 'M0 ' + (-r) + 'A' + r + ' ' + r + ' 0 1 0 0 ' + r
+    + 'A' + r + ' ' + r + ' 0 1 0 0 ' + (-r) + 'Z'
+    + 'M0 ' + (-inner) + 'A' + inner + ' ' + inner + ' 0 1 1 0 ' + inner
+    + 'A' + inner + ' ' + inner + ' 0 1 1 0 ' + (-inner) + 'Z';
+}
+
+/** renderBar gets the rect the bar would have filled, so the geometry stays
+    the chart's and only the shape is ours. */
+function chtPillBar(ctx: any) {
+  const r = Math.min(ctx.width / 2, ctx.height / 2);
+  return 'M' + ctx.x + ' ' + (ctx.y + r)
+    + 'a' + r + ' ' + r + ' 0 0 1 ' + (r * 2) + ' 0'
+    + 'v' + Math.max(0, ctx.height - r * 2)
+    + 'a' + r + ' ' + r + ' 0 0 1 ' + (-r * 2) + ' 0Z';
+}
+function chtArrowBar(ctx: any) {
+  const head = Math.min(ctx.height, ctx.width * 0.8);
+  const mid = ctx.x + ctx.width / 2;
+  return 'M' + mid + ' ' + ctx.y
+    + 'L' + (ctx.x + ctx.width) + ' ' + (ctx.y + head)
+    + 'H' + (mid + ctx.width * 0.22)
+    + 'V' + (ctx.y + ctx.height)
+    + 'H' + (mid - ctx.width * 0.22)
+    + 'V' + (ctx.y + head)
+    + 'H' + ctx.x + 'Z';
+}
+
+/** A 2D zoom reports both axes; a drag that only moved in x reports no y,
+    which is why the label has two shapes rather than one with empty parts. */
+const chtZoomMode = ref('xy');
+const cht2dLabel = ref('Drag a rectangle on the plot');
+const cht2d = ref<any>(null);
+function cht2dZoom(payload: any) {
+  if (payload.full || !payload.range) { cht2dLabel.value = 'Showing everything'; return; }
+  const r = payload.range;
+  const xs = Math.round(r.x[0]) + '–' + Math.round(r.x[1]) + ' km';
+  cht2dLabel.value = r.y
+    ? xs + ', ' + r.y[0].toFixed(0) + '–' + r.y[1].toFixed(0) + ' L'
+    : xs + ' (x only)';
+}
+const chtSyncY = ref(false);
+
+/** Pie chrome, used first by the External labels section and again by the
+    radial sections that follow. */
+const chtPieLabel = ref('percentage');
+const chtPieLine = ref('angled');
+const chtOuter = ref(0.74);
+const chtLabelPlace = ref('outside-end');
 
 const tbLog = ref('');
 const tbSel = ref(0);
@@ -4421,7 +4521,281 @@ function pick(city) {
         </ApexChart>
       </div>
       <p style="font-size:13px;margin-top:8px">Legend entries carry their own averages; the tooltip adds a computed total and a signed delta. Open the menu top-right to export.</p>
-        </template>
+
+      <h2>Per-bar colour</h2>
+      <p style="font-size:13.5px">A colour array cycles by index; a callback answers per item and returning <code>undefined</code> falls through to the series colour — the same contract as <code>segmentColor</code> on lines, so conditional paint has one rule across the library. Colouring by sign is the case that needs it most: a red negative bar is doing real work.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">array, cycled by index</span>
+          <ApexChart :series="[{ id: 'sev', name: 'Open tickets', type: 'bar', data: CHT_SEVERITY,
+                        xKey: 'label', yKey: 'value',
+                        color: ['oklch(0.62 0.19 25)','oklch(0.70 0.16 55)','oklch(0.78 0.15 90)','oklch(0.64 0.14 250)','oklch(0.62 0.04 250)'] }]"
+                      :legend="{ show: false }" height="260" />
+        </div>
+        <div class="cell"><span class="cell__tag">callback — negative bars in red</span>
+          <ApexChart :series="[{ id: 'margin', name: 'Margin delta', type: 'bar', data: CHT_DELTA,
+                        xKey: 'month', yKey: 'value', color: chtSignColor }]"
+                      :legend="{ show: false }" height="260"
+                      :reference-lines="[{ value: 0, color: 'var(--fg-subtle)', dash: '0' }]" />
+        </div>
+      </div>
+
+      <h2>Bar sizing</h2>
+      <p style="font-size:13.5px"><code>categoryGap</code> is the space between categories and <code>barGap</code> the space between bars <em>within</em> a group — two knobs rather than one, because conflating them means you cannot tighten a group without also opening the categories. <code>barThickness</code> fixes the width, <code>maxBarThickness</code> caps it so a wide chart with few categories does not draw slabs, and <code>minBarLength</code> keeps a tiny value visible.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <span style="font-size:13px;color:var(--fg-subtle)">categoryGap</span>
+        <ApexSlider v-model="chtCatGap" :min="0" :max="0.8" :step="0.02" style="width:130px" />
+        <span style="font-size:13px;color:var(--fg-subtle)">barGap</span>
+        <ApexSlider v-model="chtBarGap" :min="0" :max="0.8" :step="0.02" style="width:130px" />
+        <ApexSwitch v-model="chtFloor" label="minBarLength 4px" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_SIZING" :category-gap="chtCatGap" :bar-gap="chtBarGap"
+                    :min-bar-length="chtFloor ? 4 : 0" :max-bar-thickness="46"
+                    :legend="{ position: 'bottom' }" height="300" />
+      </div>
+      <p style="font-size:13px;margin-top:8px">The last category is 0.3 — with the floor off it is a sub-pixel sliver and reads as missing rather than as small.</p>
+
+      <h2>Bar border</h2>
+      <p style="font-size:13.5px">A number for <code>barRadius</code> rounds the <em>value end</em> only, because a bar rounded at the axis reads as floating above it; an object addresses visual corners directly, and under horizontal orientation the value end is remapped from an explicit table rather than computed. <code>borderSkipped</code> decides which edge omits the stroke — the stroke is its own open path, since a closed one cannot express a missing edge.</p>
+      <div class="grid grid--3" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">skip the baseline (default)</span>
+          <ApexChart :series="CHT_BORDER" bar-border-color="var(--fg-default)" :bar-border-width="1.5"
+                      border-skipped="start" :bar-radius="6" :legend="{ show: false }" height="220" />
+        </div>
+        <div class="cell"><span class="cell__tag">all four edges</span>
+          <ApexChart :series="CHT_BORDER" bar-border-color="var(--fg-default)" :bar-border-width="1.5"
+                      :border-skipped="false" bar-border-dash="4 3" :bar-radius="6"
+                      :legend="{ show: false }" height="220" />
+        </div>
+        <div class="cell"><span class="cell__tag">per-corner object</span>
+          <ApexChart :series="CHT_BORDER" :bar-radius="{ tl: 14, tr: 2, br: 14, bl: 2 }"
+                      :legend="{ show: false }" height="220" />
+        </div>
+      </div>
+
+      <h2>Overlap</h2>
+      <p style="font-size:13.5px"><code>barMode="overlap"</code> gives every series the full band at a decreasing width, painted back to front — a target reads <em>behind</em> an actual rather than beside it, which is what makes the comparison immediate. The back bar as a light track is the point: it stops reading as a series of its own.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtBarLayout" :options="['group','overlap']" size="sm" />
+        <span style="font-size:13px;color:var(--fg-subtle)">overlapRatio {{ chtOverlap }}</span>
+        <ApexSlider v-model="chtOverlap" :min="0.3" :max="1" :step="0.05" style="width:130px" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_TARGET" :bar-mode="chtBarLayout" :overlap-ratio="chtOverlap"
+                    :legend="{ position: 'bottom' }" height="300" />
+      </div>
+
+      <h2>Grouped and stacked together</h2>
+      <p style="font-size:13.5px">No new concept needed: a band is divided between <em>stack groups</em>, so two <code>stack</code> ids give two side-by-side stacks that each accumulate independently. Products on the left of each year, services on the right.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_GROUPED_STACK" stack-mode="normal" :legend="{ position: 'bottom' }"
+                    height="340"
+                    :reference-bands="[{ from: 350, to: 500, label: 'Guidance range', color: 'var(--accent-warning)' }]" />
+      </div>
+
+      <h2>Floating bars</h2>
+      <p style="font-size:13.5px"><code>y0Key</code> anchors each bar at its own starting value instead of zero — the same field the range area and the stacked slice use, which is why a Gantt needs no separate chart type.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'plan', name: 'Phase', type: 'bar', data: CHT_GANTT,
+                      xKey: 'task', yKey: 'end', y0Key: 'start' }]"
+                    orientation="horizontal" :y-axis="{ label: 'Weeks' }"
+                    :legend="{ show: false }" :bar-radius="3" height="320" />
+      </div>
+
+      <h2>Column and bar</h2>
+      <p style="font-size:13.5px">A category band is divided between <em>stack groups</em> rather than series, since stacked bars occupy the same ground by definition. Corners round on the value end only — a bar rounded at the axis reads as floating above it. <code>orientation="horizontal"</code> turns the whole chart, and the gridlines turn with it, because a gridline exists to read a value against rather than to divide categories.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtBarMode" :options="['grouped','stacked','percent']" size="sm" />
+        <ApexSelectButton v-model="chtOrient" :options="['vertical','horizontal']" size="sm" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="chtBarSeries" :orientation="chtOrient"
+                    :stack-mode="chtBarMode === 'grouped' ? 'none' : (chtBarMode === 'percent' ? 'percent' : 'normal')"
+                    :legend="{ position: 'bottom' }" height="340" />
+      </div>
+
+      <h2>Zoom and navigator on bars</h2>
+      <p style="font-size:13.5px">Sixty days of orders — more bars than can be read at once. The overview draws <em>mini bars</em> rather than an area, because an area under a bar chart misrepresents what you are panning across. Drag the window, or drag on the plot to zoom into a range.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'orders', name: 'Daily orders', type: 'bar', data: CHT_DAILY_BARS, xKey: 'day', yKey: 'value' }]"
+                    zoom navigator :legend="{ show: false }" :category-gap="0.2"
+                    :zoom-range="[0, 29]" height="320" />
+      </div>
+
+      <h2>Bar data labels</h2>
+      <p style="font-size:13.5px">Four placements, derived from the drawn rect rather than the value — so a floor-adjusted or stacked bar labels its actual geometry. Outside-end is the default because it never covers the data; a stacked series defaults to inside-center instead, since a segment has nowhere outside itself to put a label. Inside labels stay legible by separating the glyph from its background rather than by guessing a contrasting colour, which is not derivable from an arbitrary token.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtLabelPlace" :options="['outside-end','inside-end','inside-center','inside-base']" size="sm" />
+      </div>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">columns</span>
+          <ApexChart :series="CHT_BORDER" :data-labels="{ show: true, placement: chtLabelPlace }"
+                      :legend="{ show: false }" height="260" />
+        </div>
+        <div class="cell"><span class="cell__tag">turned, with negatives</span>
+          <ApexChart :series="[{ id: 'd', name: 'Delta', type: 'bar', data: CHT_DELTA, xKey: 'month', yKey: 'value', color: chtSignColor }]"
+                      orientation="horizontal" :data-labels="{ show: true, placement: chtLabelPlace }"
+                      :legend="{ show: false }" height="260"
+                      :reference-lines="[{ axis: 'y', value: 0, color: 'var(--fg-subtle)', dash: '0' }]" />
+        </div>
+      </div>
+
+      <h2>Population pyramid</h2>
+      <p style="font-size:13.5px">Negative values in one series stack below zero, which produces the mirrored split with no extra configuration — the same negatives-accumulate-separately rule the stacking already had. A reference line at zero draws the divide, and the axis and labels hide the sign with their own formatter.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_PYRAMID" orientation="horizontal" stack-mode="normal"
+                    :y-axis="{ format: chtAbsFormat }"
+                    :data-labels="{ show: true, placement: 'outside-end', format: chtAbsLabel }"
+                    :legend="{ position: 'top' }" :bar-radius="2" height="380"
+                    :reference-lines="[{ axis: 'y', value: 0, color: 'var(--fg-subtle)', dash: '0' }]" />
+      </div>
+
+      <h2>Waterfall</h2>
+      <p style="font-size:13.5px">Each bar starts where the previous one ended. A row flagged as a total resets to the baseline — that is what makes it a subtotal rather than another step. <code>renderBar</code> is doing the colouring here: gains, losses and totals are the same series.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'wf', name: 'Cash flow', type: 'bar', data: CHT_WATERFALL,
+                      xKey: 'label', yKey: 'value', waterfall: true, totalKey: 'total' }]"
+                    :legend="{ show: false }" :bar-radius="2" height="320"
+                    :reference-lines="[{ value: 0, color: 'var(--fg-subtle)', dash: '0' }]" />
+      </div>
+
+      <h2>2D zoom</h2>
+      <p style="font-size:13.5px">Drag a rectangle to zoom both axes. A scatter cluster is two-dimensional, so narrowing x alone would give a vertical slab containing everything rather than isolating the group — which is why a point chart defaults to <code>mode: 'xy'</code>. The marquee spans the full plot on any axis the mode does not select, so it shows exactly what will be kept. Points outside a y window are <em>clipped</em>, not filtered: dropping them would silently reduce the rendered count, which looks like a working zoom.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtZoomMode" :options="['xy','x','y']" size="sm" />
+        <ApexButton size="sm" severity="secondary" variant="outlined" icon="zoom_out_map"
+                     @click="cht2d.resetZoom()">Reset</ApexButton>
+        <span style="font-size:13px;color:var(--fg-subtle)">{{ cht2dLabel }}</span>
+      </div>
+      <div class="cht-frame">
+        <ApexChart ref="cht2d" :series="CHT_CLUSTERS" :zoom="{ wheel: true, drag: true, pan: true, mode: chtZoomMode }"
+                    navigator :x-axis="{ type: 'linear', label: 'Route distance (km)' }"
+                    :y-axis="{ label: 'Fuel burn (litres)' }" :legend="{ position: 'bottom' }"
+                    :animation="false" height="360" @zoom-change="cht2dZoom" />
+      </div>
+      <p style="font-size:13px;margin-top:8px">The overview draws mini points with a rectangular handle — a horizontal strip can only express one axis, so under a 2D zoom it would misreport the view.</p>
+
+      <h2>Synced charts and syncY</h2>
+      <p style="font-size:13.5px">A group shares x always and y only with <code>syncY</code>. Off by default because two charts in a group usually plot different quantities: forcing one y window onto both would zoom a range that means nothing on the other. A 2D zoom on either chart still pans the group in x.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSwitch v-model="chtSyncY" label="syncY" />
+      </div>
+      <ApexChartGroup :sync-y="chtSyncY" style="margin-top:12px">
+        <div class="cht-frame" style="margin-top:0">
+          <ApexChart title="Fuel burn" :series="[CHT_CLUSTERS[0]]" :zoom="{ wheel: true, drag: true, pan: true, mode: 'xy' }"
+                      :x-axis="{ type: 'linear' }" :legend="{ show: false }" :animation="false" height="200" />
+        </div>
+        <div class="cht-frame">
+          <ApexChart title="Turnaround minutes" :series="CHT_TURNAROUND" :zoom="{ wheel: true, drag: true, pan: true, mode: 'xy' }"
+                      :x-axis="{ type: 'linear' }" :legend="{ show: false }" :animation="false" height="200" />
+        </div>
+      </ApexChartGroup>
+
+      <h2>Point styling</h2>
+      <p style="font-size:13.5px">Per-point colour uses the same contract as bars and line segments — an array cycles by index, a callback answers per item, <code>undefined</code> falls through. <code>pointBorderColor</code> was previously unreachable because the stroke was hard-coded to the series colour, and a white border is precisely what separates overlapping points.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">colour by value</span>
+          <ApexChart :series="[{ id: 'renewal', name: 'Accounts', type: 'scatter', data: CHT_RENEWAL,
+                        xKey: 'adoption', yKey: 'renewal', color: chtBandColor, markerSize: 6 }]"
+                      :x-axis="{ type: 'linear', label: 'Product adoption (%)' }"
+                      :y-axis="{ label: 'Renewal likelihood (%)' }"
+                      :legend="{ show: false }" height="280" />
+        </div>
+        <div class="cell"><span class="cell__tag">white border on overlapping points</span>
+          <ApexChart :series="CHT_OVERLAP" point-border-color="var(--bg-surface)"
+                      :point-border-stroke-width="2" :x-axis="{ type: 'linear' }"
+                      :legend="{ position: 'bottom' }" height="280" />
+        </div>
+      </div>
+
+      <h2>Radial gradients</h2>
+      <p style="font-size:13.5px">A gradient with <code>type: 'radial'</code> is centred on each point and sized to it. A plot-wide linear gradient gives thirty bubbles a flat slice of the ramp each, which reads as noise; a radial one reads as depth. It emits <em>one</em> definition per series using <code>objectBoundingBox</code>, so it serves every point at its own radius rather than needing a definition per point.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_DEPTH" :x-axis="{ type: 'linear', label: 'Days to close' }"
+                    :y-axis="{ label: 'Forecast confidence (%)' }" :legend="{ show: false }" height="320" />
+      </div>
+
+      <h2>Custom markers</h2>
+      <p style="font-size:13.5px"><code>renderMarker</code> returns a path drawn <em>at origin</em> — the chart keeps the translation, the same division as <code>renderBar</code>. Here each point is a ring with a notch, sized from its own radius.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'bets', name: 'Initiatives', type: 'scatter', data: CHT_BETS,
+                      xKey: 'effort', yKey: 'impact', renderMarker: chtRingMarker, markerSize: 8 }]"
+                    :x-axis="{ type: 'linear', label: 'Implementation effort (points)' }"
+                    :y-axis="{ label: 'Estimated ARR impact ($K)' }"
+                    :legend="{ show: false }" height="300" />
+      </div>
+
+      <h2>Quadrants and point labels</h2>
+      <p style="font-size:13.5px">Reference lines on <em>both</em> axes divide a scatter into quadrants — this needed no new feature, both axes were already supported. <code>display: 'label'</code> names each point from its category, which is what makes a scatter readable without a tooltip.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'hubs', name: 'Hubs', type: 'scatter', data: CHT_HUBS,
+                      xKey: 'load', yKey: 'delay', markerSize: 6 }]"
+                    :x-axis="{ type: 'linear', label: 'Hub load (%)' }"
+                    :y-axis="{ label: 'Delay risk (%)' }"
+                    :data-labels="{ show: true, display: 'label', labelKey: 'hub', offset: 14 }"
+                    :legend="{ show: false }" height="340"
+                    :reference-lines="[
+                      { axis: 'x', value: 60, label: 'Capacity', labelPosition: 'start' },
+                      { value: 50, label: 'Risk threshold' }
+                    ]" />
+      </div>
+
+      <h2>Scatter and bubble</h2>
+      <p style="font-size:13.5px">A scatter series draws points against a numeric x. A bubble adds <code>rKey</code>, and scales <em>area</em> rather than radius — the eye reads a circle by its area, so mapping value to radius would exaggerate the large ones by their square.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">scatter — two clusters</span>
+          <ApexChart :series="CHT_SCATTER" :x-axis="{ type: 'linear', label: 'Sessions' }"
+                      :y-axis="{ label: 'Conversion %' }" :tooltip="{ mode: 'nearest', snap: 'xy' }"
+                      :legend="{ position: 'bottom' }" height="280" />
+        </div>
+        <div class="cell"><span class="cell__tag">bubble — size is account value</span>
+          <ApexChart :series="CHT_BUBBLE" :x-axis="{ type: 'linear', label: 'Seats' }"
+                      :y-axis="{ label: 'Retention %' }" :tooltip="{ mode: 'nearest', snap: 'xy' }"
+                      :legend="{ position: 'bottom' }" height="280" />
+        </div>
+      </div>
+
+      <h2>Combo</h2>
+      <p style="font-size:13.5px">This is the point of a series array rather than compound children: bars, a line and an area share one category axis, one hit-testing service and one animation clock, so they behave as one chart rather than three overlaid. The bars take the band; the line and area use the same band centres, so nothing is off by half a step.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_COMBO" :y-axis="{ label: 'Revenue' }"
+                    :y2-axis="{ label: 'Conversion %' }" curve="smooth"
+                    :legend="{ position: 'bottom' }" height="340" />
+      </div>
+
+      <h2>Custom bar shapes</h2>
+      <p style="font-size:13.5px"><code>renderBar</code> receives the rect the bar would have filled and returns a path, so the geometry stays the chart's and only the shape is yours.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">pill</span>
+          <ApexChart :series="[{ id: 'p', name: 'Load', type: 'bar', data: CHT_SHAPE, xKey: 'hour', yKey: 'value', renderBar: chtPillBar }]"
+                      :legend="{ show: false }" height="220" />
+        </div>
+        <div class="cell"><span class="cell__tag">arrow</span>
+          <ApexChart :series="[{ id: 'a', name: 'Load', type: 'bar', data: CHT_SHAPE, xKey: 'hour', yKey: 'value', renderBar: chtArrowBar }]"
+                      :legend="{ show: false }" height="220" />
+        </div>
+      </div>
+
+      <h2>External labels</h2>
+      <p style="font-size:13.5px">Labels beyond the rim with leader lines, which is how a pie gets read without a legend. <code>outerRadius</code> shrinks the ring to make room — the two are one feature, since labels outside a ring sized to fill the box would run off the edge. Labels cluster wherever slices are thin, so they are split by side and pushed apart: <em>displaced</em>, not culled, because on a pie the collisions are the small slices and those are the ones most needing a label. The anchor stays on the slice's own rim and only the text end moves, so a connector never points at the wrong wedge.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtPieLabel" :options="['percentage','value','both','label']" size="sm" />
+        <ApexSelectButton v-model="chtPieLine" :options="['angled','straight']" size="sm" />
+        <span style="font-size:13px;color:var(--fg-subtle)">outerRadius {{ chtOuter.toFixed(2) }}</span>
+        <ApexSlider v-model="chtOuter" :min="0.5" :max="1" :step="0.02" style="width:120px" />
+      </div>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">five slices</span>
+          <ApexChart :series="[{ id: 'mix', name: 'Revenue mix', type: 'pie', data: CHT_MIX, xKey: 'label', yKey: 'value' }]"
+                      :outer-radius="chtOuter" :legend="{ show: false }" height="320"
+                      :data-labels="{ show: true, position: 'outside', display: chtPieLabel, lineStyle: chtPieLine }" />
+        </div>
+        <div class="cell"><span class="cell__tag">crowded — displacement doing the work</span>
+          <ApexChart :series="[{ id: 'long', name: 'Channels', type: 'pie', data: CHT_LONGTAIL, xKey: 'label', yKey: 'value' }]"
+                      :outer-radius="chtOuter" :inner-radius="0.5" :legend="{ show: false }" height="320"
+                      :data-labels="{ show: true, position: 'outside', display: chtPieLabel, lineStyle: chtPieLine }" />
+        </div>
+      </div>        </template>
 
         <template v-if="entry.id === 'taskboard'">
           <h2>Data binding</h2>

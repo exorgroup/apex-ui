@@ -138,3 +138,207 @@ export const CHT_RD = [
   { id: 'higher', name: 'Higher education', type: 'bar', xKey: 'country', yKey: 'value',
     data: RD_COUNTRIES.map((c, i) => ({ country: c, value: [0.4, 0.28, 0.29, 0.55, 0.4, 0.44, 0.62, 0.42][i] })) },
 ];
+
+/* ── The bar, scatter and combo families (sections 27-47) ──────────────── */
+
+export const CHT_WATERFALL = [
+  { label: 'Opening', value: 42000, total: true },
+  { label: 'New', value: 18500 },
+  { label: 'Expansion', value: 7200 },
+  { label: 'Churn', value: -6400 },
+  { label: 'Discounts', value: -2100 },
+  { label: 'Closing', value: 59200, total: true },
+];
+export const CHT_SCATTER = (function () {
+  const cluster = (n: number, cx: number, cy: number, spread: number, seed: number) => {
+    const out = [];
+    let r = seed;
+    for (let i = 0; i < n; i += 1) {
+      r = (r * 1103515245 + 12345) % 2147483648;
+      const a = (r / 2147483648) * Math.PI * 2;
+      r = (r * 1103515245 + 12345) % 2147483648;
+      const d = (r / 2147483648) * spread;
+      out.push({ x: Math.round(cx + Math.cos(a) * d), y: Number((cy + Math.sin(a) * d * 0.06).toFixed(2)) });
+    }
+    return out;
+  };
+  return [
+    { id: 'self', name: 'Self-serve', type: 'scatter', xKey: 'x', yKey: 'y',
+      data: cluster(46, 620, 3.2, 340, 7), markerSize: 4 },
+    { id: 'assisted', name: 'Sales-assisted', type: 'scatter', xKey: 'x', yKey: 'y',
+      data: cluster(38, 1750, 6.1, 520, 91), markerSize: 4 },
+  ];
+}());
+export const CHT_BUBBLE = [
+  { id: 'smb', name: 'SMB', type: 'bubble', xKey: 'seats', yKey: 'retention', rKey: 'value',
+    fillOpacity: 0.45, minSize: 5, maxSize: 26,
+    data: [
+      { seats: 12, retention: 78, value: 4200 }, { seats: 28, retention: 82, value: 9100 },
+      { seats: 45, retention: 74, value: 6400 }, { seats: 63, retention: 88, value: 21000 },
+      { seats: 22, retention: 69, value: 2800 }, { seats: 51, retention: 85, value: 15600 },
+    ] },
+  { id: 'ent', name: 'Enterprise', type: 'bubble', xKey: 'seats', yKey: 'retention', rKey: 'value',
+    fillOpacity: 0.45, minSize: 5, maxSize: 26,
+    data: [
+      { seats: 180, retention: 94, value: 84000 }, { seats: 320, retention: 91, value: 142000 },
+      { seats: 96, retention: 89, value: 46000 }, { seats: 410, retention: 96, value: 210000 },
+      { seats: 240, retention: 87, value: 98000 },
+    ] },
+];
+export const CHT_COMBO = [
+  { id: 'direct', name: 'Direct', type: 'bar', stack: 'rev', xKey: 'month', yKey: 'value',
+    data: pair(MONTHS, [4200, 4600, 4900, 5100, 5000, 5300, 5600, 5400, 5700, 5900, 6100, 6400]) },
+  { id: 'partner', name: 'Partner', type: 'bar', stack: 'rev', xKey: 'month', yKey: 'value',
+    data: pair(MONTHS, [2400, 2900, 3300, 3100, 3600, 4200, 4600, 4400, 4100, 3800, 4300, 4900]) },
+  { id: 'target', name: 'Target', type: 'line', xKey: 'month', yKey: 'value',
+    lineDash: [7, 5], data: pair(MONTHS, [6200, 7000, 7800, 8300, 8800, 9400, 10000, 10200, 10400, 10600, 11000, 11600]) },
+  { id: 'conv', name: 'Conversion %', type: 'line', axis: 'right', xKey: 'month', yKey: 'value',
+    fillOpacity: 0.12, data: pair(MONTHS, [2.1, 2.4, 2.3, 2.8, 3.1, 3.4, 3.2, 3.6, 3.9, 3.7, 4.1, 4.4]) },
+];
+
+export const CHT_MIX = [
+  { label: 'Self-serve', value: 4200 }, { label: 'Sales-assisted', value: 3100 },
+  { label: 'Partner', value: 1800 }, { label: 'Marketplace', value: 950 },
+  { label: 'Other', value: 420 },
+];
+
+export const CHT_SEVERITY = [
+  { label: 'Critical', value: 42 }, { label: 'High', value: 61 }, { label: 'Medium', value: 90 },
+  { label: 'Low', value: 55 }, { label: 'Backlog', value: 18 },
+];
+export const CHT_DELTA = pair(MONTHS.slice(0, 8), [1.1, -0.8, 2.1, -0.35, 1.7, -1.6, 3.0, 0.6]);
+export const CHT_SIZING = [{
+  id: 'docks', name: 'Parcels per hour', type: 'bar', xKey: 'label', yKey: 'value',
+  data: [
+    { label: 'Dock 1', value: 79 }, { label: 'Dock 2', value: 54 }, { label: 'Dock 3', value: 91 },
+    { label: 'Dock 4', value: 39 }, { label: 'Dock 5', value: 67 }, { label: 'Dock 6', value: 74 },
+    { label: 'Dock 7', value: 87 }, { label: 'Dock 8', value: 0.3 },
+  ],
+}];
+export const CHT_BORDER = [{
+  id: 'sla', name: 'SLA checks', type: 'bar', xKey: 'month', yKey: 'value',
+  fillOpacity: 1, data: pair(MONTHS.slice(0, 5), [310, 268, 402, 351, 448]),
+}];
+export const CHT_TARGET = [
+  { id: 'target', name: 'Target', type: 'bar', xKey: 'month', yKey: 'value',
+    color: 'var(--bg-muted)',
+    data: pair(MONTHS.slice(0, 6), [100, 100, 105, 100, 100, 110]) },
+  { id: 'actual', name: 'Actual', type: 'bar', xKey: 'month', yKey: 'value',
+    data: pair(MONTHS.slice(0, 6), [78, 92, 104, 88, 95, 112]) },
+];
+const YEARS = ['2019', '2020', '2021', '2022', '2023'];
+export const CHT_GROUPED_STACK = [
+  { id: 'hw', name: 'Hardware', type: 'bar', stack: 'products', xKey: 'year', yKey: 'value',
+    data: YEARS.map((y, i) => ({ year: y, value: [140, 148, 156, 152, 158][i] })) },
+  { id: 'sw', name: 'Software', type: 'bar', stack: 'products', xKey: 'year', yKey: 'value',
+    data: YEARS.map((y, i) => ({ year: y, value: [62, 74, 96, 128, 162][i] })) },
+  { id: 'subs', name: 'Subscriptions', type: 'bar', stack: 'products', xKey: 'year', yKey: 'value',
+    data: YEARS.map((y, i) => ({ year: y, value: [58, 66, 78, 92, 108][i] })) },
+  { id: 'cloud', name: 'Cloud', type: 'bar', stack: 'services', xKey: 'year', yKey: 'value',
+    data: YEARS.map((y, i) => ({ year: y, value: [70, 96, 132, 168, 206][i] })) },
+  { id: 'prof', name: 'Professional', type: 'bar', stack: 'services', xKey: 'year', yKey: 'value',
+    data: YEARS.map((y, i) => ({ year: y, value: [42, 46, 52, 58, 64][i] })) },
+  { id: 'supp', name: 'Support', type: 'bar', stack: 'services', xKey: 'year', yKey: 'value',
+    data: YEARS.map((y, i) => ({ year: y, value: [26, 30, 36, 44, 54][i] })) },
+];
+export const CHT_GANTT = [
+  { task: 'Site survey', start: 0, end: 2 }, { task: 'Permits', start: 1.5, end: 5 },
+  { task: 'Fiber pull', start: 4, end: 8 }, { task: 'Equipment install', start: 7, end: 10 },
+  { task: 'Acceptance test', start: 9.5, end: 11.5 }, { task: 'Customer handoff', start: 11, end: 13 },
+];
+
+const AGES = ['0\u201314', '15\u201329', '30\u201344', '45\u201359', '60\u201374', '75+'];
+export const CHT_PYRAMID = [
+  { id: 'male', name: 'Male', type: 'bar', stack: 'pop', xKey: 'age', yKey: 'value',
+    data: AGES.map((a, i) => ({ age: a, value: -[1.43, 1.05, 1.02, 0.86, 0.52, 0.26][i] })) },
+  { id: 'female', name: 'Female', type: 'bar', stack: 'pop', xKey: 'age', yKey: 'value',
+    data: AGES.map((a, i) => ({ age: a, value: [1.35, 1.00, 0.98, 0.85, 0.57, 0.39][i] })) },
+];
+
+
+export const CHT_DAILY_BARS = (function () {
+  const out = [];
+  for (let i = 0; i < 60; i += 1) {
+    const wave = Math.sin(i / 7) * 90 + Math.sin(i / 3) * 25;
+    out.push({ day: 'Day ' + (i + 1), value: Math.max(20, Math.round(210 + wave)) });
+  }
+  return out;
+}());
+
+export const CHT_LONGTAIL = [
+  { label: 'Paid search', value: 3200 }, { label: 'Organic', value: 2400 },
+  { label: 'Lifecycle email', value: 1800 }, { label: 'Partner', value: 1400 },
+  { label: 'Community', value: 1200 }, { label: 'Events', value: 620 },
+  { label: 'Affiliate', value: 380 }, { label: 'Podcast', value: 210 },
+  { label: 'Referral', value: 140 }, { label: 'Other', value: 90 },
+];
+
+export const CHT_RENEWAL = (function () {
+  const out = [];
+  for (let i = 0; i < 14; i += 1) {
+    const adoption = 46 + i * 3.6;
+    out.push({ adoption: Number(adoption.toFixed(1)), renewal: Number((41 + i * 3.9 + (i % 3)).toFixed(1)) });
+  }
+  return out;
+}());
+export const CHT_OVERLAP = ['Product-led', 'Partner', 'Outbound'].map((name, si) => ({
+  id: 'ov' + si, name: name, type: 'scatter', markerSize: 7,
+  data: Array.from({ length: 9 }, (_, i) => ({
+    x: 8 + i * 7 + si * 2,
+    y: 30 + i * 2.6 + si * 5 + (i % 2 ? 1.5 : -1.5),
+  })),
+}));
+export const CHT_DEPTH = [{
+  id: 'depth', name: 'Deals', type: 'bubble', xKey: 'days', yKey: 'confidence', rKey: 'size',
+  fillOpacity: 0.85, minSize: 8, maxSize: 30,
+  color: { type: 'radial', stops: [
+    { offset: 0, color: 'oklch(0.86 0.06 265)' },
+    { offset: 0.55, color: 'oklch(0.66 0.15 265)' },
+    { offset: 1, color: 'oklch(0.48 0.16 270)' },
+  ] },
+  data: Array.from({ length: 12 }, (_, i) => ({
+    days: 8 + i * 6,
+    confidence: 86 - i * 5 + (i % 3) * 2,
+    size: 20 + ((i * 37) % 80),
+  })),
+}];
+export const CHT_BETS = [
+  { effort: 8, impact: 55 }, { effort: 13, impact: 42 }, { effort: 22, impact: 63 },
+  { effort: 30, impact: 49 }, { effort: 38, impact: 76 }, { effort: 45, impact: 68 },
+];
+export const CHT_HUBS = [
+  { hub: 'ATL', load: 34, delay: 28 }, { hub: 'DFW', load: 47, delay: 39 },
+  { hub: 'LAX', load: 58, delay: 54 }, { hub: 'ORD', load: 68, delay: 61 },
+  { hub: 'SEA', load: 79, delay: 73 }, { hub: 'EWR', load: 90, delay: 84 },
+];
+
+export const CHT_CLUSTERS = (function () {
+  /* Deterministic clusters, so a 2D zoom has something real to isolate. */
+  const mk = (n: number, cx: number, cy: number, sx: number, sy: number, seed: number) => {
+    const out = [];
+    let r = seed;
+    for (let i = 0; i < n; i += 1) {
+      r = (r * 1103515245 + 12345) % 2147483648;
+      const a = (r / 2147483648) * Math.PI * 2;
+      r = (r * 1103515245 + 12345) % 2147483648;
+      const d = r / 2147483648;
+      out.push({
+        x: Math.round(cx + Math.cos(a) * d * sx),
+        y: Number((cy + Math.sin(a) * d * sy).toFixed(1)),
+      });
+    }
+    return out;
+  };
+  return [
+    { id: 'short', name: 'Short haul', type: 'scatter', markerSize: 5,
+      data: mk(40, 120, 38, 70, 12, 11) },
+    { id: 'medium', name: 'Medium haul', type: 'scatter', markerSize: 5,
+      data: mk(40, 280, 55, 90, 14, 907) },
+    { id: 'long', name: 'Long haul', type: 'scatter', markerSize: 5,
+      data: mk(40, 430, 72, 80, 13, 5501) },
+  ];
+}());
+export const CHT_TURNAROUND = [{
+  id: 'turn', name: 'Turnaround', type: 'scatter', markerSize: 5,
+  data: CHT_CLUSTERS[1].data.map((p) => ({ x: p.x, y: Number((18 + p.y * 0.42).toFixed(1)) })),
+}];
