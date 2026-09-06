@@ -873,3 +873,88 @@ html,body{margin:0;background:var(--bg-app);color:var(--fg-default);font-family:
   background: color-mix(in srgb, var(--accent-warning) 8%, transparent);
   border-radius: var(--r-sm); color: var(--fg-default);
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * The menu family's demo chrome, ported from the gallery.
+ *
+ * These are page classes, not component classes: the frame around a sidebar
+ * demo, the dashed box you right-click, the grey blocks standing in for
+ * content. The gallery has them in its own <style>; ours referenced them by
+ * name and defined NONE of them, so every one of these demos rendered as
+ * unstyled markup — which is what the sidebar screenshots showed. The page
+ * still mounted and still warned about nothing, because a missing class is
+ * not an error anywhere in the stack.
+ *
+ * Taken verbatim, so a demo copied from the gallery looks like the gallery's.
+ * ───────────────────────────────────────────────────────────────────────── */
+.sb-brand{display:flex;align-items:center;gap:9px;min-width:0;padding:2px}
+.sb-brand--btn{inline-size:100%;border:0;background:transparent;font:inherit;color:inherit;cursor:pointer;border-radius:var(--r-sm);padding:4px}
+.sb-brand--btn:hover{background:var(--bg-muted)}
+.sb-brand strong{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-mark{display:grid;place-items:center;flex:0 0 auto;inline-size:26px;block-size:26px;border-radius:7px;background:var(--accent-primary);color:#fff;font-size:13px;font-weight:700}
+.sb-mark--dark{background:#0F141C}
+.sb-user{display:flex;align-items:center;gap:9px;min-width:0;padding:2px}
+.sb-user--btn{inline-size:100%;border:0;background:transparent;font:inherit;color:inherit;cursor:pointer;border-radius:var(--r-sm);padding:4px;text-align:start}
+.sb-user--btn:hover{background:var(--bg-muted)}
+.sb-user span{display:flex;flex-direction:column;min-width:0}
+.sb-user strong{font-size:13px;white-space:nowrap}
+.sb-user em{font-style:normal;font-size:11.5px;color:var(--fg-subtle)}
+.sb-topbar{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border-subtle);flex:0 0 auto}
+.sb-topbar strong{font-size:13.5px}
+.sb-content{display:flex;flex-direction:column;gap:12px;padding:14px}
+.sb-block{block-size:120px;border-radius:var(--r-md);background:var(--bg-muted)}
+.sb-block--tall{block-size:220px}
+.sb-chat{display:flex;flex-direction:column;gap:10px;font-size:13px}
+.sb-chat__q{margin:0;padding:8px 10px;border-radius:var(--r-sm);background:var(--bg-muted)}
+.sb-chat__a{margin:0;color:var(--fg-muted)}
+.sb-stats{display:flex;flex-direction:column;gap:6px;margin:0;font-size:13px}
+.sb-stats div{display:flex;justify-content:space-between;gap:10px}
+.sb-stats dt{color:var(--fg-muted)}
+.sb-stats dd{margin:0;font-weight:600}
+.sb-chatgroup{margin-block-start:12px}
+.sb-chatgroup h5{margin:0 0 4px;padding-inline:10px;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-subtle)}
+.sb-chatitem{display:flex;align-items:center;gap:6px;inline-size:100%;padding:7px 10px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--fg-default);font:inherit;font-size:13px;text-align:start;cursor:pointer}
+.sb-chatitem span{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-chatitem em{display:grid;place-items:center;inline-size:22px;block-size:22px;border-radius:5px;color:var(--fg-subtle);opacity:0}
+.sb-chatitem:hover{background:var(--bg-muted)}
+.sb-chatitem:hover em{opacity:1}
+.sb-chatitem em:hover{background:var(--bg-surface);color:var(--accent-danger)}
+.sb-chatitem[data-on="true"]{background:var(--bg-muted);font-weight:600}
+.mnu-row{display:flex;align-items:flex-start;gap:22px;flex-wrap:wrap}
+.mnu-profile{display:flex;align-items:center;gap:10px;padding:4px 2px}
+.mnu-profile span{display:flex;flex-direction:column;min-width:0}
+.mnu-profile strong{font-size:13.5px}
+.mnu-profile em{font-style:normal;font-size:12px;color:var(--fg-subtle)}
+.mnu-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-primary)}
+.dock-stage{position:relative;display:flex;min-height:240px;padding:18px;border-radius:var(--r-lg);overflow:hidden;
+background:linear-gradient(135deg,#F0574B 0%,#E8823C 38%,#5B9BD5 78%,#2E6FA8 100%)}
+.dock-stage[data-position="bottom"]{align-items:flex-end;justify-content:center}
+.dock-stage[data-position="top"]{align-items:flex-start;justify-content:center}
+.dock-stage[data-position="left"]{align-items:center;justify-content:flex-start}
+.dock-stage[data-position="right"]{align-items:center;justify-content:flex-end}
+.dock-log{position:absolute;inset-block-start:12px;inset-inline-start:14px;margin:0;font-size:12px;color:rgba(255,255,255,.9)}
+.dock-tile{display:grid;place-items:center;inline-size:100%;block-size:100%;border-radius:12px;color:#FFF}
+.dock-desk{border:1px solid var(--border-default);border-radius:var(--r-lg);overflow:hidden}
+.dock-desk__bar{border-radius:0}
+.dock-desk__wall{position:relative;display:flex;align-items:flex-end;justify-content:center;min-height:300px;padding:18px;
+background:linear-gradient(150deg,#F0574B 0%,#E8823C 40%,#5B9BD5 80%,#2E6FA8 100%)}
+.dock-desk__hint{position:absolute;inset-block-start:16px;inset-inline:0;margin:0;text-align:center;font-size:12.5px;color:rgba(255,255,255,.92)}
+.ctx-zone{display:grid;place-items:center;min-height:150px;border:1.5px dashed var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);color:var(--fg-muted);font-size:13.5px;user-select:none}
+.ctx-list{list-style:none;margin:0;padding:6px;display:flex;flex-direction:column;gap:2px;border:1px solid var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);max-width:420px}
+.ctx-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-sm);border:1px solid transparent;font-size:13.5px}
+.ctx-list li:hover{background:var(--bg-subtle)}
+.ctx-list li[data-on="true"]{border-color:var(--accent-primary)}
+.ctx-list strong{flex:1 1 auto;font-weight:600}
+.ctx-role{font-size:11px;letter-spacing:.03em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--bg-muted);color:var(--fg-muted)}
+.ctx-kbd{font-style:normal;font-family:var(--font-mono);font-size:11px;color:var(--fg-subtle);margin-inline-start:12px}
+.bc-dot{display:block;inline-size:4px;block-size:4px;border-radius:50%;background:var(--fg-subtle)}
+.bc-badge em{font-style:normal;margin-inline-start:8px;padding:2px 7px;border-radius:999px;background:color-mix(in oklch,var(--accent-warning) 18%,transparent);color:var(--accent-warning);font-size:11px;letter-spacing:.03em;text-transform:uppercase}
+
+/* Ours, for demos the gallery frames differently — a plain bordered box
+   around a sidebar shell, and the two tails the chat example needs. */
+.sb-demo { margin-block-start: 12px; border: 1px solid var(--border-default);
+  border-radius: var(--r-md); overflow: hidden; }
+.sb-content--chat { gap: 8px; }
+.sb-msg { margin: 0; padding: 10px 12px; border-radius: var(--r-md);
+  background: var(--bg-muted); font-size: 13.5px; }
+.sb-foot { font-size: 12px; color: var(--fg-subtle); }

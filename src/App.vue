@@ -236,62 +236,149 @@ const dialGated: SpeedDialItem[] = [
 const pageCan = useCan();
 
 /* ── ApexSidebar page ──────────────────────────── */
-const sbKeys = ref<Record<string, boolean>>({ reports: true });
+/*
+ * The gallery's own models, ported.
+ *
+ * Four of the six are computed rather than constant, because the gallery's
+ * demos are wired both ways: a row's `command` writes state, and the row's own
+ * `active` or `icon` reads it back. ApexMenu has no selection of its own, so
+ * "which row is current" lives in the page, exactly as it would in an app.
+ */
+const sbNarrow = ref(false);
+const sbIdeNarrow = ref(false);
+const sbIdePanel = ref(true);
+const sbIdeSection = ref('General');
+const sbRespOpen = ref(true);
+const sbWorkspace = ref('Acme Inc');
+const sbAsk = ref('');
+const sbFile = ref('Q1 Report');
+const sbFilePath = ref<string[]>(['Documents', 'Work', 'Projects', 'Q1 Report']);
+const sbFileKeys = ref<Record<string, boolean>>({ documents: true, work: true, projects: true });
+const sbChat = ref('Apex Sidebar component');
+const sbChatLog = ref('');
 
-const sbNav: MenuItem[] = [
-  { key: 'main', label: 'Workspace', items: [
-    { label: 'Dashboard', icon: 'dashboard', active: true },
-    { label: 'Events', icon: 'event' },
-    { label: 'Venues', icon: 'place' },
+/* The two popup menus in the "With menu" shell are driven through their refs,
+   the way a real header's workspace and account menus would be. */
+const wsMenu = ref<InstanceType<typeof ApexMenu> | null>(null);
+const userMenu = ref<InstanceType<typeof ApexMenu> | null>(null);
+
+/** Grouped application navigation: a static section label per group. */
+const SB_NAV: MenuItem[] = [
+  { label: 'Navigation', items: [
+    { label: 'Home', icon: 'home', active: true },
+    { label: 'Inbox', icon: 'inbox', badge: 12 },
+    { label: 'Search', icon: 'search' },
+    { label: 'Notifications', icon: 'notifications', badge: 3 },
   ] },
-];
-
-const sbAside: MenuItem[] = [
-  { key: 'inbox', label: 'Inbox', items: [
-    { label: 'Unread', icon: 'mark_email_unread', badge: '3' },
-    { label: 'Starred', icon: 'star' },
-    { label: 'Archived', icon: 'archive' },
-  ] },
-];
-
-/* Icon-only, for the narrow rail beside a wider panel. */
-const sbRail: MenuItem[] = [
-  { key: 'rail', label: '', items: [
-    { icon: 'mail', label: 'Mail' },
-    { icon: 'event', label: 'Calendar' },
-    { icon: 'group', label: 'People' },
-  ] },
-];
-
-const sbNested: MenuItem[] = [
-  { key: 'main', label: 'Workspace', items: [
-    { label: 'Dashboard', icon: 'dashboard' },
-    { key: 'reports', label: 'Reports', icon: 'bar_chart', items: [
-      { label: 'Sales' },
-      { label: 'Attendance' },
+  { label: 'Projects', items: [
+    { key: 'analytics', label: 'Analytics', icon: 'bar_chart', toggleable: true, items: [
+      { label: 'Overview', icon: 'donut_small' },
+      { label: 'Reports', icon: 'description' },
+      { label: 'Real-time', icon: 'bolt' },
     ] },
-    { key: 'settings', label: 'Settings', icon: 'settings', items: [
-      { label: 'General' },
-      { label: 'Billing' },
-    ] },
+    { label: 'Team', icon: 'group' },
+    { label: 'Calendar', icon: 'calendar_month' },
+  ] },
+  { label: 'Billing', items: [
+    { label: 'Payments', icon: 'credit_card' },
+    { label: 'Orders', icon: 'shopping_cart' },
+    { label: 'Subscriptions', icon: 'star' },
   ] },
 ];
 
-const sbChats: MenuItem[] = [
-  { key: 'today', label: 'Today', items: [
-    { label: 'Seat map rendering', icon: 'chat' },
-    { label: 'Refund policy', icon: 'chat' },
+/** The workspace switcher: the tick follows the choice. */
+const SB_WORKSPACES = computed<MenuItem[]>(() =>
+  ['Acme Inc', 'Globex Corp', 'Initech'].map((w) => ({
+    label: w,
+    icon: sbWorkspace.value === w ? 'check' : 'business',
+    command: () => { sbWorkspace.value = w; },
+  })));
+
+/** The narrow icon rail of the two-panel example. */
+const SB_IDE_RAIL: MenuItem[] = [
+  { label: 'Project', items: [
+    { label: 'Home', icon: 'home', active: true },
+    { label: 'Database', icon: 'database' },
+    { label: 'Authentication', icon: 'key' },
+    { label: 'Edge Functions', icon: 'bolt' },
+    { label: 'Storage', icon: 'cloud' },
+    { label: 'SQL Editor', icon: 'code' },
   ] },
-  { key: 'earlier', label: 'Earlier', items: [
-    { label: 'Door scanning', icon: 'chat' },
-    { label: 'VAT on fees', icon: 'chat' },
-  ] },
+];
+
+/** The settings panel beside it — every row marks itself active. */
+const SB_IDE_PANEL = computed<MenuItem[]>(() => {
+  const row = (label: string, extra: Partial<MenuItem> = {}): MenuItem => ({
+    label,
+    active: sbIdeSection.value === label,
+    command: () => { sbIdeSection.value = label; },
+    ...extra,
+  });
+  return [
+    { label: 'Configuration', items: [
+      row('General'), row('Compute and Disk'), row('Infrastructure'),
+      row('Integrations'), row('API Keys'), row('JWT Keys'),
+      row('Log Drains'), row('Add-ons'),
+    ] },
+    { label: 'Integrations', items: [
+      row('Data API', { hint: '\u2197' }),
+      row('Vault', { badge: 'Beta' }),
+    ] },
+    { label: 'Billing', items: [
+      row('Subscription', { hint: '\u2197' }),
+      row('Usage', { hint: '\u2197' }),
+    ] },
+  ];
+});
+
+/** A file tree: leaves set both the open file and the trail beside it. */
+const SB_FILES = computed<MenuItem[]>(() => {
+  const leaf = (label: string, path: string[]): MenuItem => ({
+    label,
+    active: sbFile.value === label,
+    command: () => { sbFile.value = label; sbFilePath.value = path; },
+  });
+  return [
+    { label: 'Files', items: [
+      { key: 'documents', label: 'Documents', icon: 'folder', toggleable: true, items: [
+        { key: 'work', label: 'Work', toggleable: true, items: [
+          { key: 'projects', label: 'Projects', toggleable: true, items: [
+            leaf('Q1 Report', ['Documents', 'Work', 'Projects', 'Q1 Report']),
+            leaf('Q2 Report', ['Documents', 'Work', 'Projects', 'Q2 Report']),
+            leaf('Roadmap', ['Documents', 'Work', 'Projects', 'Roadmap']),
+          ] },
+          leaf('Invoices', ['Documents', 'Work', 'Invoices']),
+          leaf('Contracts', ['Documents', 'Work', 'Contracts']),
+        ] },
+        { key: 'personal', label: 'Personal', toggleable: true, items: [
+          leaf('Recipes', ['Documents', 'Personal', 'Recipes']),
+          leaf('Travel', ['Documents', 'Personal', 'Travel']),
+        ] },
+      ] },
+    ] },
+    { label: 'Media', items: [
+      { key: 'photos', label: 'Photos', icon: 'image', toggleable: true, items: [
+        leaf('2024', ['Photos', '2024']), leaf('2025', ['Photos', '2025']),
+      ] },
+      { key: 'videos', label: 'Videos', icon: 'videocam', toggleable: true, items: [
+        leaf('Tutorials', ['Videos', 'Tutorials']), leaf('Recordings', ['Videos', 'Recordings']),
+      ] },
+    ] },
+  ];
+});
+
+/** Conversations grouped by age, for the chat example. */
+const SB_CHATS = [
+  { label: 'Today', items: ['Apex Sidebar component', 'How to use Vue composables', 'Fix TypeScript generics'] },
+  { label: 'Yesterday', items: ['Design system architecture', 'Vue 3 new features', 'CSS light-dark()'] },
+  { label: 'Previous 7 days', items: ['Build a dashboard layout', 'Node API authentication', 'Monorepo with pnpm'] },
 ];
 
 /*
- * Nothing here is sidebar-specific: the rows carry `can`, ApexMenu resolves
- * it, and Administration disappears with its children rather than becoming a
- * heading over nothing.
+ * The gated model for the Permissions section. Nothing here is
+ * sidebar-specific: the rows carry `can`, ApexMenu resolves it, and
+ * Administration disappears with its children rather than becoming a heading
+ * over nothing.
  */
 const sbGated: MenuItem[] = [
   { key: 'main', label: 'Workspace', items: [
@@ -3572,147 +3659,207 @@ function pick(city) {
         <!-- Ported from the gallery, five sections. The popover is reached
              through its ref throughout, which is how it is meant to be used —
              so each example declares its own ref rather than sharing one. -->
+        <!--
+          The gallery's seven, ported. Each is a real application shell: the
+          panel only means anything beside the content it pushes, and the
+          demos I wrote instead were toys that made the control look broken.
+        -->
         <template v-if="entry.id === 'sidebar'">
           <h2>Variants</h2>
           <p class="note">
-            The panel lives inside <code>ApexSidebarLayout</code>, beside an
-            <code>ApexSidebarInset</code> — so a panel pushes the content by layout
-            rather than by margins you maintain by hand. <code>variant</code> is a flush
-            panel, a detached card, or a card inside an inset shell.
+            The playground above drives every prop. <code>variant</code> changes the panel's
+            frame, <code>collapsible</code> what collapsing means, and <code>overlay</code>
+            whether the panel pushes the content or floats over it. Pair
+            <code>collapsible="icon"</code> with <code>openOnHover</code> for a rail that
+            expands under the pointer.
           </p>
-          <pre class="doc-pre" v-pre>&lt;ApexSidebarLayout&gt;
-  &lt;ApexSidebar id="primary" collapsible="icon"&gt;
-    &lt;ApexMenu :items="items" /&gt;
+          <pre class="doc-pre" v-pre>&lt;ApexSidebarLayout height="420px"&gt;
+  &lt;ApexSidebar id="main" collapsible="icon" open-on-hover&gt;
+    &lt;template #header="{ collapsed }"&gt;…&lt;/template&gt;
+    &lt;ApexMenu :items="nav" /&gt;
+    &lt;template #footer&gt;…&lt;/template&gt;
   &lt;/ApexSidebar&gt;
-  &lt;ApexSidebarInset&gt;
-    &lt;ApexSidebarTrigger target="primary" /&gt;
+  &lt;ApexSidebarInset scroll&gt;
+    &lt;ApexSidebarTrigger target="main" /&gt;
   &lt;/ApexSidebarInset&gt;
 &lt;/ApexSidebarLayout&gt;</pre>
-          <div class="sb-demo" v-for="v in (['sidebar', 'floating', 'inset'] as const)" :key="v">
-            <ApexSidebarLayout :variant="v" height="200px">
-              <ApexSidebar :id="'sb-var-' + v" :variant="v" width="200px">
-                <template #header="{ collapsed }">
-                  <span class="sb-brand">{{ collapsed ? 'A' : v }}</span>
-                </template>
-                <ApexMenu :items="sbNav" />
-              </ApexSidebar>
-              <ApexSidebarInset>
-                <div class="sb-content">
-                  <ApexSidebarTrigger :target="'sb-var-' + v" />
-                  <span>variant="{{ v }}"</span>
-                </div>
-              </ApexSidebarInset>
-            </ApexSidebarLayout>
-          </div>
 
           <h2>With menu</h2>
           <p class="note">
-            The panel is a container, not a menu — put an <code>ApexMenu</code> inside it
-            and the two compose. In icon mode the labels go and the icons stay, which is
-            why the menu rows carry icons rather than text alone.
+            Application chrome: a workspace switcher in the header, grouped navigation from
+            ApexMenu, and a user menu in the footer. Collapsing to icon mode hides every
+            label in the panel — whichever component drew it — so nothing has to be
+            duplicated for the rail.
           </p>
           <div class="sb-demo">
-            <ApexSidebarLayout height="240px">
-              <ApexSidebar id="sb-menu" collapsible="icon" width="220px">
-                <ApexMenu :items="sbNav" />
+            <ApexSidebarLayout height="460px">
+              <ApexSidebar id="chrome" collapsible="icon">
+                <template #header="{ collapsed }">
+                  <button type="button" class="sb-brand sb-brand--btn" @click="wsMenu?.toggle($event)">
+                    <span class="sb-mark">{{ sbWorkspace.charAt(0) }}</span>
+                    <strong v-if="!collapsed">{{ sbWorkspace }}</strong>
+                    <ApexIcon v-if="!collapsed" name="expand_more" :size="18"
+                              style="margin-inline-start:auto;color:var(--fg-subtle)" />
+                  </button>
+                  <ApexMenu ref="wsMenu" popup width="230px"
+                            :items="[{ label: 'Companies', items: SB_WORKSPACES }, { separator: true },
+                                     { label: 'Add company', icon: 'add' }]" />
+                </template>
+                <ApexMenu :items="SB_NAV" width="100%" />
                 <template #footer="{ collapsed }">
-                  <span v-if="!collapsed" class="sb-foot">Signed in as Duncan</span>
+                  <button type="button" class="sb-user sb-user--btn" @click="userMenu?.toggle($event)">
+                    <ApexAvatar label="John Doe" size="sm" />
+                    <span v-if="!collapsed"><strong>John Doe</strong><em>john@acme.io</em></span>
+                  </button>
+                  <ApexMenu ref="userMenu" popup side="top" width="220px"
+                            :items="[{ label: 'Account', icon: 'person' }, { label: 'Billing', icon: 'credit_card' },
+                                     { separator: true }, { label: 'Sign out', icon: 'logout' }]" />
                 </template>
               </ApexSidebar>
-              <ApexSidebarInset>
-                <div class="sb-content">
-                  <ApexSidebarTrigger target="sb-menu" />
-                  <span>Collapse it — the labels go, the icons stay.</span>
-                </div>
+              <ApexSidebarInset scroll>
+                <div class="sb-topbar"><ApexSidebarTrigger target="chrome" /><strong>Dashboard</strong></div>
+                <div class="sb-content"><div class="sb-block"></div><div class="sb-block sb-block--tall"></div></div>
               </ApexSidebarInset>
             </ApexSidebarLayout>
           </div>
 
           <h2>Responsive</h2>
           <p class="note">
-            <code>collapsible="offcanvas"</code> slides the panel away entirely rather than
-            leaving a rail. Add <code>overlay</code> and it floats over the content instead
-            of pushing it, with <code>backdrop</code> to dim the page behind — the shape a
-            narrow screen wants. Without <code>overlay</code> an offcanvas panel pushes,
-            which keeps the trigger that closes it reachable.
+            One flag from <code>matchMedia</code> chooses the mode: below the breakpoint the
+            panel becomes an offcanvas overlay with a backdrop, above it stays an icon rail
+            pushing the inset. The panel itself does not change.
           </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexSwitch v-model="sbNarrow" label="Simulate a narrow viewport" />
+          </div>
           <div class="sb-demo">
-            <ApexSidebarLayout height="240px">
-              <ApexSidebar id="sb-resp" collapsible="offcanvas" overlay backdrop
-                           :open="false" width="220px">
-                <ApexMenu :items="sbNav" />
+            <ApexSidebarLayout height="420px">
+              <ApexSidebar id="resp" :collapsible="sbNarrow ? 'offcanvas' : 'icon'"
+                           :overlay="sbNarrow" :backdrop="sbNarrow" v-model:open="sbRespOpen">
+                <template #header="{ collapsed }">
+                  <div class="sb-brand"><span class="sb-mark">A</span><strong v-if="!collapsed">Acme Inc</strong></div>
+                </template>
+                <ApexMenu :items="SB_NAV" width="100%" />
               </ApexSidebar>
-              <ApexSidebarInset>
-                <div class="sb-content">
-                  <ApexSidebarTrigger target="sb-resp" label="Menu" />
-                  <span>Overlay panel with a backdrop; clicking the dim closes it.</span>
+              <ApexSidebarInset scroll>
+                <div class="sb-topbar">
+                  <ApexSidebarTrigger target="resp" />
+                  <strong>{{ sbNarrow ? 'Offcanvas + backdrop' : 'Icon rail' }}</strong>
                 </div>
+                <div class="sb-content"><div class="sb-block"></div></div>
               </ApexSidebarInset>
             </ApexSidebarLayout>
           </div>
 
           <h2>Dual sidebar</h2>
           <p class="note">
-            Two panels, one on each side, in the same layout. Each registers under its own
-            <code>id</code>, so the triggers stay independent — which is the point of the
-            registry rather than a shared open flag.
+            Two panels on opposite sides of one layout — navigation on the left, an
+            assistant panel on the right — each targeted by its own trigger through
+            <code>id</code>.
           </p>
           <div class="sb-demo">
-            <ApexSidebarLayout height="240px">
-              <ApexSidebar id="sb-left" width="190px">
-                <ApexMenu :items="sbNav" />
+            <ApexSidebarLayout height="460px">
+              <ApexSidebar id="dual-left" collapsible="icon" width="230px">
+                <template #header="{ collapsed }">
+                  <div class="sb-brand"><span class="sb-mark">A</span><strong v-if="!collapsed">Acme Inc</strong></div>
+                </template>
+                <ApexMenu :items="SB_NAV" width="100%" />
               </ApexSidebar>
-              <ApexSidebarInset>
-                <div class="sb-content">
-                  <ApexSidebarTrigger target="sb-left" />
-                  <ApexSidebarTrigger target="sb-right" icon="tune" />
-                  <span>Two panels, two triggers.</span>
+              <ApexSidebarInset scroll>
+                <div class="sb-topbar">
+                  <ApexSidebarTrigger target="dual-left" />
+                  <strong>Dashboard</strong>
+                  <ApexSidebarTrigger target="dual-right" icon="smart_toy" label="Toggle assistant"
+                                      style="margin-inline-start:auto" />
                 </div>
+                <div class="sb-content"><div class="sb-block sb-block--tall"></div></div>
               </ApexSidebarInset>
-              <ApexSidebar id="sb-right" side="right" width="190px" :open="false">
-                <ApexMenu :items="sbAside" />
+              <ApexSidebar id="dual-right" side="right" collapsible="offcanvas" width="280px" :open="false">
+                <template #header><strong style="font-size:13.5px">Weekly metrics</strong></template>
+                <div class="sb-chat">
+                  <p class="sb-chat__q">Show me this week's metrics</p>
+                  <p class="sb-chat__a">Here are your key metrics for this week:</p>
+                  <dl class="sb-stats">
+                    <div><dt>Page views</dt><dd>12,482</dd></div>
+                    <div><dt>New users</dt><dd>342</dd></div>
+                    <div><dt>Bounce rate</dt><dd>34%</dd></div>
+                  </dl>
+                </div>
+                <template #footer>
+                  <ApexInput v-model="sbAsk" placeholder="Reply…" label="Reply"
+                             label-placement="hidden" size="sm" />
+                </template>
               </ApexSidebar>
             </ApexSidebarLayout>
           </div>
 
           <h2>Multi sidebar</h2>
           <p class="note">
-            A narrow icon rail next to a wider panel — the pattern a mail client uses,
-            where the rail switches context and the panel lists what is in it. Both are
-            ApexSidebars; only their widths and <code>collapsible</code> differ.
+            Two panels stacked on the same side of one layout: a hover-to-open icon bar and
+            a secondary panel that stays open on desktop and collapses to an offcanvas
+            overlay on smaller screens. The rail keeps its 52px of layout while the expanded
+            panel floats over the second one, so nothing reflows as it opens.
           </p>
+          <div class="iconstrip" style="margin-top: 12px">
+            <ApexSwitch v-model="sbIdeNarrow" label="Simulate a narrow viewport" />
+          </div>
           <div class="sb-demo">
-            <ApexSidebarLayout height="260px">
-              <ApexSidebar id="sb-rail" collapsible="none" width="64px">
-                <ApexMenu :items="sbRail" />
+            <ApexSidebarLayout height="520px">
+              <ApexSidebar id="ide-rail" collapsible="icon" :open="false" open-on-hover
+                           width="210px" icon-width="52px">
+                <template #header="{ collapsed }">
+                  <div class="sb-brand"><span class="sb-mark">A</span><strong v-if="!collapsed">Acme Inc</strong></div>
+                </template>
+                <ApexMenu :items="SB_IDE_RAIL" width="100%" :label-caps="false" />
+                <template #footer="{ collapsed }">
+                  <div class="sb-user">
+                    <ApexIcon name="settings" :size="20" style="color:var(--fg-subtle)" />
+                    <strong v-if="!collapsed">Settings</strong>
+                  </div>
+                </template>
               </ApexSidebar>
-              <ApexSidebar id="sb-list" width="200px">
-                <ApexMenu :items="sbAside" />
+              <ApexSidebar id="ide-panel" collapsible="offcanvas" width="230px"
+                           :overlay="sbIdeNarrow" :backdrop="sbIdeNarrow" v-model:open="sbIdePanel">
+                <template #header><strong style="font-size:14px">Settings</strong></template>
+                <ApexMenu :items="SB_IDE_PANEL" width="100%" />
               </ApexSidebar>
-              <ApexSidebarInset>
-                <div class="sb-content">
-                  <ApexSidebarTrigger target="sb-list" />
-                  <span>A rail that stays, and a panel that collapses.</span>
+              <ApexSidebarInset scroll>
+                <div class="sb-topbar">
+                  <ApexSidebarTrigger target="ide-panel" />
+                  <strong>Table Editor</strong>
+                  <span style="font-size:13px;color:var(--fg-subtle)">/ {{ sbIdeSection.toLowerCase() }}</span>
                 </div>
+                <div class="sb-content"><div class="sb-block"></div><div class="sb-block sb-block--tall"></div></div>
               </ApexSidebarInset>
             </ApexSidebarLayout>
           </div>
+          <p class="note">
+            Section: <code>{{ sbIdeSection }}</code> — hover the icon rail to expand it
+            over the panel.
+          </p>
 
           <h2>Nested menu</h2>
           <p class="note">
-            Groups nest inside the panel exactly as they do anywhere else, and
-            <code>expandedKeys</code> works the same — so a sidebar can restore which
-            sections were open between visits.
+            Groups inside the panel collapse to reveal deep trees, with the current node
+            marked — the sidebar holds the frame, ApexMenu holds the tree and its
+            <code>expandedKeys</code>.
           </p>
           <div class="sb-demo">
-            <ApexSidebarLayout height="280px">
-              <ApexSidebar id="sb-nest" width="240px">
-                <ApexMenu :items="sbNested" v-model:expandedKeys="sbKeys" />
+            <ApexSidebarLayout height="480px">
+              <ApexSidebar id="files" collapsible="icon" width="250px">
+                <template #header="{ collapsed }">
+                  <div class="sb-brand"><span class="sb-mark">F</span><strong v-if="!collapsed">File Manager</strong></div>
+                </template>
+                <ApexMenu :items="SB_FILES" v-model:expandedKeys="sbFileKeys" width="100%" />
+                <template #footer="{ collapsed }">
+                  <div class="sb-user"><ApexAvatar label="John Doe" size="sm" /><strong v-if="!collapsed">John Doe</strong></div>
+                </template>
               </ApexSidebar>
-              <ApexSidebarInset>
+              <ApexSidebarInset scroll>
+                <div class="sb-topbar"><ApexSidebarTrigger target="files" /><strong>{{ sbFile }}</strong></div>
                 <div class="sb-content">
-                  <ApexSidebarTrigger target="sb-nest" />
-                  <code>{{ JSON.stringify(sbKeys) }}</code>
+                  <h3 style="margin:0">{{ sbFile }}</h3>
+                  <ApexBreadcrumb :items="sbFilePath.map((p) => ({ label: p }))" separator="/" />
                 </div>
               </ApexSidebarInset>
             </ApexSidebarLayout>
@@ -3720,45 +3867,50 @@ function pick(city) {
 
           <h2>Chat application</h2>
           <p class="note">
-            Put together: a panel with a header, a scrolling list, and a footer, beside a
-            content region that scrolls on its own. Each slot receives
-            <code>{ collapsed }</code>, so the header can swap a wordmark for a monogram
-            without a second component.
+            A history panel: pinned shortcuts at the top, conversations grouped by age, and
+            a delete action that appears on hover — all ordinary content inside the panel
+            body.
           </p>
           <div class="sb-demo">
-            <ApexSidebarLayout height="300px">
-              <ApexSidebar id="sb-chat" width="230px" collapsible="icon">
-                <template #header="{ collapsed }">
-                  <span class="sb-brand">{{ collapsed ? 'C' : 'Conversations' }}</span>
+            <ApexSidebarLayout height="480px">
+              <ApexSidebar id="chat" collapsible="offcanvas" width="250px">
+                <template #header>
+                  <div class="sb-brand"><span class="sb-mark sb-mark--dark">✦</span><strong>Apex Chat</strong></div>
                 </template>
-                <ApexMenu :items="sbChats" />
-                <template #footer="{ collapsed }">
-                  <ApexButton size="sm" variant="text" icon="add">
-                    <span v-if="!collapsed">New chat</span>
-                  </ApexButton>
+                <ApexMenu :items="[{ label: 'Search', icon: 'search' }, { label: 'New chat', icon: 'edit_square' },
+                                   { label: 'Browse web', icon: 'language' }]" width="100%" />
+                <div v-for="grp in SB_CHATS" :key="grp.label" class="sb-chatgroup">
+                  <h5>{{ grp.label }}</h5>
+                  <button v-for="c in grp.items" :key="c" type="button" class="sb-chatitem"
+                          :data-on="sbChat === c ? 'true' : 'false'" @click="sbChat = c">
+                    <span>{{ c }}</span>
+                    <em @click.stop="sbChatLog = 'deleted: ' + c"><ApexIcon name="delete" :size="16" /></em>
+                  </button>
+                </div>
+                <template #footer>
+                  <div class="sb-user"><ApexAvatar label="John Doe" size="sm" /><strong>John Doe</strong></div>
                 </template>
               </ApexSidebar>
               <ApexSidebarInset scroll>
-                <div class="sb-content sb-content--chat">
-                  <ApexSidebarTrigger target="sb-chat" />
-                  <p v-for="n in 6" :key="n" class="sb-msg">Message {{ n }}</p>
-                </div>
+                <div class="sb-topbar"><ApexSidebarTrigger target="chat" /><strong>{{ sbChat }}</strong></div>
+                <div class="sb-content"><div class="sb-block"></div><div class="sb-block sb-block--tall"></div></div>
               </ApexSidebarInset>
             </ApexSidebarLayout>
           </div>
+          <p class="note">Hover action: <code>{{ sbChatLog || 'none yet' }}</code></p>
 
           <h2>Permissions</h2>
           <p class="note">
             The panel itself has no <code>can</code>, because it holds content rather than
-            rows — the gating belongs to whatever is inside it. An
-            <code>ApexMenu</code> in a sidebar filters exactly as it does anywhere else,
-            which is the whole reason the panel is a container and not a menu.
+            rows — the gating belongs to whatever is inside it. An <code>ApexMenu</code>
+            in a sidebar filters exactly as it does anywhere else, which is the whole reason
+            the panel is a container and not a menu.
           </p>
           <p class="note">
             That composition is worth stating plainly: nothing here is sidebar-specific.
-            The rows carry <code>can</code>, the menu resolves it, and a group whose
-            children have all gone takes its section label with it — so a role with
-            nothing under Administration sees no Administration heading either.
+            The rows carry <code>can</code>, the menu resolves it, and a group whose children
+            have all gone takes its section label with it — so a role with nothing under
+            Administration sees no Administration heading either.
           </p>
           <div class="iconstrip" style="margin-top: 12px">
             <ApexButton
@@ -3771,12 +3923,12 @@ function pick(city) {
           <div class="sb-demo">
             <ApexSidebarLayout height="260px">
               <ApexSidebar id="sb-gate" width="230px">
-                <ApexMenu :items="sbGated" />
+                <ApexMenu :items="sbGated" width="100%" />
               </ApexSidebar>
               <ApexSidebarInset>
-                <div class="sb-content">
+                <div class="sb-topbar">
                   <ApexSidebarTrigger target="sb-gate" />
-                  <span>The panel stays; its contents are what the role changes.</span>
+                  <strong>The panel stays; its contents are what the role changes.</strong>
                 </div>
               </ApexSidebarInset>
             </ApexSidebarLayout>
