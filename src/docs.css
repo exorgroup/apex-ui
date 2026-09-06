@@ -987,3 +987,27 @@ background:linear-gradient(150deg,#F0574B 0%,#E8823C 40%,#5B9BD5 80%,#2E6FA8 100
 .vm-label { font-size: 11px; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: var(--accent-primary); }
 .vm-plain { font-size: 13.5px; }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * The media family's demo chrome, ported from the gallery.
+ *
+ * cfm-stage/cfm-log are the gallery's generic playground helpers — a centred
+ * column with a caption under it — used by compare, carousel and the context
+ * menu alike. The rest is the comparison's own: two plates standing in for
+ * artwork, and the card the Template section clips.
+ * ───────────────────────────────────────────────────────────────────────── */
+.cfm-stage{display:flex;flex-direction:column;align-items:center;gap:12px}
+.cfm-log{margin:0;font-size:12.5px;color:var(--fg-subtle)}
+.cmp-plate{display:grid;place-items:center;font-size:13px;font-weight:700;letter-spacing:.06em;
+text-transform:uppercase;color:#33404F}
+.cmp-plate--a{background:linear-gradient(140deg,#C8D8E8,#EEF3F8)}
+.cmp-plate--b{background:linear-gradient(140deg,#3F5568,#8FA6B8);color:#F4F8FB}
+.cmp-card-wrap{display:grid;place-items:center;padding:22px}
+.cmp-card-wrap--free{background:var(--bg-muted)}
+.cmp-card-wrap--pro{background:color-mix(in oklch,var(--accent-primary) 14%,var(--bg-surface))}
+.cmp-card{inline-size:250px;block-size:auto!important;display:flex;flex-direction:column;gap:10px;
+padding:14px;border:1px solid var(--border-default);border-radius:var(--r-lg);background:var(--bg-elevated);
+box-shadow:var(--shadow-md)}
+.cmp-card__head{display:flex;align-items:center;gap:10px}
+.cmp-card__row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--fg-subtle)}
+.car-frame{padding:16px;border:1px solid var(--border-default);border-radius:var(--r-lg);background:var(--bg-surface)}

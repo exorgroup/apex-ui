@@ -34,6 +34,7 @@ import DirectiveStage from './demos/DirectiveStage.vue';
 import ServiceStage from './demos/ServiceStage.vue';
 import OverlayStage from './demos/OverlayStage.vue';
 import MenuStage from './demos/MenuStage.vue';
+import MediaStage from './demos/MediaStage.vue';
 /* The dynamic-dialog and confirm-popup demos appear in the stage AND in a
    section below it. One module holds their state so both report through the
    same line — see demos/overlayDemos.ts. */
@@ -234,6 +235,27 @@ const dialGated: SpeedDialItem[] = [
 /* The toolbar has no model, so its Permissions section gates the way a caller
    would: the same resolver, read directly, driving a v-if. */
 const pageCan = useCan();
+
+/* ── ApexCompare page ─────────────────── */
+/** The ui map's parts, for the Customising table. */
+const CMP_PARTS: string[][] = [
+  ['root', 'The frame both items sit in'],
+  ['item', 'One side — set on ApexCompareItem, not the parent'],
+  ['divider', 'The line at the current position'],
+  ['handle', 'The draggable control on it'],
+  ['grip', 'The chevron pair inside the handle'],
+  ['chev', 'One chevron'],
+];
+
+/* One position per demo, so dragging one comparison does not move the rest. */
+const cmpBasic = ref(50);
+const cmpHandleA = ref(45);
+const cmpHandleB = ref(55);
+const cmpHandleC = ref(50);
+const cmpHover = ref(50);
+const cmpVert = ref(50);
+const cmpCtl = ref(50);
+const cmpTpl = ref(50);
 
 /* ── ApexSidebar page ──────────────────────────── */
 /*
@@ -1814,6 +1836,14 @@ async function copyUsage() {
                    holds the shape each one needs. -->
               <MenuStage
                 v-else-if="entry.demo === 'menu'"
+                :id="entry.id"
+                :bind="live"
+              />
+
+              <!-- A comparison, a carousel and a gallery each need their own
+                   shape of host — see MediaStage. -->
+              <MediaStage
+                v-else-if="entry.demo === 'media'"
                 :id="entry.id"
                 :bind="live"
               />
@@ -3642,6 +3672,167 @@ function pick(city) {
           panel only means anything beside the content it pushes, and the
           demos I wrote instead were toys that made the control look broken.
         -->
+        <!-- The gallery's six, ported. -->
+        <template v-if="entry.id === 'compare'">
+          <h2>Basic</h2>
+          <p class="note">
+            Two <code>ApexCompareItem</code> children, one <code>before</code> and one
+            <code>after</code>. Drag the divider, or focus the handle and use the arrow keys
+            — Home and End jump to either extreme. Placeholders stand in for artwork; real
+            images drop in unchanged.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCompare v-model="cmpBasic" aspect-ratio="16/9" style="max-width:520px;margin:0 auto">
+              <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
+              <ApexCompareItem position="after"><div class="cmp-plate cmp-plate--b">After</div></ApexCompareItem>
+            </ApexCompare>
+          </div>
+
+          <h2>Custom handle</h2>
+          <p class="note">
+            Colour, size, corners and shadow are props; the <code>handle</code> slot replaces
+            the contents outright while keeping the drag, the keys and the positioning.
+            <code>handle</code> off leaves the divider draggable but unadorned.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell"><span class="cell__tag">props only</span>
+              <ApexCompare v-model="cmpHandleA" aspect-ratio="16/10" handle-size="44px" handle-radius="12px"
+                           handle-background="var(--accent-primary)" handle-color="#FFF"
+                           divider-color="var(--accent-primary)" divider-width="3px" radius="16px">
+                <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
+                <ApexCompareItem position="after"><div class="cmp-plate cmp-plate--b">After</div></ApexCompareItem>
+              </ApexCompare>
+            </div>
+            <div class="cell"><span class="cell__tag">handle slot</span>
+              <ApexCompare v-model="cmpHandleB" aspect-ratio="16/10" handle-size="52px"
+                           handle-background="#101720" handle-border-color="#2A3542"
+                           handle-shadow="0 8px 20px rgba(0,0,0,.35)">
+                <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
+                <ApexCompareItem position="after"><div class="cmp-plate cmp-plate--b">After</div></ApexCompareItem>
+                <template #handle="{ value }">
+                  <span style="font-size:11px;font-weight:700;color:#F2F6FB">{{ Math.round(value) }}%</span>
+                </template>
+              </ApexCompare>
+            </div>
+            <div class="cell"><span class="cell__tag">handle off</span>
+              <ApexCompare v-model="cmpHandleC" aspect-ratio="16/10" :handle="false" divider-width="4px">
+                <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
+                <ApexCompareItem position="after"><div class="cmp-plate cmp-plate--b">After</div></ApexCompareItem>
+              </ApexCompare>
+            </div>
+            <div class="cell"><span class="cell__tag">disabled</span>
+              <ApexCompare :model-value="38" aspect-ratio="16/10" disabled>
+                <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
+                <ApexCompareItem position="after"><div class="cmp-plate cmp-plate--b">After</div></ApexCompareItem>
+              </ApexCompare>
+            </div>
+          </div>
+
+          <h2>Hover</h2>
+          <p class="note">
+            <code>slideOnHover</code> follows the pointer without a press. Dragging still
+            works, and a drag that leaves the frame is not fought by the hover handler.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCompare v-model="cmpHover" slide-on-hover aspect-ratio="16/9" style="max-width:520px;margin:0 auto">
+              <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
+              <ApexCompareItem position="after"><div class="cmp-plate cmp-plate--b">After</div></ApexCompareItem>
+            </ApexCompare>
+          </div>
+
+          <h2>Vertical</h2>
+          <p class="note">
+            <code>orientation="vertical"</code> clips on the block axis instead; the handle
+            picks up the matching cursor and chevrons.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCompare v-model="cmpVert" orientation="vertical" aspect-ratio="4/3" style="max-width:400px;margin:0 auto">
+              <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
+              <ApexCompareItem position="after"><div class="cmp-plate cmp-plate--b">After</div></ApexCompareItem>
+            </ApexCompare>
+          </div>
+
+          <h2>Controlled</h2>
+          <p class="note">
+            Bind with <code>v-model</code> when other UI has to stay in step with the divider.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCompare v-model="cmpCtl" aspect-ratio="16/9" style="max-width:520px;margin:0 auto">
+              <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
+              <ApexCompareItem position="after"><div class="cmp-plate cmp-plate--b">After</div></ApexCompareItem>
+            </ApexCompare>
+            <div class="iconstrip" style="justify-content:center;margin-top:12px">
+              <ApexButton v-for="v in [25, 50, 75]" :key="v" size="sm" variant="outlined" severity="secondary"
+                          @click="cmpCtl = v">{{ v }}%</ApexButton>
+              <ApexSlider v-model="cmpCtl" :min="0" :max="100" style="width:180px" />
+            </div>
+          </div>
+
+          <h2>Template</h2>
+          <p class="note">
+            Neither side has to be an image — any markup works, and because the before side
+            is clipped rather than resized, a card inside keeps the size it would have on its
+            own.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCompare v-model="cmpTpl" height="300px" style="max-width:460px;margin:0 auto"
+                         background="var(--bg-muted)">
+              <ApexCompareItem position="before">
+                <div class="cmp-card-wrap cmp-card-wrap--free">
+                  <div class="cmp-card">
+                    <div class="cmp-card__head">
+                      <ApexAvatar label="Amy Elsner" size="sm" />
+                      <div>
+                        <strong style="font-size:13.5px">Amy Elsner</strong>
+                        <span style="display:block;font-size:12px;color:var(--fg-subtle)">Free plan</span>
+                      </div>
+                    </div>
+                    <div class="cmp-card__row"><span>Storage</span><span>7.2 GB / 10 GB</span></div>
+                    <ApexProgressBar :value="72" />
+                    <ApexButton size="sm" severity="secondary" variant="outlined" style="width:100%">Settings</ApexButton>
+                  </div>
+                </div>
+              </ApexCompareItem>
+              <ApexCompareItem position="after">
+                <div class="cmp-card-wrap cmp-card-wrap--pro">
+                  <div class="cmp-card">
+                    <div class="cmp-card__head">
+                      <ApexAvatar label="Amy Elsner" size="sm" />
+                      <div>
+                        <strong style="font-size:13.5px">Amy Elsner</strong>
+                        <span style="display:block;font-size:12px;color:var(--accent-primary)">Pro plan</span>
+                      </div>
+                    </div>
+                    <div class="cmp-card__row"><span>Storage</span><span>7.2 GB / 2 TB</span></div>
+                    <ApexProgressBar :value="4" />
+                    <ApexButton size="sm" style="width:100%">Manage plan</ApexButton>
+                  </div>
+                </div>
+              </ApexCompareItem>
+            </ApexCompare>
+          </div>
+
+          <h2>Customising</h2>
+          <p class="note">
+            Two ways in. <strong>Props</strong> restyle one comparison from the template —
+            every frame, divider and handle dimension above is one. <strong>Classes</strong>
+            do everything props do plus states, media queries and pseudo-elements, through
+            the <code>ui</code> map.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>ui key</th><th>Part</th></tr></thead>
+            <tbody>
+              <tr v-for="r in CMP_PARTS" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td>{{ r[1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="note">
+            Both routes reach the same <code>--apex-cmp-*</code> variables, so a prop and a
+            class cannot disagree about what they control.
+          </p>
+        </template>
+
         <template v-if="entry.id === 'sidebar'">
           <h2>Variants</h2>
           <p class="note">

@@ -58,7 +58,7 @@ export interface DocEntry {
    */
   demo?: 'plain' | 'chip' | 'meter' | 'inplace' | 'block' | 'scrolltop'
     | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container'
-    | 'overlay' | 'menu';
+    | 'overlay' | 'menu' | 'media';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -4239,6 +4239,50 @@ export const ENTRIES: DocEntry[] = [
       ['v-apex-tooltip.top="’Text’"', 'modifier', 'top, bottom, left or right'],
       ['v-apex-tooltip="{ value, … }"', 'object', 'Every option above, and reactive — a live tooltip picks up new text without a re-hover'],
       ['app.use(ApexUI)', 'plugin', 'Registers the directive; import { apexTooltip } to register it yourself'],
+    ],
+  },
+  {
+    id: 'compare', name: 'ApexCompare', group: 'Media',
+    blurb: 'Two items stacked and revealed by a draggable divider. The before item is clipped rather than resized, so both children keep their natural layout at every position \u2014 an image never squashes, and a card inside the comparison stays the size it would be on its own. The divider is a real slider with arrow, Home and End keys, since a control that only answers to a drag is unusable by keyboard.',
+    noField: true, demo: 'media',
+    lead: ['v-model="value"'],
+    tail: '>\n  \u2026\n</ApexCompare>',
+    base: { orientation: 'horizontal', slideOnHover: false, handle: true },
+    controls: [
+      { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'slideOnHover', type: 'bool' }, { key: 'handle', type: 'bool' },
+      { key: 'disabled', type: 'bool' },
+      { key: 'height', type: 'text' }, { key: 'aspectRatio', type: 'text' },
+      { key: 'radius', type: 'text' }, { key: 'dividerWidth', type: 'text' },
+      { key: 'dividerColor', type: 'color' }, { key: 'background', type: 'color' },
+      { key: 'handleSize', type: 'text' }, { key: 'handleRadius', type: 'text' },
+      { key: 'handleBackground', type: 'color' }, { key: 'handleColor', type: 'color' },
+      { key: 'handleBorderColor', type: 'color' },
+      { key: 'step', type: 'number' }, { key: 'pageStep', type: 'number' },
+    ],
+    props: [
+      ['modelValue', 'number', '50', 'v-model \u2014 the divider position as a percentage'],
+      ['orientation', "'horizontal' | 'vertical'", "'horizontal'", ''],
+      ['slideOnHover', 'boolean', 'false', 'Follows the pointer without a press'],
+      ['disabled', 'boolean', 'false', 'Freezes the divider and takes the handle out of the tab order'],
+      ['step / pageStep', 'number', '1 / 10', 'Arrow keys, and PageUp/PageDown'],
+      ['width / height / aspectRatio', 'string', '100% / \u2014 / \u2014', 'The frame; aspectRatio is usually what you want for imagery'],
+      ['radius / background', 'string', 'tokens', 'Frame corners, and what shows behind the items'],
+      ['dividerWidth / dividerColor', 'string', "'2px' / white", ''],
+      ['handle', 'boolean', 'true', 'Off leaves the divider draggable but unadorned'],
+      ['handleSize / handleRadius / handleBackground / handleColor / handleBorderColor / handleShadow', 'string', 'tokens', 'The handle \u2014 a square, a pill or a circle, in any colour'],
+    ],
+    events: [
+      ['update:modelValue', 'number'],
+      ['slide-start / slide-end', '\u2014 a drag began or ended'],
+    ],
+    slots: [
+      ['default', 'Two ApexCompareItem children, position="before" and "after"'],
+      ['handle', 'Replaces the handle contents; receives { value } \u2014 the drag, keys and positioning stay'],
+    ],
+    serviceTitle: 'Sub-components',
+    serviceRows: [
+      ['ApexCompareItem', 'position="before" | "after"', 'One side \u2014 an image, a chart, a whole card'],
     ],
   },
   {
