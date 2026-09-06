@@ -41,9 +41,10 @@ import {
   createChartRegistry, partList, partOne, provideChartRegistry,
 } from '../core/chart/registry';
 import {
-  candleGeometry, candleTones, heatBand, heatGrid, heatIntensity, treemapLayout,
+  candleGeometry, candleTones, heatBand, heatGrid, heatIntensity,
   type Candle, type TreeNode, type TreeTile,
 } from '../core/chart/special';
+import ApexChartTreemap from './ApexChartTreemap.vue';
 
 export interface ChartLegendSpec {
   show?: boolean;
@@ -856,6 +857,18 @@ const clipping = computed(() => revealMode.value === 'draw' && reveal.value < 1)
  * it. Filtering those points out instead would silently reduce the rendered count
  * — which looks exactly like a working zoom, and is the failure this avoids.
  */
+/*
+ * AF2-236: declared HERE, not eighty lines below.
+ *
+ * plotClipId reads uid, and const is in its temporal dead zone until its
+ * own line runs — so setup threw "Cannot access 'uid' before
+ * initialization" and the chart could not mount at all. The original has
+ * the same order; nothing caught it because nothing had ever mounted an
+ * ApexChart, in the suite or in the docs.
+ */
+const uid = Math.random().toString(36).slice(2, 8);
+const uidClip = `cht-clip-${uid}`;
+
 const plotClipId = `cht-plot-${uid}`;
 const clipToPlot = computed(() => !!zoomY.value);
 const seriesClip = computed(() => {
@@ -937,9 +950,6 @@ function valScale(s: ResolvedSeries) {
   return scales.value!.left;
 }
 function yScaleFor(s: ResolvedSeries) { return valScale(s); }
-
-const uid = Math.random().toString(36).slice(2, 8);
-const uidClip = `cht-clip-${uid}`;
 
 function resolveSegmentStyle<T>(
   value: T | ((ctx: SegmentContext) => T | undefined) | undefined,
@@ -1789,38 +1799,18 @@ const heatView = computed(() => {
 /* ─── treemap ────────────────────────────────────────────── */
 const drillPath = ref<TreeNode[]>([]);
 
-const treeView = computed(() => {
-  if (!hasTreemap.value) return null;
-  const spec = merged.series.value.find((s) => s.type === 'treemap');
-  if (!spec) return null;
-  const roots = (drillPath.value.length
-    ? (drillPath.value[drillPath.value.length - 1].children || [])
-    : (spec.nodes || [])) as TreeNode[];
-  const w = size.value.width;
-  const h = size.value.height;
-  const tiles = treemapLayout(roots, { x: 0, y: 0, width: w, height: h },
-    spec.depth ?? 1, spec.tilePadding ?? 2);
-  const fmt = new Intl.NumberFormat(props.locale, { notation: 'compact', maximumFractionDigits: 1 });
-  return {
-    tiles: tiles.map((t, i) => ({
-      ...t,
-      /* Top-level tiles take palette colours in layout order; children inherit
-         their parent's so the hierarchy is legible without a legend. */
-      fill: t.depth === 0
-        ? seriesColor(i, t.node.color)
-        : (t.node.color || 'var(--bg-surface)'),
-      /* A nested parent is a frame with a header, so it stays quiet behind its
-               children; children are near-opaque so nothing bleeds through. */
-            opacity: t.nested ? 0.22 : (t.depth === 0 ? 0.9 : 0.95),
-      label: t.node.name ?? '',
-      valueLabel: fmt.format(t.value),
-      showLabel: t.width > 54 && (t.nested ? t.height > 24 : t.height > 26),
-            showValue: !t.nested,
-            labelY: t.nested ? t.y + 14 : t.y + 17,
-    })),
-    breadcrumb: drillPath.value.map((n, i) => ({ key: `${n.name}-${i}`, name: n.name ?? '', index: i })),
-  };
-});
+/**
+ * The breadcrumb, from the drill path alone.
+ *
+ * The tiles moved to ApexChartTreemap; this did not. It renders outside the
+ * svg, above the caption, and a child cannot render into two places \u2014 so the
+ * path stays here, where both the nav and the renderer can read it.
+ */
+const crumbs = computed(() =>
+  drillPath.value.map((n, i2) => ({ key: `${n.name}-${i2}`, name: n.name ?? '', index: i2 })));
+
+/** The unfiltered series, for the renderer that has to find its own spec. */
+const allSeries = computed(() => merged.series.value);
 
 function drillInto(tile: TreeTile) {
   if (!tile.drillable) return;
@@ -2499,9 +2489,9 @@ defineExpose({
           :data-zoomed="zoomRange ? 'true' : 'false'"
           :data-renderer="useCanvas ? 'canvas' : 'svg'"
           :data-hovered="hit ? 'true' : 'false'">
-    <nav v-if="treeView && treeView.breadcrumb.length" class="apex-cht__crumbs">
+    <nav v-if="hasTreemap && crumbs.length" class="apex-cht__crumbs">
       <button type="button" @click="drillPath = []">All</button>
-      <button v-for="c in treeView.breadcrumb" :key="c.key" type="button" @click="drillTo(c.index)">{{ c.name }}</button>
+      <button v-for="c in crumbs" :key="c.key" type="button" @click="drillTo(c.index)">{{ c.name }}</button>
       <button type="button" class="apex-cht__crumb-up" @click="drillOut()">Back</button>
     </nav>
 
@@ -2571,18 +2561,9 @@ defineExpose({
         <!-- radial: no plot rect, no axes, so the cartesian layer is skipped
              entirely rather than drawn and hidden -->
         <!-- a treemap owns the whole frame: no scales, no axes, no plot rect -->
-        <g v-if="treeView" class="apex-cht__tree">
-          <g v-for="t in treeView.tiles" :key="t.key" class="apex-cht__tile"
-             :data-drillable="t.drillable ? 'true' : 'false'"
-             @click="drillInto(t)">
-            <rect :x="t.x" :y="t.y" :width="Math.max(0, t.width - 2)"
-                  :height="Math.max(0, t.height - 2)" :fill="t.fill" :fill-opacity="t.opacity" rx="3" />
-            <text v-if="t.showLabel" class="apex-cht__tile-name" :x="t.x + 8" :y="t.labelY"
-                  :data-band="t.nested ? 'true' : 'false'">{{ t.label }}</text>
-            <text v-if="t.showLabel && t.showValue" class="apex-cht__tile-value"
-                  :x="t.x + 8" :y="t.labelY + 14">{{ t.valueLabel }}</text>
-          </g>
-        </g>
+        <ApexChartTreemap v-if="hasTreemap" :series="allSeries" :drill-path="drillPath"
+                          :width="size.width" :height="size.height" :locale="locale"
+                          @drill="drillInto" />
 
         <g v-else-if="radial" class="apex-cht__radial">
           <template v-if="radialKind === 'pie'">
