@@ -182,10 +182,34 @@ for (const rel of files) {
   const removed = rows.filter((l) => l[0] === '-').map((l) => l.slice(1));
   const gone = removed.filter((r) => !added.some((a) => a.trim() === r.trim()));
 
-  const odd = added.filter((l) => !INTENDED.some((r) => r.test(l)));
+  /*
+   * A line that also appears on the `-` side was MOVED, not written.
+   *
+   * AF2-238c/d lifted the bar and candle geometry above the label pass that
+   * reads it — a pure relocation, proved by the line multiset being unchanged.
+   * A sequence diff cannot say "moved": it reports the whole displaced region
+   * as added here and removed there, which was 74 lines of the original's own
+   * code arriving as findings. Pairing them off leaves only lines that are
+   * genuinely new, which is the question this script asks.
+   *
+   * Not the same as ignoring them: `gone` below still reports anything the
+   * original had that we dropped, so a deletion disguised as a move is caught.
+   */
+  const pool = removed.map((r) => r.trim());
+  const moved = [];
+  const written = added.filter((l) => {
+    const i = pool.indexOf(l.trim());
+    if (i === -1) return true;
+    pool.splice(i, 1);
+    moved.push(l);
+    return false;
+  });
+
+  const odd = written.filter((l) => !INTENDED.some((r) => r.test(l)));
   if (!odd.length) {
     explained++;
-    console.log(`ok    ${rel}  — ${added.length} line(s) of ours, all accounted for`
+    console.log(`ok    ${rel}  — ${written.length} line(s) of ours, all accounted for`
+      + (moved.length ? `; ${moved.length} moved` : '')
       + (gone.length ? `; ${gone.length} of the original's dropped` : ''));
     continue;
   }
