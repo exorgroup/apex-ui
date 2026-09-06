@@ -1,5 +1,12 @@
 /*
- * AF2-216: the menu pack, row by row, untruncated.
+ * AF2-216: a pack of controls, row by row, untruncated.
+ *
+ * Written for the menu pack; AF2-240 gave it a second pack rather than a
+ * second script, because the media and board controls need exactly the same
+ * check and the only thing that differs is which ids to walk.
+ *
+ *   node scripts/menu-pack-sweep.mjs          # the menu pack
+ *   node scripts/menu-pack-sweep.mjs batch    # compare, carousel, gallery, taskboard
  *
  * reconcile.mjs answers the question that matters — does a ported control
  * LACK anything the gallery had — and for this pack it answers no. What it
@@ -31,11 +38,38 @@ const PANDO = 'C:/WorkFolder/APEX Digital Signage/Digital Singage/Apex Pando V01
 const gallery = fs.readFileSync(path.join(PANDO, 'web', 'apex-ui-docs.js'), 'utf8');
 const ours = fs.readFileSync(path.join(HERE, '..', 'src', 'registry.ts'), 'utf8');
 
-/** The pack: the eight new pages, plus the three that were gated afterwards. */
-const PACK = [
-  'tieredmenu', 'menubar', 'menu', 'megamenu', 'dock', 'contextmenu',
-  'breadcrumb', 'sidebar', 'splitbutton', 'speeddial', 'toolbar',
-];
+const PACKS = {
+  /** The eight new menu pages, plus the three that were gated afterwards. */
+  menu: [
+    'tieredmenu', 'menubar', 'menu', 'megamenu', 'dock', 'contextmenu',
+    'breadcrumb', 'sidebar', 'splitbutton', 'speeddial', 'toolbar',
+  ],
+  /*
+   * AF2-227…234. The chart is absent on purpose: it has no entry of ours yet,
+   * and listing it would print "no entry of ours" as a finding every run,
+   * which is how a report starts being ignored.
+   */
+  batch: ['compare', 'carousel', 'gallery', 'taskboard'],
+};
+
+/*
+ * Which rules apply to which pack.
+ *
+ * The three below undo menu-pack changes; the batch was ported verbatim and
+ * needs none. Without this the batch run ended by reporting all three as
+ * "allowances no row needed", which is the report crying wolf about rules
+ * that were never in play.
+ */
+const PACK_RULES = { menu: [0, 1, 2], batch: [] };
+
+const packName = process.argv[2] || 'menu';
+const PACK = PACKS[packName];
+if (!PACK) {
+  console.error(`no pack named ${packName} — try ${Object.keys(PACKS).join(' or ')}`);
+  process.exit(1);
+}
+console.log(`sweeping the ${packName} pack
+`);
 
 /**
  * Fields we added to an item type that the gallery's has no equivalent of.
@@ -63,7 +97,7 @@ function stripAdded(text) {
  * reported at the end — an allowance nothing needs is an allowance that has
  * silently started excusing something else.
  */
-const RULES = [
+const ALL_RULES = [
   {
     why: 'the fields we added to the item type — `can`, and the breadcrumb’s `to`',
     apply: stripAdded,
@@ -80,6 +114,9 @@ const RULES = [
   },
 ];
 
+/** Only the rules this pack plays by. */
+const RULES = PACK_RULES[packName].map((i) => ALL_RULES[i]);
+
 /*
  * The three tables are rows of cells. `controls` is NOT — it is a list of
  * objects, so rows() finds no [ … ] rows in it and returns a count of
@@ -89,10 +126,12 @@ const RULES = [
  * controlKeys and are counted, not diffed — reconcile already reports a key
  * we lack.
  */
-const FIELDS = ['props', 'events', 'slots'];
+/* serviceRows added in AF2-240: it is a table of cells like the others, and
+   for the gallery and the board it is the longest one on the page. */
+const FIELDS = ['props', 'events', 'slots', 'serviceRows'];
 let unexplained = 0;
 
-console.log('control          props g/o  events g/o  slots g/o  controls g/o');
+console.log('control          props g/o  events g/o  slots g/o  service g/o  controls g/o');
 for (const id of PACK) {
   const g = entryBlock(gallery, id);
   const o = entryBlock(ours, id);
@@ -101,7 +140,7 @@ for (const id of PACK) {
 
   const counts = FIELDS.map((f) => `${rows(g, f).length}/${rows(o, f).length}`);
   counts.push(`${controlKeys(g).length}/${controlKeys(o).length}`);
-  console.log(`  ${id.padEnd(15)}${counts[0].padStart(8)}${counts[1].padStart(12)}${counts[2].padStart(11)}${counts[3].padStart(14)}`);
+  console.log(`  ${id.padEnd(15)}${counts[0].padStart(8)}${counts[1].padStart(12)}${counts[2].padStart(11)}${counts[3].padStart(12)}${counts[4].padStart(14)}`);
 }
 
 console.log('\nEvery row the gallery and we both have, where the text differs:\n');
