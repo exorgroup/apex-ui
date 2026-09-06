@@ -57,6 +57,14 @@ export interface ChartSeries {
   /** Discrete colour bands. Without them, intensity is opacity on the series colour. */
   colorStops?: string[];
   cellRadius?: number;
+  /* The candle's own width knob, as a fraction of the band. ApexChart reads
+     `s.spec.barWidthRatio` and falls back to the prop; without it here the
+     per-series override was untyped and undiscoverable. */
+  barWidthRatio?: number;
+  /* Read as per-series overrides beside barWidthRatio, and undeclared for the
+     same reason: the component prop existed, the series-level one did not. */
+  neutralColor?: string;
+  wickStrokeWidth?: number;
   cellGap?: number;
   showCellLabels?: boolean;
   /* ── candlestick ── */

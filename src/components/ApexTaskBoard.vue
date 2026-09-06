@@ -315,14 +315,24 @@ interface DragState {
 const drag = ref<DragState | null>(null);
 const pointer = ref({ x: 0, y: 0 });
 const target = ref<{ columnId: string; swimlaneId?: string; index: number; blocked: boolean } | null>(null);
-let pending: { item: TaskBoardItem; el: HTMLElement; x: number; y: number } | null = null;
+/*
+ * `index` travels with the pending drag.
+ *
+ * onPointerDown knows which position in the cell was grabbed; beginDrag is
+ * what records it, and the two are separated by the 5px threshold. The port
+ * dropped `index` from this object while leaving beginDrag reading it, which
+ * is not a wrong value but an undeclared name — a ReferenceError on the first
+ * move, so no board dragged at all. The original carries it here too.
+ */
+let pending:
+  { item: TaskBoardItem; el: HTMLElement; x: number; y: number; index: number } | null = null;
 let scrollRaf: number | null = null;
 
 function onPointerDown(e: PointerEvent, item: TaskBoardItem, index: number) {
   if (!props.draggable || e.button !== 0) return;
   if (!may.drag(item)) return;
   if ((e.target as HTMLElement).closest('button,a,input,select,textarea')) return;
-  pending = { item, el: e.currentTarget as HTMLElement, x: e.clientX, y: e.clientY };
+  pending = { item, el: e.currentTarget as HTMLElement, x: e.clientX, y: e.clientY, index };
   window.addEventListener('pointermove', onPointerMove);
   window.addEventListener('pointerup', onPointerUp);
   window.addEventListener('keydown', onDragKey, true);
@@ -330,7 +340,7 @@ function onPointerDown(e: PointerEvent, item: TaskBoardItem, index: number) {
 
 function beginDrag(e: PointerEvent) {
   if (!pending) return;
-  const { item, el } = pending;
+  const { item, el, index } = pending;
   const rect = el.getBoundingClientRect();
   /* a selected card drags its whole selection; an unselected one drags alone */
   const group = isSelected(item) && selected.value.length > 1

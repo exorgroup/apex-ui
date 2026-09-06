@@ -320,7 +320,12 @@ export { applyWaterfall } from './core/chart/data';
 export {
   heatGrid, heatIntensity, heatBand, candleGeometry, treemapLayout,
 } from './core/chart/special';
-export type { HeatCell, HeatGrid, Candle, CandleGeometry, TreeNode, TreeTile } from './core/chart/special';
+/* The treemap's node is not the tree component's node. Both were exported as
+   `TreeNode`, so an importer got whichever the compiler resolved and a
+   duplicate-identifier error either way. The chart's is the newer of the two
+   and takes the qualified name. */
+export type { HeatCell, HeatGrid, Candle, CandleGeometry, TreeTile } from './core/chart/special';
+export type { TreeNode as ChartTreeNode } from './core/chart/special';
 export {
   ApexChartSeries, ApexChartXAxis, ApexChartYAxis, ApexChartY2Axis, ApexChartLegend,
   ApexChartTooltip, ApexChartHover, ApexChartDataLabels, ApexChartZoom, ApexChartNavigator,

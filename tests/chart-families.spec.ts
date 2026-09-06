@@ -139,3 +139,44 @@ describe('a bar series with data labels renders', () => {
     w.unmount();
   });
 });
+
+describe('hovering the families that take the early branch', () => {
+  /*
+   * AF2-244. onMove returns early for radial, heatmap and treemap, and that
+   * branch assigns to the module-scope `pointer` ref — which a `const pointer`
+   * further down the same function shadowed for the entire scope. Reading it
+   * was a TDZ throw, so hovering any of these crashed.
+   *
+   * The original had no collision: under the Options API the ref is
+   * `this.pointer`. Dropping `this.` in the conversion to <script setup>
+   * merged the two names, which is a hazard for every method this port
+   * converted, not a one-off typo.
+   *
+   * Driven through the root's own pointermove, because the bug is in the
+   * handler rather than in any geometry it computes.
+   */
+  const HOVERED: [string, unknown][] = [
+    ['pie', [{ id: 'p', type: 'pie', data: [{ x: 'A', y: 3 }, { x: 'B', y: 5 }] }]],
+    ['gauge', [{ id: 'g', type: 'gauge', data: [{ x: 'v', y: 62 }] }]],
+    ['radar', [{ id: 'r', type: 'radar', data: [{ x: 'A', y: 3 }, { x: 'B', y: 5 }] }]],
+    ['heatmap', [{ id: 'h', type: 'heatmap', data: [{ x: 'Mon', group: 'AM', value: 3 }] }]],
+    ['treemap', [{ id: 't', type: 'treemap', nodes: [{ name: 'A', value: 3 }] }]],
+  ];
+
+  it.each(HOVERED)('%s does not throw on pointermove', async (_name, series) => {
+    const w = mount(ApexChart, {
+      props: { width: 600, height: 400, series },
+      attachTo: document.body,
+    });
+    await w.vm.$nextTick();
+    /* The handler lives on .apex-cht__plot, not the root. Triggering the root
+       is why the first version of this test passed against the unfixed code —
+       it dispatched into an element with no listener and proved nothing.
+       Throws propagate out of trigger, so an unhandled TDZ fails the test. */
+    const plot = w.find('.apex-cht__plot');
+    expect(plot.exists(), 'no plot element to hover').toBe(true);
+    await plot.trigger('pointermove', { clientX: 300, clientY: 200 });
+    expect(w.find('.apex-cht').exists()).toBe(true);
+    w.unmount();
+  });
+});

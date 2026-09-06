@@ -296,7 +296,10 @@ const emit = defineEmits<{
   (e: 'point-click', payload: { series: string; point: ChartPoint; originalEvent: MouseEvent }): void;
   (e: 'hover-change', payload: HitResult | null): void;
   (e: 'legend-toggle', payload: { series: string; hidden: boolean }): void;
-  (e: 'update:zoomRange', payload: ZoomRange | null): void;
+  /* Emits what the prop accepts. It declared ZoomRange while setZoom sends a
+     ZoomWindow, so the two halves of v-model:zoomRange disagreed on their own
+     payload type. */
+  (e: 'update:zoomRange', payload: ZoomRange | ZoomWindow | null): void;
   (e: 'zoom-change', payload: { range: ZoomRange | null; full: boolean }): void;
 }>();
 
@@ -539,7 +542,15 @@ function setZoom(range: ZoomRange | ZoomWindow | null) {
   decimate();
   paint();
 }
-watch(() => merged.zoom.valueRange, (v) => { if (!group) localZoom.value = v ?? null; });
+/*
+ * The input half of `v-model:zoomRange`.
+ *
+ * This watched `merged.zoom.valueRange` — no `.value`, and no such field on
+ * anything. It read undefined on every evaluation, so the watcher never fired
+ * and a caller-supplied range was silently ignored while the emit half kept
+ * working. A one-way v-model that reports but never accepts.
+ */
+watch(() => props.zoomRange, (v) => { if (!group) localZoom.value = toWindow(v ?? null); });
 
 /**
  * The pane rects, split from the plot by weight.
@@ -593,7 +604,19 @@ const layoutState = shallowRef({
   xRotate: 0,
   xVisible: [] as number[],
 });
-const scales = shallowRef<{ x: Scale; left: Scale; right: Scale | null }>();
+/*
+ * paneY is part of this shape, not an extra bolted on.
+ *
+ * buildScales writes it and two readers consume it, but the type never named
+ * it — so the compiler could neither check the writers nor warn a reader that
+ * it might be absent. A field the type does not describe is exactly how
+ * `index` and `pointer` survived: the checker had nothing to check against.
+ */
+const scales = shallowRef<{
+  x: Scale; left: Scale; right: Scale | null;
+  /** One y scale per pane. Single-pane charts get `[left]`. */
+  paneY?: Scale[];
+}>();
 
 /**
  * The series restricted to the visible window, for deriving the y domain. A
@@ -1485,19 +1508,30 @@ function onMove(e: PointerEvent) {
     const p = pointerToPlot(e);
     if (p) pointer.value = p;
     return;
+  /*
+   * Named plotPoint, not pointer, because a `const pointer` here shadowed the
+   * module-scope `pointer` ref for the WHOLE function — including the radial /
+   * heatmap / treemap branch above, which assigns to the ref and runs before
+   * this line. Reading it there was a TDZ throw, so hovering a pie, gauge,
+   * radar, polar, heatmap or treemap crashed.
+   *
+   * The original had no such collision: under the Options API the ref is
+   * `this.pointer` and the local is `pointer`. Dropping `this.` in the
+   * conversion to <script setup> silently merged the two names.
+   */
   }
-  const pointer = pointerToPlot(e);
-  if (!pointer || !scales.value) return;
+  const plotPoint = pointerToPlot(e);
+  if (!plotPoint || !scales.value) return;
   const plot = layoutState.value.plot;
-  if (pointer.x < plot.x - 4 || pointer.x > plot.x + plot.width + 4) { clearHit(); return; }
+  if (plotPoint.x < plot.x - 4 || plotPoint.x > plot.x + plot.width + 4) { clearHit(); return; }
   const result = findHit({
-    pointer,
+    pointer: plotPoint,
     series: live.value,
     project: projectPoint,
     mode: merged.tooltip.value?.mode || (pointsOnly.value ? 'nearest' : 'shared-x'),
     /* Horizontal snaps on the other axis: "same x" means "same category", and
        the category runs vertically once the chart is turned. */
-    /* Bars snap to the BAND the pointer is inside; a line snaps along the category
+    /* Bars snap to the BAND the plotPoint is inside; a line snaps along the category
        axis, which flips when the chart is turned. At a band edge the nearest
        centre belongs to the neighbour, which is the bug this replaces. */
     /* A point chart snaps in 2D: picking by horizontal distance alone makes two
@@ -1507,7 +1541,7 @@ function onMove(e: PointerEvent) {
         : hasBars.value ? 'band' as HitSnap
           : (horizontal.value ? 'y' as HitSnap : 'x')),
     bandIndex: hasBars.value && scales.value
-      ? Math.round(catScale().invert(horizontal.value ? pointer.y : pointer.x))
+      ? Math.round(catScale().invert(horizontal.value ? plotPoint.y : plotPoint.x))
       : undefined,
     radius: props.pointHitRadius,
   });

@@ -17,7 +17,19 @@ const props = withDefaults(defineProps<{
   crosshair?: boolean;
   /** Share legend visibility, so one legend drives every chart. */
   legend?: boolean;
-}>(), { zoom: true, crosshair: true, legend: true });
+  /*
+   * Share the y window as well as x.
+   *
+   * setZoom already reads props.syncY, and the registry documents it — but it
+   * was never declared, so it read undefined and the group always dropped the
+   * y window. A documented option that behaved as one fixed value.
+   *
+   * Off by default because two charts in a group usually plot different
+   * quantities, and forcing one y window onto both zooms a range that means
+   * nothing on the other.
+   */
+  syncY?: boolean;
+}>(), { zoom: true, crosshair: true, legend: true, syncY: false });
 
 const emit = defineEmits<{
   (e: 'zoom-change', payload: { range: ZoomWindow | null }): void;

@@ -12,7 +12,7 @@
  * the point of this control and fetch cannot report upload progress.
  */
 import { computed, ref, watch } from 'vue';
-import ApexButton from './ApexButton.vue';
+import ApexButton, { type ApexSeverity } from './ApexButton.vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexProgressBar from './ApexProgressBar.vue';
 
@@ -68,9 +68,12 @@ const props = withDefaults(defineProps<{
   uploadIcon?: string;
   cancelIcon?: string;
   /** Colour and weight of each built-in button, straight through to ApexButton. */
-  chooseSeverity?: string;
-  uploadSeverity?: string;
-  cancelSeverity?: string;
+  /* Typed as the union ApexButton actually accepts, not `string`. As strings
+     they type-checked here and failed at the button, so an invalid severity
+     was a silent no-op rather than an error at the call site. */
+  chooseSeverity?: ApexSeverity;
+  uploadSeverity?: ApexSeverity;
+  cancelSeverity?: ApexSeverity;
   chooseVariant?: 'solid' | 'outlined' | 'text';
   uploadVariant?: 'solid' | 'outlined' | 'text';
   cancelVariant?: 'solid' | 'outlined' | 'text';
