@@ -2567,7 +2567,23 @@ defineExpose({
       </div>
     </div>
 
-    <div ref="plotBox" class="apex-cht__plot" :class="ui?.plot" @pointermove="onMove" @pointerleave="clearHit" @click="onClick">
+    <!--
+      Every pointer entry point the chart has.
+
+      The port kept onWheel, onDown and the three touch handlers and bound none
+      of them, so wheel zoom, rubber-band zoom, shift-drag pan, 2D zoom and
+      pinch were all dead while the code for them sat right there. vue-tsc said
+      so — five TS6133 "declared but never read" — but an unread *handler* is an
+      unbound interaction, not an untidy import, and the class was waved through
+      as cosmetic.
+
+      data-zoom belongs here too: the registry documents it as a state hook.
+    -->
+    <div ref="plotBox" class="apex-cht__plot" :class="ui?.plot"
+         :data-zoom="zoomOn ? 'true' : 'false'"
+         @pointermove="onMove" @pointerleave="clearHit" @click="onClick"
+         @pointerdown="onDown" @wheel="onWheel"
+         @touchstart="onTouchStart" @touchmove="onTouchMove" @touchend="onTouchEnd">
       <svg ref="svgEl" class="apex-cht__svg" :class="ui?.svg" :viewBox="`0 0 ${size.width} ${size.height}`" role="img"
            :aria-label="summary" tabindex="0" @keydown="onKey" @blur="clearHit">
         <defs>
