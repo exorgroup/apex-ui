@@ -10,8 +10,9 @@
  * a control that only responds to a drag is unusable by keyboard.
  */
 import { computed, provide, ref } from 'vue';
+import type { ApexMediaProps } from '../types';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexMediaProps & {
   /** v-model — the divider position as a percentage. */
   modelValue?: number;
   orientation?: 'horizontal' | 'vertical';
@@ -107,39 +108,39 @@ function onKey(e: KeyboardEvent) {
 }
 
 const rootStyle = computed(() => {
-  const s: Record<string, string> = { '--cmp-pos': pos.value + '%' };
+  const s: Record<string, string> = { '--apex-cmp-pos': pos.value + '%' };
   if (props.width) s.inlineSize = props.width;
   if (props.height) s.blockSize = props.height;
   if (props.aspectRatio) s.aspectRatio = props.aspectRatio;
-  if (props.radius) s['--cmp-radius'] = props.radius;
-  if (props.background) s['--cmp-bg'] = props.background;
-  if (props.dividerWidth) s['--cmp-divider-w'] = props.dividerWidth;
-  if (props.dividerColor) s['--cmp-divider'] = props.dividerColor;
-  if (props.handleSize) s['--cmp-handle-size'] = props.handleSize;
-  if (props.handleColor) s['--cmp-handle-fg'] = props.handleColor;
-  if (props.handleBackground) s['--cmp-handle-bg'] = props.handleBackground;
-  if (props.handleBorderColor) s['--cmp-handle-border'] = props.handleBorderColor;
-  if (props.handleRadius) s['--cmp-handle-radius'] = props.handleRadius;
-  if (props.handleShadow) s['--cmp-handle-shadow'] = props.handleShadow;
+  if (props.radius) s['--apex-cmp-radius'] = props.radius;
+  if (props.background) s['--apex-cmp-bg'] = props.background;
+  if (props.dividerWidth) s['--apex-cmp-divider-w'] = props.dividerWidth;
+  if (props.dividerColor) s['--apex-cmp-divider'] = props.dividerColor;
+  if (props.handleSize) s['--apex-cmp-handle-size'] = props.handleSize;
+  if (props.handleColor) s['--apex-cmp-handle-fg'] = props.handleColor;
+  if (props.handleBackground) s['--apex-cmp-handle-bg'] = props.handleBackground;
+  if (props.handleBorderColor) s['--apex-cmp-handle-border'] = props.handleBorderColor;
+  if (props.handleRadius) s['--apex-cmp-handle-radius'] = props.handleRadius;
+  if (props.handleShadow) s['--apex-cmp-handle-shadow'] = props.handleShadow;
   return s;
 });
 </script>
 
 <template>
-  <div ref="root" class="apex-cmp" :style="rootStyle" :data-orientation="orientation"
+  <div ref="root" class="apex-cmp" :class="ui?.root" :style="rootStyle" :data-orientation="orientation"
        :data-disabled="disabled ? 'true' : 'false'" :data-dragging="dragging ? 'true' : 'false'"
        @pointermove="onPointerMove" @pointerdown="onPointerDown"
        @pointerup="onPointerUp" @pointercancel="onPointerUp">
     <slot />
-    <div class="apex-cmp__divider" aria-hidden="true"></div>
-    <div v-if="handle" class="apex-cmp__handle" role="slider" :tabindex="disabled ? -1 : 0"
+    <div class="apex-cmp__divider" :class="ui?.divider" aria-hidden="true"></div>
+    <div v-if="handle" class="apex-cmp__handle" :class="ui?.handle" role="slider" :tabindex="disabled ? -1 : 0"
          :aria-label="'Comparison position'" :aria-valuenow="Math.round(pos)"
          aria-valuemin="0" aria-valuemax="100" :aria-disabled="disabled || undefined"
          :aria-orientation="orientation" @keydown="onKey">
       <slot name="handle" :value="pos">
-        <span class="apex-cmp__grip">
-          <span class="apex-cmp__chev" :data-dir="vertical ? 'up' : 'left'"></span>
-          <span class="apex-cmp__chev" :data-dir="vertical ? 'down' : 'right'"></span>
+        <span class="apex-cmp__grip" :class="ui?.grip">
+          <span class="apex-cmp__chev" :class="ui?.chev" :data-dir="vertical ? 'up' : 'left'"></span>
+          <span class="apex-cmp__chev" :class="ui?.chev" :data-dir="vertical ? 'down' : 'right'"></span>
         </span>
       </slot>
     </div>

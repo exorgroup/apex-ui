@@ -39,7 +39,15 @@ const FAMILY = [
   'components/ApexDock.vue', 'components/ApexContextMenu.vue',
   'components/ApexBreadcrumb.vue', 'components/ApexSplitButton.vue',
   'components/ApexSpeedDial.vue', 'components/ApexToolbar.vue',
-  'core/sidebar.ts', 'core/speedDial.ts',
+  /* AF2-227…239: the media, board and chart controls, which diverge from the
+     original as each is normalised onto our ui map and --apex-* variables. */
+  'components/ApexCompare.vue', 'components/ApexCompareItem.vue',
+  'components/ApexCarousel.vue', 'components/ApexCarouselContent.vue',
+  'components/ApexCarouselItem.vue', 'components/ApexCarouselControls.vue',
+  'components/ApexCarouselIndicators.vue', 'components/ApexCarouselNav.vue',
+  'components/ApexGallery.vue', 'components/ApexTaskBoard.vue',
+  'components/ApexChart.vue', 'components/ApexChartGroup.vue',
+  'core/sidebar.ts', 'core/speedDial.ts', 'core/carousel.ts', 'core/taskboard.ts',
 ];
 
 /**
@@ -56,7 +64,7 @@ const INTENDED = [
   { why: 'AF2-167: absent booleans arrive false, not undefined', test: (l) => /open: undefined/.test(l) },
   { why: 'AF2-200: the `padding` the original declares twice in one interface', test: (l) => /padding/.test(l) },
   { why: 'AF2-133/143/169: the ui class map', test: (l) => /\bui\?\.|ui\?:|ApexUiClasses|ApexContainerClasses|ApexDisplayClasses/.test(l) },
-  { why: 'AF2-62/64/67/68: the shared appearance props and their style block', test: (l) => /ApexButtonAppearance|ApexContainerProps|ApexDisplayProps|(menu|action)[A-Z]\w*\?:|withDefaults\(defineProps<|btnStyle|Record<string, string>|Array<\[string \| undefined, string\]>|map\.forEach|^\s*(out|return out|\]|\);|\}\);)/.test(l) },
+  { why: 'AF2-62/64/67/68: the shared appearance props and their style block', test: (l) => /ApexButtonAppearance|ApexContainerProps|ApexDisplayProps|ApexMediaProps|(menu|action)[A-Z]\w*\?:|withDefaults\(defineProps<|btnStyle|Record<string, string>|Array<\[string \| undefined, string\]>|map\.forEach|^\s*(out|return out|\]|\);|\}\);)/.test(l) },
   { why: 'AF2-203: the breadcrumb’s routing helpers, and hiding an empty trail', test: (l) => /hrefFor|isRouted|linkAs|tagFor|all\.length|entry\.item|item\.to\b/.test(l) },
   { why: 'AF2-131/141/170: variables renamed to --apex-*', test: (l) => /--apex-[a-z]+-/.test(l) || /--(tbar|mnu|sbar|bc|dial|dock|mbar|mega)-/.test(l) },
   { why: 'AF2-202: the watch that closes a group the filter emptied', test: (l) => /^import \{ computed, ref(, watch)? \} from 'vue';$/.test(l.trim()) },

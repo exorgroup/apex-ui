@@ -1188,36 +1188,36 @@ inline-size var(--dur-fast) var(--ease-out)}
 .apex-carousel__dot:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 
 /* ─── compare ──────────────────────────────────────────── */
-.apex-cmp{--cmp-pos:50%;--cmp-radius:var(--r-md);--cmp-bg:var(--bg-muted);--cmp-divider-w:2px;
---cmp-divider:#FFF;--cmp-handle-size:34px;--cmp-handle-bg:#FFF;--cmp-handle-fg:#1B2430;
---cmp-handle-border:transparent;--cmp-handle-radius:999px;--cmp-handle-shadow:var(--shadow-md);
-position:relative;overflow:hidden;inline-size:100%;border-radius:var(--cmp-radius);
-background:var(--cmp-bg);touch-action:none;user-select:none;font-family:var(--font-sans)}
+.apex-cmp{--apex-cmp-pos:50%;--apex-cmp-radius:var(--r-md);--apex-cmp-bg:var(--bg-muted);--apex-cmp-divider-w:2px;
+--apex-cmp-divider:#FFF;--apex-cmp-handle-size:34px;--apex-cmp-handle-bg:#FFF;--apex-cmp-handle-fg:#1B2430;
+--apex-cmp-handle-border:transparent;--apex-cmp-handle-radius:999px;--apex-cmp-handle-shadow:var(--shadow-md);
+position:relative;overflow:hidden;inline-size:100%;border-radius:var(--apex-cmp-radius);
+background:var(--apex-cmp-bg);touch-action:none;user-select:none;font-family:var(--font-sans)}
 .apex-cmp[data-disabled="true"]{cursor:default}
 .apex-cmp__item{position:absolute;inset:0}
 .apex-cmp__item>*{inline-size:100%;block-size:100%}
 .apex-cmp__item img{object-fit:cover;display:block}
 /* clipped, not resized: both children keep their natural layout at every
    position, so an image never squashes and a card stays its own size */
-.apex-cmp__item[data-position="before"]{clip-path:inset(0 calc(100% - var(--cmp-pos)) 0 0);z-index:1}
+.apex-cmp__item[data-position="before"]{clip-path:inset(0 calc(100% - var(--apex-cmp-pos)) 0 0);z-index:1}
 .apex-cmp[data-orientation="vertical"] .apex-cmp__item[data-position="before"]{
-clip-path:inset(0 0 calc(100% - var(--cmp-pos)) 0)}
-.apex-cmp__divider{position:absolute;inset-block:0;inset-inline-start:var(--cmp-pos);z-index:2;
-inline-size:var(--cmp-divider-w);margin-inline-start:calc(var(--cmp-divider-w) / -2);
-background:var(--cmp-divider)}
+clip-path:inset(0 0 calc(100% - var(--apex-cmp-pos)) 0)}
+.apex-cmp__divider{position:absolute;inset-block:0;inset-inline-start:var(--apex-cmp-pos);z-index:2;
+inline-size:var(--apex-cmp-divider-w);margin-inline-start:calc(var(--apex-cmp-divider-w) / -2);
+background:var(--apex-cmp-divider)}
 .apex-cmp[data-orientation="vertical"] .apex-cmp__divider{inset:auto 0 auto 0;
-inset-block-start:var(--cmp-pos);inline-size:auto;block-size:var(--cmp-divider-w);
-margin-inline-start:0;margin-block-start:calc(var(--cmp-divider-w) / -2)}
+inset-block-start:var(--apex-cmp-pos);inline-size:auto;block-size:var(--apex-cmp-divider-w);
+margin-inline-start:0;margin-block-start:calc(var(--apex-cmp-divider-w) / -2)}
 .apex-cmp__handle{position:absolute;z-index:3;display:grid;place-items:center;
-inset-inline-start:var(--cmp-pos);inset-block-start:50%;translate:-50% -50%;
-inline-size:var(--cmp-handle-size);block-size:var(--cmp-handle-size);
-border:1px solid var(--cmp-handle-border);border-radius:var(--cmp-handle-radius);
-background:var(--cmp-handle-bg);color:var(--cmp-handle-fg);box-shadow:var(--cmp-handle-shadow);
+inset-inline-start:var(--apex-cmp-pos);inset-block-start:50%;translate:-50% -50%;
+inline-size:var(--apex-cmp-handle-size);block-size:var(--apex-cmp-handle-size);
+border:1px solid var(--apex-cmp-handle-border);border-radius:var(--apex-cmp-handle-radius);
+background:var(--apex-cmp-handle-bg);color:var(--apex-cmp-handle-fg);box-shadow:var(--apex-cmp-handle-shadow);
 cursor:ew-resize}
 .apex-cmp[data-orientation="vertical"] .apex-cmp__handle{inset-inline-start:50%;
-inset-block-start:var(--cmp-pos);cursor:ns-resize}
+inset-block-start:var(--apex-cmp-pos);cursor:ns-resize}
 .apex-cmp[data-disabled="true"] .apex-cmp__handle{cursor:default;opacity:.6}
-.apex-cmp__handle:focus-visible{outline:none;box-shadow:var(--focus-ring),var(--cmp-handle-shadow)}
+.apex-cmp__handle:focus-visible{outline:none;box-shadow:var(--focus-ring),var(--apex-cmp-handle-shadow)}
 .apex-cmp__grip{display:flex;align-items:center;gap:3px}
 .apex-cmp__chev{inline-size:5px;block-size:5px;border-style:solid;border-color:currentColor;
 border-width:0 0 1.5px 1.5px}

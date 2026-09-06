@@ -467,9 +467,38 @@ export interface ApexDisplayClasses {
   dock?: string;
 }
 
+/**
+ * The media family: ApexCompare, ApexCarousel and ApexGallery.
+ *
+ * A sixth map rather than more keys on ApexDisplayClasses, which documents
+ * itself as "these nine" and is already a long union. Same reasoning that gave
+ * ApexAlert its own: a family with its own parts gets its own map, and a
+ * reader of one control's `ui` should not have to scroll past another's.
+ *
+ * Parts are added as each control is normalised, so nothing here is
+ * speculative — every key below is rendered by something.
+ */
+export interface ApexMediaClasses {
+  /** The outermost element. Every control in the family has this. */
+  root?: string;
+
+  /** ApexCompare — one side of the comparison, and the line between them. */
+  item?: string;
+  divider?: string;
+  /** ApexCompare — the draggable control on the divider, and its chevrons. */
+  handle?: string;
+  grip?: string;
+  chev?: string;
+}
+
 export interface ApexDisplayProps {
   /** Your own class on any part. See ApexDisplayClasses. */
   ui?: ApexDisplayClasses;
+}
+
+export interface ApexMediaProps {
+  /** Your own class on any part. See ApexMediaClasses. */
+  ui?: ApexMediaClasses;
 }
 
 export interface ApexContainerProps {
