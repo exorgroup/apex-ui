@@ -35,7 +35,8 @@ import { CHT_TRIAL, CHT_SEVERITY, CHT_DELTA, CHT_SIZING, CHT_BORDER,
   CHT_TARGET, CHT_GROUPED_STACK, CHT_GANTT, CHT_DAILY_BARS, CHT_PYRAMID,
   CHT_WATERFALL, CHT_SCATTER, CHT_BUBBLE, CHT_COMBO, CHT_MIX, CHT_CLUSTERS,
   CHT_TURNAROUND, CHT_RENEWAL, CHT_OVERLAP, CHT_DEPTH, CHT_BETS, CHT_HUBS,
-  CHT_LONGTAIL, CHT_REVENUE, CHT_SHAPE, CHT_GAPPY, CHT_LOG, CHT_REGIONS,
+  CHT_LONGTAIL, CHT_RADAR, CHT_ROSE, CHT_HEAT, CHT_OHLC, CHT_TREE,
+  CHT_HOLLOW, CHT_BTC, CHT_REVENUE, CHT_SHAPE, CHT_GAPPY, CHT_LOG, CHT_REGIONS,
   CHT_CHANNELS, CHT_WEATHER, CHT_DAILY, CHT_BIG, CHT_STACK, CHT_BAND, CHT_TREND,
   CHT_CROSSING, CHT_CROSSING_HALO, CHT_GRADIENT, CHT_SHAPES, CHT_STYLES,
   CHT_SYNC_A, CHT_SYNC_B, CHT_RD } from './chartData';
@@ -516,6 +517,38 @@ const chtPieLabel = ref('percentage');
 const chtPieLine = ref('angled');
 const chtOuter = ref(0.74);
 const chtLabelPlace = ref('outside-end');
+
+
+/* ── The radial, special and chrome sections (48-66) ─────────────────────── */
+
+/** Pie geometry. minSlicePercent folds the tail into one "Other" slice, which
+    is the difference between a readable pie and a fan of slivers. */
+const chtMinPct = ref(0);
+const chtDonut = ref(0.62);
+const chtWidth = ref(100);
+
+/** Gauge sweeps are given in radians, so the two the sections use are named
+    rather than written as 1.5707963 in the markup. */
+const HALF_PI = Math.PI / 2;
+const THREE_Q_PI = Math.PI * 0.75;
+
+/** Radial entrance. The replay key remounts the demo — an animation that has
+    already finished cannot be watched, so a section about entrances needs a
+    way to run it again. */
+const chtRadialEnt = ref('sweep');
+const chtSweepDir = ref('cw');
+const chtSweepKey = ref(0);
+
+/** Candles carry four values, so the label field has to be stated rather than
+    inferred, and the body and wick widths are separate questions. */
+const chtCandle = ref('candle');
+const chtCandleW = ref(0.6);
+const chtWick = ref(1);
+const chtCandleField = ref('close');
+const chtPaneW = ref(3);
+
+const chtHeatLabels = ref(false);
+const chtTreeDepth = ref(1);
 
 const tbLog = ref('');
 const tbSel = ref(0);
@@ -4795,7 +4828,307 @@ function pick(city) {
                       :outer-radius="chtOuter" :inner-radius="0.5" :legend="{ show: false }" height="320"
                       :data-labels="{ show: true, position: 'outside', display: chtPieLabel, lineStyle: chtPieLine }" />
         </div>
-      </div>        </template>
+      </div>
+      <h2>Small slices</h2>
+      <p style="font-size:13.5px"><code>minPercentage</code> is the honest cull: a slice below the threshold carries no label at all. Displacing it would put its text a long way from the wedge it describes, which is worse than leaving it to the tooltip.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <span style="font-size:13px;color:var(--fg-subtle)">minPercentage {{ chtMinPct }}%</span>
+        <ApexSlider v-model="chtMinPct" :min="0" :max="12" :step="1" style="width:150px" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'tail', name: 'Channels', type: 'pie', data: CHT_LONGTAIL, xKey: 'label', yKey: 'value' }]"
+                    :outer-radius="0.74" :legend="{ position: 'bottom' }" height="340"
+                    :data-labels="{ show: true, position: 'outside', display: 'both', minPercentage: chtMinPct }" />
+      </div>
+
+      <h2>Radial entrance</h2>
+      <p style="font-size:13.5px">A clockwise sweep, once, when the chart comes on screen. Slices are <em>clamped</em> to a moving cursor rather than covered by a rotating clip — so nothing exists ahead of it, and an unrevealed slice cannot be hovered. A gauge fills from its start angle. A radar cannot sweep at all — an angular cursor across a polygon distorts the shape as it crosses, which reads as the data changing — so asking for one falls back to growing from the centre rather than resolving to a mode no renderer implements.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtRadialEnt" :options="['sweep','grow','none']" size="sm" />
+        <ApexSelectButton v-model="chtSweepDir" :options="['cw','ccw']" size="sm" />
+        <ApexButton size="sm" severity="secondary" variant="outlined" icon="replay"
+                     @click="chtSweepKey += 1">Replay</ApexButton>
+      </div>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">donut</span>
+          <ApexChart :key="'sw-a-' + chtSweepKey + chtRadialEnt + chtSweepDir"
+                      :entrance="chtRadialEnt" :entrance-direction="chtSweepDir"
+                      :series="[{ id: 'mix', name: 'Revenue mix', type: 'pie', data: CHT_MIX, xKey: 'label', yKey: 'value' }]"
+                      :inner-radius="0.6" :pad-angle="0.012"
+                      center-value="$10.5k" center-label="Total" height="280" />
+        </div>
+        <div class="cell"><span class="cell__tag">gauge — duration scales with the swept angle</span>
+          <ApexChart :key="'sw-b-' + chtSweepKey + chtRadialEnt + chtSweepDir"
+                      :entrance="chtRadialEnt" :entrance-direction="chtSweepDir"
+                      :series="[{ id: 'g', type: 'gauge', data: [{ x: 'Quota', y: 68 }], min: 0, max: 100 }]"
+                      :start-angle="-THREE_Q_PI" :end-angle="THREE_Q_PI" :inner-radius="0.7"
+                      center-value="68%" center-label="Quota" :legend="{ show: false }" height="280" />
+        </div>
+        <div class="cell"><span class="cell__tag">rose — sectors are independent, so they sweep</span>
+          <ApexChart :key="'sw-c-' + chtSweepKey + chtRadialEnt + chtSweepDir"
+                      :entrance="chtRadialEnt" :entrance-direction="chtSweepDir"
+                      :series="CHT_ROSE" :inner-radius="0.12" :pad-angle="0.02"
+                      :legend="{ show: false }" height="280" />
+        </div>
+        <div class="cell"><span class="cell__tag">radar — falls back to growing from the centre</span>
+          <ApexChart :key="'sw-d-' + chtSweepKey + chtRadialEnt + chtSweepDir"
+                      :entrance="chtRadialEnt" :series="CHT_RADAR"
+                      :legend="{ show: false }" height="280" />
+        </div>
+      </div>
+
+      <h2>Pie and donut</h2>
+      <p style="font-size:13.5px">A pie's <em>parts</em> are what is being compared, so slices take colours by position in the series and the legend names the slices rather than the series. <code>innerRadius</code> is a fraction of the outer radius, so a chart stays a donut at any size. Zero and negative values are dropped rather than drawn as unhoverable slivers — a part-to-whole chart has no way to show a negative part.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSlider v-model="chtDonut" :min="0" :max="0.85" :step="0.01" style="width:180px" />
+        <span style="font-size:13px;color:var(--fg-subtle)">innerRadius {{ chtDonut.toFixed(2) }}</span>
+      </div>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">donut with a centre total</span>
+          <ApexChart :series="[{ id: 'mix', name: 'Revenue mix', type: 'pie', data: CHT_MIX, xKey: 'label', yKey: 'value' }]"
+                      :inner-radius="chtDonut" :pad-angle="0.012"
+                      center-value="$10.5k" center-label="Total" height="300" />
+        </div>
+        <div class="cell"><span class="cell__tag">two series become concentric rings</span>
+          <ApexChart :series="[
+                        { id: 'q2', name: 'Q2', type: 'pie', data: CHT_MIX, xKey: 'label', yKey: 'value' },
+                        { id: 'q1', name: 'Q1', type: 'pie', xKey: 'label', yKey: 'value',
+                          data: CHT_MIX.map(function (r) { return { label: r.label, value: Math.round(r.value * (0.6 + (r.value % 7) / 10)) }; }) }
+                      ]" :inner-radius="0.35" :pad-angle="0.012" height="300" />
+        </div>
+      </div>
+
+      <h2>Gauge</h2>
+      <p style="font-size:13.5px">A gauge is a donut with a partial sweep. Angles run from twelve o'clock clockwise — the way a dial is read — so a half-dial is <code>startAngle</code> −π/2 to π/2, and a shallow sweep is centred on the arc it actually occupies rather than on its box.</p>
+      <div class="grid grid--3" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">half dial</span>
+          <ApexChart :series="[{ id: 'g', type: 'gauge', data: [{ x: 'Uptime', y: 99.2 }], min: 95, max: 100 }]"
+                      :start-angle="-HALF_PI" :end-angle="HALF_PI" :inner-radius="0.72"
+                      center-value="99.2%" center-label="Uptime" :legend="{ show: false }" height="200" />
+        </div>
+        <div class="cell"><span class="cell__tag">three-quarter</span>
+          <ApexChart :series="[{ id: 'g2', type: 'gauge', data: [{ x: 'Quota', y: 68 }], min: 0, max: 100 }]"
+                      :start-angle="-THREE_Q_PI" :end-angle="THREE_Q_PI" :inner-radius="0.7"
+                      center-value="68%" center-label="Quota" :legend="{ show: false }" height="220" />
+        </div>
+        <div class="cell"><span class="cell__tag">full ring</span>
+          <ApexChart :series="[{ id: 'g3', type: 'gauge', data: [{ x: 'Storage', y: 412 }], min: 0, max: 512 }]"
+                      :inner-radius="0.76" center-value="412 GB" center-label="of 512 GB"
+                      :legend="{ show: false }" height="220" />
+        </div>
+      </div>
+
+      <h2>Radar</h2>
+      <p style="font-size:13.5px">One spoke per category, each series a polygon across them. The rings are polygons rather than circles: a value is read along a spoke, and a circular ring crosses the spokes where there is nothing to read. A missing value collapses to the centre rather than breaking the shape — an open polygon reads as a different profile, not as missing data.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_RADAR" :legend="{ position: 'bottom' }" height="360" />
+      </div>
+
+      <h2>Polar</h2>
+      <p style="font-size:13.5px">A rose: each category takes an equal share of the circle and only the radius carries meaning, which is what distinguishes it from a pie.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_ROSE" :inner-radius="0.12" :pad-angle="0.02"
+                    :legend="{ show: false }" height="340" />
+      </div>
+
+      <h2>Compound components</h2>
+      <p style="font-size:13.5px">The same chart written as markup. Every part is renderless — it registers configuration and draws nothing — so this is a second <em>authoring</em> surface rather than a second engine: both forms end up in the same series array and the same option objects. A declared part wins over the equivalent prop, being the more specific declaration, and series order follows the markup.</p>
+      <div class="cht-frame">
+        <ApexChart height="340" :stack-mode="'normal'">
+          <ApexChartTitle text="Revenue by channel" />
+          <ApexChartCaption text="Stacked bars with a target line and a second axis" />
+          <ApexChartXAxis type="category" />
+          <ApexChartYAxis label="Revenue" />
+          <ApexChartY2Axis label="Conversion %" />
+          <ApexChartSeries id="direct" name="Direct" type="bar" stack="rev"
+                             :data="CHT_STACK[0].data" x-key="month" y-key="value" />
+          <ApexChartSeries id="organic" name="Organic" type="bar" stack="rev"
+                             :data="CHT_STACK[1].data" x-key="month" y-key="value" />
+          <ApexChartSeries id="conv" name="Conversion %" type="line" axis="right"
+                             :data="CHT_COMBO[3].data" x-key="month" y-key="value"
+                             curve="smooth" :line-stroke-width="2.5" />
+          <ApexChartReferenceLine :value="9000" label="Plan" />
+          <ApexChartLegend position="bottom" />
+          <ApexChartTooltip mode="shared-x" />
+          <ApexChartHover :dim-opacity="0.3" />
+        </ApexChart>
+      </div>
+
+      <p style="font-size:13.5px;margin-top:12px">And the markup form composes with everything else — zoom, navigator and data labels are parts too.</p>
+      <div class="cht-frame">
+        <ApexChart height="300">
+          <ApexChartXAxis type="time" />
+          <ApexChartSeries id="sessions" name="Sessions" :data="CHT_DAILY"
+                             x-key="date" y-key="value" :fill-opacity="0.16" curve="smooth" />
+          <ApexChartZoom />
+          <ApexChartNavigator :height="52" />
+          <ApexChartReferenceBand :from="400" :to="700" label="Expected" />
+          <ApexChartLegend :show="false" />
+        </ApexChart>
+      </div>
+
+      <h2>Heatmap</h2>
+      <p style="font-size:13.5px">Columns come from <code>xKey</code>, rows from <code>groupKey</code>, in the order the data presents them — a heatmap's axes are usually meaningful sequences, and sorting them alphabetically destroys the order the reader came for. Intensity is opacity on a token colour by default, so theming keeps working; <code>colorStops</code> gives discrete bands instead.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSwitch v-model="chtHeatLabels" label="Cell labels" />
+      </div>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">token ramp</span>
+          <ApexChart :series="[{ id: 'traffic', type: 'heatmap', data: CHT_HEAT,
+                        xKey: 'hour', groupKey: 'day', yKey: 'value', showCellLabels: chtHeatLabels }]"
+                      height="280" />
+        </div>
+        <div class="cell"><span class="cell__tag">discrete bands</span>
+          <ApexChart :series="[{ id: 'traffic2', type: 'heatmap', data: CHT_HEAT,
+                        xKey: 'hour', groupKey: 'day', yKey: 'value', showCellLabels: chtHeatLabels,
+                        colorStops: ['oklch(0.93 0.03 250)','oklch(0.84 0.07 240)','oklch(0.72 0.12 235)','oklch(0.58 0.16 250)','oklch(0.44 0.17 265)'] }]"
+                      height="280" />
+        </div>
+      </div>
+
+      <h2>Panes — price and volume</h2>
+      <p style="font-size:13.5px">Two stacked plot areas sharing one x axis. Each pane derives its y scale from <em>its own</em> series, which is the whole point: volume in millions would otherwise flatten the price axis to a flat line. Weights rather than pixels, so the split survives a resize; the x axis is drawn once below the last pane, since the panes share it by construction.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <span style="font-size:13px;color:var(--fg-subtle)">price / volume weight</span>
+        <ApexSlider v-model="chtPaneW" :min="1" :max="6" :step="1" style="width:130px" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="[
+                      { id: 'px', name: 'Price', type: 'candlestick', data: CHT_OHLC, xKey: 'day',
+                        openKey: 'open', highKey: 'high', lowKey: 'low', closeKey: 'close' },
+                      { id: 'vol', name: 'Volume', type: 'bar', data: CHT_OHLC, xKey: 'day', yKey: 'volume',
+                        pane: 'volume', fillOpacity: 1 }
+                    ]"
+                    :panes="[{ id: 'price', weight: chtPaneW, label: 'Price ($)' },
+                             { id: 'volume', weight: 1, label: 'Volume' }]"
+                    :legend="{ position: 'bottom' }" :bar-width-ratio="0.6" height="420" />
+      </div>
+      <p style="font-size:13px;margin-top:8px">Hover anywhere: the crosshair spans both panes, so a price reading and its volume are the same moment.</p>
+
+      <h2>Hollow candles</h2>
+      <p style="font-size:13.5px">This data is deliberately gappy — several sessions open <em>below</em> the previous close and then rise, which is the only case where the two colouring rules disagree. Hollow mode carries <em>two</em> facts in two channels: the <strong>fill</strong> reports close against the candle's own open, and the <strong>colour</strong> reports close against the <em>previous</em> close. That is what the variant is for — deriving both from the open would make the colour redundant and lose the inter-period comparison entirely. So a hollow (bullish) candle can be red: it rose from its own open but still closed below yesterday. The first candle has no predecessor, so it is neutral rather than silently green.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">hollow — colour from the previous close</span>
+          <ApexChart :series="[{ id: 'h', name: 'AAPL', type: 'candlestick', data: CHT_HOLLOW,
+                        xKey: 'day', openKey: 'open', highKey: 'high', lowKey: 'low', closeKey: 'close', candleVariant: 'hollow' }]"
+                      :legend="{ show: false }" :bar-width-ratio="0.6" height="300" />
+        </div>
+        <div class="cell"><span class="cell__tag">candle — colour from its own open</span>
+          <ApexChart :series="[{ id: 'c', name: 'AAPL', type: 'candlestick', data: CHT_HOLLOW,
+                        xKey: 'day', openKey: 'open', highKey: 'high', lowKey: 'low', closeKey: 'close' }]"
+                      :legend="{ show: false }" :bar-width-ratio="0.6" height="300" />
+        </div>
+      </div>
+
+      <h2>Candle styling</h2>
+      <p style="font-size:13.5px"><code>barWidthRatio</code> is a fraction of the category band, so bodies stay proportional as the chart resizes; <code>wickStrokeWidth</code> sets the wick thickness. <code>neutralColor</code> covers doji candles where open equals close — indecision is a distinct signal rather than a tiny up candle.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <span style="font-size:13px;color:var(--fg-subtle)">barWidthRatio {{ chtCandleW.toFixed(2) }}</span>
+        <ApexSlider v-model="chtCandleW" :min="0.2" :max="1" :step="0.05" style="width:130px" />
+        <span style="font-size:13px;color:var(--fg-subtle)">wick {{ chtWick }}px</span>
+        <ApexSlider v-model="chtWick" :min="1" :max="5" :step="1" style="width:100px" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'style', name: 'AAPL', type: 'candlestick', data: CHT_OHLC,
+                      xKey: 'day', openKey: 'open', highKey: 'high', lowKey: 'low', closeKey: 'close' }]"
+                    :bar-width-ratio="chtCandleW" :wick-stroke-width="chtWick"
+                    neutral-color="oklch(0.62 0.04 250)" :legend="{ show: false }" height="320" />
+      </div>
+
+      <h2>Candle labels and a log axis</h2>
+      <p style="font-size:13.5px">A candle has four values, so the labelled field is stated rather than assumed. Labels clear the <em>high wick</em> rather than the body top, and hide when the text is wider than their own candle — a width test per label, because two neighbours can fail to overlap and still be unreadable. On a log axis both body edges map through the scale independently rather than the body being positioned by a midpoint.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtCandleField" :options="['close','open','high','low']" size="sm" />
+      </div>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">labels — narrow candles auto-hide</span>
+          <ApexChart :series="[{ id: 'lab', name: 'AAPL', type: 'candlestick', data: CHT_OHLC,
+                        xKey: 'day', openKey: 'open', highKey: 'high', lowKey: 'low', closeKey: 'close' }]"
+                      :data-labels="{ show: true, display: chtCandleField }"
+                      :legend="{ show: false }" height="300" />
+        </div>
+        <div class="cell"><span class="cell__tag">log y — four decades of price</span>
+          <ApexChart :series="[{ id: 'log', name: 'BTC', type: 'candlestick', data: CHT_BTC,
+                        xKey: 'week', openKey: 'open', highKey: 'high', lowKey: 'low', closeKey: 'close' }]"
+                      :y-axis="{ type: 'log' }" :legend="{ show: false }" height="300"
+                      :reference-bands="[{ from: 16000, to: 30000, label: '2022 bear market', color: 'var(--accent-danger)' }]" />
+        </div>
+      </div>
+
+      <h2>Candlestick and OHLC</h2>
+      <p style="font-size:13.5px">Direction colours a candle rather than the palette — the reader is looking for up or down. A doji keeps a one-pixel body rather than vanishing, since "no change" is information, and the wick is part of the domain so highs and lows are never clipped. <code>y</code> resolves to the close, so the shared crosshair and hit testing work without knowing the series is a candlestick; only the tooltip needs to know, and it lists all four numbers.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtCandle" :options="['candle','hollow','ohlc']" size="sm" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'px', name: 'ACME', type: 'candlestick', data: CHT_OHLC,
+                      xKey: 'day', openKey: 'open', highKey: 'high', lowKey: 'low', closeKey: 'close',
+                      candleVariant: chtCandle }]"
+                    :legend="{ show: false }" :bar-padding="0.35" height="340" />
+      </div>
+
+      <h2>Treemap</h2>
+      <p style="font-size:13.5px">Squarified rather than sliced: aspect ratio is what makes a tile comparable, since a long thin sliver of equal area reads as smaller. Click a tile to drill in, and use the breadcrumb to come back out. <code>depth</code> above 1 nests the children inline instead, inset so the parent's edge stays visible.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtTreeDepth" :options="[1, 2]" size="sm" />
+        <span style="font-size:13px;color:var(--fg-subtle)">depth {{ chtTreeDepth }} — click a tile to drill in</span>
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'spend', type: 'treemap', nodes: CHT_TREE, depth: chtTreeDepth }]"
+                    :legend="{ show: false }" height="380" />
+      </div>
+
+      <h2>Locale</h2>
+      <p style="font-size:13.5px"><code>locale</code> formats every number and date the chart produces — ticks, tooltips, data labels, treemap values. It is passed explicitly rather than read from the document, because a chart is often formatted for its <em>data's</em> locale rather than the page's: a euro revenue chart on an English page is an ordinary case.</p>
+      <div class="grid grid--3" style="margin-top:12px">
+        <div v-for="loc in [['en-US','English'],['de-DE','German'],['ja-JP','Japanese']]" :key="loc[0]" class="cell">
+          <span class="cell__tag">{{ loc[1] }} — {{ loc[0] }}</span>
+          <ApexChart :locale="loc[0]" :series="[{ id: 'r', name: 'Revenue', data: CHT_DAILY.slice(0, 40), xKey: 'date', yKey: 'value', fillOpacity: 0.15 }]"
+                      :x-axis="{ type: 'time' }" :y-axis="{ format: { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 } }"
+                      curve="smooth" :legend="{ show: false }" height="200" />
+        </div>
+      </div>
+
+      <h2>Right to left</h2>
+      <p style="font-size:13.5px"><code>direction</code> defaults to <code>auto</code> and reads the rendered element, so a chart inside a <code>[dir=rtl]</code> subtree follows it without being told. RTL reverses the category axis and swaps the margins so the value axis moves to the right — rather than mirroring the chart with a transform, which would reverse the text along with it.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">ltr</span>
+          <ApexChart :series="CHT_CHANNELS" curve="smooth" :legend="{ position: 'bottom' }" height="240" />
+        </div>
+        <div class="cell" dir="rtl"><span class="cell__tag">rtl — inherited from the container</span>
+          <ApexChart :series="CHT_CHANNELS" curve="smooth" :legend="{ position: 'bottom' }" height="240" />
+        </div>
+      </div>
+
+      <h2>Responsive</h2>
+      <p style="font-size:13.5px">Rules are keyed on the chart's <em>own measured width</em>, not a media query. A query measures the viewport and says nothing about how much room this particular chart was given, which is exactly why legends keep overflowing narrow columns on wide screens. Drag the slider to shrink the container.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSlider v-model="chtWidth" :min="30" :max="100" :step="1" style="width:200px" />
+        <span style="font-size:13px;color:var(--fg-subtle)">container {{ chtWidth }}%</span>
+      </div>
+      <div class="cht-frame" :style="{ width: chtWidth + '%' }">
+        <ApexChart :series="CHT_CHANNELS" curve="smooth" height="280"
+                    :responsive="[
+                      { maxWidth: 520, legend: { show: false }, xAxis: { tickCount: 4 }, dataLabels: false },
+                      { maxWidth: 340, yAxis: { ticks: false, grid: true }, tooltip: { crosshair: false } }
+                    ]" />
+      </div>
+
+      <h2>Theming</h2>
+      <p style="font-size:13.5px">Three separate layers: structural CSS that positions things, theme variables that colour them, and state attributes on the root that let a stylesheet or a test know what the chart is doing. Restyling means overriding variables — <code>--apex-cht-series-1</code> through <code>8</code>, <code>--apex-cht-grid</code>, <code>--apex-cht-axis</code>, <code>--apex-cht-tick</code> — rather than fighting selectors.</p>
+      <div class="cht-frame" style="--apex-cht-series-1:oklch(0.55 0.19 15);--apex-cht-series-2:oklch(0.66 0.14 55);--apex-cht-series-3:oklch(0.72 0.13 95);--apex-cht-grid:oklch(0.88 0.02 30);--apex-cht-tick:oklch(0.52 0.06 25)">
+        <ApexChart :series="CHT_CHANNELS" curve="smooth" :legend="{ position: 'bottom' }" height="280" />
+      </div>
+      <p style="font-size:13px;margin-top:8px">Same component, five variables overridden on an ancestor. State hooks available on the root: <code>data-family</code>, <code>data-orientation</code>, <code>data-dir</code>, <code>data-zoomed</code>, <code>data-renderer</code>, <code>data-hovered</code>, <code>data-decimated</code>.</p>
+
+      <h2>Title, caption and accessibility</h2>
+      <p style="font-size:13.5px">Title and caption reduce the plot rect rather than floating over it. The chart is focusable: arrow keys move the read-out point by point, Home and End jump to the ends, Escape clears — with each step announced live. <code>dataTable</code> adds a screen-reader table of the plotted values.</p>
+      <div class="cht-frame">
+        <ApexChart title="Trial activation rate" caption="Activated trial accounts by signup month · Jan–Dec cohort"
+                    :series="[{ id: 'activation', name: 'Activated', data: CHT_TRIAL, xKey: 'month', yKey: 'value', fillOpacity: 0.18 }]"
+                    curve="smooth" data-table :legend="{ show: false }" height="300" />
+      </div>
+        </template>
 
         <template v-if="entry.id === 'taskboard'">
           <h2>Data binding</h2>

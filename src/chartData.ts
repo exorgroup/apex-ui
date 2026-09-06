@@ -43,7 +43,7 @@ export const CHT_WEATHER = [
   { id: 'rain', name: 'Rainfall (mm)', data: pair(MONTHS, [82, 61, 66, 54, 47, 31, 29, 38, 57, 70, 76, 84]), xKey: 'month', yKey: 'value', axis: 'right' },
 ];
 export const CHT_DAILY = (function () {
-  const out = [];
+  const out: any[] = [];
   const start = Date.UTC(2026, 4, 1);
   let v = 480;
   for (let i = 0; i < 90; i += 1) {
@@ -55,7 +55,7 @@ export const CHT_DAILY = (function () {
 /* 50k points: the case decimation exists for. Deterministic, so the shape is
    the same every reload and the spikes are visible rather than random. */
 export const CHT_BIG = (function () {
-  const out = [];
+  const out: any[] = [];
   let v = 50;
   for (let i = 0; i < 50000; i += 1) {
     v += Math.sin(i / 900) * 0.9 + Math.sin(i / 37) * 0.35;
@@ -151,7 +151,7 @@ export const CHT_WATERFALL = [
 ];
 export const CHT_SCATTER = (function () {
   const cluster = (n: number, cx: number, cy: number, spread: number, seed: number) => {
-    const out = [];
+    const out: any[] = [];
     let r = seed;
     for (let i = 0; i < n; i += 1) {
       r = (r * 1103515245 + 12345) % 2147483648;
@@ -257,7 +257,7 @@ export const CHT_PYRAMID = [
 
 
 export const CHT_DAILY_BARS = (function () {
-  const out = [];
+  const out: any[] = [];
   for (let i = 0; i < 60; i += 1) {
     const wave = Math.sin(i / 7) * 90 + Math.sin(i / 3) * 25;
     out.push({ day: 'Day ' + (i + 1), value: Math.max(20, Math.round(210 + wave)) });
@@ -274,7 +274,7 @@ export const CHT_LONGTAIL = [
 ];
 
 export const CHT_RENEWAL = (function () {
-  const out = [];
+  const out: any[] = [];
   for (let i = 0; i < 14; i += 1) {
     const adoption = 46 + i * 3.6;
     out.push({ adoption: Number(adoption.toFixed(1)), renewal: Number((41 + i * 3.9 + (i % 3)).toFixed(1)) });
@@ -315,7 +315,7 @@ export const CHT_HUBS = [
 export const CHT_CLUSTERS = (function () {
   /* Deterministic clusters, so a 2D zoom has something real to isolate. */
   const mk = (n: number, cx: number, cy: number, sx: number, sy: number, seed: number) => {
-    const out = [];
+    const out: any[] = [];
     let r = seed;
     for (let i = 0; i < n; i += 1) {
       r = (r * 1103515245 + 12345) % 2147483648;
@@ -342,3 +342,125 @@ export const CHT_TURNAROUND = [{
   id: 'turn', name: 'Turnaround', type: 'scatter', markerSize: 5,
   data: CHT_CLUSTERS[1].data.map((p) => ({ x: p.x, y: Number((18 + p.y * 0.42).toFixed(1)) })),
 }];
+
+/* ── The radial, heatmap, treemap and candle families (sections 48-66) ── */
+
+export const CHT_RADAR = [
+  { id: 'now', name: 'This quarter', type: 'radar', xKey: 'axis', yKey: 'value',
+    data: [
+      { axis: 'Speed', value: 82 }, { axis: 'Reliability', value: 74 },
+      { axis: 'Coverage', value: 61 }, { axis: 'Support', value: 88 },
+      { axis: 'Cost', value: 55 }, { axis: 'Security', value: 79 },
+    ] },
+  { id: 'prev', name: 'Last quarter', type: 'radar', xKey: 'axis', yKey: 'value',
+    data: [
+      { axis: 'Speed', value: 64 }, { axis: 'Reliability', value: 70 },
+      { axis: 'Coverage', value: 48 }, { axis: 'Support', value: 72 },
+      { axis: 'Cost', value: 62 }, { axis: 'Security', value: 58 },
+    ] },
+];
+export const CHT_ROSE = [{
+  id: 'wind', name: 'Incidents', type: 'polar', xKey: 'dir', yKey: 'value',
+  data: [
+    { dir: 'N', value: 34 }, { dir: 'NE', value: 21 }, { dir: 'E', value: 48 },
+    { dir: 'SE', value: 62 }, { dir: 'S', value: 41 }, { dir: 'SW', value: 28 },
+    { dir: 'W', value: 55 }, { dir: 'NW', value: 39 },
+  ],
+}];
+
+export const CHT_HEAT = (function () {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const hours = ['00', '03', '06', '09', '12', '15', '18', '21'];
+  const out: any[] = [];
+  days.forEach((d, di) => hours.forEach((h, hi) => {
+    const peak = Math.exp(-Math.pow(hi - 4.2, 2) / 5) * (di < 5 ? 1 : 0.45);
+    out.push({ hour: h, day: d, value: Math.round(20 + peak * 180 + ((di * 7 + hi * 3) % 11)) });
+  }));
+  return out;
+}());
+export const CHT_OHLC = (function () {
+  const out: any[] = [];
+  let price = 148;
+  for (let i = 0; i < 42; i += 1) {
+    const drift = Math.sin(i / 5) * 2.4 + (i % 9 === 0 ? -3.2 : 0.6);
+    const open = price;
+    const close = Number((open + drift).toFixed(2));
+    const high = Number((Math.max(open, close) + 1.1 + (i % 4) * 0.5).toFixed(2));
+    const low = Number((Math.min(open, close) - 0.9 - (i % 3) * 0.4).toFixed(2));
+    out.push({
+      volume: Math.round(400 + ((price * 37) % 620)), day: 'D' + (i + 1), open: open, high: high, low: low, close: close });
+    price = close;
+  }
+  return out;
+}());
+export const CHT_TREE = [
+  { name: 'Platform', children: [
+    { name: 'Compute', value: 42000 }, { name: 'Storage', value: 18500 },
+    { name: 'Network', value: 9200 }, { name: 'Observability', value: 6400 },
+  ] },
+  { name: 'Product', children: [
+    { name: 'Web app', value: 28000 }, { name: 'Mobile', value: 14200 },
+    { name: 'API', value: 11800 }, { name: 'Integrations', value: 5100 },
+  ] },
+  { name: 'Go to market', children: [
+    { name: 'Paid media', value: 22000 }, { name: 'Events', value: 8600 },
+    { name: 'Content', value: 6200 },
+  ] },
+  { name: 'Support', children: [
+    { name: 'Tier 1', value: 12400 }, { name: 'Tier 2', value: 7800 },
+  ] },
+];
+
+export const CHT_HOLLOW = (function () {
+  /* Both disagreement cases, several times each:
+       HOLLOW + down  — opened below yesterday's close, rose, still closed lower
+       SOLID  + up    — opened above yesterday's close, fell, still closed higher */
+  const rows = [
+    [100, 104],
+    [108, 106], // solid (fell from open) but 106 > 104 → up
+    [101, 103], // hollow (rose) but 103 < 106 → down
+    [99, 102], // hollow but 102 < 103 → down
+    [107, 105], // solid but 105 > 102 → up
+    [104, 101],
+    [97, 100], // hollow, 100 < 101 → down
+    [103, 102], // solid, 102 > 100 → up
+    [99, 104],
+    [109, 106], // solid, 106 > 104 → up
+    [102, 105], // hollow, 105 < 106 → down
+    [100, 103], // hollow, 103 < 105 → down
+    [108, 106], // solid, 106 > 103 → up
+    [105, 102],
+    [98, 101], // hollow, 101 < 102 → down
+    [104, 107],
+    [110, 108], // solid, 108 > 107 → up
+    [106, 109],
+    [112, 110], // solid, 110 > 109 → up
+    [107, 111],
+  ];
+  return rows.map((r, i) => ({
+    day: 'D' + (i + 1),
+    open: r[0], close: r[1],
+    high: Math.max(r[0], r[1]) + 2,
+    low: Math.min(r[0], r[1]) - 2,
+  }));
+}());
+
+/* Four decades of price, so a log axis has something to compress. */
+export const CHT_BTC = (function () {
+  const out: any[] = [];
+  let price = 62000;
+  const path = [-0.06, -0.09, -0.12, -0.07, 0.03, -0.11, -0.08, 0.05, -0.06, 0.04,
+    0.08, 0.03, 0.11, 0.06, -0.04, 0.09, 0.13, 0.07, 0.15, 0.09, 0.05, 0.12, 0.08, 0.14];
+  path.forEach((step, i) => {
+    const o = price;
+    const c = Math.max(15500, o * (1 + step));
+    out.push({
+      week: 'W' + (i + 1),
+      open: Math.round(o), close: Math.round(c),
+      high: Math.round(Math.max(o, c) * 1.05),
+      low: Math.round(Math.min(o, c) * 0.94),
+    });
+    price = c;
+  });
+  return out;
+}());
