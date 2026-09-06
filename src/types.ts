@@ -496,6 +496,18 @@ export interface ApexMediaClasses {
   nav?: string;
   dots?: string;
   dot?: string;
+
+  /** ApexGallery — the image frame, and the picture inside it. `nav` is shared
+      with ApexCarousel: in both it is one prev-or-next button. */
+  stage?: string;
+  img?: string;
+  /** ApexGallery — the floating toolbar and one of its buttons. */
+  bar?: string;
+  act?: string;
+  /** ApexGallery — the "3 / 8" counter, the thumbnail strip and one thumbnail. */
+  count?: string;
+  thumbs?: string;
+  thumb?: string;
 }
 
 export interface ApexDisplayProps {

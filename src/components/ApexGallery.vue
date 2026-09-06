@@ -14,6 +14,7 @@
  */
 import { computed, onBeforeUnmount, ref, watch, Teleport } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import type { ApexMediaProps } from '../types';
 
 export interface GalleryImage {
   src?: string;
@@ -30,7 +31,7 @@ export type GalleryAction =
   | 'rotate-left' | 'rotate-right' | 'zoom-in' | 'zoom-out' | 'zoom-reset'
   | 'flip-h' | 'flip-v' | 'download' | 'fullscreen' | 'close';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexMediaProps & {
   images?: GalleryImage[];
   /** v-model — the active index. */
   modelValue?: number;
@@ -91,6 +92,13 @@ const props = withDefaults(defineProps<{
   thumbInactiveOpacity?: number;
 }>(), {
   modelValue: 0, open: false,
+  /* Absent means "the array decides", so these have to arrive undefined:
+     Vue casts an absent boolean to false, which switched every button off
+     and left the toolbar v-if'd away. Same trap as AF2-167, reached here
+     through props[SWITCHES[a]] rather than a named read. */
+  rotateLeft: undefined, rotateRight: undefined, zoomIn: undefined, zoomOut: undefined,
+  zoomReset: undefined, flipHorizontal: undefined, flipVertical: undefined,
+  downloadable: undefined, fullscreen: undefined, closable: undefined,
   actions: () => ['rotate-left', 'rotate-right', 'zoom-in', 'zoom-out', 'flip-h', 'flip-v', 'download', 'fullscreen'],
   showNav: true, showThumbnails: true, thumbnailsPosition: 'bottom', showCounter: false,
   zoomStep: 0.25, maxZoom: 4, radius: 'var(--r-md)', toolbarPosition: 'top',
@@ -289,23 +297,23 @@ const imageStyle = computed(() => ({
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
   if (props.width) s.inlineSize = props.width;
-  if (props.height) s['--gal-height'] = props.height;
-  if (props.aspectRatio) s['--gal-ratio'] = props.aspectRatio;
-  if (props.radius) s['--gal-radius'] = props.radius;
-  if (props.stageBackground) s['--gal-stage-bg'] = props.stageBackground;
-  if (props.padding) s['--gal-pad'] = props.padding;
-  if (props.toolbarBackground) s['--gal-bar-bg'] = props.toolbarBackground;
-  if (props.toolbarColor) s['--gal-bar-fg'] = props.toolbarColor;
-  if (props.toolbarRadius) s['--gal-bar-radius'] = props.toolbarRadius;
-  if (props.navBackground) s['--gal-nav-bg'] = props.navBackground;
-  if (props.navColor) s['--gal-nav-fg'] = props.navColor;
-  if (props.navSize) s['--gal-nav-size'] = props.navSize;
-  if (props.navRadius) s['--gal-nav-radius'] = props.navRadius;
-  if (props.thumbSize) s['--gal-thumb-size'] = props.thumbSize;
-  if (props.thumbGap) s['--gal-thumb-gap'] = props.thumbGap;
-  if (props.thumbRadius) s['--gal-thumb-radius'] = props.thumbRadius;
-  if (props.thumbActiveColor) s['--gal-thumb-active'] = props.thumbActiveColor;
-  s['--gal-thumb-dim'] = String(props.thumbInactiveOpacity);
+  if (props.height) s['--apex-gal-height'] = props.height;
+  if (props.aspectRatio) s['--apex-gal-ratio'] = props.aspectRatio;
+  if (props.radius) s['--apex-gal-radius'] = props.radius;
+  if (props.stageBackground) s['--apex-gal-stage-bg'] = props.stageBackground;
+  if (props.padding) s['--apex-gal-pad'] = props.padding;
+  if (props.toolbarBackground) s['--apex-gal-bar-bg'] = props.toolbarBackground;
+  if (props.toolbarColor) s['--apex-gal-bar-fg'] = props.toolbarColor;
+  if (props.toolbarRadius) s['--apex-gal-bar-radius'] = props.toolbarRadius;
+  if (props.navBackground) s['--apex-gal-nav-bg'] = props.navBackground;
+  if (props.navColor) s['--apex-gal-nav-fg'] = props.navColor;
+  if (props.navSize) s['--apex-gal-nav-size'] = props.navSize;
+  if (props.navRadius) s['--apex-gal-nav-radius'] = props.navRadius;
+  if (props.thumbSize) s['--apex-gal-thumb-size'] = props.thumbSize;
+  if (props.thumbGap) s['--apex-gal-thumb-gap'] = props.thumbGap;
+  if (props.thumbRadius) s['--apex-gal-thumb-radius'] = props.thumbRadius;
+  if (props.thumbActiveColor) s['--apex-gal-thumb-active'] = props.thumbActiveColor;
+  s['--apex-gal-thumb-dim'] = String(props.thumbInactiveOpacity);
   return s;
 });
 
@@ -315,19 +323,19 @@ defineExpose({ act, go, reset, zoom, rotation, fullscreen: faux });
 <template>
   <component :is="overlay ? Teleport : 'div'" :to="overlay ? 'body' : undefined">
     <Transition :name="overlay ? 'apex-gal-fade' : 'apex-none'">
-      <div v-if="!overlay || open" ref="root" class="apex-gal" :style="rootStyle"
+      <div v-if="!overlay || open" ref="root" class="apex-gal" :style="rootStyle" :class="ui?.root"
            :data-overlay="overlay ? 'true' : 'false'" :data-fullscreen="faux ? 'true' : 'false'"
            :data-hover-bar="hoverToolbar ? 'true' : 'false'"
            :data-hover-nav="hoverNav ? 'true' : 'false'"
            :data-thumbs="thumbnailsPosition" :data-bar="toolbarPosition"
            role="group" aria-label="Image gallery" tabindex="-1" @keydown="onKey">
-        <div ref="stage" class="apex-gal__stage" :data-pannable="pannable ? 'true' : 'false'"
+        <div ref="stage" class="apex-gal__stage" :class="ui?.stage" :data-pannable="pannable ? 'true' : 'false'"
              :data-dragging="dragging ? 'true' : 'false'"
              @pointerdown="onPointerDown" @pointermove="onPointerMove"
              @pointerup="onPointerUp" @pointercancel="onPointerUp" @wheel="onWheel">
-          <div v-if="shownActions.length" class="apex-gal__bar">
+          <div v-if="shownActions.length" class="apex-gal__bar" :class="ui?.bar">
             <slot name="toolbar" :act="act">
-              <button v-for="a in shownActions" :key="a" type="button" class="apex-gal__act"
+              <button v-for="a in shownActions" :key="a" type="button" class="apex-gal__act" :class="ui?.act"
                       :disabled="a === 'download' && !active.src"
                       :aria-label="labelFor(a)" :title="labelFor(a)" :aria-pressed="a === 'fullscreen' ? faux : undefined"
                       @click.stop="act(a)">
@@ -336,26 +344,26 @@ defineExpose({ act, go, reset, zoom, rotation, fullscreen: faux });
             </slot>
           </div>
           <slot name="image" :image="active" :index="index" :style="imageStyle">
-            <img v-if="active.src" class="apex-gal__img" :src="active.src" :alt="active.alt || ''"
+            <img v-if="active.src" class="apex-gal__img" :class="ui?.img" :src="active.src" :alt="active.alt || ''"
                  :style="imageStyle" draggable="false" />
-            <div v-else class="apex-gal__img apex-gal__ph" :style="[imageStyle, { background: active.background }]">
+            <div v-else class="apex-gal__img apex-gal__ph" :class="ui?.img" :style="[imageStyle, { background: active.background }]">
               {{ active.caption || active.alt || '' }}
             </div>
           </slot>
           <template v-if="showNav && list.length > 1">
-            <button type="button" class="apex-gal__nav" data-dir="prev" aria-label="Previous image"
+            <button type="button" class="apex-gal__nav" :class="ui?.nav" data-dir="prev" aria-label="Previous image"
                     :disabled="!canPrev" @click.stop="go(index - 1)">
               <ApexIcon name="chevron_left" :size="22" />
             </button>
-            <button type="button" class="apex-gal__nav" data-dir="next" aria-label="Next image"
+            <button type="button" class="apex-gal__nav" :class="ui?.nav" data-dir="next" aria-label="Next image"
                     :disabled="!canNext" @click.stop="go(index + 1)">
               <ApexIcon name="chevron_right" :size="22" />
             </button>
           </template>
-          <span v-if="showCounter" class="apex-gal__count">{{ index + 1 }} / {{ list.length }}</span>
+          <span v-if="showCounter" class="apex-gal__count" :class="ui?.count">{{ index + 1 }} / {{ list.length }}</span>
         </div>
-        <div v-if="showThumbnails && list.length > 1" class="apex-gal__thumbs">
-          <button v-for="(im, i) in list" :key="i" type="button" class="apex-gal__thumb"
+        <div v-if="showThumbnails && list.length > 1" class="apex-gal__thumbs" :class="ui?.thumbs">
+          <button v-for="(im, i) in list" :key="i" type="button" class="apex-gal__thumb" :class="ui?.thumb"
                   :data-active="i === index ? 'true' : 'false'" :aria-label="`Image ${i + 1}`"
                   @click="go(i)">
             <img v-if="im.thumbnail || im.src" :src="im.thumbnail || im.src" :alt="im.alt || ''" />

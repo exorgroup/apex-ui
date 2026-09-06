@@ -1228,16 +1228,16 @@ border-width:0 0 1.5px 1.5px}
 .apex-cmp[data-orientation="vertical"] .apex-cmp__grip{flex-direction:column}
 
 /* ─── gallery ──────────────────────────────────────────── */
-.apex-gal{--gal-radius:var(--r-md);--gal-stage-bg:#0B0F14;--gal-pad:0px;--gal-height:auto;
---gal-ratio:16/9;--gal-bar-bg:rgba(12,16,22,.62);--gal-bar-fg:#F2F6FB;--gal-bar-radius:999px;
---gal-nav-bg:rgba(12,16,22,.55);--gal-nav-fg:#F2F6FB;--gal-nav-size:38px;--gal-nav-radius:999px;
---gal-thumb-size:72px;--gal-thumb-gap:8px;--gal-thumb-radius:var(--r-sm);
---gal-thumb-active:var(--accent-primary);--gal-thumb-dim:.55;
+.apex-gal{--apex-gal-radius:var(--r-md);--apex-gal-stage-bg:#0B0F14;--apex-gal-pad:0px;--apex-gal-height:auto;
+--apex-gal-ratio:16/9;--apex-gal-bar-bg:rgba(12,16,22,.62);--apex-gal-bar-fg:#F2F6FB;--apex-gal-bar-radius:999px;
+--apex-gal-nav-bg:rgba(12,16,22,.55);--apex-gal-nav-fg:#F2F6FB;--apex-gal-nav-size:38px;--apex-gal-nav-radius:999px;
+--apex-gal-thumb-size:72px;--apex-gal-thumb-gap:8px;--apex-gal-thumb-radius:var(--r-sm);
+--apex-gal-thumb-active:var(--accent-primary);--apex-gal-thumb-dim:.55;
 display:flex;flex-direction:column;gap:10px;inline-size:100%;font-family:var(--font-sans)}
 .apex-gal[data-thumbs="top"]{flex-direction:column-reverse}
 .apex-gal__stage{position:relative;overflow:hidden;display:grid;place-items:center;
-padding:var(--gal-pad);block-size:var(--gal-height);aspect-ratio:var(--gal-ratio);
-border-radius:var(--gal-radius);background:var(--gal-stage-bg);touch-action:none}
+padding:var(--apex-gal-pad);block-size:var(--apex-gal-height);aspect-ratio:var(--apex-gal-ratio);
+border-radius:var(--apex-gal-radius);background:var(--apex-gal-stage-bg);touch-action:none}
 .apex-gal[data-overlay="true"]{position:fixed;inset:0;z-index:1300;gap:14px;padding:22px;
 background:rgba(8,11,16,.92);backdrop-filter:blur(6px)}
 .apex-gal[data-overlay="true"] .apex-gal__stage{flex:1 1 auto;block-size:auto;aspect-ratio:auto;
@@ -1261,7 +1261,7 @@ font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;col
 /* toolbar and arrows float over the stage so the image keeps the whole frame */
 .apex-gal__bar{position:absolute;inset-inline:0;display:flex;align-items:center;justify-content:center;
 gap:2px;z-index:2;margin-inline:auto;padding:4px;inline-size:max-content;max-inline-size:calc(100% - 20px);
-background:var(--gal-bar-bg);border-radius:var(--gal-bar-radius);color:var(--gal-bar-fg);
+background:var(--apex-gal-bar-bg);border-radius:var(--apex-gal-bar-radius);color:var(--apex-gal-bar-fg);
 backdrop-filter:blur(8px);flex-wrap:wrap;justify-content:center}
 .apex-gal[data-bar="top"] .apex-gal__bar{inset-block-start:10px}
 .apex-gal[data-bar="bottom"] .apex-gal__bar{inset-block-end:10px}
@@ -1271,15 +1271,15 @@ border-radius:999px;background:transparent;color:inherit;cursor:pointer}
 .apex-gal__act:disabled{opacity:.4;cursor:default}
 .apex-gal__act:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-gal__nav{position:absolute;inset-block-start:50%;translate:0 -50%;z-index:2;
-display:grid;place-items:center;inline-size:var(--gal-nav-size);block-size:var(--gal-nav-size);
-border:0;border-radius:var(--gal-nav-radius);background:var(--gal-nav-bg);color:var(--gal-nav-fg);
+display:grid;place-items:center;inline-size:var(--apex-gal-nav-size);block-size:var(--apex-gal-nav-size);
+border:0;border-radius:var(--apex-gal-nav-radius);background:var(--apex-gal-nav-bg);color:var(--apex-gal-nav-fg);
 cursor:pointer;backdrop-filter:blur(6px)}
 .apex-gal__nav[data-dir="prev"]{inset-inline-start:12px}
 .apex-gal__nav[data-dir="next"]{inset-inline-end:12px}
 .apex-gal__nav:disabled{opacity:.35;cursor:default}
 .apex-gal__nav:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-gal__count{position:absolute;inset-block-end:12px;inset-inline-start:12px;z-index:2;
-padding:3px 9px;border-radius:999px;background:var(--gal-bar-bg);color:var(--gal-bar-fg);
+padding:3px 9px;border-radius:999px;background:var(--apex-gal-bar-bg);color:var(--apex-gal-bar-fg);
 font-size:12px;font-variant-numeric:tabular-nums}
 /* hover-only chrome: hidden by opacity, not display, so it fades rather than snaps */
 .apex-gal[data-hover-bar="true"] .apex-gal__bar,
@@ -1288,15 +1288,15 @@ font-size:12px;font-variant-numeric:tabular-nums}
 .apex-gal[data-hover-bar="true"]:focus-within .apex-gal__bar,
 .apex-gal[data-hover-nav="true"]:hover .apex-gal__nav,
 .apex-gal[data-hover-nav="true"]:focus-within .apex-gal__nav{opacity:1}
-.apex-gal__thumbs{display:flex;gap:var(--gal-thumb-gap);overflow-x:auto;padding-block-end:2px;
+.apex-gal__thumbs{display:flex;gap:var(--apex-gal-thumb-gap);overflow-x:auto;padding-block-end:2px;
 scrollbar-width:thin}
 .apex-gal__thumb{flex:0 0 auto;padding:0;overflow:hidden;cursor:pointer;
-inline-size:var(--gal-thumb-size);block-size:calc(var(--gal-thumb-size) * .72);
-border:2px solid transparent;border-radius:var(--gal-thumb-radius);background:var(--bg-muted);
-opacity:var(--gal-thumb-dim);transition:opacity var(--dur-fast) var(--ease-out),
+inline-size:var(--apex-gal-thumb-size);block-size:calc(var(--apex-gal-thumb-size) * .72);
+border:2px solid transparent;border-radius:var(--apex-gal-thumb-radius);background:var(--bg-muted);
+opacity:var(--apex-gal-thumb-dim);transition:opacity var(--dur-fast) var(--ease-out),
 border-color var(--dur-fast) var(--ease-out)}
 .apex-gal__thumb:hover{opacity:1}
-.apex-gal__thumb[data-active="true"]{opacity:1;border-color:var(--gal-thumb-active)}
+.apex-gal__thumb[data-active="true"]{opacity:1;border-color:var(--apex-gal-thumb-active)}
 .apex-gal__thumb img,.apex-gal__thumbph{display:block;inline-size:100%;block-size:100%;object-fit:cover}
 .apex-gal__thumb:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-gal-fade-enter-active,.apex-gal-fade-leave-active{transition:opacity var(--dur-fast) var(--ease-out)}

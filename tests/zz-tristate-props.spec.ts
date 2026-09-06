@@ -12,6 +12,13 @@ import { describe, it, expect } from 'vitest';
  *
  * This finds the pattern rather than the symptom, so a new control that
  * repeats it fails here instead of in someone's hands.
+ *
+ * AF2-231: it missed one anyway. ApexGallery reads its ten per-button switches
+ * through a lookup — `props[SWITCHES[a]]` — so the name never appears next to
+ * `undefined` and no `props.x !== undefined` was there to find. Every button
+ * was therefore switched off and the toolbar was v-if'd away entirely, in the
+ * original as much as here. The tell for that route is a map typed
+ * `keyof typeof props`: its values ARE prop names, read indirectly.
  */
 
 const SOURCES = import.meta.glob('../src/components/*.vue', {
@@ -23,6 +30,18 @@ function comparedToUndefined(src: string): string[] {
   return [...new Set(
     [...src.matchAll(/props\.([a-zA-Z][a-zA-Z0-9]*)\s*(?:!==|===)\s*undefined/g)].map((m) => m[1]),
   )];
+}
+
+/**
+ * Prop names reached through a lookup map — `Record<X, keyof typeof props>`.
+ *
+ * A component only writes that type to read props by a name it computes, and
+ * a computed read is exactly the one the regex above cannot see.
+ */
+function viaLookup(src: string): string[] {
+  const maps = [...src.matchAll(/keyof typeof props>\s*=\s*\{([\s\S]*?)\};/g)];
+  return [...new Set(maps.flatMap((m) =>
+    [...m[1].matchAll(/:\s*'([a-zA-Z][a-zA-Z0-9]*)'/g)].map((v) => v[1])))];
 }
 
 /** The `withDefaults(defineProps<…>(), { … })` object, if there is one. */
@@ -37,7 +56,7 @@ describe('tri-state boolean props declare undefined', () => {
     const type = typeBlockOf(src);
     const defaults = defaultsOf(src);
 
-    const offenders = comparedToUndefined(src)
+    const offenders = [...new Set([...comparedToUndefined(src), ...viaLookup(src)])]
       // only booleans are cast; a string or number prop really is undefined
       .filter((name) => new RegExp(`\\b${name}\\?:\\s*boolean`).test(type))
       .filter((name) => !new RegExp(`\\b${name}\\s*:\\s*undefined`).test(defaults));

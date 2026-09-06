@@ -61,7 +61,10 @@ const FAMILY = [
 const INTENDED = [
   { why: 'AF2-198…205: the permission filter', test: (l) => /useCan|filterMenu|filterItems|filterMega|menuPermissions|ApexPermission|\bshown\b|\bcan\??[:,)]|can\.|, can\b|items \|\| \[\]/.test(l) },
   { why: 'AF2-203: CrumbItem, and the breadcrumb’s `to`', test: (l) => /CrumbItem|MenuItem|linkComponent|markRaw|toRaw|cutShort|walkable|isCurrent|\bfull\b|\blist\b|\bto\?:|label\?|icon\?|href\?|target\?|disabled\?|current\?|command\?|\[key: string\]|^\s*\}$|home\?|items\?/.test(l) },
-  { why: 'AF2-167: absent booleans arrive false, not undefined', test: (l) => /open: undefined/.test(l) },
+  /* AF2-231 widened this: ApexGallery's ten per-button switches are the same
+     trap, and there the whole toolbar was v-if'd away by it. A line of
+     `name: undefined` pairs in the defaults is the shape of the fix. */
+  { why: 'AF2-167/231: absent booleans arrive false, not undefined', test: (l) => /^\s*(\w+: undefined,\s*)+$/.test(l) },
   { why: 'AF2-200: the `padding` the original declares twice in one interface', test: (l) => /padding/.test(l) },
   { why: 'AF2-133/143/169: the ui class map', test: (l) => /\bui\?\.|ui\?:|ApexUiClasses|ApexContainerClasses|ApexDisplayClasses|ApexMediaClasses/.test(l) },
   /* The carousel's parts live in five files, so one map on the root travels
