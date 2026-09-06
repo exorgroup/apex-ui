@@ -348,6 +348,23 @@ export const MTR_ICONS = [
 
 /** Seven people for the avatar examples. Only the first three carry a status,
     so the group examples show both states without looking uniform. */
+/**
+ * The people the context menu's per-row example acts on. Ported from the
+ * gallery, where the same list backs several controls.
+ */
+export const TEAM = [
+  { id: 'u1', name: 'A. Borg', role: 'Founder & CEO', icon: 'person' },
+  { id: 'u2', name: 'L. Rossi', role: 'Product Lead', icon: 'lightbulb' },
+  { id: 'u3', name: 'K. Weber', role: 'Engineering Lead', icon: 'terminal' },
+  { id: 'u4', name: 'S. de Vries', role: 'UX Designer', icon: 'draw' },
+  { id: 'u5', name: 'M. Dubois', role: 'Product Manager', icon: 'assignment' },
+  { id: 'u6', name: 'C. Ruiz', role: 'Frontend Engineer', icon: 'code' },
+  { id: 'u7', name: 'J. Camilleri', role: 'Backend Engineer', icon: 'dns' },
+  { id: 'u8', name: 'N. Farrugia', role: 'QA Engineer', icon: 'bug_report' },
+  { id: 'u9', name: 'P. Zammit', role: 'Operations', icon: 'inventory_2' },
+  { id: 'u10', name: 'D. Micallef', role: 'Field Technician', icon: 'handyman' },
+];
+
 export const CREW = [
   { label: 'A. Borg', status: 'online' },
   { label: 'L. Rossi', status: 'busy' },

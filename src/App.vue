@@ -15,7 +15,7 @@ import {
   SPLIT_EVENTS, SPLIT_STATEFUL, SPLIT_NAV, PANEL_REPEAT, LEGEND_ALIGNS,
   FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
   BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS,
-  AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW,
+  AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW, TEAM,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS, DLG_POSITIONS, MSG_TEXT,
   TOAST_POSITIONS, TOAST_LINES,
@@ -392,127 +392,86 @@ const sbGated: MenuItem[] = [
 ];
 
 /* ── ApexBreadcrumb page ───────────────────────── */
-const bcHome: CrumbItem = { icon: 'home', href: '#' };
+const bcLog = ref('');
+const bcRoute = ref('');
 
-const bcBasic: CrumbItem[] = [
-  { label: 'Venues', href: '#' },
-  { label: 'Teatru Manoel', href: '#' },
-  { label: 'Seating' },
+const CRUMB_HOME: CrumbItem = { icon: 'home', href: '#' };
+const CRUMBS: CrumbItem[] = [
+  { label: 'Components', href: '#' },
+  { label: 'Menu', href: '#' },
+  { label: 'Breadcrumb' },
+];
+const LONG_CRUMBS: CrumbItem[] = [
+  { label: 'Components', href: '#' },
+  { label: 'Form', href: '#' },
+  { label: 'Input', href: '#' },
+  { label: 'InputText', href: '#' },
+  { label: 'Variants', href: '#' },
+  { label: 'Filled', href: '#' },
+  { label: 'Outlined' },
 ];
 
-const bcIcons: CrumbItem[] = [
-  { label: 'Venues', icon: 'place', href: '#' },
-  { icon: 'theater_comedy', href: '#' },
-  { label: 'Seating', icon: 'event_seat' },
-];
-
-const bcLong: CrumbItem[] = [
-  { label: 'Venues', href: '#' },
-  { label: 'Malta', href: '#' },
-  { label: 'Valletta', href: '#' },
-  { label: 'Teatru Manoel', href: '#' },
-  { label: 'La Traviata', href: '#' },
-  { label: 'Seating' },
-];
-
-/*
- * A stand-in for RouterLink or Inertia's Link. The real one comes from the
- * app; what matters here is that a crumb with `to` goes through it rather
- * than reloading the page.
- */
-const BcLink = {
-  name: 'BcLink',
-  props: { to: { type: [String, Object], default: undefined } },
-  template: '<a class="bc-routed" href="javascript:void(0)"><slot /></a>',
-};
-
-const bcRoute: CrumbItem[] = [
-  { label: 'Venues', to: { name: 'venues' } },
-  { label: 'Teatru Manoel', to: '/venues/manoel' },
-  { label: 'Seating' },
-];
-
-/*
- * Shows is gated, and it sits in the middle: the trail stops there rather
- * than skipping it, which is the whole difference between a path and a list.
- */
+/* The gated trail. A breadcrumb is a path, so a denied crumb truncates it
+   rather than closing a gap: what follows was reached THROUGH the denied
+   one, and showing it would describe a route this user has no way to walk. */
 const bcGated: CrumbItem[] = [
-  { label: 'Venues', href: '#' },
-  { label: 'Teatru Manoel', href: '#' },
   { label: 'Events', href: '#' },
-  { label: 'Shows', href: '#', can: 'reports' },
-  { label: 'La Traviata', href: '#' },
-  { label: 'Seating' },
+  { label: 'Reports', href: '#', can: 'reports' },
+  { label: 'Settings', href: '#', can: 'settings' },
+  { label: 'Audit log' },
 ];
 
 /* ── ApexContextMenu page ──────────────────────── */
-const cxBasicZone = ref<HTMLElement | null>(null);
-const cxSubZone = ref<HTMLElement | null>(null);
-const cxTplZone = ref<HTMLElement | null>(null);
-const cxLinkZone = ref<HTMLElement | null>(null);
-const cxGateZone = ref<HTMLElement | null>(null);
-const cxRowZone = ref<HTMLElement | null>(null);
-const cxPicked = ref('');
-const cxTarget = ref('');
-const cxRows = ['Invoice 1041', 'Invoice 1042', 'Invoice 1043'];
+const ctxLog = ref('');
+const ctxGlobal = ref(false);
+const ctxRow = ref('');
+const ctxRowLog = ref('');
 
-const cxBasic: MenuItem[] = [
-  { label: 'Open', icon: 'folder_open' },
-  { label: 'Rename', icon: 'edit', hint: 'F2' },
+/* Every zone is right-clicked, so each needs its own element to bind to. */
+const ctxBasic = ref<HTMLElement | null>(null);
+const ctxSub = ref<HTMLElement | null>(null);
+const ctxRowsEl = ref<HTMLElement | null>(null);
+const ctxTpl = ref<HTMLElement | null>(null);
+const ctxLinks = ref<HTMLElement | null>(null);
+const ctxGate = ref<HTMLElement | null>(null);
+
+const CTX_ITEMS: MenuItem[] = [
+  { label: 'Cut', icon: 'content_cut', hint: '\u2318X' },
+  { label: 'Copy', icon: 'content_copy', hint: '\u2318C' },
+  { label: 'Paste', icon: 'content_paste', hint: '\u2318V' },
+  { label: 'Rename', icon: 'edit' },
   { separator: true },
   { label: 'Delete', icon: 'delete' },
 ];
 
-const cxSub: MenuItem[] = [
-  { label: 'Open', icon: 'folder_open' },
-  { header: 'Send to' },
+const CTX_NESTED: MenuItem[] = [
+  { header: 'Edit' },
+  { label: 'Cut', icon: 'content_cut', hint: '\u2318X' },
+  { label: 'Copy', icon: 'content_copy', hint: '\u2318C' },
+  { separator: true },
+  { header: 'Share' },
   { label: 'Share', icon: 'share', items: [
+    { label: 'Copy link', icon: 'link' },
     { label: 'Email', icon: 'mail' },
-    { label: 'Link', icon: 'link' },
-    { separator: true },
-    { label: 'More…', icon: 'more_horiz', items: [
-      { label: 'Slack' },
-      { label: 'Teams' },
+    { label: 'More\u2026', icon: 'more_horiz', items: [
+      { label: 'Slack', icon: 'chat' },
+      { label: 'Teams', icon: 'groups' },
     ] },
   ] },
+  { label: 'Add to favourites', icon: 'bookmark' },
+  { label: 'Preview', icon: 'visibility' },
   { separator: true },
-  { label: 'Properties', icon: 'info', hint: '⌘I' },
+  { label: 'Delete', icon: 'delete' },
 ];
 
-/*
- * The command reads the element the menu was opened on, so one menu serves
- * every row — which is the whole point of attaching to the container rather
- * than to each row in turn.
- */
-const named = (e: unknown) => {
-  const el = (e as { target?: HTMLElement } | undefined)?.target;
-  return el?.closest?.('.ctx-row')?.getAttribute('data-row') || 'the container';
-};
-const cxRowItems: MenuItem[] = [
-  { label: 'Mark as paid', icon: 'check', command: (p: unknown) => { cxTarget.value =`paid: ${named(p)}`; } },
-  { label: 'Send reminder', icon: 'mail', command: (p: unknown) => { cxTarget.value =`reminder: ${named(p)}`; } },
-];
-
-const cxLinks: MenuItem[] = [
-  { label: 'Open in a new tab', icon: 'open_in_new', href: 'https://example.com', target: '_blank' },
-  { label: 'Documentation', icon: 'menu_book', href: 'https://example.com/docs' },
-  { separator: true },
-  { label: 'Copy link', icon: 'link' },
-];
-
-/* Reports is a submenu whose children are both gated, so for a role without
-   them it goes — and the header above it, having nothing left to label, goes
-   with it. */
-const cxGated: MenuItem[] = [
+/* The gated model: deny `reports` and the Admin header goes with its rows. */
+const ctxGated: MenuItem[] = [
   { label: 'Open', icon: 'folder_open' },
+  { label: 'Export', icon: 'download', can: 'reports' },
   { separator: true },
-  { header: 'Reporting' },
-  { label: 'Reports', icon: 'bar_chart', items: [
-    { label: 'Sales', can: 'reports' },
-    { label: 'Attendance', can: 'reports' },
-  ] },
-  { separator: true },
+  { header: 'Admin' },
   { label: 'Settings', icon: 'settings', can: 'settings' },
+  { label: 'Delete', icon: 'delete', can: { action: 'delete', resource: 'events' } },
 ];
 
 /* ── ApexDock page ─────────────────────────────── */
@@ -3935,119 +3894,153 @@ function pick(city) {
           </div>
         </template>
 
+        <!-- The gallery's seven, ported. -->
         <template v-if="entry.id === 'breadcrumb'">
           <h2>Basic</h2>
           <p class="note">
-            The trail to the page you are on. <code>home</code> is a leading crumb, and it
-            counts as the first one. By default the last crumb reads as the current page:
-            bold, not a link, and <code>aria-current="page"</code>.
+            A <code>home</code> crumb and an <code>items</code> array. The last crumb reads
+            as the current page — bold, not a link, and <code>aria-current="page"</code>.
           </p>
-          <pre class="doc-pre" v-pre>&lt;ApexBreadcrumb :home="home" :items="items" /&gt;
-
-const home = { icon: 'home', href: '/' }
+          <pre class="doc-pre" v-pre>const home = { icon: 'home', href: '/' };
 const items = [
-  { label: 'Venues', href: '/venues' },
-  { label: 'Teatru Manoel', href: '/venues/manoel' },
-  { label: 'Seating' },
-]</pre>
-          <ApexBreadcrumb :home="bcHome" :items="bcBasic" />
+  { label: 'Components', href: '/components' },
+  { label: 'Menu', href: '/components/menu' },
+  { label: 'Breadcrumb' },
+];</pre>
+          <div class="card" style="margin-top:12px">
+            <ApexBreadcrumb :home="CRUMB_HOME" :items="CRUMBS"
+                            @item-click="bcLog = 'clicked: ' + ($event.item.label || 'home')" />
+          </div>
+          <p class="note">Last event: <code>{{ bcLog || 'none yet' }}</code></p>
 
           <h2>Text, icons, or both</h2>
           <p class="note">
-            A crumb is <code>label</code>, <code>icon</code>, or both, from one shape — so
-            an icon-only root and a text trail need no special case between them.
+            One item shape covers all three: a <code>label</code> alone, an
+            <code>icon</code> alone, or the pair.
           </p>
-          <ApexBreadcrumb :home="bcHome" :items="bcIcons" class="bc-demo" />
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+            <div class="cell"><span class="cell__tag">labels only</span>
+              <ApexBreadcrumb :items="[{ label: 'Fleet', href: '#' }, { label: 'Vehicles', href: '#' }, { label: 'VW Beetle' }]" />
+            </div>
+            <div class="cell"><span class="cell__tag">icons only</span>
+              <ApexBreadcrumb :items="[{ icon: 'home', href: '#' }, { icon: 'folder', href: '#' }, { icon: 'description' }]" />
+            </div>
+            <div class="cell"><span class="cell__tag">icons and labels</span>
+              <ApexBreadcrumb :items="[{ icon: 'home', label: 'Home', href: '#' }, { icon: 'inventory_2', label: 'Products', href: '#' }, { icon: 'memory', label: 'Electronics' }]" />
+            </div>
+            <div class="cell"><span class="cell__tag">mixed — icon-only root, labels after</span>
+              <ApexBreadcrumb :home="CRUMB_HOME" :items="[{ label: 'Settings', href: '#' }, { icon: 'lock', label: 'Security', href: '#' }, { label: 'Two-factor' }]" />
+            </div>
+          </div>
 
           <h2>Route</h2>
           <p class="note">
-            <code>href</code> is a URL; <code>to</code> is a route. A crumb naming a route
-            is rendered through whatever the app passes as <code>linkComponent</code> —
-            RouterLink, Inertia’s Link, anything taking a <code>to</code> — so the trail
-            navigates without reloading the page.
+            The <code>item</code> slot is the hook for a router: render a
+            <code>router-link</code> for anything but the current crumb, which stays plain
+            text. Items also take a <code>command</code>, which runs before
+            <code>item-click</code>.
           </p>
-          <p class="note">
-            Without a link component a string <code>to</code> falls back to an href, so it
-            still navigates rather than rendering an attribute nothing acts on.
-          </p>
-          <pre class="doc-pre" v-pre>&lt;ApexBreadcrumb :items="items" :link-component="RouterLink" /&gt;
-
-const items = [
-  { label: 'Venues', to: { name: 'venues' } },
-  { label: 'Seating' },
-]</pre>
-          <ApexBreadcrumb :items="bcRoute" :link-component="BcLink" class="bc-demo" />
+          <pre class="doc-pre" v-pre>&lt;ApexBreadcrumb :home="home" :items="items"&gt;
+  &lt;template #item="{ item, isCurrent }"&gt;
+    &lt;span v-if="isCurrent" class="apex-bc__link"&gt;{{ item.label }}&lt;/span&gt;
+    &lt;router-link v-else :to="item.to" class="apex-bc__link"&gt;
+      &lt;ApexIcon v-if="item.icon" :name="item.icon" /&gt;
+      {{ item.label }}
+    &lt;/router-link&gt;
+  &lt;/template&gt;
+&lt;/ApexBreadcrumb&gt;</pre>
+          <div class="card" style="margin-top:12px">
+            <ApexBreadcrumb :items="[{ icon: 'home', command: () => (bcRoute = '/') },
+                                     { label: 'Components', command: () => (bcRoute = '/components') },
+                                     { label: 'Form', command: () => (bcRoute = '/components/form') },
+                                     { label: 'Input' }]" />
+            <p class="note" style="margin:10px 0 0">Navigated to: <code>{{ bcRoute || '—' }}</code></p>
+          </div>
 
           <h2>Custom separator</h2>
           <p class="note">
-            <code>separator</code> takes an icon name or any text at all —
-            <code>/</code>, <code>›</code>, an em dash. The <code>separator</code> slot
-            replaces every one of them when a glyph is not enough.
+            Pass an icon name or plain text to <code>separator</code>, or take the slot for
+            anything else.
           </p>
-          <ApexBreadcrumb :items="bcBasic" separator="/" class="bc-demo" />
-          <ApexBreadcrumb :items="bcBasic" separator="›" class="bc-demo" />
-          <ApexBreadcrumb :items="bcBasic" class="bc-demo">
-            <template #separator><span class="bc-sep">::</span></template>
-          </ApexBreadcrumb>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+            <div class="cell"><span class="cell__tag">separator="/"</span>
+              <ApexBreadcrumb :items="CRUMBS" separator="/" />
+            </div>
+            <div class="cell"><span class="cell__tag">separator="chevron_right" (default)</span>
+              <ApexBreadcrumb :items="CRUMBS" />
+            </div>
+            <div class="cell"><span class="cell__tag">separator="arrow_forward"</span>
+              <ApexBreadcrumb :items="CRUMBS" separator="arrow_forward" />
+            </div>
+            <div class="cell"><span class="cell__tag">#separator slot</span>
+              <ApexBreadcrumb :items="CRUMBS">
+                <template #separator><span class="bc-dot"></span></template>
+              </ApexBreadcrumb>
+            </div>
+          </div>
 
           <h2>Ellipsis</h2>
           <p class="note">
-            Past <code>maxItems</code> the middle collapses behind an ellipsis rather than
-            wrapping, keeping the first crumb and the last two — enough to say where you
-            are and how you got in. Clicking it expands the trail. The
-            <code>ellipsis</code> slot replaces that control and receives
-            <code>expand</code>.
+            Past <code>maxItems</code> the middle collapses to one control; clicking it
+            expands the whole trail. Without it, a long trail scrolls sideways — or wraps
+            with <code>wrap</code>.
           </p>
-          <ApexBreadcrumb :home="bcHome" :items="bcLong" :max-items="4" class="bc-demo" />
-          <ApexBreadcrumb :home="bcHome" :items="bcLong" :max-items="4" class="bc-demo">
-            <template #ellipsis="{ expand }">
-              <ApexButton size="sm" variant="text" @click="expand()">show all</ApexButton>
-            </template>
-          </ApexBreadcrumb>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+            <div class="cell"><span class="cell__tag">maxItems="4"</span>
+              <ApexBreadcrumb :home="CRUMB_HOME" :items="LONG_CRUMBS" :max-items="4" />
+            </div>
+            <div class="cell"><span class="cell__tag">wrap</span>
+              <ApexBreadcrumb :home="CRUMB_HOME" :items="LONG_CRUMBS" wrap />
+            </div>
+          </div>
 
           <h2>Custom item</h2>
           <p class="note">
-            The <code>item</code> slot replaces a crumb and receives
-            <code>{ item, index, isCurrent }</code> — the hook for a router link, or for
-            a crumb that carries something other than text.
+            The <code>item</code> slot takes over a crumb entirely — here a badge on the
+            current page and an avatar on one of the links.
           </p>
-          <ApexBreadcrumb :home="bcHome" :items="bcBasic" class="bc-demo">
-            <template #item="{ item, isCurrent }">
-              <span :class="isCurrent ? 'bc-here' : 'bc-link'">
-                <ApexIcon v-if="item.icon" :name="String(item.icon)" :size="16" />
-                {{ item.label }}
-              </span>
-            </template>
-          </ApexBreadcrumb>
+          <div class="card" style="margin-top:12px">
+            <ApexBreadcrumb :items="[{ icon: 'groups', label: 'Teams', href: '#' },
+                                     { label: 'Sarah Anderson', avatar: true, href: '#' },
+                                     { label: 'Draft', badge: 'unsaved' }]">
+              <template #item="{ item }">
+                <span v-if="item.badge" class="apex-bc__link bc-badge">{{ item.label }}<em>{{ item.badge }}</em></span>
+                <a v-else-if="item.avatar" href="#" class="apex-bc__link">
+                  <ApexAvatar label="Sarah Anderson" size="xs" />{{ item.label }}
+                </a>
+                <a v-else href="#" class="apex-bc__link">
+                  <ApexIcon v-if="item.icon" :name="String(item.icon)" class="apex-bc__icon" />{{ item.label }}
+                </a>
+              </template>
+            </ApexBreadcrumb>
+          </div>
 
           <h2>Sizes and chrome</h2>
           <p class="note">
-            Three sizes, and enough chrome props to make the trail a bar of its own. A long
-            trail scrolls sideways by default; <code>wrap</code> lets it wrap instead.
+            Three sizes, and every colour is a prop — a breadcrumb can sit bare above a
+            title or as a filled bar.
           </p>
-          <ApexBreadcrumb :home="bcHome" :items="bcBasic" size="sm" class="bc-demo" />
-          <ApexBreadcrumb :home="bcHome" :items="bcBasic" size="lg" class="bc-demo" />
-          <ApexBreadcrumb
-            :home="bcHome" :items="bcBasic" class="bc-demo"
-            background="#101828" color="#9fb0c9" activeColor="#ffffff"
-            hoverColor="#7aa2ff" separatorColor="#3a4a63"
-            padding="8px 14px" radius="999px" gap="10px"
-          />
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+            <div v-for="s in SIZES" :key="s" class="cell"><span class="cell__tag">{{ s }}</span>
+              <ApexBreadcrumb :home="CRUMB_HOME" :items="CRUMBS" :size="s" />
+            </div>
+            <div class="cell"><span class="cell__tag">as a bar</span>
+              <ApexBreadcrumb :home="CRUMB_HOME" :items="CRUMBS" background="var(--bg-muted)"
+                              padding="10px 14px" radius="10px" hover-color="var(--accent-info)" />
+            </div>
+          </div>
 
           <h2>Permissions</h2>
           <p class="note">
-            This is the one control in the family that does not filter. A trail is a path,
-            not a list: each crumb is reachable only through the one before it, so a denied
-            crumb truncates it. Dropping just that crumb would leave a trail offering a
-            route that does not exist.
+            A trail is a path, so <code>can</code> does something here it does nowhere else
+            in the family: rather than closing the gap, the trail stops at the first denied
+            crumb. Everything after it was reached THROUGH that crumb, and a path this user
+            cannot walk is not a path worth drawing.
           </p>
           <p class="note">
-            So it stops there and shows the walkable prefix — no ellipsis, nothing to
-            suggest something was elided. Deny the first crumb, or <code>home</code>, and
-            there is no trail at all: the component renders nothing rather than an empty
-            bar. And a truncated trail marks nothing as the current page, because you are
-            not on the crumb it stops at; that crumb stays a link, since it is somewhere
-            you can actually go.
+            The current-page styling moves with the truncation, and a trail with nothing
+            left renders no bar at all — an empty one is chrome describing a path the
+            reader has none of.
           </p>
           <div class="iconstrip" style="margin-top: 12px">
             <ApexButton
@@ -4057,88 +4050,105 @@ const items = [
               @click="docsRole = r"
             >{{ r }}</ApexButton>
           </div>
-          <ApexBreadcrumb :home="bcHome" :items="bcGated" :max-items="4" class="bc-demo" />
-          <p class="pov-state">
-            Shows is gated. A Viewer’s trail stops at Events — and the collapse runs on
-            what is left, not on the full trail, so nothing hides behind an ellipsis that
-            was never walkable.
-          </p>
+          <div class="card" style="margin-top:12px">
+            <ApexBreadcrumb :home="CRUMB_HOME" :items="bcGated" />
+          </div>
         </template>
 
         <template v-if="entry.id === 'contextmenu'">
           <h2>Basic</h2>
           <p class="note">
-            Point <code>target</code> at an element and a right click inside it opens the
-            menu at the pointer, shifting only as far as it must to stay on screen. The
-            native menu is suppressed there and nowhere else.
+            Give it a <code>target</code> and an <code>items</code> array. Right-clicking
+            inside the target opens the menu at the pointer; the native menu is suppressed
+            only there.
           </p>
-          <pre class="doc-pre" v-pre>&lt;div ref="zone"&gt;Right-click me&lt;/div&gt;
-&lt;ApexContextMenu :items="items" :target="zone" /&gt;</pre>
-          <div ref="cxBasicZone" class="ctx-zone">Right-click anywhere in this box</div>
-          <ApexContextMenu :items="cxBasic" :target="cxBasicZone"
-                           @item-click="cxPicked = $event.item.label || ''" />
-          <p class="pov-state">item-click: <code>{{ cxPicked || 'nothing yet' }}</code></p>
+          <pre class="doc-pre" v-pre>&lt;div ref="zone"&gt;Right-click here&lt;/div&gt;
+&lt;ApexContextMenu :target="zone" :items="items" /&gt;</pre>
+          <div ref="ctxBasic" class="ctx-zone" style="margin-top:12px">Right-click here</div>
+          <ApexContextMenu :items="CTX_ITEMS" :target="() => ctxBasic"
+                           @item-click="ctxLog = $event.item.label || ''" />
+          <p class="note">Last command: <code>{{ ctxLog || 'none yet' }}</code></p>
 
           <h2>Submenus</h2>
           <p class="note">
-            Rows come from the shared overlay renderer, so nesting, separators, headers
-            and hints behave exactly as they do in the tiered menu — including the flip
-            when a submenu would run off the edge.
+            Nest an <code>items</code> array on a row and it becomes a branch, opening to
+            the side on hover. <code>separator</code> and <code>header</code> rows structure
+            a long menu, and <code>hint</code> puts a shortcut on the right.
           </p>
-          <div ref="cxSubZone" class="ctx-zone">Right-click for a nested menu</div>
-          <ApexContextMenu :items="cxSub" :target="cxSubZone" />
+          <div ref="ctxSub" class="ctx-zone" style="margin-top:12px">Right-click for a nested menu</div>
+          <ApexContextMenu :items="CTX_NESTED" :target="() => ctxSub"
+                           @item-click="ctxLog = $event.item.label || ''" />
 
           <h2>Global</h2>
           <p class="note">
-            <code>global</code> attaches to the document instead of one element, which is
-            what an application-wide menu wants. <code>disabled</code> lets the browser’s
-            own menu through again — worth keeping reachable, since replacing it
-            everywhere takes away copy, paste and inspect.
+            <code>global</code> attaches the menu to the document, for an app-wide menu.
+            Toggle it on and right-click anywhere on this page — including outside the
+            boxes.
           </p>
-          <pre class="doc-pre" v-pre>&lt;ApexContextMenu :items="items" global :disabled="!appMenuEnabled" /&gt;</pre>
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexSwitch v-model="ctxGlobal" label="Global context menu" />
+          </div>
+          <ApexContextMenu v-if="ctxGlobal" global :items="CTX_ITEMS"
+                           @item-click="ctxLog = $event.item.label || ''" />
 
           <h2>Command</h2>
           <p class="note">
-            A row runs its own <code>command</code> first, then the menu emits
-            <code>item-click</code>. The command also receives the element the menu was
-            opened on, so one menu can act on whichever row was right-clicked.
+            A row's <code>command</code> runs when it is picked, receiving
+            <code>{ item, originalEvent, target }</code> — <code>target</code> being the
+            element the menu was opened on, which is what a per-row menu in a list needs.
           </p>
-          <div ref="cxRowZone" class="ctx-rows">
-            <div v-for="r in cxRows" :key="r" class="ctx-row" :data-row="r">{{ r }}</div>
-          </div>
-          <ApexContextMenu :items="cxRowItems" :target="cxRowZone" />
-          <p class="pov-state">acted on: <code>{{ cxTarget || 'nothing yet' }}</code></p>
+          <ul ref="ctxRowsEl" class="ctx-list" style="margin-top:12px">
+            <li v-for="p in TEAM.slice(0, 5)" :key="p.name"
+                :data-on="ctxRow === p.name ? 'true' : 'false'"
+                @contextmenu="ctxRow = p.name">
+              <ApexAvatar :label="p.name" size="sm" />
+              <strong>{{ p.name }}</strong>
+              <span class="ctx-role">{{ p.role }}</span>
+            </li>
+          </ul>
+          <ApexContextMenu :target="() => ctxRowsEl"
+                           :items="[{ header: 'Role' },
+                                    { label: 'Admin', icon: 'shield_person', command: () => (ctxRowLog = ctxRow + ' \u2192 Admin') },
+                                    { label: 'Member', icon: 'person', command: () => (ctxRowLog = ctxRow + ' \u2192 Member') },
+                                    { label: 'Guest', icon: 'person_outline', command: () => (ctxRowLog = ctxRow + ' \u2192 Guest') },
+                                    { separator: true },
+                                    { label: 'Remove from team', icon: 'person_remove', command: () => (ctxRowLog = ctxRow + ' removed') }]" />
+          <p class="note">Result: <code>{{ ctxRowLog || 'right-click a person' }}</code></p>
 
           <h2>Template</h2>
           <p class="note">
-            The <code>item</code> slot replaces a row’s contents and nothing else. The row
-            keeps its click, its hover and its submenu, so a custom row never has to
-            reimplement the menu.
+            The <code>item</code> slot replaces a row's contents while the row keeps its
+            click, hover and submenu behaviour — so a custom template never reimplements
+            the menu.
           </p>
-          <div ref="cxTplZone" class="ctx-zone">Right-click for custom rows</div>
-          <ApexContextMenu :items="cxBasic" :target="cxTplZone">
+          <div ref="ctxTpl" class="ctx-zone" style="margin-top:12px">Right-click for a custom template</div>
+          <ApexContextMenu :items="CTX_ITEMS" :target="() => ctxTpl">
             <template #item="{ item, branch }">
-              <ApexIcon v-if="item.icon" :name="item.icon" :size="18" />
-              <span class="tmenu-tpl__label">{{ item.label }}</span>
-              <ApexBadge v-if="item.hint" :value="String(item.hint)" severity="secondary" />
-              <ApexIcon v-if="branch" name="chevron_right" :size="18" class="tmenu-tpl__chev" />
+              <ApexIcon v-if="item.icon" :name="item.icon" :size="18" style="color:var(--accent-primary)" />
+              <span class="apex-menu__label" style="font-weight:600">{{ item.label }}</span>
+              <em v-if="item.hint" class="ctx-kbd">{{ item.hint }}</em>
+              <ApexIcon v-if="branch" name="chevron_right" :size="18" class="apex-menu__chev" />
             </template>
           </ApexContextMenu>
 
           <h2>Router and links</h2>
           <p class="note">
-            A row with an <code>href</code> renders as a real anchor, so middle-click,
-            right-click and copy-address all keep working — which matters more in a
-            context menu than anywhere else, since the user is already right-clicking.
+            A row with <code>href</code> renders an anchor — <code>target="_blank"</code>
+            and all. For programmatic routing use <code>command</code> and call the router
+            there.
           </p>
-          <div ref="cxLinkZone" class="ctx-zone">Right-click for links</div>
-          <ApexContextMenu :items="cxLinks" :target="cxLinkZone" />
+          <div ref="ctxLinks" class="ctx-zone" style="margin-top:12px">Right-click for links</div>
+          <ApexContextMenu :target="() => ctxLinks"
+                           :items="[{ label: 'Open docs', icon: 'open_in_new', href: 'https://vuejs.org', target: '_blank' },
+                                    { label: 'Go to dashboard', icon: 'dashboard', command: () => (ctxLog = 'router.push(/dashboard)') },
+                                    { separator: true },
+                                    { label: 'Unavailable', icon: 'block', disabled: true }]" />
 
           <h2>Permissions</h2>
           <p class="note">
             <code>can</code> hides a row from anyone the resolver denies, and the removals
-            cascade: a submenu whose children have all gone is dropped with them, the
-            header left over nothing goes, and the rules that framed the gap collapse.
+            cascade: a submenu whose children have all gone is dropped with them, the header
+            left over nothing goes, and the rules that framed the gap collapse.
           </p>
           <p class="note">
             This is the one control in the family with arrow-key navigation, and it walks
@@ -4153,8 +4163,8 @@ const items = [
               @click="docsRole = r"
             >{{ r }}</ApexButton>
           </div>
-          <div ref="cxGateZone" class="ctx-zone">Right-click as the role above</div>
-          <ApexContextMenu :items="cxGated" :target="cxGateZone" />
+          <div ref="ctxGate" class="ctx-zone" style="margin-top:12px">Right-click as the role above</div>
+          <ApexContextMenu :items="ctxGated" :target="() => ctxGate" />
         </template>
 
         <template v-if="entry.id === 'dock'">

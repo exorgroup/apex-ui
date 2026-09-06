@@ -958,3 +958,32 @@ background:linear-gradient(150deg,#F0574B 0%,#E8823C 40%,#5B9BD5 80%,#2E6FA8 100
 .sb-msg { margin: 0; padding: 10px 12px; border-radius: var(--r-md);
   background: var(--bg-muted); font-size: 13.5px; }
 .sb-foot { font-size: 12px; color: var(--fg-subtle); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * The demo chrome the other menu pages need.
+ *
+ * The gallery styles these examples with inline attributes; ours use classes,
+ * and until AF2-221 defined none of them. Same defect as the sidebar's, found
+ * by the same guard — zz-docs-classes now fails on a class nothing defines.
+ * ───────────────────────────────────────────────────────────────────────── */
+.dock-stage--tall { min-height: 300px; }
+
+.mbar-demo { margin-block-start: 12px; }
+.mbar-brand { display: inline-flex; align-items: center; gap: 7px;
+  padding-inline: 4px; font-weight: 600; font-size: 13.5px; }
+
+.mega-demo { margin-block-start: 12px; }
+.mega-vert { display: flex; align-items: flex-start; gap: 18px;
+  min-block-size: 280px; margin-block-start: 12px; }
+
+.tmenu-row { display: flex; align-items: flex-start; gap: 22px; flex-wrap: wrap;
+  margin-block-start: 12px; }
+.tmenu-tpl__label { flex: 1 1 auto; font-weight: 600; }
+.tmenu-tpl__chev { margin-inline-start: auto; color: var(--fg-subtle); }
+
+/* One custom menu row: an avatar, a name, and a caps label above the group. */
+.vm-profile { display: flex; align-items: center; gap: 10px; padding: 4px 2px; }
+.vm-profile__name { font-size: 13.5px; font-weight: 600; }
+.vm-label { font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent-primary); }
+.vm-plain { font-size: 13.5px; }
