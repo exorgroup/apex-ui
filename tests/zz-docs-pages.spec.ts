@@ -170,10 +170,7 @@ describe('the ported gallery examples are on the page', () => {
   /* Headings taken from APEX UI Gallery.html. A build cannot tell you a
      section is missing — only reading the rendered page can. */
   const EXPECTED: Record<string, string[]> = {
-    /* Sections 1-47 of the gallery's 66. The radial, special and chrome
-       sections arrive with AF2-238d; listing only what is ported keeps the
-       guard honest about what exists today rather than asserting an
-       aspiration. */
+    /* All 66 gallery sections, in the gallery's order. */
     ApexChart: ['Basic', 'Area', 'Multiple series and the palette', 'Curve types',
       'Null handling', 'Scales', 'Animation', 'Entrance', 'Decimation',
       'Stacked area', 'Range area', 'Segment styling', 'Line border', 'Gradients',
@@ -185,7 +182,12 @@ describe('the ported gallery examples are on the page', () => {
       'Zoom and navigator on bars', 'Bar data labels', 'Population pyramid',
       'Waterfall', '2D zoom', 'Synced charts and syncY', 'Point styling',
       'Radial gradients', 'Custom markers', 'Quadrants and point labels',
-      'Scatter and bubble', 'Combo', 'Custom bar shapes', 'External labels'],
+      'Scatter and bubble', 'Combo', 'Custom bar shapes', 'External labels',
+      'Small slices', 'Radial entrance', 'Pie and donut', 'Gauge', 'Radar',
+      'Polar', 'Compound components', 'Heatmap', 'Panes — price and volume',
+      'Hollow candles', 'Candle styling', 'Candle labels and a log axis',
+      'Candlestick and OHLC', 'Treemap', 'Locale', 'Right to left',
+      'Responsive', 'Theming', 'Title, caption and accessibility'],
     ApexToolbar: ['Basic', 'Sizes and chrome', 'Centred content',
       'Custom — navigation bar', 'Sticky and wrapping', 'Permissions'],
     ApexTabs: ['Basic and dynamic', 'Controlled', 'Scrollable', 'Select on focus',

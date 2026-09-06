@@ -1175,6 +1175,38 @@ const paths = computed(() => {
       };
     }) : [];
 
+    /* Candle geometry moves up for the same reason the bar geometry did: the
+       candle-label branch maps over candleParts, and the declaration sat
+       below it. Two families, one mistake, and neither could be hit until
+       something drew them. Both are now covered by chart-families.spec. */
+    const candleVariantResolved = (s.spec.candleVariant || 'candle') as 'candle' | 'hollow' | 'ohlc';
+    const tones = s.type === 'candlestick' ? candleTones(s.points, candleVariantResolved) : null;
+    const candleWidth = slot
+      ? slot.width
+      : Math.max(2, cat.step * (s.spec.barWidthRatio ?? props.barWidthRatio));
+    const candles = s.type === 'candlestick'
+      ? candleGeometry(
+        s.drawn.filter((p) => p.ohlc).map((p): Candle => ({
+          key: `${s.id}-${p.key}`,
+          point: p,
+          open: p.ohlc!.open,
+          high: p.ohlc!.high,
+          low: p.ohlc!.low,
+          close: p.ohlc!.close,
+          /* Direction, not the palette, colours a candle: the reader is looking
+             for up or down, and a palette hue would say nothing. */
+          up: p.ohlc!.close >= p.ohlc!.open,
+        })),
+        (v) => cat.map(v),
+        (v) => val.map(v),
+        Math.max(2, candleWidth),
+      )
+      : [];
+    const candleParts = candles.map((c) => {
+      const t = tones?.get(c.point.key);
+      return { ...c, tone: t?.tone || (c.up ? 'up' : 'down'), filled: t?.filled ?? true };
+    });
+
     let labels: LabelCandidate[] = [];
     if (labelSpec.value.show && s.type === 'candlestick') {
       /* A candle has FOUR values, so "the value" is meaningless — the field is
@@ -1270,33 +1302,6 @@ const paths = computed(() => {
     /* ── candlesticks ── */
     /* barWidthRatio is the candle's own knob: a fraction of the band, so it stays
        proportional as the chart resizes. */
-    const candleVariantResolved = (s.spec.candleVariant || 'candle') as 'candle' | 'hollow' | 'ohlc';
-    const tones = s.type === 'candlestick' ? candleTones(s.points, candleVariantResolved) : null;
-    const candleWidth = slot
-      ? slot.width
-      : Math.max(2, cat.step * (s.spec.barWidthRatio ?? props.barWidthRatio));
-    const candles = s.type === 'candlestick'
-      ? candleGeometry(
-        s.drawn.filter((p) => p.ohlc).map((p): Candle => ({
-          key: `${s.id}-${p.key}`,
-          point: p,
-          open: p.ohlc!.open,
-          high: p.ohlc!.high,
-          low: p.ohlc!.low,
-          close: p.ohlc!.close,
-          /* Direction, not the palette, colours a candle: the reader is looking
-             for up or down, and a palette hue would say nothing. */
-          up: p.ohlc!.close >= p.ohlc!.open,
-        })),
-        (v) => cat.map(v),
-        (v) => val.map(v),
-        Math.max(2, candleWidth),
-      )
-      : [];
-    const candleParts = candles.map((c) => {
-      const t = tones?.get(c.point.key);
-      return { ...c, tone: t?.tone || (c.up ? 'up' : 'down'), filled: t?.filled ?? true };
-    });
     const candleVariant = candleVariantResolved;
     const upColor = s.spec.upColor || 'var(--accent-success)';
     const downColor = s.spec.downColor || 'var(--accent-danger)';

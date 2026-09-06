@@ -32,15 +32,23 @@ export function createChartRegistry(): ChartRegistry {
     parts,
     set(kind, key, config) {
       if (!parts[kind]) parts[kind] = new Map();
+      /* Mutated in place, never replaced.
+       *
+       * This used to reassign `parts[kind] = new Map(parts[kind])` on every
+       * write, on the theory that a computed reading .values() needed a new
+       * reference to re-evaluate. It does not — a reactive Map tracks
+       * iteration, which is what partList does — and the reassignment was an
+       * infinite loop waiting for a second part: each part registers inside a
+       * watchEffect that reads `parts[kind]`, so A's write invalidated B's
+       * effect, B's write invalidated A's, forever. One compound part alone
+       * never tripped it, because Vue does not re-run an effect on its own
+       * write. Two did: "Maximum recursive updates exceeded".
+       */
       parts[kind].set(key, config);
-      /* A Map mutation is reactive in Vue 3, but replacing the reference is what
-         makes a computed reading .values() re-evaluate reliably across renames. */
-      parts[kind] = new Map(parts[kind]);
     },
     remove(kind, key) {
       if (!parts[kind]) return;
       parts[kind].delete(key);
-      parts[kind] = new Map(parts[kind]);
     },
   };
 }
