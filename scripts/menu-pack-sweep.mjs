@@ -44,12 +44,8 @@ const PACKS = {
     'tieredmenu', 'menubar', 'menu', 'megamenu', 'dock', 'contextmenu',
     'breadcrumb', 'sidebar', 'splitbutton', 'speeddial', 'toolbar',
   ],
-  /*
-   * AF2-227…234. The chart is absent on purpose: it has no entry of ours yet,
-   * and listing it would print "no entry of ours" as a finding every run,
-   * which is how a report starts being ignored.
-   */
-  batch: ['compare', 'carousel', 'gallery', 'taskboard'],
+  /** AF2-227…238d. The chart joined once AF2-238a gave it an entry. */
+  batch: ['compare', 'carousel', 'gallery', 'taskboard', 'chart'],
 };
 
 /*
@@ -60,7 +56,7 @@ const PACKS = {
  * "allowances no row needed", which is the report crying wolf about rules
  * that were never in play.
  */
-const PACK_RULES = { menu: [0, 1, 2], batch: [] };
+const PACK_RULES = { menu: [0, 1, 2], batch: [3] };
 
 const packName = process.argv[2] || 'menu';
 const PACK = PACKS[packName];
@@ -111,6 +107,19 @@ const ALL_RULES = [
        as the first crumb for maxItems, and its table never said so. */
     why: 'the note that `home` counts as the first crumb',
     apply: (t) => t.replace('. It counts as the first crumb', ''),
+  },
+  {
+    /*
+     * AF2-237 renamed the chart's palette to the library-wide --apex-* prefix,
+     * so three service rows name variables the gallery spells the old way.
+     * The rows are prose ABOUT the code, and the code emits --apex-cht-*, so
+     * matching the gallery here would make the docs wrong on purpose.
+     *
+     * Every rule normalises OUR text back towards the gallery's, so this
+     * undoes the rename rather than applying it.
+     */
+    why: 'AF2-237 renamed --cht-* to --apex-cht-*',
+    apply: (t) => t.replace(/--apex-cht-/g, '--cht-'),
   },
 ];
 

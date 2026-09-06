@@ -784,6 +784,46 @@ const CAR_PARTS: string[][] = [
   ['dot', 'One indicator'],
 ];
 
+/* ── ApexChart page ───────────────────── */
+/**
+ * The ui map's parts, for the Customising table.
+ *
+ * Twenty-six keys over sixty named elements: the map covers the parts a caller
+ * has a reason to restyle, not every node the chart draws. `tile` and `cell`
+ * are the two worth knowing about — they belong to the treemap and heatmap
+ * renderers AF2-236 extracted, and reach them only because the chart hands its
+ * map down.
+ */
+const CHT_PARTS: string[][] = [
+  ['root', 'The figure — the element carrying every data-* state hook'],
+  ['svg', 'The drawing surface inside it'],
+  ['plot', 'The plot rect, inside the axes'],
+  ['head', 'Title and caption together, above the plot'],
+  ['title', 'The title text'],
+  ['caption', 'The caption under it'],
+  ['legend', 'The legend list'],
+  ['key', 'One legend entry'],
+  ['swatch', 'The colour chip in an entry'],
+  ['axis', 'An axis group'],
+  ['tick', 'One tick label — including a heatmap row or column label'],
+  ['grid', 'A grid line'],
+  ['axisTitle', 'An axis label'],
+  ['series', 'A series group, whatever it draws'],
+  ['line', 'A line path'],
+  ['area', 'The fill under a line'],
+  ['bar', 'One bar'],
+  ['point', 'One marker'],
+  ['slice', 'One pie, donut or polar slice'],
+  ['tip', 'The tooltip'],
+  ['tipTitle', 'Its heading'],
+  ['tipRow', 'One row in it'],
+  ['nav', 'The navigator strip'],
+  ['toolbar', 'The toolbar'],
+  ['tool', 'One toolbar button'],
+  ['tile', 'One treemap tile — rendered by ApexChartTreemap'],
+  ['cell', 'One heatmap cell — rendered by ApexChartHeat'],
+];
+
 /* ── ApexCompare page ─────────────────── */
 /** The ui map's parts, for the Customising table. */
 const CMP_PARTS: string[][] = [
@@ -5128,6 +5168,30 @@ function pick(city) {
                     :series="[{ id: 'activation', name: 'Activated', data: CHT_TRIAL, xKey: 'month', yKey: 'value', fillOpacity: 0.18 }]"
                     curve="smooth" data-table :legend="{ show: false }" height="300" />
       </div>
+          <h2>Customising</h2>
+          <p class="note">
+            Two ways in. <strong>Variables</strong> restyle every chart at once —
+            <code>--apex-cht-series-1…8</code> for the palette, plus
+            <code>--apex-cht-grid</code>, <code>--apex-cht-axis</code> and
+            <code>--apex-cht-tick</code>. The Theming section above overrides five of
+            them on an ancestor and the chart follows without a prop.
+            <strong>Classes</strong> do everything variables do plus states, media
+            queries and pseudo-elements, through the <code>ui</code> map.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>ui key</th><th>Part</th></tr></thead>
+            <tbody>
+              <tr v-for="r in CHT_PARTS" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td>{{ r[1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="note">
+            The palette is a function, not an array: <code>seriesColor(i)</code> returns
+            <code>var(--apex-cht-series-N)</code>, so a hundred charts restyle together
+            and dark mode costs nothing. An export resolves those variables to literal
+            colours first — a standalone SVG has no design system to look them up in.
+          </p>
         </template>
 
         <template v-if="entry.id === 'taskboard'">
