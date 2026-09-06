@@ -58,7 +58,7 @@ export interface DocEntry {
    */
   demo?: 'plain' | 'chip' | 'meter' | 'inplace' | 'block' | 'scrolltop'
     | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container'
-    | 'overlay' | 'menu' | 'media';
+    | 'overlay' | 'menu' | 'media' | 'board';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -352,6 +352,137 @@ export const MTR_ICONS = [
  * The people the context menu's per-row example acts on. Ported from the
  * gallery, where the same list backs several controls.
  */
+/* ── ApexTaskBoard demo data ──────────────────────────────────────
+   Ported from the gallery. Every board on the page copies its seed, so one
+   demo's drags never show up in another. */
+export const TB_SEED = [
+  { id: 't1', columnId: 'ideas', order: 0, title: 'Persona-based onboarding paths', labels: ['activation', 'research'], priority: 'P2', assignees: ['Sarah Wilson'], description: 'Route new customers into starter flows.', points: 5 },
+  { id: 't2', columnId: 'ideas', order: 1, title: 'Usage-based pricing meters', labels: ['billing', 'platform'], priority: 'P1', checklist: { done: 2, total: 5 }, due: 'Sep 13', assignees: ['James Chen'], points: 8 },
+  { id: 't3', columnId: 'ideas', order: 2, title: 'Enterprise SSO buying signal', labels: ['enterprise'], priority: 'P3', description: 'Detect SSO interest from trials.', points: 3 },
+  { id: 't4', columnId: 'discovery', order: 0, title: 'Mobile trial activation', labels: ['mobile'], priority: 'P2', checklist: { done: 1, total: 3 }, due: 'Sep 6', assignees: ['Maria Garcia'], points: 5 },
+  { id: 't5', columnId: 'discovery', order: 1, title: 'Account health score', labels: ['analytics', 'growth'], priority: 'P3', assignees: ['Alex Kim'], description: 'Blend usage and support signals.', points: 13 },
+  { id: 't6', columnId: 'ready', order: 0, title: 'Customer import wizard', labels: ['platform'], priority: 'P3', assignees: ['Lena Braun'], points: 8 },
+  { id: 't7', columnId: 'ready', order: 1, title: 'Self-serve plan downgrade', labels: ['billing', 'trust'], priority: 'P2', due: 'Sep 4', assignees: ['Raj Patel'], description: 'Let customers downgrade unaided.', points: 5 },
+  { id: 't8', columnId: 'ready', order: 2, title: 'Warehouse sync beta', labels: ['analytics'], priority: 'P1', due: 'Sep 9', assignees: ['James Chen'], points: 21 },
+  { id: 't9', columnId: 'building', order: 0, title: 'Checkout recovery campaign', labels: ['checkout', 'growth'], priority: 'P1', checklist: { done: 3, total: 5 }, due: 'Sep 2', assignees: ['Sarah Wilson', 'Lena Braun'], points: 8 },
+  { id: 't10', columnId: 'building', order: 1, title: 'Admin audit log', labels: ['enterprise', 'trust'], priority: 'P2', checklist: { done: 1, total: 3 }, assignees: ['Lena Braun'], description: 'Immutable record of admin actions.', points: 5 },
+  { id: 't11', columnId: 'building', order: 2, title: 'Saved dashboard templates', labels: ['analytics'], priority: 'P3', assignees: ['James Chen'], points: 3 },
+  { id: 't12', columnId: 'blocked', order: 0, title: 'Apple Pay certification', labels: ['checkout', 'trust'], priority: 'P2', due: '2d ago', assignees: ['Sarah Wilson'], description: 'Waiting on the certification queue.', points: 8 },
+  { id: 't13', columnId: 'blocked', order: 1, title: 'Data residency messaging', labels: ['enterprise'], priority: 'P3', points: 2 },
+];
+
+export const TB_OPS_SEED = [
+  { id: 'o1', columnId: 'intake', swimlaneId: 'north', order: 0, title: 'Quote backup generator service', priority: 'Medium', estimate: '2p', tag: '#quote', assignees: ['Priya Shah'] },
+  { id: 'o2', columnId: 'scheduled', swimlaneId: 'north', order: 0, title: 'Replace freezer controller', priority: 'High', estimate: '2p', tag: '#cold-chain', assignees: ['Nils Kaur'] },
+  { id: 'o3', columnId: 'onsite', swimlaneId: 'north', order: 0, title: 'Investigate gate sensor loop', priority: 'Critical', estimate: '3p', tag: '#access', assignees: ['Mona Lund'] },
+  { id: 'o4', columnId: 'onsite', swimlaneId: 'north', order: 1, title: 'Refit loading dock camera', priority: 'High', estimate: '5p', tag: '#security', assignees: ['Nils Kaur'] },
+  { id: 'o5', columnId: 'review', swimlaneId: 'north', order: 0, title: 'Verify night crew handoff', priority: 'Medium', estimate: '1p', tag: '#handoff', assignees: ['Sam Carter'] },
+  { id: 'o6', columnId: 'closed', swimlaneId: 'north', order: 0, title: 'Close sprinkler inspection', priority: 'Low', estimate: '1p', tag: '#inspection', assignees: ['Priya Shah'] },
+  { id: 'o7', columnId: 'intake', swimlaneId: 'retail', order: 0, title: 'Book signage replacement', priority: 'High', estimate: '2p', tag: '#retail', assignees: ['Elif Riza'] },
+  { id: 'o8', columnId: 'intake', swimlaneId: 'retail', order: 1, title: 'Repair stockroom door strike', priority: 'High', estimate: '2p', tag: '#access', assignees: ['Vik Cruz'] },
+  { id: 'o9', columnId: 'scheduled', swimlaneId: 'retail', order: 0, title: 'Stage weekend cleaning crew', priority: 'Medium', estimate: '1p', tag: '#crew', assignees: ['Vik Cruz'] },
+  { id: 'o10', columnId: 'onsite', swimlaneId: 'retail', order: 0, title: 'Escalator brake fault', priority: 'Critical', estimate: '3p', tag: '#safety', assignees: ['Omar Bay'] },
+  { id: 'o11', columnId: 'review', swimlaneId: 'retail', order: 0, title: 'Approve storefront glass work', priority: 'Critical', estimate: '2p', tag: '#vendor', assignees: ['Omar Bay'] },
+  { id: 'o12', columnId: 'closed', swimlaneId: 'retail', order: 0, title: 'Close POS counter retrofit', priority: 'Medium', estimate: '2p', tag: '#retail', assignees: ['Elif Riza'] },
+  { id: 'o13', columnId: 'intake', swimlaneId: 'airport', order: 0, title: 'Triage baggage belt alarm', priority: 'Critical', estimate: '5p', tag: '#baggage', assignees: ['Maya Patel'] },
+  { id: 'o14', columnId: 'onsite', swimlaneId: 'airport', order: 0, title: 'Repair kiosk printer cluster', priority: 'High', estimate: '2p', tag: '#kiosk', assignees: ['Maya Patel'] },
+  { id: 'o15', columnId: 'closed', swimlaneId: 'airport', order: 0, title: 'Close terminal HVAC alarm', priority: 'High', estimate: '3p', tag: '#hvac', assignees: ['Maya Patel'] },
+];
+
+/** 600 cards, for the virtual-scroll example. */
+export const TB_BIG = (() => {
+  const cols = ['intake', 'scheduled', 'onsite', 'review', 'closed'];
+  const prios = ['P1', 'P2', 'P3', 'P4'];
+  const who = ['Sarah Wilson', 'James Chen', 'Maria Garcia', 'Alex Kim', 'Lena Braun'];
+  const out = [];
+  for (let i = 0; i < 600; i += 1) {
+    out.push({
+      id: 'big-' + i,
+      columnId: cols[i % cols.length],
+      order: Math.floor(i / cols.length),
+      title: 'Work item ' + (i + 1),
+      priority: prios[i % prios.length],
+      assignees: [who[i % who.length]],
+      points: (i % 8) + 1,
+    });
+  }
+  return out;
+})();
+
+export const TB_COLUMNS = [
+  { id: 'ideas', title: 'Ideas', accent: 'oklch(0.62 0.14 250)' },
+  { id: 'discovery', title: 'Discovery', accent: 'oklch(0.66 0.15 200)' },
+  { id: 'ready', title: 'Ready', limit: 4, accent: 'oklch(0.68 0.16 150)' },
+  { id: 'building', title: 'Building', limit: 3, accent: 'oklch(0.72 0.15 90)' },
+  { id: 'blocked', title: 'Blocked', accent: 'oklch(0.62 0.19 25)' },
+];
+
+export const TB_RULE_COLUMNS = [
+  { id: 'ideas', title: 'Ideas' },
+  { id: 'ready', title: 'Ready', limit: 2 },
+  { id: 'building', title: 'Building' },
+  { id: 'review', title: 'Review', allowedTo: ['building', 'shipped'] },
+  { id: 'shipped', title: 'Shipped', locked: true },
+];
+
+export const TB_OPS_COLUMNS = [
+  { id: 'intake', title: 'Intake' },
+  { id: 'scheduled', title: 'Scheduled' },
+  { id: 'onsite', title: 'On site', limit: 3 },
+  { id: 'review', title: 'Review' },
+  { id: 'closed', title: 'Closed' },
+];
+
+export const TB_LANES = [
+  { id: 'north', title: 'North Region', icon: 'apartment' },
+  { id: 'retail', title: 'Downtown Retail', icon: 'storefront' },
+  { id: 'airport', title: 'Airport Terminal', icon: 'flight' },
+];
+
+export const TB_PERM_COLUMNS = [
+  { id: 'ideas', title: 'Ideas' },
+  { id: 'ready', title: 'Ready' },
+  { id: 'building', title: 'Building' },
+  { id: 'shipped', title: 'Shipped' },
+];
+
+export const TB_GUARD_COLUMNS = [
+  { id: 'ready', title: 'Ready' },
+  { id: 'building', title: 'Building' },
+  { id: 'shipped', title: 'Shipped' },
+];
+
+export const TB_GROUPS = [
+  { id: 'shaping', title: 'Shaping', columnIds: ['backlog', 'ideas', 'discovery'], accent: 'oklch(0.62 0.14 250)' },
+  { id: 'delivery', title: 'Delivery', columnIds: ['ready', 'building'], accent: 'oklch(0.68 0.16 150)' },
+  { id: 'done', title: 'Done', columnIds: ['shipped'], accent: 'oklch(0.60 0.10 260)' },
+];
+
+export const TB_PHASE_COLUMNS = [
+  { id: 'backlog', title: 'Backlog', pinned: 'start' as const },
+  { id: 'ideas', title: 'Ideas' },
+  { id: 'discovery', title: 'Discovery' },
+  { id: 'ready', title: 'Ready', limit: 4 },
+  { id: 'building', title: 'Building', limit: 3 },
+  { id: 'shipped', title: 'Shipped', pinned: 'end' as const },
+];
+
+export const TB_ICONS: Record<string, string> = {
+  ideas: 'lightbulb', discovery: 'travel_explore', ready: 'task_alt',
+  building: 'construction', blocked: 'block',
+};
+
+export const TB_FIELDS = {
+  title: 'title', labels: 'labels', priority: 'priority', assignees: 'assignees',
+  checklist: 'checklist', due: 'due', description: 'description',
+  meta: [{ key: 'points', icon: 'straighten' }],
+};
+
+export const TB_OPS_FIELDS = {
+  title: 'title', priority: 'priority', assignees: 'assignees',
+  meta: [{ key: 'estimate', icon: 'schedule' }, { key: 'tag' }],
+};
+
 /** The gallery's eight placeholders \u2014 every ApexGallery example uses these. */
 export const GAL_IMAGES = [
   { caption: 'Coastline', background: 'linear-gradient(140deg,#8FB6D9,#DCE9F2)' },
@@ -4273,6 +4404,81 @@ export const ENTRIES: DocEntry[] = [
       ['v-apex-tooltip.top="’Text’"', 'modifier', 'top, bottom, left or right'],
       ['v-apex-tooltip="{ value, … }"', 'object', 'Every option above, and reactive — a live tooltip picks up new text without a re-hover'],
       ['app.use(ApexUI)', 'plugin', 'Registers the directive; import { apexTooltip } to register it yourself'],
+    ],
+  },
+  {
+    id: 'taskboard', name: 'ApexTaskBoard', group: 'Board',
+    blurb: 'A kanban board over data the application owns. Nothing here mutates items \u2014 every interaction emits a payload describing the change, so optimistic update, rollback, undo and multi-user sync stay in the app where they belong. Items are a flat array rather than nested column arrays, which is what makes a move one field on one object instead of two splices and a rebuild of both columns, and leaves filtering and sorting to the app with no restructuring on the way in.',
+    noField: true, demo: 'board',
+    lead: [':items="items"', ':columns="columns"', ':swimlanes="swimlanes"'],
+    tail: '\n  @card-move="onMove"\n/>',
+    base: { selectionMode: 'multiple', wipMode: 'warn', density: 'normal', columnWidth: '260px', showCounts: true },
+    controls: [
+      { key: 'selectionMode', type: 'select', options: ['none', 'single', 'multiple'] },
+      { key: 'wipMode', type: 'select', options: ['warn', 'block'] },
+      { key: 'density', type: 'select', options: ['compact', 'normal', 'roomy'] },
+      { key: 'draggable', type: 'bool' }, { key: 'reorderableColumns', type: 'bool' },
+      { key: 'showCounts', type: 'bool' },
+      { key: 'showAddCard', type: 'bool' }, { key: 'collapsibleColumns', type: 'bool' },
+      { key: 'columnWidth', type: 'text' }, { key: 'laneWidth', type: 'text' },
+      { key: 'gap', type: 'text' }, { key: 'height', type: 'text' },
+      { key: 'cardRadius', type: 'text' },
+      { key: 'accent', type: 'color' }, { key: 'columnBackground', type: 'color' },
+      { key: 'cardBackground', type: 'color' },
+    ],
+    props: [
+      ['items', 'TaskBoardItem[]', '[]', '{ id, columnId, swimlaneId?, order?, \u2026your own fields }. Never mutated \u2014 the board reads it and emits moves'],
+      ['columns', 'TaskBoardColumn[]', '[]', '{ id, title, limit?, collapsed?, locked?, accent?, allowedTo? }. allowedTo restricts where cards may go from that column; locked keeps them in it'],
+      ['swimlanes', 'TaskBoardSwimlane[]', '\u2014', '{ id, title, icon?, collapsed? }. Omit for a plain column board; the column model is identical either way'],
+      ['columnGroups', 'TaskBoardColumnGroup[]', '\u2014', '{ id, title, columnIds, accent? } \u2014 phase headers above the columns. Each header spans exactly its own columns, and an ungrouped column keeps a track of its own'],
+      ['column.pinned', "'start' | 'end'", '\u2014', 'Sticks that column to an edge while the rest scrolls under it. The inset is resolved from the tracks before it, since sticky cannot measure them itself'],
+      ['reorderableColumns', 'boolean', 'false', 'Drag a header to reorder. Only reports \u2014 emits column-reorder and leaves the columns array to the app, like every other change'],
+      ['permissions', 'TaskBoardPermissions', '\u2014', 'Access rules, all optional and permitted by default: hiddenColumns, canDrag(item), canDrop({ item, columnId, swimlaneId }), canCreate({ columnId, swimlaneId }), canEdit(item), canDelete(item), canReorderColumns. Functions rather than flags, because a real permission depends on the row \u2014 this user\u2019s own cards, an archived column \u2014 which a boolean per board could never express'],
+      ['confirmMove', '(payload) => boolean | Promise<boolean>', '\u2014', 'Asked before a move is emitted; false abandons it. Async, so a confirmation dialog or a server check can answer \u2014 which a synchronous guard could not. Drags and keyboard moves both go through it'],
+      ['cardFields', 'TaskCardFields', 'sensible names', 'Which item property feeds each part of the default card \u2014 title, labels, priority, assignees, checklist, due, description, plus meta chips. A mapping rather than a fixed shape, so any dataset renders without a custom card'],
+      ['draggable', 'boolean', 'true', 'Pointer-based, so multi-card drag, a real preview, edge auto-scroll and touch all work \u2014 none of which HTML5 drag-and-drop gives'],
+      ['selectionMode', "'none' | 'single' | 'multiple'", "'single'", 'Multiple allows ctrl or cmd click, and dragging a selected card drags the whole selection'],
+      ['wipMode', "'warn' | 'block'", "'warn'", 'Over a column\u2019s limit: flag it, or refuse the drop and emit wip-blocked'],
+      ['showCounts / showAddCard / collapsibleColumns', 'boolean', 'true', ''],
+      ['virtualScroll', 'boolean', 'false', 'Renders only the cards near each cell\u2019s viewport, windowed per cell so columns scroll independently. The cells take over the vertical axis and the board keeps the horizontal one \u2014 which makes it a column-board feature: with swimlanes the lanes need the board\u2019s own vertical scroll, so it is ignored'],
+      ['virtualScrollItemHeight / virtualScrollBuffer', 'number', '96 / 4', 'A starting estimate, replaced by a real measurement as soon as one card renders \u2014 a guess wrong by a third leaves blank gaps or wasted DOM. Cards of wildly variable height make the estimate less useful, so keep heights stable within a board'],
+      ['columnWidth / laneWidth / gap / height / density', 'string', "'280px' / '160px' / '14px' / auto / 'normal'", 'A collapsed column narrows to a rail'],
+      ['background / columnBackground / cardBackground / cardRadius / accent', 'string', 'tokens', 'A column\u2019s own accent overrides the board\u2019s'],
+    ],
+    events: [
+      ['card-move', '{ items, from: { columnId, swimlaneId, index }, to: { \u2026 } } \u2014 one payload for drags and keyboard moves alike, so persistence never learns which it was'],
+      ['card-click / card-activate / card-contextmenu', '{ item, originalEvent } \u2014 activate covers double-click and Enter'],
+      ['selection-change', '{ items }'],
+      ['add-card', '{ columnId, swimlaneId }'],
+      ['column-collapse', '{ columnId, collapsed }'],
+      ['wip-blocked', '{ columnId } \u2014 a drop refused by a limit'],
+      ['column-reorder', '{ columnId, fromIndex, toIndex } \u2014 a header was dragged'],
+    ],
+    slots: [
+      ['card', 'Replaces the card contents; receives { item, selected, canEdit, canDelete, canDrag } \u2014 so your card and menu read the same rules the board does. Drag, selection, focus and movement stay with the board'],
+      ['drag-preview', '{ items, count } \u2014 replaces the preview\u2019s contents. Its positioning stays with the board, since a consumer cannot know the pointer offset the drag began from'],
+      ['column-header', '{ column, count, over }'],
+      ['column-footer', '{ column }'],
+      ['swimlane-header', '{ swimlane, count }'],
+      ['empty', '{ column, swimlane }'],
+    ],
+    serviceTitle: 'Data, history and rules',
+    serviceRows: [
+      ['items', 'Ref<TaskBoardItem[]>', 'Bind straight to the board'],
+      ['move(payload)', 'void', 'Applies a card-move payload, renumbering both affected cells'],
+      ['add / update / remove', 'void', 'The usual mutations, each pushed onto the history'],
+      ['undo() / redo(), canUndo / canRedo', 'void / boolean', 'A stack of the payloads the board already emits. History lives here rather than in the component, which would fight an app that has its own'],
+      ['applyMove(items, payload)', 'TaskBoardItem[]', 'The same index arithmetic, exported for your own store'],
+      ['getState() / setState(state)', 'ref methods', 'Collapse, lane closure, selection and scroll offsets \u2014 and deliberately no rendered geometry or measured heights, which belong to this session\u2019s DOM and restore into a different viewport as a board scrolled somewhere that no longer exists'],
+      ['exportJson() / exportCsv() / exportRows()', 'ref methods', 'What the board is showing, with column and lane ids resolved to titles. Returns strings rather than downloading \u2014 the file, its name and where it goes are the app\u2019s'],
+      ['print', 'CSS', 'Printing unrolls the columns into a wrapping grid, drops the cells\u2019 fixed heights and hides the controls, so a board prints as a document rather than a photograph of a scroller'],
+      ['hidden columns', 'removed', 'A column in hiddenColumns is not rendered at all \u2014 an emptied column with a count of zero still advertises that it exists'],
+      ['canDelete', 'passthrough', 'The board never deletes; the rule is handed to your card and menu so there is one source of truth'],
+      ['keyboard \u2014 moving', 'Ctrl/Cmd + arrows', 'Left and right move columns, up and down reorder, with Shift for swimlanes \u2014 a drag-only board is unusable without a mouse'],
+      ['keyboard \u2014 reading', 'plain arrows', 'Roves focus to the nearest card in that direction, so reading the board never moves anything'],
+      ['keyboard \u2014 selecting', 'Ctrl/Cmd+A, Escape', 'Selects the focused card\u2019s column, or clears'],
+      ['shift-click', 'range', "Extends within the anchor's own cell: a board has no single sequence, so a range across columns would take in cards the user cannot see between"],
+      ['clearSelection() / selectAll(columnId, swimlaneId?)', 'ref methods', 'Drive selection from a toolbar'],
     ],
   },
   {

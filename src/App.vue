@@ -16,6 +16,8 @@ import {
   FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
   BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS,
   AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW, TEAM, CAR_SHOTS, CAR_TRACKS, CAR_NAV_POS, GAL_IMAGES,
+  TB_SEED, TB_OPS_SEED, TB_BIG, TB_COLUMNS, TB_RULE_COLUMNS, TB_OPS_COLUMNS, TB_LANES,
+  TB_PERM_COLUMNS, TB_GUARD_COLUMNS, TB_GROUPS, TB_PHASE_COLUMNS, TB_ICONS, TB_FIELDS, TB_OPS_FIELDS,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS, DLG_POSITIONS, MSG_TEXT,
   TOAST_POSITIONS, TOAST_LINES,
@@ -24,6 +26,7 @@ import type { AddNewKind, DocEntry, DocPage } from './registry';
 /* ApexPopover is imported for its type: the five popover examples are driven
    through refs, and a ref to a component needs the component to type it. The
    tags themselves come from the plugin's global registration. */
+import { applyMove } from '@exorgroup/apex-ui';
 import { useApexDialog, useApexAlert, useApexToast, useCan, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu, ApexBreadcrumb,
   ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger } from '@exorgroup/apex-ui';
 import type { MenuItem, MegaItem, CrumbItem, SpeedDialItem } from '@exorgroup/apex-ui';
@@ -35,6 +38,7 @@ import ServiceStage from './demos/ServiceStage.vue';
 import OverlayStage from './demos/OverlayStage.vue';
 import MenuStage from './demos/MenuStage.vue';
 import MediaStage from './demos/MediaStage.vue';
+import BoardStage from './demos/BoardStage.vue';
 /* The dynamic-dialog and confirm-popup demos appear in the stage AND in a
    section below it. One module holds their state so both report through the
    same line — see demos/overlayDemos.ts. */
@@ -235,6 +239,242 @@ const dialGated: SpeedDialItem[] = [
 /* The toolbar has no model, so its Permissions section gates the way a caller
    would: the same resolver, read directly, driving a v-if. */
 const pageCan = useCan();
+
+/* ── ApexTaskBoard page ───────── */
+/* Each example copies the seed. The board never mutates `items` — it emits a
+   payload and the app applies it — so one shared array would make every drag
+   on this page show up in all thirteen examples at once. */
+/* Spelled out rather than derived from the seed: TB_SEED's element type is a
+   union of shapes (some rows have a checklist, some a due date), so a derived
+   type makes every spread of two rows a wider union again, and tbEditSave's
+   `{ ...row, ...draft }` stops assigning back to the array it came from. */
+type TbItem = {
+  id: string;
+  columnId: string;
+  swimlaneId?: string;
+  order?: number;
+  title: string;
+  labels?: string[];
+  priority?: string;
+  assignees?: string[];
+  checklist?: { done: number; total: number };
+  due?: string;
+  description?: string;
+  points?: number;
+  [key: string]: unknown;
+};
+
+const copy = (rows: readonly Record<string, unknown>[]): TbItem[] =>
+  rows.map((r) => ({ ...r })) as TbItem[];
+type TbMove = Parameters<typeof applyMove>[1];
+
+const tbItems = ref<TbItem[]>(copy(TB_SEED));
+const tbOps = ref<TbItem[]>(copy(TB_OPS_SEED));
+const tbPhase = ref<TbItem[]>(
+  TB_SEED.map((r) => ({ ...r, columnId: r.columnId === 'blocked' ? 'backlog' : r.columnId })));
+const tbPhaseColumns = ref(copy(TB_PHASE_COLUMNS));
+const tbMenuItems = ref<TbItem[]>(copy(TB_SEED.filter((i2) => ['ideas', 'ready', 'building'].includes(i2.columnId))));
+const tbRules = ref<TbItem[]>(copy(TB_SEED.filter((i2) => ['ideas', 'ready', 'building'].includes(i2.columnId))));
+const tbPermItems = ref<TbItem[]>(copy(TB_SEED.filter((i2) => ['ideas', 'ready', 'building'].includes(i2.columnId))));
+const tbGuard = ref<TbItem[]>(copy(TB_SEED.filter((i2) => ['ready', 'building'].includes(i2.columnId))));
+const tbSelItems = ref<TbItem[]>(copy(TB_SEED));
+const tbEditItems = ref<TbItem[]>(
+  copy(TB_SEED.filter((r) => ['ideas', 'ready', 'building'].includes(r.columnId))));
+const tbBig = ref<TbItem[]>(copy(TB_BIG));
+const tbStateItems = ref<TbItem[]>(copy(TB_OPS_SEED));
+
+const tbLog = ref('');
+const tbSel = ref(0);
+const tbBlock = ref(false);
+const tbRole = ref('Admin');
+const tbGuardLog = ref('');
+const tbSelNames = ref('');
+const tbMenuLog = ref('');
+const tbMenuCard = ref<TbItem | null>(null);
+const tbVirtual = ref(true);
+const tbRendered = ref(0);
+const tbState = ref<unknown>(null);
+const tbExport = ref('');
+const tbDialog = ref(false);
+const tbDraft = ref<Record<string, unknown>>({});
+
+/* The first board keeps its own history, to show that undo is the app's:
+   the board emits, the app decides what a stack of those payloads means. */
+const tbPast = ref<TbItem[][]>([]);
+const tbFuture = ref<TbItem[][]>([]);
+
+function tbMove(payload: TbMove) {
+  tbPast.value = [...tbPast.value, tbItems.value];
+  tbFuture.value = [];
+  tbItems.value = applyMove(tbItems.value, payload) as TbItem[];
+  tbLog.value = payload.items.length > 1
+    ? `${payload.items.length} cards moved to ${payload.to.columnId}`
+    : `${payload.items[0].title} → ${payload.to.columnId}`;
+}
+function tbUndo() {
+  const prev = tbPast.value[tbPast.value.length - 1];
+  if (!prev) return;
+  tbPast.value = tbPast.value.slice(0, -1);
+  tbFuture.value = [...tbFuture.value, tbItems.value];
+  tbItems.value = prev;
+  tbLog.value = 'undone';
+}
+function tbRedo() {
+  const next = tbFuture.value[tbFuture.value.length - 1];
+  if (!next) return;
+  tbFuture.value = tbFuture.value.slice(0, -1);
+  tbPast.value = [...tbPast.value, tbItems.value];
+  tbItems.value = next;
+  tbLog.value = 'redone';
+}
+function tbReset() {
+  tbItems.value = copy(TB_SEED);
+  tbPast.value = [];
+  tbFuture.value = [];
+  tbLog.value = '';
+}
+
+/* The board reports the intent; the columns array is the app's to reorder. */
+function tbReorder(payload: { columnId: string; fromIndex: number; toIndex: number }) {
+  const next = tbPhaseColumns.value.slice();
+  next.splice(payload.toIndex, 0, next.splice(payload.fromIndex, 1)[0]);
+  tbPhaseColumns.value = next;
+  tbLog.value = `${payload.columnId} moved to position ${payload.toIndex + 1}`;
+}
+
+/* Context menu — the board emits the card and the event; the menu is ours. */
+const tbMenu = ref<{ show: (e: Event) => void } | null>(null);
+function tbOpenMenu(payload: { item: TbItem; originalEvent: Event }) {
+  payload.originalEvent.preventDefault();
+  tbMenuCard.value = payload.item;
+  tbMenu.value?.show(payload.originalEvent);
+}
+function tbMenuMove(columnId: string) {
+  const card = tbMenuCard.value;
+  if (!card) return;
+  tbMenuItems.value = applyMove(tbMenuItems.value, {
+    items: [card], from: { columnId: card.columnId, index: 0 }, to: { columnId, index: 0 },
+  }) as TbItem[];
+  tbMenuLog.value = `${card.title} → ${columnId}`;
+}
+function tbDuplicate() {
+  const card = tbMenuCard.value;
+  if (!card) return;
+  tbMenuItems.value = [...tbMenuItems.value,
+    { ...card, id: `${card.id}-copy-${Date.now()}`, title: `${card.title} (copy)` }];
+  tbMenuLog.value = `duplicated ${card.title}`;
+}
+function tbDelete() {
+  const card = tbMenuCard.value;
+  if (!card) return;
+  tbMenuItems.value = tbMenuItems.value.filter((i2) => i2.id !== card.id);
+  tbMenuLog.value = `deleted ${card.title}`;
+}
+const TB_MENU = computed<MenuItem[]>(() => [
+  { label: 'Open card', icon: 'open_in_new', command: () => { tbMenuLog.value = `open ${tbMenuCard.value?.title}`; } },
+  { label: 'Duplicate', icon: 'content_copy', command: tbDuplicate },
+  { separator: true },
+  { label: 'Move to Ready', icon: 'east', command: () => tbMenuMove('ready') },
+  { label: 'Move to Building', icon: 'construction', command: () => tbMenuMove('building') },
+  { separator: true },
+  { label: 'Delete', icon: 'delete', command: tbDelete },
+]);
+
+/*
+ * The board's own permission model, not the can() seam.
+ *
+ * Every other control asks can(action, resource) and hides what is refused.
+ * A board cannot: the answer depends on the row — whether this card is mine,
+ * whether that column is archived — and there are six distinct verbs, one of
+ * which (canDelete) the board only passes through to your card because it
+ * never deletes anything itself. Functions per board beat a resource string
+ * per card here, so ApexTaskBoard keeps TaskBoardPermissions.
+ */
+const tbPermissions = computed(() => {
+  const mine = (item: TbItem) => (item.assignees || []).includes('Sarah Wilson');
+  if (tbRole.value === 'Admin') return {};
+  if (tbRole.value === 'Contributor') {
+    return {
+      hiddenColumns: ['shipped'],
+      canDrag: mine,
+      canEdit: mine,
+      canDelete: () => false,
+      canCreate: (cell: { columnId: string }) => cell.columnId === 'ideas',
+      canReorderColumns: false,
+    };
+  }
+  return {
+    canDrag: () => false, canEdit: () => false, canDelete: () => false,
+    canCreate: () => false, canReorderColumns: false,
+  };
+});
+
+/* Async by design: the guard answers when the user does, and the board waits
+   rather than emitting a move it may have to undo. Our alert service already
+   returns a promise, so the gallery's confirm dialog becomes one await. */
+async function tbConfirm(payload: TbMove) {
+  if (payload.to.columnId !== 'shipped') return true;
+  const titles = payload.items.map((c: TbItem) => c.title).join(', ');
+  const yes = await alert.confirm({
+    tone: 'info',
+    title: 'Ship this work?',
+    message: `${titles} will be marked shipped. This is announced to the team.`,
+    confirmText: 'Ship it',
+    cancelText: 'Not yet',
+  });
+  tbGuardLog.value = `${yes ? 'confirmed' : 'declined'} — ${titles}`;
+  return yes;
+}
+
+/* Activation is an event, not a built-in editor. */
+function tbEdit(item: TbItem | null, columnId?: string) {
+  tbDraft.value = item ? { ...item } : { title: '', priority: 'P3', due: '', columnId: columnId || 'ideas' };
+  tbDialog.value = true;
+}
+function tbEditSave() {
+  const draft = tbDraft.value as TbItem;
+  tbEditItems.value = draft.id
+    ? tbEditItems.value.map((i2) => (i2.id === draft.id ? { ...i2, ...draft } : i2))
+    : [...tbEditItems.value, { ...draft, id: `new-${Date.now()}`, order: 999 }];
+  tbDialog.value = false;
+}
+function tbEditDelete() {
+  tbEditItems.value = tbEditItems.value.filter((i2) => i2.id !== tbDraft.value.id);
+  tbDialog.value = false;
+}
+
+/* Windowing, state and export all read the board through its ref. */
+const tbBigBoard = ref<{ $el: HTMLElement } | null>(null);
+const tbSelBoard = ref<{ selectAll: (c: string) => void; clearSelection: () => void } | null>(null);
+const tbStateBoard = ref<{
+  getState: () => unknown; setState: (s: unknown) => void;
+  exportJson: () => string; exportCsv: () => string;
+} | null>(null);
+
+function tbCountRendered() {
+  /* [data-kb-card], not the [data-tb-card] the gallery counted: the board has
+     always written data-kb-card, so that counter read zero however many cards
+     were on screen. Fixed on import rather than ported. */
+  tbRendered.value = tbBigBoard.value?.$el.querySelectorAll('[data-kb-card]').length ?? 0;
+}
+function tbPrint() { window.print(); }
+function tbSave() { tbState.value = tbStateBoard.value?.getState(); tbLog.value = 'state saved'; }
+function tbRestore() { tbStateBoard.value?.setState(tbState.value); tbLog.value = 'state restored'; }
+function tbShow(kind: 'json' | 'csv') {
+  const b = tbStateBoard.value;
+  tbExport.value = (kind === 'json' ? b?.exportJson() : b?.exportCsv()) || '';
+}
+
+/** The ui map's parts, for the Customising table. */
+const TB_PARTS: string[][] = [
+  ['root / grid', 'The board, and the stack of rows inside it'],
+  ['head / column / columnTitle / count', 'The header row, one header, its title and its count'],
+  ['group', 'One column-group cell above the headers'],
+  ['lane / laneTitle', "A swimlane's header, and its title"],
+  ['cell / empty / add', 'One column × lane cell, its empty note, its add-card button'],
+  ['card / indicator / preview', 'One card, the drop indicator, the clone under the pointer'],
+  ['body / cardTitle / labels / label / meta / chip', "ApexTaskCard's own parts — only while the default card is in use"],
+];
 
 /* ── ApexGallery page ─────────────── */
 const galBasic = ref(0);
@@ -1883,6 +2123,13 @@ async function copyUsage() {
 
               <!-- A comparison, a carousel and a gallery each need their own
                    shape of host — see MediaStage. -->
+              <!-- A board with no items, columns or lanes is an empty frame with a
+                   rail of inert controls, every one of them apparently dead. -->
+              <BoardStage
+                v-else-if="entry.demo === 'board'"
+                :bind="live"
+              />
+
               <MediaStage
                 v-else-if="entry.demo === 'media'"
                 :id="entry.id"
@@ -3714,6 +3961,315 @@ function pick(city) {
           demos I wrote instead were toys that made the control look broken.
         -->
         <!-- The gallery's six, ported. -->
+        <!-- The gallery's thirteen, ported. -->
+        <template v-if="entry.id === 'taskboard'">
+          <h2>Data binding</h2>
+          <p class="note">
+            The board reads a flat <code>items</code> array and emits every change. Nothing
+            moves until the app applies the payload — here through a small history of
+            its own, which is what <code>useApexTaskBoard()</code> packages. Drag a card, or
+            focus one and press Ctrl with the arrow keys: both produce the same
+            <code>card-move</code>.
+          </p>
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexButton size="sm" severity="secondary" variant="outlined" icon="undo"
+                        :disabled="!tbPast.length" @click="tbUndo">Undo</ApexButton>
+            <ApexButton size="sm" severity="secondary" variant="outlined" icon="redo"
+                        :disabled="!tbFuture.length" @click="tbRedo">Redo</ApexButton>
+            <ApexButton size="sm" variant="text" @click="tbReset">Reset board</ApexButton>
+            <span class="note">{{ tbLog || 'No moves yet' }}</span>
+          </div>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbItems" :columns="TB_COLUMNS" :card-fields="TB_FIELDS"
+                           selection-mode="multiple" height="420px" column-width="260px"
+                           @card-move="tbMove" @card-activate="tbLog = 'opened ' + $event.item.title"
+                           @selection-change="tbSel = $event.items.length" />
+          </div>
+          <p class="note" style="margin-top:8px">
+            Selected: <code>{{ tbSel }}</code> — ctrl or cmd click to add to the selection,
+            then drag any of them and the whole set moves.
+          </p>
+
+          <h2>Swimlanes</h2>
+          <p class="note">
+            Lanes group cards into horizontal rows over the same column model — the columns
+            and their limits are unchanged, and a card's <code>swimlaneId</code> is the only
+            difference in the data. Lane headers stay put as the board scrolls sideways.
+          </p>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbOps" :columns="TB_OPS_COLUMNS" :swimlanes="TB_LANES"
+                           :card-fields="TB_OPS_FIELDS" height="460px" column-width="230px"
+                           lane-width="150px" density="compact"
+                           @card-move="tbOps = applyMove(tbOps, $event); tbLog = 'moved to ' + $event.to.columnId" />
+          </div>
+
+          <h2>Column groups and pinned columns</h2>
+          <p class="note">
+            Phase headers sit above the columns, each spanning exactly its own.
+            <code>pinned</code> sticks a column to an edge while the rest scrolls under it —
+            the inset is resolved from the tracks before it, since sticky cannot measure them
+            itself. Drag a header to reorder: <code>reorderableColumns</code> emits
+            <code>column-reorder</code> and leaves the array to the app, like every other
+            change.
+          </p>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbPhase" :columns="tbPhaseColumns" :column-groups="TB_GROUPS"
+                           :card-fields="TB_FIELDS" reorderable-columns height="420px" column-width="220px"
+                           @card-move="tbPhase = applyMove(tbPhase, $event); tbLog = 'moved to ' + $event.to.columnId"
+                           @column-reorder="tbReorder" />
+          </div>
+          <p class="note" style="margin-top:8px">
+            Backlog is pinned to the start and Shipped to the end.
+            {{ tbLog || 'Drag a column header to reorder the phases.' }}
+          </p>
+
+          <h2>Context menu</h2>
+          <p class="note">
+            The board emits <code>card-contextmenu</code> with the card and the event; the menu
+            itself is the app's, so its items can be anything. Right-click a card.
+          </p>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbMenuItems" :columns="[TB_COLUMNS[0], TB_COLUMNS[2], TB_COLUMNS[3]]"
+                           :card-fields="TB_FIELDS" height="340px" column-width="240px"
+                           @card-contextmenu="tbOpenMenu"
+                           @card-move="tbMenuItems = applyMove(tbMenuItems, $event)" />
+            <ApexContextMenu ref="tbMenu" :items="TB_MENU" />
+          </div>
+          <p class="note" style="margin-top:8px">Last action: <code>{{ tbMenuLog || 'none yet' }}</code></p>
+
+          <h2>WIP limits and rules</h2>
+          <p class="note">
+            A column's <code>limit</code> warns when exceeded; <code>wipMode="block"</code>
+            refuses the drop instead and emits <code>wip-blocked</code>. <code>allowedTo</code>
+            restricts where cards may go from a column, and <code>locked</code> keeps them where
+            they are — the drop indicator turns red before you release.
+          </p>
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexSwitch v-model="tbBlock" label="Block over the limit" />
+            <span class="note">Ready holds 2; Shipped is locked; Review only accepts from Building.</span>
+          </div>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbRules" :columns="TB_RULE_COLUMNS" :card-fields="TB_FIELDS"
+                           :wip-mode="tbBlock ? 'block' : 'warn'" height="380px" column-width="240px"
+                           @card-move="tbRules = applyMove(tbRules, $event); tbLog = 'moved'"
+                           @wip-blocked="tbLog = 'refused — ' + $event.columnId + ' is at its limit'" />
+          </div>
+
+          <h2>Card fields</h2>
+          <p class="note">
+            The default card is driven by a mapping, so a dataset with different property names
+            renders without a custom card. These two boards share one component and one dataset
+            shape — only <code>cardFields</code> differs.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell"><span class="cell__tag">full anatomy</span>
+              <ApexTaskBoard :items="tbItems.slice(0, 4)" :columns="[TB_COLUMNS[0], TB_COLUMNS[1]]"
+                             :card-fields="TB_FIELDS" :show-add-card="false" column-width="210px" />
+            </div>
+            <div class="cell"><span class="cell__tag">title and points only</span>
+              <ApexTaskBoard :items="tbItems.slice(0, 4)" :columns="[TB_COLUMNS[0], TB_COLUMNS[1]]"
+                             :card-fields="{ title: 'title', meta: [{ key: 'points', icon: 'straighten' }] }"
+                             :show-add-card="false" column-width="210px" />
+            </div>
+          </div>
+
+          <h2>Permissions</h2>
+          <p class="note">
+            Rules are functions, not flags, because a real permission depends on the row rather
+            than the board. Switch roles: a viewer sees no add controls and cannot drag; a
+            contributor may move their own cards only, and the Shipped column disappears for
+            them entirely — a column with a count of zero still advertises that it exists.
+          </p>
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexSelectButton v-model="tbRole" :options="['Admin', 'Contributor', 'Viewer']" />
+            <span class="note">Contributor owns the cards assigned to Sarah Wilson.</span>
+          </div>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbPermItems" :columns="TB_PERM_COLUMNS" :card-fields="TB_FIELDS"
+                           :permissions="tbPermissions" reorderable-columns height="380px" column-width="230px"
+                           @card-move="tbPermItems = applyMove(tbPermItems, $event); tbLog = 'moved'"
+                           @card-activate="tbLog = 'opened ' + $event.item.title"
+                           @add-card="tbLog = 'add card in ' + $event.columnId">
+              <template #card="{ item, canDrag, canEdit }">
+                <div style="display:flex;align-items:flex-start;gap:8px">
+                  <div style="flex:1;min-width:0">
+                    <ApexTaskCard :item="item" :fields="TB_FIELDS" />
+                  </div>
+                  <ApexIcon v-if="!canDrag || !canEdit" name="lock" :size="15" style="color:var(--fg-subtle)" />
+                </div>
+              </template>
+            </ApexTaskBoard>
+          </div>
+          <p class="note" style="margin-top:8px">{{ tbLog || 'Try dragging a card that is not yours.' }}</p>
+          <p class="note">
+            This is the one control in the library that does not use the
+            <code>can()</code> seam, and deliberately: the answer here depends on the row, there
+            are six distinct verbs, and one of them — <code>canDelete</code> — the board
+            only hands to your card, because it never deletes anything itself.
+          </p>
+
+          <h2>Guarded transitions</h2>
+          <p class="note">
+            <code>confirmMove</code> is asked before a move is emitted and can answer
+            asynchronously, so a dialog or a server check decides — a synchronous guard could
+            not. Drags and keyboard moves both go through it. Here anything entering Shipped
+            needs confirming.
+          </p>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbGuard" :columns="TB_GUARD_COLUMNS" :card-fields="TB_FIELDS"
+                           :confirm-move="tbConfirm" height="360px" column-width="230px"
+                           @card-move="tbGuard = applyMove(tbGuard, $event); tbLog = 'shipped'" />
+          </div>
+          <p class="note" style="margin-top:8px">Last decision: <code>{{ tbGuardLog || 'none yet' }}</code></p>
+
+          <h2>Selection and keyboard</h2>
+          <p class="note">
+            Plain arrows rove focus so reading the board moves nothing; Ctrl or Cmd with the
+            arrows moves the card. Shift-click extends a range within the card's own column —
+            a board has no single sequence, so a range across columns would take in cards you
+            cannot see between. Ctrl+A selects the focused column, Escape clears, and dragging
+            any selected card brings the whole set.
+          </p>
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexButton size="sm" severity="secondary" variant="outlined"
+                        @click="tbSelBoard?.selectAll('ready')">Select the Ready column</ApexButton>
+            <ApexButton size="sm" variant="text" @click="tbSelBoard?.clearSelection()">Clear</ApexButton>
+            <span class="note">{{ tbSelNames || 'Nothing selected' }}</span>
+          </div>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard ref="tbSelBoard" :items="tbSelItems" :columns="TB_COLUMNS" :card-fields="TB_FIELDS"
+                           selection-mode="multiple" height="380px" column-width="240px"
+                           @selection-change="tbSelNames = $event.items.map((c: TbItem) => c.title).join(', ')"
+                           @card-move="tbSelItems = applyMove(tbSelItems, $event)">
+              <template #drag-preview="{ items, count }">
+                <div class="tb-preview">
+                  <ApexIcon name="drag_indicator" :size="18" />
+                  <strong style="font-size:13px">{{ count === 1 ? items[0].title : count + ' cards' }}</strong>
+                </div>
+              </template>
+            </ApexTaskBoard>
+          </div>
+
+          <h2>Editing</h2>
+          <p class="note">
+            Activation is an event, not a built-in editor: double-click a card or press Enter and
+            the app opens whatever it likes. This one edits the app's array directly, so the
+            board re-renders from the data.
+          </p>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbEditItems" :columns="[TB_COLUMNS[0], TB_COLUMNS[2], TB_COLUMNS[3]]"
+                           :card-fields="TB_FIELDS" height="340px" column-width="240px"
+                           @card-activate="tbEdit($event.item)"
+                           @add-card="tbEdit(null, $event.columnId)"
+                           @card-move="tbEditItems = applyMove(tbEditItems, $event)" />
+          </div>
+          <ApexDialog v-model:visible="tbDialog" :header="tbDraft.id ? 'Edit card' : 'New card'" width="420px">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <ApexInput v-model="tbDraft.title" label="Title" />
+              <ApexSelect v-model="tbDraft.priority" label="Priority" :options="['P1', 'P2', 'P3', 'P4']" />
+              <ApexInput v-model="tbDraft.due" label="Due" placeholder="Sep 12" />
+            </div>
+            <template #footer>
+              <ApexButton v-if="tbDraft.id" severity="danger" variant="text" icon="delete"
+                          @click="tbEditDelete">Delete</ApexButton>
+              <ApexButton severity="secondary" variant="outlined" @click="tbDialog = false">Cancel</ApexButton>
+              <ApexButton @click="tbEditSave">Save</ApexButton>
+            </template>
+          </ApexDialog>
+
+          <h2>Virtual scroll</h2>
+          <p class="note">
+            600 cards across five columns. Windowing is per cell, since each cell is its own
+            scroller — a board-wide window would have to assume every column scrolls together.
+            The height estimate is replaced by a real measurement once a card has rendered.
+          </p>
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexSwitch v-model="tbVirtual" label="Virtual scroll" />
+            <span class="note">Rendered card elements: <code>{{ tbRendered }}</code> of {{ tbBig.length }}</span>
+            <ApexButton size="sm" variant="text" @click="tbCountRendered">Recount</ApexButton>
+          </div>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard ref="tbBigBoard" :items="tbBig" :columns="TB_OPS_COLUMNS" :card-fields="TB_FIELDS"
+                           :virtual-scroll="tbVirtual" :virtual-scroll-item-height="96" :virtual-scroll-buffer="4"
+                           height="420px" column-width="230px" :show-add-card="false"
+                           @card-move="tbBig = applyMove(tbBig, $event)" />
+          </div>
+
+          <h2>State, export and print</h2>
+          <p class="note">
+            <code>getState()</code> returns collapse, lane closure, selection and scroll offsets
+            — and nothing about rendered geometry, which belongs to this session's DOM. Export
+            returns strings rather than downloading, because the file and where it goes are the
+            app's business. Print unrolls the columns into a wrapping grid so the board prints as
+            a document.
+          </p>
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexButton size="sm" severity="secondary" variant="outlined" icon="bookmark"
+                        @click="tbSave">Save state</ApexButton>
+            <ApexButton size="sm" severity="secondary" variant="outlined" icon="restore"
+                        :disabled="!tbState" @click="tbRestore">Restore</ApexButton>
+            <ApexButton size="sm" variant="text" icon="data_object" @click="tbShow('json')">Export JSON</ApexButton>
+            <ApexButton size="sm" variant="text" icon="table_view" @click="tbShow('csv')">Export CSV</ApexButton>
+            <ApexButton size="sm" variant="text" icon="print" @click="tbPrint">Print</ApexButton>
+          </div>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard ref="tbStateBoard" :items="tbStateItems" :columns="TB_OPS_COLUMNS" :swimlanes="TB_LANES"
+                           :card-fields="TB_FIELDS" selection-mode="multiple" height="360px" column-width="220px"
+                           lane-width="140px" density="compact"
+                           @card-move="tbStateItems = applyMove(tbStateItems, $event)" />
+          </div>
+          <pre v-if="tbExport" class="doc-pre" style="margin-top:10px;max-height:220px;overflow:auto">{{ tbExport }}</pre>
+
+          <h2>Custom cards and chrome</h2>
+          <p class="note">
+            The <code>card</code> slot replaces the contents entirely while the board keeps drag,
+            selection, focus and movement. <code>column-header</code>,
+            <code>swimlane-header</code>, <code>column-footer</code> and <code>empty</code> do the
+            same for the surrounding chrome.
+          </p>
+          <div class="tb-frame" style="margin-top:12px">
+            <ApexTaskBoard :items="tbItems" :columns="TB_COLUMNS" height="380px" column-width="250px"
+                           accent="oklch(0.55 0.20 300)" card-radius="12px"
+                           @card-move="tbMove">
+              <template #column-header="{ column, count, over }">
+                <ApexIcon :name="TB_ICONS[column.id] || 'view_column'" :size="17" style="color:var(--fg-subtle)" />
+                <span class="apex-kb__col-title">{{ column.title }}</span>
+                <ApexBadge :value="count" :severity="over ? 'danger' : 'secondary'" size="sm" />
+              </template>
+              <template #card="{ item, selected }">
+                <div class="tb-mine">
+                  <div class="tb-mine__row">
+                    <strong style="font-size:13.5px">{{ item.title }}</strong>
+                    <ApexIcon v-if="selected" name="check_circle" :size="16" style="color:var(--accent-primary)" />
+                  </div>
+                  <ApexProgressBar :value="item.checklist ? (item.checklist.done / item.checklist.total) * 100 : 0"
+                                   :height="4" />
+                  <div class="tb-mine__row" style="font-size:11.5px;color:var(--fg-subtle)">
+                    <span>{{ item.due || 'No date' }}</span>
+                    <ApexAvatar v-if="item.assignees && item.assignees[0]" :label="item.assignees[0]" size="xs" auto-color />
+                  </div>
+                </div>
+              </template>
+              <template #empty><p class="apex-kb__empty">Nothing here — drop a card in</p></template>
+            </ApexTaskBoard>
+          </div>
+
+          <h2>Customising</h2>
+          <p class="note">
+            One <code>ui</code> map classes the board's fifteen parts and, while the default card
+            is in use, its six as well. Every metric and colour prop writes a matching
+            <code>--apex-kb-*</code> variable.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>ui keys</th><th>Parts</th></tr></thead>
+            <tbody>
+              <tr v-for="r in TB_PARTS" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td>{{ r[1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+
         <!-- The gallery's seven, ported. -->
         <template v-if="entry.id === 'gallery'">
           <h2>Basic</h2>

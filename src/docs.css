@@ -1038,3 +1038,13 @@ border-radius:var(--r-md);font-size:11.5px;font-weight:700;letter-spacing:.05em;
 color:#33404F;transition:transform var(--dur-fast) var(--ease-out)}
 .gal-cell:hover{transform:scale(1.02)}
 .gal-cell:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+/* ── ApexTaskBoard demos ───────────────────────────────────
+   The frame every board sits in, the custom drag preview, and the custom
+   card. The board's own chrome is in apex-ui.css. */
+.tb-frame{border:1px solid var(--border-default);border-radius:var(--r-lg);
+background:var(--bg-surface);padding:12px}
+.tb-preview{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:var(--r-md);
+background:var(--fg-default);color:var(--bg-surface);box-shadow:var(--shadow-lg)}
+.tb-mine{display:flex;flex-direction:column;gap:8px}
+.tb-mine__row{display:flex;align-items:center;justify-content:space-between;gap:8px}
