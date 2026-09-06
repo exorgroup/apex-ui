@@ -106,3 +106,36 @@ describe('the heatmap family renders', () => {
     w.unmount();
   });
 });
+
+describe('a bar series with data labels renders', () => {
+  /*
+   * AF2-238c: the bar-label branch mapped over `barRects`, which was declared
+   * sixty lines further down the same function — a const, so a TDZ throw for
+   * every bar chart with labels turned on. It survived because nothing had
+   * ever drawn a bar: no test, and the docs page did not exist yet.
+   *
+   * Labels ON is the whole point. Without `dataLabels` the branch is skipped
+   * and this passes over the bug it exists for.
+   */
+  it('does not throw reaching bar geometry from the label pass', async () => {
+    const w = mount(ApexChart, {
+      props: {
+        width: 600,
+        height: 400,
+        dataLabels: true,
+        series: [{
+          id: 'b',
+          name: 'Revenue',
+          type: 'bar',
+          xKey: 'month',
+          yKey: 'value',
+          data: [{ month: 'Jan', value: 3 }, { month: 'Feb', value: 8 }],
+        }],
+      },
+      attachTo: document.body,
+    });
+    await w.vm.$nextTick();
+    expect(w.findAll('.apex-cht__bar').length, 'no bars drawn').toBeGreaterThan(0);
+    w.unmount();
+  });
+});

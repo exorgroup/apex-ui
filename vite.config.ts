@@ -34,5 +34,17 @@ export default defineConfig({
      * invisible to the other. Nothing failed loudly — the pages still rendered.
      */
     alias: { '@exorgroup/apex-ui': resolve(__dirname, 'src/index.ts') },
+    /*
+     * zz-docs-pages mounts the whole docs app once per test — 152 of them —
+     * and the app grew a chart page whose datasets include a 50,000-point
+     * series. That crossed node's default 2 GB worker heap in AF2-238c: the
+     * worker died mid-run and vitest still reported "36 passed", because a
+     * file that never finishes is not a file that failed.
+     *
+     * Measured, not guessed: the same run completes at 4 GB, so this is a
+     * ceiling rather than an unbounded leak. Set here rather than left to
+     * NODE_OPTIONS so `npx vitest run` behaves the same for everyone.
+     */
+    poolOptions: { forks: { execArgv: ['--max-old-space-size=4096'] } },
   },
 });

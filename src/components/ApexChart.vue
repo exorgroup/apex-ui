@@ -1107,6 +1107,74 @@ const paths = computed(() => {
 
     /* Labels are candidates, not placements: the chart culls collisions, so a
        dense series degrades to its readable points instead of a smear. */
+    /* Bar geometry is computed BEFORE the labels that read it: the bar-label
+       branch maps over barRects, and with the declaration below it that was a
+       TDZ throw — const, same scope — for every bar series with labels on. No
+       test drew a bar until the docs page did.
+       Nothing here depends on the label pass, so moving it up is the whole fix. */
+    const cat = catScale();
+    const val = valScale(s);
+    const slot = slots.get((overlap ? s.id : s.spec.stack) || '_');
+    const barBase = val.map(clampBaseline(val));
+    /* Per-bar paint: an array cycles by index, a callback answers per item, and
+       undefined falls through to the series colour. */
+    const palette = Array.isArray(s.color) ? (s.color as string[]) : null;
+    const colorFn = typeof s.color === 'function'
+      ? (s.color as (c: unknown) => string | undefined)
+      : null;
+    const floor = s.spec.minBarLength ?? props.minBarLength ?? 0;
+
+    const barRects = (s.type === 'bar' && slot) ? s.drawn.filter((p) => p.y !== null).map((p) => {
+      const centre = cat.map(p.x) + slot.offset;
+      const from = p.y0 === null || p.y0 === undefined ? barBase : val.map(p.y0);
+      const to = val.map(p.y as number);
+      const negative = (p.y as number) < (p.y0 ?? 0);
+      /* The floor grows AWAY from the baseline, so a tiny negative bar still hangs
+         below zero rather than being nudged across it. */
+      const raw = Math.abs(to - from);
+      const size = floor ? Math.max(raw, floor) : raw;
+      const end = from + (to >= from ? size : -size);
+      const lo = Math.min(from, end);
+      const rect = horizontal.value
+        ? { x: lo, y: centre - slot.width / 2, width: size, height: slot.width }
+        : { x: centre - slot.width / 2, y: lo, width: slot.width, height: size };
+
+      const corners = resolveCorners(
+        s.spec.barRadius ?? props.barRadius,
+        horizontal.value,
+        negative,
+      );
+      const skipped = s.spec.borderSkipped ?? props.borderSkipped;
+      const outline = barOutline(rect.x, rect.y, rect.width, rect.height,
+        corners, skipped, horizontal.value, negative);
+      const custom = s.spec.renderBar
+        ? s.spec.renderBar({ ...rect, point: p, series: s.id, index: p.index })
+        : null;
+
+      const own = palette
+        ? palette[p.index % palette.length]
+        : (colorFn
+          ? colorFn({
+            point: p,
+            index: p.index,
+            value: p.y as number,
+            category: categorical.value ? (categories.value[p.x] ?? p.key) : p.key,
+            negative,
+            series: s.id,
+          })
+          : undefined);
+
+      return {
+        key: `${s.id}-${p.key}`,
+        point: p,
+        rect,
+        d: custom || outline.fill,
+        stroke: custom || outline.stroke,
+        fill: own || fillPaint,
+        negative,
+      };
+    }) : [];
+
     let labels: LabelCandidate[] = [];
     if (labelSpec.value.show && s.type === 'candlestick') {
       /* A candle has FOUR values, so "the value" is meaningless — the field is
@@ -1198,68 +1266,6 @@ const paths = computed(() => {
     }
 
     /* ── bars ── */
-    const cat = catScale();
-    const val = valScale(s);
-    const slot = slots.get((overlap ? s.id : s.spec.stack) || '_');
-    const barBase = val.map(clampBaseline(val));
-    /* Per-bar paint: an array cycles by index, a callback answers per item, and
-       undefined falls through to the series colour. */
-    const palette = Array.isArray(s.color) ? (s.color as string[]) : null;
-    const colorFn = typeof s.color === 'function'
-      ? (s.color as (c: unknown) => string | undefined)
-      : null;
-    const floor = s.spec.minBarLength ?? props.minBarLength ?? 0;
-
-    const barRects = (s.type === 'bar' && slot) ? s.drawn.filter((p) => p.y !== null).map((p) => {
-      const centre = cat.map(p.x) + slot.offset;
-      const from = p.y0 === null || p.y0 === undefined ? barBase : val.map(p.y0);
-      const to = val.map(p.y as number);
-      const negative = (p.y as number) < (p.y0 ?? 0);
-      /* The floor grows AWAY from the baseline, so a tiny negative bar still hangs
-         below zero rather than being nudged across it. */
-      const raw = Math.abs(to - from);
-      const size = floor ? Math.max(raw, floor) : raw;
-      const end = from + (to >= from ? size : -size);
-      const lo = Math.min(from, end);
-      const rect = horizontal.value
-        ? { x: lo, y: centre - slot.width / 2, width: size, height: slot.width }
-        : { x: centre - slot.width / 2, y: lo, width: slot.width, height: size };
-
-      const corners = resolveCorners(
-        s.spec.barRadius ?? props.barRadius,
-        horizontal.value,
-        negative,
-      );
-      const skipped = s.spec.borderSkipped ?? props.borderSkipped;
-      const outline = barOutline(rect.x, rect.y, rect.width, rect.height,
-        corners, skipped, horizontal.value, negative);
-      const custom = s.spec.renderBar
-        ? s.spec.renderBar({ ...rect, point: p, series: s.id, index: p.index })
-        : null;
-
-      const own = palette
-        ? palette[p.index % palette.length]
-        : (colorFn
-          ? colorFn({
-            point: p,
-            index: p.index,
-            value: p.y as number,
-            category: categorical.value ? (categories.value[p.x] ?? p.key) : p.key,
-            negative,
-            series: s.id,
-          })
-          : undefined);
-
-      return {
-        key: `${s.id}-${p.key}`,
-        point: p,
-        rect,
-        d: custom || outline.fill,
-        stroke: custom || outline.stroke,
-        fill: own || fillPaint,
-        negative,
-      };
-    }) : [];
 
     /* ── candlesticks ── */
     /* barWidthRatio is the candle's own knob: a fraction of the band, so it stays
