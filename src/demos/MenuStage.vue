@@ -40,13 +40,15 @@
       <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
 
-    <!-- The strip pins itself to an edge, so the stage gives it a box to sit
-         in rather than letting it escape to the viewport. -->
+    <!-- A dock is a desktop launcher, and the gallery stages it as one: a
+         wallpaper it pins itself to an edge of, with the launch log inside.
+         A dock floating in a plain box shows neither the edge it docks to nor
+         what the blur is blurring. -->
     <template v-else-if="id === 'dock'">
-      <div class="menu-stage__dock">
+      <div class="dock-stage" :data-position="(bind?.position as string) || 'bottom'">
         <ApexDock :items="DOCK_ITEMS" v-bind="bind" @item-click="onPick" />
+        <p class="dock-log">Last launched: <code>{{ picked || 'none yet' }}</code></p>
       </div>
-      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
 
     <!-- A context menu renders nothing until something is right-clicked, so
@@ -213,17 +215,14 @@ const MEGA_ITEMS: MegaItem[] = [
   { label: 'Support', icon: 'help', href: '#' },
 ];
 
-/** One plain action, one badged, one disabled, and a group that fans. */
+/** The gallery's launcher, so the playground reads as the dock it is. */
 const DOCK_ITEMS: MenuItem[] = [
-  { icon: 'home', label: 'Home' },
-  { icon: 'mail', label: 'Mail', badge: '3' },
-  { icon: 'folder', label: 'Files', items: [
-    { icon: 'description', label: 'Documents' },
-    { icon: 'image', label: 'Pictures' },
-    { icon: 'movie', label: 'Video' },
-  ] },
-  { icon: 'settings', label: 'Settings' },
-  { icon: 'delete', label: 'Trash', disabled: true },
+  { icon: 'folder', label: 'Finder' },
+  { icon: 'terminal', label: 'Terminal' },
+  { icon: 'apps', label: 'App Store' },
+  { icon: 'explore', label: 'Safari' },
+  { icon: 'photo_library', label: 'Photos' },
+  { icon: 'delete', label: 'Trash' },
 ];
 
 const CRUMB_HOME: CrumbItem = { icon: 'home', href: '#' };

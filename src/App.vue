@@ -475,183 +475,202 @@ const ctxGated: MenuItem[] = [
 ];
 
 /* ── ApexDock page ─────────────────────────────── */
-const dkPicked = ref('');
+const dockPos = ref('bottom');
+const dockLog = ref('');
+const dockDialog = ref(false);
+const dockWall = ref<HTMLElement | null>(null);
 
-/* `tint` is the demo's own field, read by the custom-item slot. */
-const dkBasic: MenuItem[] = [
-  { icon: 'home', label: 'Home', tint: '#2f6f4f' },
-  { icon: 'search', label: 'Search', tint: '#3b5b8c' },
-  { icon: 'event', label: 'Calendar', tint: '#7a4b8c' },
-  { icon: 'chat', label: 'Messages', tint: '#8c5a2b' },
-  { icon: 'settings', label: 'Settings', tint: '#444a5a' },
+const DOCK_ITEMS: MenuItem[] = [
+  { icon: 'folder', label: 'Finder' },
+  { icon: 'terminal', label: 'Terminal' },
+  { icon: 'apps', label: 'App Store' },
+  { icon: 'explore', label: 'Safari' },
+  { icon: 'photo_library', label: 'Photos' },
+  { icon: 'delete', label: 'Trash' },
 ];
 
-const dkGroups: MenuItem[] = [
+/** A plain action beside two slots that fan, which is the section's point. */
+const DOCK_MIXED: MenuItem[] = [
   { icon: 'home', label: 'Home' },
-  { icon: 'folder', label: 'Files', items: [
-    { icon: 'description', label: 'Documents' },
-    { icon: 'image', label: 'Pictures' },
-    { icon: 'movie', label: 'Video' },
+  { icon: 'add', label: 'New', items: [
+    { icon: 'description', label: 'Document' },
+    { icon: 'table_chart', label: 'Spreadsheet' },
+    { icon: 'slideshow', label: 'Deck' },
   ] },
-  { icon: 'add', label: 'Create', items: [
-    { icon: 'note_add', label: 'Document' },
-    { icon: 'event', label: 'Event' },
+  { icon: 'share', label: 'Share', items: [
+    { icon: 'link', label: 'Copy link' },
+    { icon: 'mail', label: 'Email' },
   ] },
   { icon: 'settings', label: 'Settings' },
 ];
 
-const dkBadges: MenuItem[] = [
-  { icon: 'mail', label: 'Mail', badge: '3' },
-  { icon: 'notifications', label: 'Alerts', badge: '12' },
-  { icon: 'cloud_upload', label: 'Sync' },
-  { icon: 'delete', label: 'Trash', disabled: true },
-];
-
-const dkDesktop: MenuItem[] = [
-  { icon: 'dashboard', label: 'Dashboard' },
-  { icon: 'event', label: 'Events', badge: '4' },
-  { icon: 'folder', label: 'Library', items: [
-    { icon: 'image', label: 'Posters' },
-    { icon: 'movie', label: 'Trailers' },
-    { icon: 'description', label: 'Contracts' },
-  ] },
-  { icon: 'bar_chart', label: 'Reports' },
-  { icon: 'person', label: 'Account', items: [
-    { icon: 'badge', label: 'Profile' },
-    { icon: 'logout', label: 'Sign out' },
+/** `tint` is not a dock prop — it rides along for the item slot to read. */
+const DOCK_TILES: MenuItem[] = [
+  { icon: 'draw', label: 'Design', tint: '#0B5FFF' },
+  { icon: 'code', label: 'Code', tint: '#137C4A' },
+  { icon: 'insights', label: 'Analytics', tint: '#C24A06' },
+  { icon: 'more_horiz', label: 'More', tint: '#5F6C7E', items: [
+    { icon: 'bug_report', label: 'Issues', tint: '#C41E1E' },
+    { icon: 'science', label: 'Labs', tint: '#7C3AED' },
   ] },
 ];
 
-/* Settings is denied outright; Reports is a group whose children are both
-   gated, so it goes with them rather than fanning onto nothing. */
-const dkGated: MenuItem[] = [
+/* One item opens a dialog. The dock does not own it — it calls the callback. */
+const DOCK_DESK = computed<MenuItem[]>(() => [
+  { icon: 'folder', label: 'Finder' },
+  { icon: 'terminal', label: 'Terminal' },
+  { icon: 'info', label: 'About', command: () => { dockDialog.value = true; } },
+  { icon: 'add', label: 'New', items: [
+    { icon: 'description', label: 'Document' },
+    { icon: 'folder', label: 'Folder' },
+    { icon: 'terminal', label: 'Shell' },
+  ] },
+  { icon: 'delete', label: 'Trash' },
+]);
+
+/* The gated strip for the Permissions section. */
+const dockGated: MenuItem[] = [
   { icon: 'home', label: 'Home' },
-  { icon: 'event', label: 'Events' },
-  { icon: 'bar_chart', label: 'Reports', items: [
-    { icon: 'payments', label: 'Sales', can: 'reports' },
-    { icon: 'groups', label: 'Attendance', can: 'reports' },
-  ] },
+  { icon: 'bar_chart', label: 'Reports', can: 'reports' },
   { icon: 'settings', label: 'Settings', can: 'settings' },
+  { icon: 'delete', label: 'Trash', can: { action: 'delete', resource: 'events' } },
 ];
 
 /* ── ApexMegaMenu page ─────────────────────────── */
-const mgPicked = ref('');
+const megaLog = ref('');
+const megaTrigger = ref<'hover' | 'click'>('hover');
+const megaQuery = ref('');
 
-/* Inline SVG tiles rather than remote files: the docs must render with no
-   network, and a broken image would look like a component fault. */
-const tile = (hex: string, text: string) =>
-  `data:image/svg+xml;utf8,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="90">`
-    + `<rect width="160" height="90" fill="${hex}"/>`
-    + `<text x="80" y="50" font-family="sans-serif" font-size="14" fill="#fff"`
-    + ` text-anchor="middle">${text}</text></svg>`)}`;
+/**
+ * A gradient placeholder as a data URI, the gallery's helper.
+ *
+ * The image examples need real artwork to mean anything, and the docs ship no
+ * binaries — so the thumbnails are generated SVG. Pass real URLs in
+ * `column.image` and `card.image`; nothing about the component changes.
+ */
+function ph(a: string, b: string, label?: string): string {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240">'
+    + '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+    + `<stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/>`
+    + '</linearGradient></defs><rect width="320" height="240" fill="url(#g)"/>'
+    + (label ? `<text x="160" y="128" text-anchor="middle" font-family="sans-serif" font-size="20"`
+      + ` fill="rgba(255,255,255,.92)">${label}</text>` : '')
+    + '</svg>';
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
-const mgBasic: MegaItem[] = [
-  { label: 'Shop', icon: 'storefront', columns: [
-    { header: 'Camping', items: [
-      { label: 'Tents', help: 'One to six berth' },
-      { label: 'Sleeping bags' },
-      { label: 'Stoves' },
-    ], footer: { label: 'Shop all camping' } },
-    { header: 'Climbing', items: [
-      { label: 'Ropes' },
-      { label: 'Harnesses', badge: 'New' },
-      { label: 'Helmets' },
-    ] },
-    { header: 'Trail', items: [
-      { label: 'Boots' },
-      { label: 'Packs' },
-    ], footer: { label: 'Shop all trail' } },
+const MEGA_BASIC: MegaItem[] = [
+  { label: 'Furniture', icon: 'chair', columns: [
+    { header: 'Living room', items: [{ label: 'Accessories', href: '#' }, { label: 'Armchair', href: '#' }, { label: 'Coffee table', href: '#' }, { label: 'Couch', href: '#' }] },
+    { header: 'Kitchen', items: [{ label: 'Bar stool', href: '#' }, { label: 'Chair', href: '#' }, { label: 'Table', href: '#' }, { label: 'Cookware', href: '#' }] },
+    { header: 'Bedroom', items: [{ label: 'Bed', href: '#' }, { label: 'Chaise longue', href: '#' }, { label: 'Cupboard', href: '#' }, { label: 'Dresser', href: '#' }] },
+    { header: 'Office', items: [{ label: 'Bookcase', href: '#' }, { label: 'Desk', href: '#' }, { label: 'Executive chair', href: '#' }, { label: 'Lamp', href: '#' }] },
   ] },
-  { label: 'Guides', icon: 'menu_book', columns: [
-    { header: 'By region', items: [{ label: 'Alps' }, { label: 'Dolomites' }] },
-    { header: 'By season', items: [{ label: 'Winter' }, { label: 'Summer' }] },
+  { label: 'Electronics', icon: 'devices', columns: [
+    { header: 'Computer', items: [{ label: 'Monitor', href: '#' }, { label: 'Mouse', href: '#' }, { label: 'Notebook', href: '#' }, { label: 'Keyboard', href: '#' }] },
+    { header: 'Home theatre', items: [{ label: 'Projector', href: '#' }, { label: 'Speakers', href: '#' }, { label: 'TVs', href: '#' }] },
+    { header: 'Gaming', items: [{ label: 'Accessories', href: '#' }, { label: 'Console', href: '#' }, { label: 'PC', href: '#' }, { label: 'Video games', href: '#' }] },
   ] },
-  { label: 'Support', icon: 'help', href: '#' },
+  { label: 'Sports', icon: 'sports_soccer', columns: [
+    { header: 'Football', items: [{ label: 'Kits', href: '#' }, { label: 'Shoes', href: '#' }, { label: 'Shorts', href: '#' }, { label: 'Training', href: '#' }] },
+    { header: 'Running', items: [{ label: 'Accessories', href: '#' }, { label: 'Shoes', href: '#' }, { label: 'T-shirts', href: '#' }, { label: 'Shorts', href: '#' }] },
+    { header: 'Swimming', items: [{ label: 'Kickboard', href: '#' }, { label: 'Nose clip', href: '#' }, { label: 'Swimsuits', href: '#' }, { label: 'Paddles', href: '#' }] },
+    { header: 'Tennis', items: [{ label: 'Balls', href: '#' }, { label: 'Rackets', href: '#' }, { label: 'Shoes', href: '#' }, { label: 'Training', href: '#' }] },
+  ] },
+  { label: 'Pricing', icon: 'sell', href: '#' },
 ];
 
-const mgThumbs: MegaItem[] = [
-  { label: 'Departments', icon: 'category', columns: [
-    { header: 'Camping', image: tile('#2f6f4f', 'Camping'), items: [
-      { label: 'Tents' }, { label: 'Stoves' },
-    ] },
-    { header: 'Climbing', image: tile('#3b5b8c', 'Climbing'), items: [
-      { label: 'Ropes' }, { label: 'Harnesses' },
-    ] },
-    { header: 'Brands', items: [
-      { label: 'Northwind', image: tile('#7a4b8c', 'NW') },
-      { label: 'Cairn', image: tile('#8c5a2b', 'CA') },
-    ] },
+const MEGA_IMAGES: MegaItem[] = [
+  { label: '3 Stripe Life', columns: [
+    { header: "What's new?", image: ph('#3A3F47', '#0F141C', 'Campaign'), items: [
+      { label: 'Impossible is Nothing', href: '#' }, { label: 'New arrivals', href: '#' },
+      { label: 'Best sellers', href: '#' }, { label: 'Release dates', href: '#' }] },
+    { header: 'Collaborations', image: ph('#8A6F5A', '#3B2E24', 'IVY PARK'), items: [
+      { label: 'IVY PARK', href: '#' }, { label: 'Pharrell', href: '#' },
+      { label: 'Prada', href: '#' }, { label: 'Y-3', href: '#' }] },
+    { header: 'Our world', image: ph('#E4E7EC', '#B6C0CD', 'Sustainability'), items: [
+      { label: 'Give back', href: '#' }, { label: 'Sustainability', href: '#' },
+      { label: 'Futurecraft', href: '#' }, { label: 'adiClub', href: '#' }] },
+    { header: 'Sports', image: ph('#2F6B3A', '#12331B', 'Football'), items: [
+      { label: 'Football', href: '#' }, { label: 'Running', href: '#' },
+      { label: 'Basketball', href: '#' }, { label: 'Outdoor', href: '#' }] },
+    { header: 'Originals', image: ph('#EDEFF3', '#CBD3DE', 'Superstar'), items: [
+      { label: 'Superstar', href: '#' }, { label: 'Samba', href: '#' },
+      { label: 'Gazelle', href: '#' }, { label: 'Stan Smith', href: '#' }] },
   ] },
+  { label: 'Men', href: '#' },
+  { label: 'Women', href: '#' },
+  { label: 'Sale', href: '#' },
 ];
 
-const mgCards: MegaItem[] = [
-  { label: 'Featured', icon: 'grid_view', columns: [
-    { header: 'This season', layout: 'cards', span: 2, items: [
-      { label: 'Winter kit', image: tile('#22405c', 'Winter') },
-      { label: 'Trail running', image: tile('#4c6b2f', 'Trail') },
-      { label: 'Bouldering', image: tile('#6c3b3b', 'Boulder') },
-      { label: 'Travel', image: tile('#3f3f6b', 'Travel') },
-    ] },
-    { header: 'Quick links', items: [
-      { label: 'Gift cards' }, { label: 'Returns' },
+const MEGA_CARDS: MegaItem[] = [
+  { label: 'Recipes', columns: [
+    { span: 1, header: 'Collections', items: [
+      { label: 'Easter', href: '#' }, { label: 'Family dinners', href: '#' },
+      { label: 'Spring entertaining', href: '#' }, { label: 'Healthy', href: '#' },
+      { label: 'Baking', href: '#' }], footer: { label: 'See all recipes', href: '#' } },
+    { span: 3, header: 'Trending recipes', layout: 'cards', items: [
+      { label: 'Stuffed lemon-poppy seed scones', image: ph('#E8C170', '#B98A2E'), href: '#' },
+      { label: 'BLT bean salad', image: ph('#7FA35B', '#3D5A2A'), href: '#' },
+      { label: 'The best baked salmon', image: ph('#E08A6B', '#A24B2E'), href: '#' },
+      { label: 'Frittata with asparagus', image: ph('#E3B95C', '#8C6A1F'), href: '#' },
     ] },
   ] },
+  { label: 'Shows', href: '#' },
+  { label: 'Chefs', href: '#' },
+  { label: 'Shop', href: '#' },
 ];
 
-const mgPanel: MegaItem[] = [
-  { label: 'Shop', icon: 'storefront', columns: [
-    { header: 'Camping', items: [{ label: 'Tents' }, { label: 'Stoves' }] },
-    { header: 'Climbing', items: [{ label: 'Ropes' }, { label: 'Helmets' }] },
+const MEGA_PROMO: MegaItem[] = [
+  { label: 'Solutions', columns: [
+    { header: 'By capability', items: [
+      { label: 'Chemistry', help: 'Powerful cleaning formulations', icon: 'science', href: '#' },
+      { label: 'Equipment', help: 'Delivering exceptional performance', icon: 'precision_manufacturing', href: '#' },
+      { label: 'Digital tech', help: 'Embracing the future', icon: 'memory', href: '#' },
+      { label: 'Service', help: 'For our direct-to-market regions', icon: 'support_agent', href: '#' },
+      { label: 'Distribution', help: 'More solutions we stand behind', icon: 'local_shipping', href: '#' },
+    ], footer: { label: 'See all chemistry products', href: '#' } },
+    { header: 'By market', items: [
+      { label: 'Food service', href: '#' }, { label: 'Food processing', href: '#' },
+      { label: 'Agriculture', href: '#' }, { label: 'Automotive', href: '#', badge: 'New' },
+    ] },
   ], panel: {
-    image: tile('#1f4d3a', 'Season'),
-    title: 'Season sale',
-    text: 'Up to 40% off last year’s ranges, while stocks last.',
-    linkLabel: 'See the sale',
-    href: '#',
+    image: ph('#0B5FFF', '#062E7A', 'Featured'),
+    title: 'Autolux Concentrates',
+    text: 'A single line of concentrates across the whole wash bay, mixed on site.',
+    linkLabel: 'Explore the range', href: '#',
     cards: [
-      { label: 'Northwind', image: tile('#7a4b8c', 'NW') },
-      { label: 'Cairn', image: tile('#8c5a2b', 'CA') },
-      { label: 'Fjell', image: tile('#2b6c8c', 'FJ') },
+      { label: 'Autolux', help: 'Concentrates', image: ph('#7A1F1F', '#3A0D0D'), href: '#' },
+      { label: 'TurtleWax Pro', help: 'Retail line', image: ph('#1F5F3A', '#0C2E1C'), href: '#' },
+      { label: 'Private label', help: 'Your brand', image: ph('#3A3F47', '#14181F'), href: '#' },
+      { label: 'Custom blending', help: 'To spec', image: ph('#2D5A7A', '#122A3B'), href: '#' },
     ],
   } },
-];
-
-const mgCommand: MegaItem[] = [
-  { label: 'Shop', icon: 'storefront', columns: [
-    { header: 'Camping', items: [
-      { label: 'Tents', href: '#tents' },
-      { label: 'Track this', command: () => { mgPicked.value = 'Track this (its own command ran first)'; } },
-    ] },
-  ], panel: { cards: [{ label: 'Northwind', image: tile('#7a4b8c', 'NW') }] } },
-  { label: 'Docs', icon: 'open_in_new', href: 'https://example.com/docs', target: '_blank' },
+  { label: 'Markets', href: '#' },
+  { label: 'Resources', href: '#' },
+  { label: 'Contact', href: '#' },
 ];
 
 /*
- * Gated at all three levels, and arranged so the two exceptions show:
- *   Promotions keeps its promo panel after its only column is emptied;
- *   Lookbook is a heading and an image with no links, so it is not "empty"
- *   and stands on its own can.
+ * The gated bar: a denied root item takes its whole panel, a denied column
+ * goes from the panel that keeps its siblings, and a denied link goes from
+ * its column — three levels, one rule.
  */
-const mgGated: MegaItem[] = [
-  { label: 'Shop', icon: 'storefront', columns: [
-    { header: 'Camping', items: [{ label: 'Tents' }, { label: 'Stoves' }] },
-    { header: 'Reports', items: [
-      { label: 'Sales', can: 'reports' },
-      { label: 'Stock', can: 'reports' },
+const megaGated: MegaItem[] = [
+  { label: 'Catalogue', icon: 'inventory_2', columns: [
+    { header: 'Public', items: [
+      { label: 'Events', href: '#' },
+      { label: 'Venues', href: '#' },
     ] },
-    { header: 'Lookbook', image: tile('#4a4a6a', 'Lookbook') },
-    { header: 'Account', items: [
-      { label: 'Orders' },
-      { label: 'Settings', can: 'settings' },
+    { header: 'Internal', can: 'reports', items: [
+      { label: 'Sales', href: '#' },
+      { label: 'Attendance', href: '#' },
     ] },
   ] },
-  { label: 'Promotions', icon: 'campaign', columns: [
-    { header: 'Campaigns', items: [{ label: 'Planner', can: 'settings' }] },
-  ], panel: { title: 'Season sale', text: 'Still worth opening — the panel has copy of its own.' } },
-  { label: 'Admin', icon: 'shield', can: 'settings', columns: [
-    { header: 'Users', items: [{ label: 'Roles' }] },
+  { label: 'Administration', icon: 'shield', can: 'settings', columns: [
+    { header: 'Access', items: [{ label: 'Users', href: '#' }, { label: 'Roles', href: '#' }] },
   ] },
+  { label: 'Support', icon: 'help', href: '#' },
 ];
 
 /* ── ApexMenu page ────────────────────────────── */
@@ -4167,72 +4186,86 @@ const items = [
           <ApexContextMenu :items="ctxGated" :target="() => ctxGate" />
         </template>
 
+        <!-- The gallery's six, ported. A dock only reads as a dock against
+             the wallpaper it pins itself to. -->
         <template v-if="entry.id === 'dock'">
           <h2>Basic</h2>
           <p class="note">
-            A strip of icons pinned to an edge. Items are data, and
-            <code>position</code> decides which edge — which in turn decides which way a
-            label leans and which way a group fans.
+            An <code>items</code> array of icons. The hovered icon and its neighbours grow,
+            and the label appears on the outward side. <code>position</code> moves the strip
+            to any edge.
           </p>
-          <pre class="doc-pre" v-pre>&lt;ApexDock :items="items" position="bottom" /&gt;
-
-const items = [
-  { icon: 'home', label: 'Home' },
-  { icon: 'mail', label: 'Mail', badge: '3' },
-  { icon: 'folder', label: 'Files', items: [
-    { icon: 'description', label: 'Documents' },
-  ] },
-]</pre>
-          <div class="dock-stage">
-            <ApexDock :items="dkBasic" />
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexSelectButton v-model="dockPos" :options="['bottom', 'top', 'left', 'right']" size="sm" />
           </div>
+          <div class="dock-stage" :data-position="dockPos" style="margin-top:12px">
+            <ApexDock :items="DOCK_ITEMS" :position="dockPos" blur
+                      @item-click="dockLog = $event.item.label || ''" />
+          </div>
+          <p class="note">Last launched: <code>{{ dockLog || 'none yet' }}</code></p>
 
           <h2>Single action, or a speed dial</h2>
           <p class="note">
-            A slot is one action until you nest <code>items</code> on it — then it fans
-            its children out from the dock, speed-dial style, and one place in the strip
-            stays useful for a whole family of actions. Only one group fans at a time.
+            A plain item runs its <code>command</code> on click. Give the same item a nested
+            <code>items</code> array and the slot becomes a speed dial: clicking fans the
+            children out from the dock, away from its edge, staggered. The dot under an icon
+            marks a slot that holds more.
           </p>
-          <div class="dock-stage">
-            <ApexDock :items="dkGroups" />
+          <pre class="doc-pre" v-pre>const items = [
+  { icon: 'home', label: 'Home', command: goHome },        // single action
+  { icon: 'add', label: 'New', items: [                    // speed dial
+    { icon: 'description', label: 'Document', command: newDoc },
+    { icon: 'table', label: 'Spreadsheet', command: newSheet },
+    { icon: 'slideshow', label: 'Deck', command: newDeck },
+  ] },
+];</pre>
+          <div class="dock-stage dock-stage--tall" data-position="bottom" style="margin-top:12px">
+            <ApexDock :items="DOCK_MIXED" blur @item-click="dockLog = $event.item.label || ''" />
           </div>
+          <p class="note">
+            Last launched: <code>{{ dockLog || 'none yet' }}</code> — click
+            <strong>New</strong> or <strong>Share</strong> to fan.
+          </p>
 
           <h2>Badges and disabled</h2>
           <p class="note">
-            <code>badge</code> puts a count on the icon; <code>disabled</code> keeps the
-            slot in place but inert, which reads better than a strip whose contents move
-            about as state changes.
+            An item takes a <code>badge</code> for a count, and <code>disabled</code> to grey
+            out without removing it from the strip.
           </p>
-          <div class="dock-stage">
-            <ApexDock :items="dkBadges" />
+          <div class="dock-stage" data-position="bottom" style="margin-top:12px">
+            <ApexDock blur :items="[{ icon: 'mail', label: 'Inbox', badge: 12 },
+                                    { icon: 'chat', label: 'Messages', badge: 3 },
+                                    { icon: 'calendar_month', label: 'Calendar' },
+                                    { icon: 'cloud_off', label: 'Offline', disabled: true }]" />
           </div>
 
           <h2>Size, chrome and magnification</h2>
           <p class="note">
-            <code>size</code> is the icon box in pixels and the glyph scales with it.
-            Magnification grows the hovered icon and its two neighbours — it is CSS off
-            <code>:hover</code> and the adjacent siblings, with no pointer tracking and no
-            work on scroll, so it costs nothing when nobody is hovering.
+            Every dimension is a prop, so the same component covers a chunky desktop dock and
+            a compact toolbar rail. Turn <code>magnify</code> off where growth would be noise.
           </p>
-          <div class="dock-stage">
-            <ApexDock :items="dkBasic" :size="56" gap="10px" radius="18px"
-                      background="#101828" borderColor="#1f2a3c" />
-          </div>
-          <div class="dock-stage">
-            <ApexDock :items="dkBasic" :size="36" :magnify="false" radius="10px" />
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell"><span class="cell__tag">size="64", radius="26px"</span>
+              <ApexDock :items="DOCK_ITEMS.slice(0, 4)" :size="64" radius="26px" blur />
+            </div>
+            <div class="cell"><span class="cell__tag">size="34", :magnify="false", no labels</span>
+              <ApexDock :items="DOCK_ITEMS.slice(0, 4)" :size="34" :magnify="false"
+                        :show-labels="false" radius="12px" />
+            </div>
           </div>
 
           <h2>Custom item</h2>
           <p class="note">
-            The <code>item</code> slot replaces the icon and receives
-            <code>{ item, index, inGroup }</code> — the hook for real application
-            artwork rather than a glyph.
+            The <code>item</code> slot replaces an icon, which is where real app artwork or a
+            tinted tile goes. It receives <code>inGroup</code>, so a fanned child can look
+            different from a top-level slot.
           </p>
-          <div class="dock-stage">
-            <ApexDock :items="dkBasic">
-              <template #item="{ item }">
-                <span class="dock-tile" :style="{ background: String(item.tint || '#334') }">
-                  {{ String(item.label || '').slice(0, 2) }}
+          <div class="dock-stage" data-position="bottom" style="margin-top:12px">
+            <ApexDock :items="DOCK_TILES" blur :size="52">
+              <template #item="{ item, inGroup }">
+                <span class="dock-tile"
+                      :style="{ background: String(item.tint), transform: inGroup ? 'scale(.86)' : 'none' }">
+                  <ApexIcon :name="String(item.icon)" :size="inGroup ? 20 : 24" />
                 </span>
               </template>
             </ApexDock>
@@ -4240,26 +4273,52 @@ const items = [
 
           <h2>Advanced — a desktop</h2>
           <p class="note">
-            Put together: a strip on the left edge, groups that fan, a badge, and labels
-            on hover — the shape a small application shell actually takes.
+            The dock with the rest of the kit: a toolbar as the menu bar, a right-click
+            context menu on the wallpaper, and a dialog opened from a dock item.
           </p>
-          <div class="dock-stage dock-stage--tall">
-            <ApexDock :items="dkDesktop" position="left" :size="44" blur
-                      @item-click="dkPicked = $event.item.label || ''" />
+          <div class="dock-desk" style="margin-top:12px">
+            <ApexToolbar size="sm" class="dock-desk__bar">
+              <template #start>
+                <ApexIcon name="apps" :size="18" />
+                <strong style="font-size:12.5px">Apex OS</strong>
+              </template>
+              <template #end>
+                <ApexIcon name="wifi" :size="16" />
+                <ApexIcon name="volume_up" :size="16" />
+                <span style="font-size:12px">13:07</span>
+              </template>
+            </ApexToolbar>
+            <div ref="dockWall" class="dock-desk__wall">
+              <p class="dock-desk__hint">Right-click the wallpaper · click a dock icon</p>
+              <!-- The gallery marks this dock dock-desk__dock and styles nothing with it;
+                   dropped rather than carried as a class that does nothing. -->
+              <ApexDock blur :items="DOCK_DESK"
+                        @item-click="dockLog = $event.item.label || ''" />
+            </div>
+            <ApexContextMenu :target="() => dockWall"
+                             :items="[{ label: 'New folder', icon: 'create_new_folder' },
+                                      { label: 'Change wallpaper', icon: 'wallpaper' },
+                                      { separator: true },
+                                      { label: 'View', icon: 'grid_view', items: [
+                                        { label: 'Icons', icon: 'apps' },
+                                        { label: 'List', icon: 'list' } ] }]" />
           </div>
-          <p class="pov-state">item-click: <code>{{ dkPicked || 'nothing yet' }}</code></p>
+          <ApexDialog v-model:visible="dockDialog" header="About this Mac" width="360px" dismissable-mask>
+            <p>
+              Opened from a dock item's <code>command</code>. The dock does not own the
+              dialog — it just calls the callback.
+            </p>
+          </ApexDialog>
 
           <h2>Permissions</h2>
           <p class="note">
-            A dock slot is an icon with no text, so a denied one left in place would be an
-            unlabelled button that does nothing — worse than a stray row in a menu, not
-            better. <code>can</code> removes it, and a group whose children have all gone
-            goes with them, since its fan would open onto nothing.
+            <code>can</code> removes a slot from the strip, and the strip closes up around it
+            — a dock is a row of positions, so a gap would read as a missing icon rather
+            than as one you were never offered.
           </p>
           <p class="note">
-            The open fan closes whenever the strip changes shape. Denying a slot shifts
-            everything after it one place left, so an index left pointing into the old
-            strip could fan open a different group entirely.
+            A group whose children are all denied goes with them, dot and all: an empty slot
+            that fans onto nothing is worse than no slot.
           </p>
           <div class="iconstrip" style="margin-top: 12px">
             <ApexButton
@@ -4269,115 +4328,147 @@ const items = [
               @click="docsRole = r"
             >{{ r }}</ApexButton>
           </div>
-          <div class="dock-stage">
-            <ApexDock :items="dkGated" />
+          <div class="dock-stage" data-position="bottom" style="margin-top:12px">
+            <ApexDock :items="dockGated" blur />
           </div>
-          <p class="pov-state">
-            A Viewer loses Settings and the whole Reports group, whose children were both
-            gated.
-          </p>
         </template>
 
+        <!-- The gallery's eight, ported. -->
         <template v-if="entry.id === 'megamenu'">
           <h2>Basic</h2>
           <p class="note">
-            The panel is the model. A root item holds <code>columns</code>, and a column
-            holds links, an optional heading and an optional footer link — so a link grid
-            is data rather than rebuilt markup. The grid is auto-fit, so the column count
-            follows <code>columnMinWidth</code> rather than a fixed number.
+            A root item with a <code>columns</code> array opens a panel; one without is a
+            plain link. The panel grid is auto-fit on <code>columnMinWidth</code>, so the
+            column count follows the available width.
           </p>
-          <pre class="doc-pre" v-pre>&lt;ApexMegaMenu :items="items" /&gt;
-
-const items = [
-  { label: 'Shop', columns: [
-    { header: 'Camping', items: [
-      { label: 'Tents', help: 'One to six berth' },
-      { label: 'Stoves' },
-    ], footer: { label: 'Shop all camping' } },
+          <pre class="doc-pre" v-pre>const items = [
+  { label: 'Sports', icon: 'sports_soccer', columns: [
+    { header: 'Football', items: [{ label: 'Kits', href: '/kits' }, …] },
+    { header: 'Running', items: […] },
   ] },
-]</pre>
-          <ApexMegaMenu :items="mgBasic" />
+  { label: 'Pricing', href: '/pricing' },   // no panel
+];</pre>
+          <div class="mega-demo">
+            <ApexMegaMenu :items="MEGA_BASIC" @item-click="megaLog = $event.item.label || ''" />
+          </div>
+          <p class="note">Last click: <code>{{ megaLog || 'none yet' }}</code></p>
 
           <h2>Trigger — hover or click</h2>
           <p class="note">
             <code>trigger</code> decides what opens the <em>first</em> panel. Either way,
-            once one is open, hovering another root item switches to it, and hovering a
-            plain link closes it — a bar that needed a second click for every sibling
-            reads as broken. Hover keeps a short grace period so the pointer can cross the
-            gap to the panel without it vanishing.
+            once one is open, moving across the bar switches panels without a second click
+            — and moving onto a plain link closes it.
           </p>
-          <ApexMegaMenu :items="mgBasic" trigger="click" class="mega-demo" />
+          <div class="iconstrip" style="margin-top:12px">
+            <ApexSegmented v-model="megaTrigger"
+                           :options="[{ value: 'hover', label: 'hover' }, { value: 'click', label: 'click' }]"
+                           label="trigger" label-placement="before" />
+          </div>
+          <div class="mega-demo">
+            <ApexMegaMenu :items="MEGA_BASIC" :trigger="megaTrigger"
+                          @item-click="megaLog = $event.item.label || ''" />
+          </div>
+          <p class="note">
+            With <code>hover</code>, sweep the bar — Furniture, Electronics and Sports open
+            as you pass. With <code>click</code>, the first panel waits for a click, then the
+            same sweep works.
+          </p>
 
           <h2>Images — category thumbnails</h2>
           <p class="note">
-            A column takes an <code>image</code>, which sits above its links the way a
-            category thumbnail does; a link takes one too, replacing its icon.
+            A column takes an <code>image</code>, which sits above its heading. This is the
+            retail shape: one thumbnail per category, links underneath.
           </p>
-          <ApexMegaMenu :items="mgThumbs" class="mega-demo" />
+          <div class="mega-demo">
+            <ApexMegaMenu :items="MEGA_IMAGES" column-min-width="150px"
+                          @item-click="megaLog = $event.item.label || ''" />
+          </div>
+          <p class="note">
+            The artwork here is placeholder SVG — pass real URLs in
+            <code>column.image</code>.
+          </p>
 
           <h2>Images — card grid</h2>
           <p class="note">
-            <code>layout: 'cards'</code> turns a column's items into image tiles instead
-            of stacked links. That grid is auto-fit as well, on
-            <code>cardMinWidth</code>.
+            A column with <code>layout="cards"</code> renders its items as image tiles
+            instead of a list, and <code>span</code> widens it — here a narrow list of
+            collections beside a three-column strip of recipes. A column's
+            <code>footer</code> adds the closing link.
           </p>
-          <ApexMegaMenu :items="mgCards" class="mega-demo" />
+          <div class="mega-demo">
+            <ApexMegaMenu :items="MEGA_CARDS" card-min-width="140px"
+                          @item-click="megaLog = $event.item.label || ''" />
+          </div>
 
           <h2>Images — featured panel</h2>
           <p class="note">
-            <code>panel</code> adds a promo region beside the columns — a featured
-            image, a title, a line of copy and a call to action — plus an optional row
-            of image cards beneath them. <code>panelImagePosition</code> chooses the side.
+            A <code>panel</code> block adds a featured image with copy and a call to action
+            beside the columns, plus a row of image cards beneath them. Links can carry
+            <code>help</code> for a second line, and <code>panelImagePosition</code> moves
+            the feature to the other side.
           </p>
-          <ApexMegaMenu :items="mgPanel" class="mega-demo" />
+          <div class="mega-demo">
+            <ApexMegaMenu :items="MEGA_PROMO" @item-click="megaLog = $event.item.label || ''" />
+          </div>
 
           <h2>Vertical</h2>
           <p class="note">
-            <code>orientation="vertical"</code> stacks the root items and opens each panel
-            to the side, flipping to the other side when there is no room.
+            With <code>orientation="vertical"</code> the bar stacks and each panel opens to
+            the side — for a sidebar nav.
           </p>
           <div class="mega-vert">
-            <ApexMegaMenu :items="mgBasic" orientation="vertical" trigger="click" />
+            <ApexMegaMenu :items="MEGA_BASIC" orientation="vertical" column-min-width="160px" />
           </div>
 
           <h2>Template — bar edges</h2>
           <p class="note">
-            <code>start</code> and <code>end</code> are the bar's edges. The
-            <code>item</code> slot replaces a link, and <code>panel</code> replaces a
-            whole panel — it receives <code>close</code>, so a custom panel can dismiss
-            itself.
+            The <code>start</code> and <code>end</code> slots hold whatever the bar needs
+            around the links: a brand mark, a search control, an avatar. Use them with
+            <code>trigger="click"</code> when hover is too eager.
           </p>
-          <ApexMegaMenu :items="mgBasic" class="mega-demo">
-            <template #start>
-              <span class="mbar-brand"><ApexIcon name="hiking" :size="18" /> Outfitters</span>
-            </template>
-            <template #end>
-              <ApexButton size="sm" variant="text" icon="search">Search</ApexButton>
-            </template>
-          </ApexMegaMenu>
+          <div class="mega-demo">
+            <ApexMegaMenu :items="MEGA_BASIC.slice(0, 3)" trigger="click" radius="999px" padding="8px 12px">
+              <template #start>
+                <ApexIcon name="bolt" :size="22" style="color:var(--accent-primary)" />
+                <strong style="font-size:14px;letter-spacing:-.01em">APEX</strong>
+              </template>
+              <template #end>
+                <ApexInput v-model="megaQuery" placeholder="Search" leading-icon="search"
+                           label="Search" label-placement="hidden" size="sm" />
+                <ApexAvatar label="Sarah Anderson" size="sm" />
+              </template>
+            </ApexMegaMenu>
+          </div>
 
           <h2>Command and router</h2>
           <p class="note">
-            <code>item-click</code> fires for a root item, a link or a card alike, and the
-            item's own <code>command</code> runs first. A link with an <code>href</code>
-            is a real anchor.
+            Any link takes a <code>command</code>, which runs before <code>item-click</code>
+            — that is the hook for programmatic routing. A link with <code>href</code>
+            renders an anchor, so external URLs and <code>target="_blank"</code> work as they
+            are.
           </p>
-          <ApexMegaMenu :items="mgCommand" class="mega-demo"
-                        @item-click="mgPicked = $event.item.label || ''" />
-          <p class="pov-state">item-click: <code>{{ mgPicked || 'nothing yet' }}</code></p>
+          <div class="mega-demo">
+            <ApexMegaMenu :items="[{ label: 'Docs', columns: [
+                            { header: 'Programmatic', items: [
+                              { label: 'Dashboard', icon: 'dashboard', command: () => (megaLog = 'router.push(/dashboard)') },
+                              { label: 'Settings', icon: 'settings', command: () => (megaLog = 'router.push(/settings)') }] },
+                            { header: 'External', items: [
+                              { label: 'Vue docs', icon: 'open_in_new', href: 'https://vuejs.org', target: '_blank' },
+                              { label: 'Unavailable', icon: 'block', disabled: true }] }] },
+                          { label: 'Support', href: '#' }]"
+                          @item-click="megaLog = $event.item.label || ''" />
+          </div>
+          <p class="note">Result: <code>{{ megaLog || 'none yet' }}</code></p>
 
           <h2>Permissions</h2>
           <p class="note">
-            <code>can</code> works at three levels here — link, column, and root item —
-            and they cascade upward. A column whose links have all gone is a heading over
-            blank space, so it goes; a root item whose columns have all gone would open
-            onto nothing, so it goes with them.
+            The filter runs at all three levels of the model: a denied root item takes its
+            whole panel with it, a denied column goes from a panel whose siblings stay, and a
+            denied link goes from its column. One rule, applied wherever there is a list.
           </p>
           <p class="note">
-            Two things the cascade deliberately does not do. A column that never had links
-            — a heading and a category image — is not empty, so it stands on its own
-            <code>can</code>. And a root item whose columns are gone but whose promo panel
-            still has something to show is worth opening, so it stays.
+            A root item whose columns have all gone is dropped too — a bar entry that opens
+            an empty panel is worse than one that was never there.
           </p>
           <div class="iconstrip" style="margin-top: 12px">
             <ApexButton
@@ -4387,11 +4478,9 @@ const items = [
               @click="docsRole = r"
             >{{ r }}</ApexButton>
           </div>
-          <ApexMegaMenu :items="mgGated" trigger="click" class="mega-demo" />
-          <p class="pov-state">
-            A Viewer loses the Reports column from Shop, the whole Admin item, and the
-            Settings link — but keeps Promotions, whose panel still has copy to show.
-          </p>
+          <div class="mega-demo">
+            <ApexMegaMenu :items="megaGated" />
+          </div>
         </template>
 
         <template v-if="entry.id === 'menu'">
