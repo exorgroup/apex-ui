@@ -255,6 +255,10 @@ describe('the ported gallery examples are on the page', () => {
       'Content cards', 'Gallery'],
     ApexGallery: ['Basic', 'Toolbar', 'Per-button switches', 'Hover chrome', 'Styling',
       'Single', 'Grid lightbox'],
+    ApexTaskBoard: ['Data binding', 'Swimlanes', 'Column groups and pinned columns',
+      'Context menu', 'WIP limits and rules', 'Card fields', 'Permissions',
+      'Guarded transitions', 'Selection and keyboard', 'Editing', 'Virtual scroll',
+      'State, export and print', 'Custom cards and chrome'],
     /* These two were built before the guard existed and were never listed.
        Adding them with their Permissions sections covers both at once. */
     ApexSplitButton: ['Severity', 'Variants', 'Menu content', 'Sizes and states',
