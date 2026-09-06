@@ -513,7 +513,10 @@ const xBounds = computed<ZoomRange>(() => {
 });
 /** The full y extent, so a y zoom clamps against the data rather than the view. */
 const yBounds = computed<ZoomRange>(() => {
-  const e = extentOf(live.value);
+  /* Target values, for the same reason buildScales uses them: the full extent
+     is a property of the data, and a zoom clamped to a half-grown extent would
+     refuse most of the chart while the entrance ran. */
+  const e = extentOf(atTarget());
   return Number.isFinite(e[0]) ? e : [0, 1];
 });
 const dragMode = computed<'x' | 'y' | 'xy'>(() => zoomSpec.value.mode
@@ -632,8 +635,43 @@ function windowed(series: ResolvedSeries[]): ResolvedSeries[] {
   }));
 }
 
+/**
+ * `live` at its target values, for measurement only.
+ *
+ * A grow entrance interpolates every point from the baseline, so mid-animation
+ * `live` holds a fraction of the real data. Anything that measures it during
+ * that window gets a domain that is too small — and buildScales is called by
+ * the ResizeObserver, which on a remount fires while the animation is still
+ * running. It baked the half-grown extent into the axis and nothing rebuilt it
+ * once the values arrived, so the axis read 0–1,500 for data reaching 24,100
+ * and the line was drawn far above the plot.
+ *
+ * Only remounts showed it: on first load the chart is off screen, the reveal
+ * waits for the IntersectionObserver, and by then the observer has long
+ * settled. `draw` was immune because it reveals with a clip and never touches
+ * the values, so a rebuild mid-reveal measures the same numbers either way.
+ *
+ * The axis belongs to the data, not to the frame the animation happens to be
+ * on — so measurement always reads through the target frame.
+ */
+function atTarget(): ResolvedSeries[] {
+  const frame = targetFrame.value;
+  if (!frame || raf === null) return live.value;
+  return live.value.map((s) => {
+    const vals = frame.values.get(s.id);
+    if (!vals) return s;
+    return {
+      ...s,
+      points: s.points.map((p) => {
+        const t = vals.get(p.key);
+        return t ? { ...p, y: t.y, y0: t.y0 } : p;
+      }),
+    };
+  });
+}
+
 function buildScales() {
-  const series = live.value;
+  const series = atTarget();
   /* AF2-236: paneScales reads `inWindow` and nothing declared it. windowed()
      directly above is what it means — the same restriction the x scale applies
      — so a pane's y domain comes from the points actually on screen. */
