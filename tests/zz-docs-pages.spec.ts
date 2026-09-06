@@ -170,6 +170,15 @@ describe('the ported gallery examples are on the page', () => {
   /* Headings taken from APEX UI Gallery.html. A build cannot tell you a
      section is missing — only reading the rendered page can. */
   const EXPECTED: Record<string, string[]> = {
+    /* Sections 1-26 of the gallery's 66. The rest arrive with AF2-238c and
+       AF2-238d; listing only what is ported keeps the guard honest about
+       what exists today rather than asserting an aspiration. */
+    ApexChart: ['Basic', 'Area', 'Multiple series and the palette', 'Curve types',
+      'Null handling', 'Scales', 'Animation', 'Entrance', 'Decimation',
+      'Stacked area', 'Range area', 'Segment styling', 'Line border', 'Gradients',
+      'Markers', 'Line styling', 'Data labels', 'Hover', 'Export', 'Zoom and pan',
+      'Navigator', 'Reference lines and bands', 'Annotations', 'Plugins',
+      'Synced charts', 'Legend, tooltip and toolbar'],
     ApexToolbar: ['Basic', 'Sizes and chrome', 'Centred content',
       'Custom — navigation bar', 'Sticky and wrapping', 'Permissions'],
     ApexTabs: ['Basic and dynamic', 'Controlled', 'Scrollable', 'Select on focus',
