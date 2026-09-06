@@ -47,6 +47,8 @@ const FAMILY = [
   'components/ApexCarouselIndicators.vue', 'components/ApexCarouselNav.vue',
   'components/ApexGallery.vue', 'components/ApexTaskBoard.vue', 'components/ApexTaskCard.vue',
   'components/ApexChart.vue', 'components/ApexChartGroup.vue',
+  /* AF2-236: ours only — the families Pando kept inside ApexChart. */
+  'components/ApexChartTreemap.vue', 'components/ApexChartHeat.vue',
   'core/sidebar.ts', 'core/speedDial.ts', 'core/carousel.ts', 'core/taskboard.ts',
 ];
 
@@ -81,6 +83,10 @@ const INTENDED = [
   { why: 'AF2-236: the bindings that made ApexChart mountable', test: (l) => /needsZeroBaseline|pointsOnly|zoomWindow|const zoomY|const inWindow = windowed|const uid = Math\.random|const uidClip|localZoom = ref<ZoomRange \| ZoomWindow/.test(l) },
   /* The treemap moved to its own renderer; the drill path and its breadcrumb
      stayed, because the nav renders outside the svg. */
+  /* The heatmap's grid moved out; hasHeatmap stayed, because four other
+     things read it — the entrance mode, the tooltip path, the axis ticks
+     and data-family. */
+  { why: 'AF2-236c: the heatmap extraction', test: (l) => /ApexChartHeat|^candleGeometry, candleTones,$|:locale="locale" @hover="heatHover"/.test(l.trim()) },
   { why: 'AF2-236a: the treemap extraction', test: (l) => /ApexChartTreemap|const crumbs = computed|const allSeries = computed|crumbs\.length|c in crumbs|hasTreemap|drillPath\.value\.map|:width="size\.width"|@drill="drillInto"|^candleGeometry, candleTones, heatBand, heatGrid, heatIntensity,$/.test(l.trim()) },
   /* Continuation lines of the two definitions above. The matcher reads one
      line at a time, so a wrapped expression has to name both halves. */

@@ -41,10 +41,11 @@ import {
   createChartRegistry, partList, partOne, provideChartRegistry,
 } from '../core/chart/registry';
 import {
-  candleGeometry, candleTones, heatBand, heatGrid, heatIntensity,
+  candleGeometry, candleTones,
   type Candle, type TreeNode, type TreeTile,
 } from '../core/chart/special';
 import ApexChartTreemap from './ApexChartTreemap.vue';
+import ApexChartHeat from './ApexChartHeat.vue';
 
 export interface ChartLegendSpec {
   show?: boolean;
@@ -1785,56 +1786,6 @@ const tooltipTitle = computed(() => {
 });
 
 /* ─── heatmap ────────────────────────────────────────────── */
-const heatView = computed(() => {
-  if (!hasHeatmap.value) return null;
-  const spec = merged.series.value.find((s) => s.type === 'heatmap');
-  if (!spec) return null;
-  const get = (key: unknown, fallback: string) => (typeof key === 'function'
-    ? key as (r: unknown, i: number) => unknown
-    : (r: unknown) => (r && typeof r === 'object'
-      ? (r as Record<string, unknown>)[(key as string) || fallback]
-      : r));
-  const grid = heatGrid(
-    spec.data || [],
-    get(spec.xKey, 'x'),
-    get(spec.groupKey, 'group'),
-    get(spec.yKey, 'value'),
-  );
-  const plot = layoutState.value.plot;
-  const gap = spec.cellGap ?? 2;
-  const cw = plot.width / Math.max(1, grid.columns.length);
-  const ch = plot.height / Math.max(1, grid.rows.length);
-  const base = seriesColor(0, spec.color as string | undefined);
-  const stops = spec.colorStops || [];
-  const fmt = new Intl.NumberFormat(props.locale, { maximumFractionDigits: 1 });
-  return {
-    grid,
-    columns: grid.columns.map((c, i) => ({ key: c, label: c, x: plot.x + cw * (i + 0.5) })),
-    rows: grid.rows.map((r, i) => ({ key: r, label: r, y: plot.y + ch * (i + 0.5) })),
-    cells: grid.cells.map((cell) => {
-      const t = heatIntensity(cell.value, grid.extent);
-      return {
-        key: cell.key,
-        x: plot.x + cw * cell.cx + gap / 2,
-        y: plot.y + ch * cell.cy + gap / 2,
-        width: Math.max(0, cw - gap),
-        height: Math.max(0, ch - gap),
-        /* Intensity as opacity on a token colour rather than an interpolated
-           hue: parsing oklch out of a custom property to interpolate it would
-           tie the heatmap to a colour format and break theming. */
-        fill: stops.length ? (heatBand(t, stops) || base) : base,
-        opacity: stops.length ? 1 : 0.12 + t * 0.88,
-        label: cell.value === null ? '' : fmt.format(cell.value),
-        value: cell.value,
-        raw: cell.raw,
-        cellLabel: `${grid.columns[cell.cx]} · ${grid.rows[cell.cy]}`,
-      };
-    }),
-    radius: spec.cellRadius ?? 3,
-    showLabels: !!spec.showCellLabels,
-  };
-});
-
 /* ─── treemap ────────────────────────────────────────────── */
 const drillPath = ref<TreeNode[]>([]);
 
@@ -2099,7 +2050,13 @@ function radialHover(seriesId: string, point: ChartPoint | null, label: string) 
 }
 const radialLabel = ref('');
 
-/** A cell is a real element, so its hover needs no grid maths. */
+/**
+ * A cell is a real element, so its hover needs no grid maths.
+ *
+ * AF2-236c: the grid moved to ApexChartHeat, this did not. Turning a cell into
+ * a tooltip entry needs `live` and `hit`, which are the chart's, so the
+ * renderer emits the cell and the chart decides what a hover means.
+ */
 function heatHover(cell: { cellLabel: string; value: number | null }) {
   const s = live.value[0];
   if (!s || cell.value === null) return;
@@ -2761,21 +2718,8 @@ defineExpose({
                 :y2="horizontal ? crossPos : layoutState.plot.y + layoutState.plot.height" />
 
           <!-- heatmap: both axes categorical, so the value scale is unused -->
-          <g v-if="heatView" class="apex-cht__heat">
-            <rect v-for="c in heatView.cells" :key="c.key" class="apex-cht__cell"
-                  :x="c.x" :y="c.y" :width="c.width" :height="c.height" :rx="heatView.radius"
-                  :fill="c.fill" :fill-opacity="c.opacity"
-                  @pointerenter="heatHover(c)" @pointerleave="clearHit" />
-            <text v-if="heatView.showLabels" v-for="c in heatView.cells" :key="c.key + '-l'"
-                  class="apex-cht__cell-label" :x="c.x + c.width / 2" :y="c.y + c.height / 2"
-                  text-anchor="middle" dominant-baseline="middle">{{ c.label }}</text>
-            <text v-for="col in heatView.columns" :key="col.key" class="apex-cht__tick"
-                  :x="col.x" :y="layoutState.plot.y + layoutState.plot.height + 15"
-                  text-anchor="middle">{{ col.label }}</text>
-            <text v-for="row in heatView.rows" :key="row.key" class="apex-cht__tick"
-                  :x="layoutState.plot.x - 8" :y="row.y" text-anchor="end"
-                  dominant-baseline="middle">{{ row.label }}</text>
-          </g>
+          <ApexChartHeat v-if="hasHeatmap" :series="allSeries" :plot="layoutState.plot"
+                         :locale="locale" @hover="heatHover" @leave="clearHit" />
 
           <g v-else-if="!useCanvas" class="apex-cht__series" :clip-path="seriesClip">
             <g v-for="entry in paths" :key="entry.series.id" :opacity="entry.opacity"

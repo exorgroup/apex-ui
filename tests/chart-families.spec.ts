@@ -67,3 +67,42 @@ describe('the treemap family renders', () => {
     w.unmount();
   });
 });
+
+const HEAT = [
+  { x: 'Mon', group: 'Morning', value: 3 },
+  { x: 'Mon', group: 'Evening', value: 8 },
+  { x: 'Tue', group: 'Morning', value: 5 },
+  { x: 'Tue', group: 'Evening', value: 1 },
+];
+
+describe('the heatmap family renders', () => {
+  it('draws a cell per pair, and labels its own rows and columns', async () => {
+    const w = mount(ApexChart, {
+      props: { ...SIZED, series: [{ id: 'h', type: 'heatmap', data: HEAT }] },
+      attachTo: document.body,
+    });
+    await w.vm.$nextTick();
+    expect(w.find('.apex-cht__heat').exists(), 'no heat group — is ApexChartHeat wired in?').toBe(true);
+    expect(w.findAll('.apex-cht__cell').length).toBe(4);
+    /* Two columns and two rows, labelled by the grid rather than by the value
+       axis — which is why ApexChart suppresses its own ticks for a heatmap. */
+    expect(w.findAll('.apex-cht__tick').length).toBe(4);
+    w.unmount();
+  });
+
+  it('a cell hover reaches the chart tooltip', async () => {
+    const w = mount(ApexChart, {
+      props: { ...SIZED, series: [{ id: 'h', type: 'heatmap', data: HEAT }] },
+      attachTo: document.body,
+    });
+    await w.vm.$nextTick();
+    expect(w.find('.apex-cht__tip').exists()).toBe(false);
+
+    /* The grid moved out, the hit state did not: this is the emit crossing
+       that seam. A cell that only highlighted itself would pass every other
+       check here. */
+    await w.findAll('.apex-cht__cell')[1].trigger('pointerenter');
+    expect(w.find('.apex-cht__tip').exists(), 'hovering a cell should raise the tooltip').toBe(true);
+    w.unmount();
+  });
+});
