@@ -1042,6 +1042,23 @@ color:#33404F;transition:transform var(--dur-fast) var(--ease-out)}
 /* ── ApexTaskBoard demos ───────────────────────────────────
    The frame every board sits in, the custom drag preview, and the custom
    card. The board's own chrome is in apex-ui.css. */
+/* ApexChart demo chrome, from the gallery. The legend pills, the tooltip
+   total row and the framed figure: presentation the sections rely on, so
+   without it the ported examples render unstyled rather than wrong. */
+.cht-pill{display:inline-flex;align-items:center;gap:7px;padding:4px 11px;border-radius:999px;
+border:1px solid var(--border-default);background:var(--bg-surface);font:inherit;font-size:12.5px;
+color:var(--fg-default);cursor:pointer}
+.cht-pill[data-off="true"]{opacity:.45}
+.cht-pill em{font-style:normal;color:var(--fg-subtle);font-variant-numeric:tabular-nums}
+.cht-pill__dot{inline-size:8px;block-size:8px;border-radius:999px}
+.cht-tip-total{display:flex;align-items:center;gap:7px;margin-block-start:3px;padding-block-start:4px;
+border-block-start:1px solid var(--border-subtle);font-variant-numeric:tabular-nums}
+.cht-tip-total b{margin-inline-start:auto}
+.cht-tip-total em{font-style:normal;font-size:11px;color:var(--accent-danger)}
+.cht-tip-total em[data-up="true"]{color:var(--accent-success)}
+.cht-frame{margin-top:12px;padding:14px;border:1px solid var(--border-default);
+border-radius:var(--r-lg);background:var(--bg-surface)}
+
 .tb-frame{border:1px solid var(--border-default);border-radius:var(--r-lg);
 background:var(--bg-surface);padding:12px}
 .tb-preview{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:var(--r-md);

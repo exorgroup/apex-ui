@@ -24,7 +24,7 @@ import { ref } from 'vue';
    component is a Vue warning, not an error, so the stage would render empty
    and the build would still pass. */
 import { ApexChart } from '@exorgroup/apex-ui';
-import { CHT_TRIAL } from '../registry';
+import { CHT_TRIAL } from '../chartData';
 
 defineProps<{
   /** Live props from the playground rail. */

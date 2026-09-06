@@ -363,12 +363,6 @@ export const MTR_ICONS = [
  * The people the context menu's per-row example acts on. Ported from the
  * gallery, where the same list backs several controls.
  */
-/** The chart's twelve months, and the trial curve every line example uses. */
-export const CHT_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-export const CHT_TRIAL = [41, 46, 49, 45, 53, 58, 57, 61, 64, 62, 68, 72]
-  .map((value, i) => ({ month: CHT_MONTHS[i], value }));
-
 /* ── ApexTaskBoard demo data ──────────────────────────────────────
    Ported from the gallery. Every board on the page copies its seed, so one
    demo's drags never show up in another. */

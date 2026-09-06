@@ -30,6 +30,11 @@ import { applyMove } from '@exorgroup/apex-ui';
 import { useApexDialog, useApexAlert, useApexToast, useCan, ApexPopover, ApexTieredMenu, ApexMenubar, ApexMenu, ApexMegaMenu, ApexDock, ApexContextMenu, ApexBreadcrumb,
   ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger } from '@exorgroup/apex-ui';
 import type { MenuItem, MegaItem, CrumbItem, SpeedDialItem } from '@exorgroup/apex-ui';
+import { watermarkPlugin, trendlinePlugin, statsPlugin, thresholdPlugin } from '@exorgroup/apex-ui';
+import { CHT_TRIAL, CHT_REVENUE, CHT_SHAPE, CHT_GAPPY, CHT_LOG, CHT_REGIONS,
+  CHT_CHANNELS, CHT_WEATHER, CHT_DAILY, CHT_BIG, CHT_STACK, CHT_BAND, CHT_TREND,
+  CHT_CROSSING, CHT_CROSSING_HALO, CHT_GRADIENT, CHT_SHAPES, CHT_STYLES,
+  CHT_SYNC_A, CHT_SYNC_B, CHT_RD } from './chartData';
 import { ROLES, docsRole } from './docsCan';
 import LocalityForm from './demos/LocalityForm.vue';
 import ContainerStage from './demos/ContainerStage.vue';
@@ -283,6 +288,134 @@ const tbEditItems = ref<TbItem[]>(
   copy(TB_SEED.filter((r) => ['ideas', 'ready', 'building'].includes(r.columnId))));
 const tbBig = ref<TbItem[]>(copy(TB_BIG));
 const tbStateItems = ref<TbItem[]>(copy(TB_OPS_SEED));
+
+
+/* ── ApexChart demo state ─────────────────────────────────────────────────
+   Ported from the gallery's options object. The rail-driven props live on the
+   stage; these belong to individual sections — the animation section's flip,
+   the export section's output, the decimation section's node count.          */
+
+/** Animation: chtSwap rescales the series so the chart has something to
+    tween to, chtAddPoint/chtDropPoint change the point COUNT, which is the
+    harder case — the chart has to reconcile a different-length dataset. */
+const chtFlip = ref(false);
+const chtExtra = ref(0);
+function chtSwap() { chtFlip.value = !chtFlip.value; }
+function chtAddPoint() { chtExtra.value = Math.min(0, chtExtra.value + 1); }
+function chtDropPoint() { chtExtra.value = Math.max(-8, chtExtra.value - 1); }
+
+const chtSeries = computed(() => {
+  const scale = chtFlip.value ? 1.45 : 1;
+  const shift = chtFlip.value ? -8 : 0;
+  const len = Math.max(4, Math.min(12, 12 + chtExtra.value));
+  return [
+    {
+      id: 'activated', name: 'Activated', xKey: 'month', yKey: 'value', fillOpacity: 0.16,
+      data: CHT_TRIAL.slice(0, len).map((r: any) => ({
+        month: r.month, value: Math.round(r.value * scale + shift),
+      })),
+    },
+    {
+      id: 'invited', name: 'Invited', xKey: 'month', yKey: 'value',
+      data: CHT_TRIAL.slice(0, len).map((r: any, i: number) => ({
+        month: r.month, value: Math.round((r.value * 0.62 + 8) * (chtFlip.value ? 1.2 : 1) + (i % 3)),
+      })),
+    },
+  ];
+});
+
+const chtEntrance = ref('draw');
+const chtReplay = ref(0);
+const chtStack = ref('normal');
+const chtLog = ref('');
+
+/** Decimation: the count is read back out of the DOM rather than asserted,
+    because the honest question is how many points were DRAWN. */
+const chtDecimate = ref(true);
+const chtRenderer = ref('auto');
+const chtDrawn = ref<number | string>(0);
+const chtBig = ref<any>(null);
+function chtCount() {
+  const el = chtBig.value && chtBig.value.$el;
+  if (!el) { chtDrawn.value = 0; return; }
+  const path = el.querySelector('.apex-cht__line');
+  if (path) {
+    /* Counting path commands is the honest measure of what was drawn: the
+       canvas layer has no nodes to count. */
+    chtDrawn.value = (path.getAttribute('d').match(/[ML]/g) || []).length;
+    return;
+  }
+  chtDrawn.value = 'canvas layer — no DOM nodes';
+}
+
+/** Per-segment colour and dash: both take the segment context, so a line can
+    change appearance partway without being split into two series. */
+function chtTrendColor(ctx: any) {
+  if (ctx.p1.y === null || ctx.p0.y === null) return undefined;
+  return ctx.p1.y >= ctx.p0.y ? 'oklch(0.62 0.16 150)' : 'oklch(0.60 0.19 25)';
+}
+function chtForecastDash(ctx: any) { return ctx.p0.index >= 7 ? '6 5' : undefined; }
+function chtForecastColor(ctx: any) { return ctx.p0.index >= 7 ? 'var(--fg-subtle)' : undefined; }
+
+const chtLabels = ref('culled');
+const chtLabelSpec = computed(() => {
+  if (chtLabels.value === 'all') return { show: true, collision: false };
+  if (chtLabels.value === 'sparse') return { show: true, sparse: true };
+  return { show: true };
+});
+
+function chtSeriesAvg(s: any) {
+  const vals = s.points.map((p: any) => p.y).filter((v: number | null) => v !== null);
+  if (!vals.length) return '0.00';
+  return (vals.reduce((a: number, b: number) => a + b, 0) / vals.length).toFixed(2);
+}
+function chtRowTotal(rows: any[]) {
+  return Number(rows.reduce((sum, r) => sum + Number(String(r.value).replace(/[^0-9.-]/g, '')), 0).toFixed(2));
+}
+
+/** Export: exportCsv and exportSvg are synchronous strings, exportImage is a
+    Promise<Blob>, so the PNG needs an object URL to be shown at all. */
+const chtOut = ref('');
+const chtPng = ref('');
+const chtExp = ref<any>(null);
+function chtExport(kind: string) {
+  const chart = chtExp.value;
+  if (!chart) return;
+  chtPng.value = '';
+  if (kind === 'csv') { chtOut.value = chart.exportCsv(); return; }
+  if (kind === 'svg') { chtOut.value = chart.exportSvg().slice(0, 1400) + '…'; return; }
+  chart.exportImage({ scale: 2 }).then((blob: Blob) => {
+    chtOut.value = 'PNG blob — ' + Math.round(blob.size / 1024) + ' KB, type ' + blob.type;
+    chtPng.value = URL.createObjectURL(blob);
+  }).catch((err: Error) => { chtOut.value = 'export failed: ' + err.message; });
+}
+
+const chtZoomLabel = ref('Wheel, drag or shift-drag on the plot');
+const chtZoom = ref<any>(null);
+const chtGroup = ref<any>(null);
+function chtOnZoom(payload: any) {
+  if (payload.full || !payload.range) {
+    chtZoomLabel.value = 'Showing all 50,000 points';
+    return;
+  }
+  const span = Math.round(payload.range[1] - payload.range[0]);
+  chtZoomLabel.value = 'Window: ' + Math.round(payload.range[0]).toLocaleString()
+    + ' – ' + Math.round(payload.range[1]).toLocaleString()
+    + ' (' + span.toLocaleString() + ' points)';
+}
+
+const chtPlugWatermark = ref(true);
+const chtPlugTrend = ref(true);
+const chtPlugStats = ref(false);
+const chtPlugThreshold = ref(false);
+const chtPlugins = computed(() => {
+  const list = [];
+  if (chtPlugWatermark.value) list.push(watermarkPlugin('APEX'));
+  if (chtPlugTrend.value) list.push(trendlinePlugin('self'));
+  if (chtPlugStats.value) list.push(statsPlugin());
+  if (chtPlugThreshold.value) list.push(thresholdPlugin(25, 55));
+  return list;
+});
 
 const tbLog = ref('');
 const tbSel = ref(0);
@@ -3970,6 +4103,326 @@ function pick(city) {
         -->
         <!-- The gallery's six, ported. -->
         <!-- The gallery's thirteen, ported. -->
+        <!-- ApexChart, sections 1-26: the line and area half of the
+             gallery's 66. Ported verbatim; the datasets are in chartData.ts. -->
+        <template v-if="entry.id === 'chart'">
+      <h2>Basic</h2>
+      <p style="font-size:13.5px">A line connects points to show a trend. <code>xKey</code> and <code>yKey</code> name the properties to read, so app data is never reshaped to suit the chart. Note the y domain: a line does not force a zero baseline, because forcing one flattens the shape the chart exists to show.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'activation', name: 'Activated', data: CHT_TRIAL, xKey: 'month', yKey: 'value' }]"
+                    :legend="{ show: false }" height="300" />
+      </div>
+
+      <h2>Area</h2>
+      <p style="font-size:13.5px"><code>fillOpacity</code> fills the region beneath the line — <code>0</code> draws only the line, anything above it makes an area. An area <em>is</em> a line with a fill, so there is no separate type; and because a fill implies magnitude from a baseline, the y domain now includes zero on its own.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'revenue', name: 'Revenue', data: CHT_REVENUE, xKey: 'month', yKey: 'value', fillOpacity: 0.22 }]"
+                    :legend="{ show: false }" curve="smooth" height="300" />
+      </div>
+
+      <h2>Multiple series and the palette</h2>
+      <p style="font-size:13.5px">Series colours resolve from tokens — <code>--apex-cht-series-1</code> through <code>8</code>, eight hues at one lightness and chroma so no series shouts louder than its neighbours. A hundred charts restyle at once, and dark mode costs nothing. Click a legend entry to hide that series.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_CHANNELS" :legend="{ position: 'bottom' }" height="320"
+                    @legend-toggle="chtLog = $event.series + ($event.hidden ? ' hidden' : ' shown')" />
+      </div>
+      <p style="font-size:13px;margin-top:8px">{{ chtLog || 'Nothing toggled yet' }}</p>
+
+      <h2>Curve types</h2>
+      <p style="font-size:13.5px"><code>smooth</code> is monotone cubic and never overshoots, so it cannot invent a peak that is not in the data. <code>spline</code> is Catmull-Rom with a <code>tension</code> knob for a looser curve. The step variants draw discrete transitions, which is what state and threshold data actually did.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div v-for="c in ['linear','smooth','spline','step','step-before','step-after']" :key="c" class="cell">
+          <span class="cell__tag">{{ c }}</span>
+          <ApexChart :series="[{ id: c, name: c, data: CHT_SHAPE, xKey: 'hour', yKey: 'value', showMarkers: true }]"
+                      :curve="c" :tension="0.6" :legend="{ show: false }"
+                      :x-axis="{ ticks: false }" :y-axis="{ ticks: false, grid: false }" height="140" />
+        </div>
+      </div>
+
+      <h2>Null handling</h2>
+      <p style="font-size:13.5px">A <code>null</code> breaks the line by default, because real data has holes and a chart that silently interpolates across them lies. <code>connect</code> bridges the gap; <code>zero</code> reads nulls as zero, which is only honest when zero is a real value rather than missing data.</p>
+      <div class="grid grid--3" style="margin-top:12px">
+        <div v-for="n in ['gap','connect','zero']" :key="n" class="cell">
+          <span class="cell__tag">{{ n }}</span>
+          <ApexChart :series="[{ id: n, name: n, data: CHT_GAPPY, xKey: 'month', yKey: 'value', showMarkers: true }]"
+                      :connect-nulls="n" :legend="{ show: false }" height="170" />
+        </div>
+      </div>
+
+      <h2>Scales</h2>
+      <p style="font-size:13.5px">Four scale types, each with its own tick generator rather than one generic algorithm — nice ticks for numbers want powers of ten, for time they want calendar boundaries that are not uniform in length. Axis label widths are measured, not estimated, so the plot rect is right and labels rotate or cull only when they would collide.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">time — 90 days</span>
+          <ApexChart :series="[{ id: 'daily', name: 'Sessions', data: CHT_DAILY, xKey: 'date', yKey: 'value', fillOpacity: 0.16 }]"
+                      :x-axis="{ type: 'time' }" :legend="{ show: false }" height="220" />
+        </div>
+        <div class="cell"><span class="cell__tag">log — four decades</span>
+          <ApexChart :series="[{ id: 'growth', name: 'Requests', data: CHT_LOG, xKey: 'month', yKey: 'value' }]"
+                      :y-axis="{ type: 'log' }" :legend="{ show: false }" height="220" />
+        </div>
+        <div class="cell"><span class="cell__tag">long category labels — rotated automatically</span>
+          <ApexChart :series="[{ id: 'regions', name: 'Deployments', data: CHT_REGIONS, xKey: 'region', yKey: 'value', fillOpacity: 0.18 }]"
+                      :legend="{ show: false }" height="250" />
+        </div>
+        <div class="cell"><span class="cell__tag">two y axes — different units</span>
+          <ApexChart :series="CHT_WEATHER" :y-axis="{ label: 'Temperature (°C)' }"
+                      :y2-axis="{ label: 'Rainfall (mm)' }" curve="smooth"
+                      :legend="{ position: 'bottom' }" height="250" />
+        </div>
+      </div>
+
+      <h2>Animation</h2>
+      <p style="font-size:13.5px">Animation is interpolation between two datasets, matched per point key — so a removed point collapses and a new one grows, rather than the series being replaced. Entrance is the same code with a synthetic previous frame at the baseline, which is why no separate entrance animation exists. Swap the dataset and watch the line move rather than flicker.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexButton size="sm" @click="chtSwap()">Swap dataset</ApexButton>
+        <ApexButton size="sm" severity="secondary" variant="outlined" @click="chtAddPoint()">Append a point</ApexButton>
+        <ApexButton size="sm" variant="text" @click="chtDropPoint()">Remove one</ApexButton>
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="chtSeries" :legend="{ position: 'bottom' }" curve="smooth" height="300" />
+      </div>
+
+      <h2>Entrance</h2>
+      <p style="font-size:13.5px">A line or area sweeps into view as though drawn, once, when the chart is actually on screen. It is a <em>reveal</em> rather than a value interpolation: a drawn line has to show its real shape as it appears, where interpolating toward it would move the whole curve — a different gesture, and the one <code>grow</code> still gives you. One clip sweeps the plot, so the fill, the markers and the labels are uncovered along with the line.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtEntrance" :options="['draw','grow','none']" size="sm" />
+        <ApexButton size="sm" severity="secondary" variant="outlined" icon="replay"
+                     @click="chtReplay += 1">Replay</ApexButton>
+        <span style="font-size:13px;color:var(--fg-subtle)">Reduced-motion users get it instantly.</span>
+      </div>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">area</span>
+          <ApexChart :key="'ent-a-' + chtReplay + chtEntrance" :entrance="chtEntrance"
+                      :series="[{ id: 'r', name: 'Revenue', data: CHT_REVENUE, xKey: 'month', yKey: 'value', fillOpacity: 0.22 }]"
+                      curve="smooth" :legend="{ show: false }" height="260" />
+        </div>
+        <div class="cell"><span class="cell__tag">multi-series with markers</span>
+          <ApexChart :key="'ent-b-' + chtReplay + chtEntrance" :entrance="chtEntrance"
+                      :series="CHT_CHANNELS" :show-markers="true" curve="smooth"
+                      :legend="{ position: 'bottom' }" height="260" />
+        </div>
+      </div>
+
+      <h2>Decimation</h2>
+      <p style="font-size:13.5px">50,000 points. LTTB downsamples to roughly two per pixel before drawing, preserving spikes where stride sampling and averaging would flatten them — and because it runs before the renderer choice, most large datasets never need canvas at all. Hit testing still uses the full-resolution array, so the tooltip reports the point under the cursor rather than a neighbour.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSwitch v-model="chtDecimate" label="Decimation" />
+        <ApexSelectButton v-model="chtRenderer" :options="['auto','svg','canvas']" size="sm" />
+        <span style="font-size:13px;color:var(--fg-subtle)">Drawn vertices: <code>{{ chtDrawn }}</code> of 50,000</span>
+        <ApexButton size="sm" variant="text" @click="chtCount">Recount</ApexButton>
+      </div>
+      <div class="cht-frame">
+        <ApexChart ref="chtBig" :series="[{ id: 'signal', name: 'Signal', data: CHT_BIG, xKey: 'i', yKey: 'v' }]"
+                    :x-axis="{ type: 'linear' }" :decimation="chtDecimate" :renderer="chtRenderer"
+                    :legend="{ show: false }" :animation="false" height="300" />
+      </div>
+
+      <h2>Stacked area</h2>
+      <p style="font-size:13.5px"><code>stackMode</code> stacks series sharing a <code>stack</code> id. It is computed across the series list rather than per series, because stacking is a relationship <em>between</em> series — which is also why the same code will serve stacked bars unchanged. <code>percent</code> normalizes each category to 100.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtStack" :options="['none','normal','percent']" size="sm" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_STACK" :stack-mode="chtStack" curve="smooth"
+                    :legend="{ position: 'bottom' }" height="320" />
+      </div>
+
+      <h2>Range area</h2>
+      <p style="font-size:13.5px"><code>y0Key</code> gives a point its lower edge, so the fill becomes a band rather than a fill to zero. A range area, a confidence interval and a stacked slice are the same primitive — a fill between two values — so there is one code path, not three.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[
+                      { id: 'band', name: 'Forecast range', data: CHT_BAND, xKey: 'month', yKey: 'high', y0Key: 'low', fillOpacity: 0.2, lineStrokeWidth: 0 },
+                      { id: 'actual', name: 'Actual', data: CHT_BAND, xKey: 'month', yKey: 'mid' }
+                    ]" curve="smooth" :legend="{ position: 'bottom' }" height="300" />
+      </div>
+
+      <h2>Segment styling</h2>
+      <p style="font-size:13.5px">Each of <code>segmentColor</code>, <code>segmentStrokeWidth</code>, <code>segmentDash</code> and <code>segmentFillColor</code> takes a static value or a callback on the two endpoints; returning <code>undefined</code> falls back to the series default. Tangents come from the whole run before it is cut into pieces, so a styled segment keeps its curve. This is the case people otherwise fake with three overlapping series.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">trend colours — rising green, falling red</span>
+          <ApexChart :series="[{ id: 'trend', name: 'Price', data: CHT_TREND, xKey: 'month', yKey: 'value',
+                        showMarkers: true, segmentColor: chtTrendColor }]"
+                      :legend="{ show: false }" height="240" />
+        </div>
+        <div class="cell"><span class="cell__tag">forecast — dashed past the boundary</span>
+          <ApexChart :series="[{ id: 'fc', name: 'Bookings', data: CHT_TRIAL, xKey: 'month', yKey: 'value',
+                        fillOpacity: 0.14, segmentDash: chtForecastDash, segmentColor: chtForecastColor }]"
+                      curve="smooth" :legend="{ show: false }" height="240" />
+        </div>
+      </div>
+
+      <h2>Line border</h2>
+      <p style="font-size:13.5px"><code>borderColor</code> paints a halo behind the line, wider than the line itself. It is what keeps a series legible where it crosses an area fill or another series — compare the two panels.</p>
+      <div class="grid grid--2" style="margin-top:12px">
+        <div class="cell"><span class="cell__tag">no halo</span>
+          <ApexChart :series="CHT_CROSSING" curve="smooth" :legend="{ show: false }" height="240" />
+        </div>
+        <div class="cell"><span class="cell__tag">halo</span>
+          <ApexChart :series="CHT_CROSSING_HALO" curve="smooth" :legend="{ show: false }" height="240" />
+        </div>
+      </div>
+
+      <h2>Gradients</h2>
+      <p style="font-size:13.5px">Pass an object to <code>color</code>: <code>{ x1, y1, x2, y2, stops }</code> in normalized plot coordinates. A gradient gets two definitions rather than one, because along a stroke it reads as progression through time while under a fill it reads as fading toward the baseline — so the defaults differ, horizontal for strokes and vertical for fills.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_GRADIENT" curve="smooth" :legend="{ position: 'bottom' }" height="300" />
+      </div>
+
+      <h2>Markers</h2>
+      <p style="font-size:13.5px">Six shapes, with <code>pointRotation</code> to turn them and <code>markerSize</code> for the radius. Markers appear automatically at 40 points or fewer, because 500 markers in 600px is noise.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_SHAPES" :legend="{ position: 'bottom' }" :marker-size="5" height="300" />
+      </div>
+
+      <h2>Line styling</h2>
+      <p style="font-size:13.5px"><code>lineStrokeWidth</code>, <code>lineDash</code> with <code>lineDashOffset</code>, and <code>lineCap</code> / <code>lineJoin</code> for endings and corners. Also per-series <code>curve</code>, so one chart can mix a smooth actual with a straight target.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_STYLES" :legend="{ position: 'bottom' }" height="300" />
+      </div>
+
+      <h2>Data labels</h2>
+      <p style="font-size:13.5px">Collisions are culled, not overlapped: endpoints and local extremes survive first, so a dense series degrades to its readable points rather than a smear. <code>sparse</code> keeps only those; <code>collision: false</code> draws everything if you want to see why culling exists.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSelectButton v-model="chtLabels" :options="['culled','sparse','all']" size="sm" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'dense', name: 'Sessions', data: CHT_DAILY.slice(0, 45), xKey: 'date', yKey: 'value', fillOpacity: 0.14 }]"
+                    :x-axis="{ type: 'time' }" curve="smooth" :legend="{ show: false }"
+                    :data-labels="chtLabelSpec" height="300" />
+      </div>
+
+      <h2>Hover</h2>
+      <p style="font-size:13.5px">One <code>hover</code> object rather than nine top-level props with overlapping names: <code>brightness</code>, <code>dimOpacity</code> to fade the series you are not on, <code>radiusMultiplier</code>, and colour overrides for the active point.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_CHANNELS" :hover="{ dimOpacity: 0.25, radiusMultiplier: 2.4, brightness: 1.15 }"
+                    curve="smooth" :legend="{ position: 'bottom' }" height="300" />
+      </div>
+
+      <h2>Export</h2>
+      <p style="font-size:13.5px">SVG, PNG and CSV. Each returns a string or a blob rather than triggering a download, because the filename and where it goes are the application's business. The SVG export resolves custom properties to literal colours — a standalone file has no design system to look them up in.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexButton size="sm" severity="secondary" variant="outlined" icon="code" @click="chtExport('svg')">Export SVG</ApexButton>
+        <ApexButton size="sm" severity="secondary" variant="outlined" icon="image" @click="chtExport('png')">Export PNG</ApexButton>
+        <ApexButton size="sm" variant="text" icon="table_view" @click="chtExport('csv')">Export CSV</ApexButton>
+      </div>
+      <div class="cht-frame">
+        <ApexChart ref="chtExp" title="Revenue by month" :series="[{ id: 'revenue', name: 'Revenue', data: CHT_REVENUE, xKey: 'month', yKey: 'value', fillOpacity: 0.2 }]"
+                    curve="smooth" :legend="{ show: false }" height="280" />
+      </div>
+      <img v-if="chtPng" :src="chtPng" alt="Exported chart" style="max-width:340px;margin-top:10px;border:1px solid var(--border-default);border-radius:8px" />
+      <pre v-if="chtOut" class="doc-pre" style="margin-top:10px;max-height:200px;overflow:auto">{{ chtOut }}</pre>
+
+      <h2>Zoom and pan</h2>
+      <p style="font-size:13.5px">Wheel to zoom about the cursor — the value under the pointer is the one you care about, so it stays put. Drag to rubber-band a range, shift-drag to pan, pinch on touch. Zooming re-decimates <em>within the window</em>, so 50,000 points reveal real detail rather than a magnified approximation, and the y domain follows the window so a zoomed trace does not sit in a domain sized by data off screen.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexButton size="sm" severity="secondary" variant="outlined" icon="zoom_out_map"
+                     @click="chtZoom.resetZoom()">Reset zoom</ApexButton>
+        <span style="font-size:13px;color:var(--fg-subtle)">{{ chtZoomLabel }}</span>
+      </div>
+      <div class="cht-frame">
+        <ApexChart ref="chtZoom" :series="[{ id: 'signal', name: 'Signal', data: CHT_BIG, xKey: 'i', yKey: 'v', fillOpacity: 0.12 }]"
+                    :x-axis="{ type: 'linear' }" zoom :legend="{ show: false }" :animation="false"
+                    height="320" @zoom-change="chtOnZoom" />
+      </div>
+
+      <h2>Navigator</h2>
+      <p style="font-size:13.5px">A mini overview with a draggable window: drag the middle to pan, the edges to resize. It always draws the full extent — that is its whole job — so it keeps its own scales rather than the zoomed ones, and what it dims is what you are <em>not</em> looking at.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'daily', name: 'Sessions', data: CHT_DAILY, xKey: 'date', yKey: 'value', fillOpacity: 0.16 }]"
+                    :x-axis="{ type: 'time' }" zoom navigator curve="smooth"
+                    :legend="{ show: false }" height="300" />
+      </div>
+
+      <h2>Reference lines and bands</h2>
+      <p style="font-size:13.5px">Bands paint under the gridlines and lines over them — a band is background, a threshold line is a statement about the data. A value can be a category name rather than an index, so a marker on "Aug" follows August wherever it moves to.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'mrr', name: 'MRR', data: CHT_REVENUE, xKey: 'month', yKey: 'value' }]"
+                    curve="smooth" :legend="{ show: false }" height="300"
+                    :reference-bands="[{ from: 15000, to: 22000, label: 'Healthy range' }]"
+                    :reference-lines="[
+                      { value: 20000, label: 'Target', color: 'var(--accent-primary)', dash: '6 4' },
+                      { axis: 'x', value: 'Jul', label: 'H2 start' }
+                    ]" />
+      </div>
+
+      <h2>Annotations</h2>
+      <p style="font-size:13.5px">The <code>annotation</code> slot receives the plot rect and both mapping functions, so custom content is placed in data coordinates rather than pixels you have to work out. It is ordinary SVG, which is the reason to render in SVG at all.</p>
+      <div class="cht-frame">
+        <ApexChart :series="[{ id: 'trial', name: 'Activated', data: CHT_TRIAL, xKey: 'month', yKey: 'value', fillOpacity: 0.14 }]"
+                    curve="smooth" :legend="{ show: false }" height="300">
+          <template #annotation="{ plot, x, y }">
+            <line :x1="x(4)" :y1="y(53)" :x2="x(4)" :y2="plot.y + 26" stroke="var(--fg-subtle)" stroke-width="1" />
+            <circle :cx="x(4)" :cy="y(53)" r="5" fill="none" stroke="var(--fg-default)" stroke-width="1.5" />
+            <rect :x="x(4) - 52" :y="plot.y + 8" width="104" height="18" rx="4" fill="var(--fg-default)" />
+            <text :x="x(4)" :y="plot.y + 21" text-anchor="middle" font-size="10.5" font-weight="650"
+                  fill="var(--bg-surface)">Pricing change</text>
+          </template>
+        </ApexChart>
+      </div>
+
+      <h2>Plugins</h2>
+      <p style="font-size:13.5px">A plugin returns overlay primitives rather than drawing. Direct drawing would mean one implementation per renderer and plugins that only work in SVG; a declarative vocabulary paints identically through both and stays inspectable in the DOM. Four ship with the package.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexSwitch v-model="chtPlugWatermark" label="Watermark" />
+        <ApexSwitch v-model="chtPlugTrend" label="Trendline" />
+        <ApexSwitch v-model="chtPlugStats" label="Live stats" />
+        <ApexSwitch v-model="chtPlugThreshold" label="Threshold bands" />
+      </div>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_CHANNELS" :plugins="chtPlugins" curve="smooth"
+                    :legend="{ position: 'bottom' }" height="320" />
+      </div>
+
+      <h2>Synced charts</h2>
+      <p style="font-size:13.5px"><code>ApexChartGroup</code> provides one store rather than relaying events between siblings, so a chart added later joins automatically and declaration order does not matter. Zoom on either chart, hover either one, or click a legend entry — all three channels are shared, and each can be switched off.</p>
+      <div class="iconstrip" style="margin-top:12px">
+        <ApexButton size="sm" severity="secondary" variant="outlined" @click="chtGroup.resetZoom()">Reset both</ApexButton>
+        <span style="font-size:13px;color:var(--fg-subtle)">Drag on either plot to zoom both.</span>
+      </div>
+      <ApexChartGroup ref="chtGroup" style="margin-top:12px">
+        <div class="cht-frame" style="margin-top:0">
+          <ApexChart title="Sessions" :series="CHT_SYNC_A" :x-axis="{ type: 'time' }" zoom
+                      curve="smooth" :legend="{ position: 'bottom' }" height="220" />
+        </div>
+        <div class="cht-frame">
+          <ApexChart title="Errors" :series="CHT_SYNC_B" :x-axis="{ type: 'time' }" zoom navigator
+                      curve="smooth" :legend="{ position: 'bottom' }" height="220" />
+        </div>
+      </ApexChartGroup>
+
+      <h2>Legend, tooltip and toolbar</h2>
+      <p style="font-size:13.5px">The <code>legend</code> and <code>tooltip</code> slots replace their contents while everything else stays the chart's. A computed total or a delta against a threshold cannot come out of a value formatter, which is why the tooltip is a slot and <code>format</code> stays for the simple case. The <code>toolbar</code> is off by default — it is the first piece of <em>application</em> chrome inside a chart, so a dashboard tile has to ask for it.</p>
+      <div class="cht-frame">
+        <ApexChart :series="CHT_RD" toolbar :legend="{ position: 'top' }" height="340"
+                    :reference-lines="[{ value: 2.73, label: 'OECD average', labelPosition: 'end',
+                                         color: 'var(--accent-danger)' }]">
+          <template #legend="{ series, colors, toggle }">
+            <button v-for="(s, i) in series" :key="s.id" type="button" class="cht-pill"
+                    :data-off="s.hidden ? 'true' : 'false'" @click="toggle(s)">
+              <span class="cht-pill__dot" :style="{ background: colors[i] }"></span>
+              {{ s.name }}
+              <em>avg {{ chtSeriesAvg(s) }}%</em>
+            </button>
+          </template>
+          <template #tooltip="{ category, rows }">
+            <span class="apex-cht__tip-title">{{ category }}</span>
+            <span v-for="r in rows" :key="r.key" class="apex-cht__tip-row">
+              <span class="apex-cht__swatch" :style="{ background: r.color }"></span>
+              <span class="apex-cht__tip-name">{{ r.name }}</span><b>{{ r.value }}</b>
+            </span>
+            <span class="cht-tip-total">
+              <span class="apex-cht__tip-name">Total</span>
+              <b>{{ chtRowTotal(rows) }}</b>
+              <em :data-up="chtRowTotal(rows) >= 2.73 ? 'true' : 'false'">
+                {{ (chtRowTotal(rows) - 2.73).toFixed(2) }} vs avg
+              </em>
+            </span>
+          </template>
+        </ApexChart>
+      </div>
+      <p style="font-size:13px;margin-top:8px">Legend entries carry their own averages; the tooltip adds a computed total and a signed delta. Open the menu top-right to export.</p>
+        </template>
+
         <template v-if="entry.id === 'taskboard'">
           <h2>Data binding</h2>
           <p class="note">
