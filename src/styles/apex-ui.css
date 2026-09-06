@@ -1661,19 +1661,19 @@ inline-size:2.5rem;block-size:auto}
 .apex-skl[data-anim="wave"],.apex-skl[data-anim="pulse"]{animation:none}}
 
 /* ─── task board ───────────────────────────────────────── */
-.apex-kb{--kb-col-w:280px;--kb-lane-w:160px;--kb-gap:14px;--kb-bg:transparent;
---kb-col-bg:var(--bg-subtle);--kb-card-bg:var(--bg-elevated);--kb-card-radius:var(--r-md);
---kb-accent:var(--accent-primary);--kb-pad:12px;--kb-card-pad:11px;--kb-fs:13.5px;
+.apex-kb{--apex-kb-col-w:280px;--apex-kb-lane-w:160px;--apex-kb-gap:14px;--apex-kb-bg:transparent;
+--apex-kb-col-bg:var(--bg-subtle);--apex-kb-card-bg:var(--bg-elevated);--apex-kb-card-radius:var(--r-md);
+--apex-kb-accent:var(--accent-primary);--apex-kb-pad:12px;--apex-kb-card-pad:11px;--apex-kb-fs:13.5px;
 /* the grid's max-content width would otherwise propagate up through the board and
    size it to every column at once, leaving overflow:auto nothing to scroll */
 position:relative;overflow:auto;max-inline-size:100%;min-inline-size:0;
-background:var(--kb-bg);font-family:var(--font-sans)}
-.apex-kb[data-density="compact"]{--kb-pad:8px;--kb-card-pad:8px;--kb-fs:12.5px;--kb-gap:10px}
-.apex-kb[data-density="roomy"]{--kb-pad:16px;--kb-card-pad:14px;--kb-fs:14px;--kb-gap:18px}
+background:var(--apex-kb-bg);font-family:var(--font-sans)}
+.apex-kb[data-density="compact"]{--apex-kb-pad:8px;--apex-kb-card-pad:8px;--apex-kb-fs:12.5px;--apex-kb-gap:10px}
+.apex-kb[data-density="roomy"]{--apex-kb-pad:16px;--apex-kb-card-pad:14px;--apex-kb-fs:14px;--apex-kb-gap:18px}
 /* the outer stack is flex, so a row can be told to fill the board — a grid row
    sized to content leaves the cell without a resolved height, and a cell with no
    resolved height never becomes a scroller for windowing to measure */
-.apex-kb__grid{display:flex;flex-direction:column;gap:var(--kb-gap);min-inline-size:max-content}
+.apex-kb__grid{display:flex;flex-direction:column;gap:var(--apex-kb-gap);min-inline-size:max-content}
 /* virtual scroll hands the vertical axis to the cells: the board keeps only the
    horizontal one, and each cell scrolls its own cards */
 .apex-kb[data-virtual="true"]{overflow-y:hidden}
@@ -1682,12 +1682,12 @@ background:var(--kb-bg);font-family:var(--font-sans)}
 .apex-kb[data-virtual="true"] .apex-kb__cell{block-size:100%}
 /* the track list is computed, since a collapsed column narrows and a CSS repeat()
    cannot vary one track */
-.apex-kb__head,.apex-kb__row{display:grid;gap:var(--kb-gap);grid-template-columns:var(--kb-template)}
+.apex-kb__head,.apex-kb__row{display:grid;gap:var(--apex-kb-gap);grid-template-columns:var(--apex-kb-template)}
 /* headers stay put on a tall board; the lane column stays put on a wide one */
 .apex-kb__head{position:sticky;inset-block-start:0;z-index:3;
 background:var(--bg-surface);padding-block:2px}
 /* phase headers: one grid row above the columns, each cell spanning its own */
-.apex-kb__groups{display:grid;gap:var(--kb-gap);grid-template-columns:var(--kb-template);
+.apex-kb__groups{display:grid;gap:var(--apex-kb-gap);grid-template-columns:var(--apex-kb-template);
 position:sticky;inset-block-start:0;z-index:4;background:var(--bg-surface);padding-block-end:2px}
 /* A label over a rule spanning its own columns, rather than a tinted block: the
    phase is a heading for the group, and a filled band competes with the column
@@ -1695,24 +1695,24 @@ position:sticky;inset-block-start:0;z-index:4;background:var(--bg-surface);paddi
 .apex-kb__group{display:flex;flex-direction:column;align-items:center;gap:7px;
 color:var(--fg-muted);font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
 .apex-kb__group::after{content:"";inline-size:100%;block-size:2px;border-radius:999px;
-background:var(--kb-accent)}
+background:var(--apex-kb-accent)}
 .apex-kb__group[data-empty="true"]::after{background:transparent}
 /* a pinned phase cell needs its own backdrop, like the pinned column below it */
 .apex-kb__group[data-pinned="start"],.apex-kb__group[data-pinned="end"]{
-z-index:5;box-shadow:0 0 0 var(--kb-gap) var(--bg-surface)}
+z-index:5;box-shadow:0 0 0 var(--apex-kb-gap) var(--bg-surface)}
 /* the head row sits below the phase row when both are present */
 .apex-kb__groups+.apex-kb__head{inset-block-start:32px}
 /* a pinned column keeps its own backdrop, or the scrolling columns show through */
 .apex-kb__col-head[data-pinned="start"],.apex-kb__col-head[data-pinned="end"],
 .apex-kb__cell[data-pinned="start"],.apex-kb__cell[data-pinned="end"]{
-box-shadow:0 0 0 var(--kb-gap) var(--bg-surface)}
+box-shadow:0 0 0 var(--apex-kb-gap) var(--bg-surface)}
 .apex-kb__col-head[data-drag="true"]{opacity:.5}
-.apex-kb__col-head[data-drop="true"]{box-shadow:inset 0 0 0 2px var(--kb-accent)}
+.apex-kb__col-head[data-drop="true"]{box-shadow:inset 0 0 0 2px var(--apex-kb-accent)}
 .apex-kb[data-reorder="true"] .apex-kb__col-head{cursor:grab}
 .apex-kb__corner{position:sticky;inset-inline-start:0;z-index:4;background:var(--bg-surface)}
-.apex-kb__col-head{display:flex;align-items:center;gap:7px;padding:9px var(--kb-pad);
-border-block-start:3px solid var(--kb-accent);border-radius:var(--r-sm);
-background:var(--kb-col-bg);font-size:var(--kb-fs);font-weight:650}
+.apex-kb__col-head{display:flex;align-items:center;gap:7px;padding:9px var(--apex-kb-pad);
+border-block-start:3px solid var(--apex-kb-accent);border-radius:var(--r-sm);
+background:var(--apex-kb-col-bg);font-size:var(--apex-kb-fs);font-weight:650}
 .apex-kb__col-head[data-collapsed="true"]{writing-mode:vertical-rl;justify-content:flex-start}
 .apex-kb__col-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .apex-kb__count{margin-inline-start:auto;padding:1px 7px;border-radius:999px;
@@ -1727,26 +1727,26 @@ border:0;border-radius:var(--r-sm);background:transparent;color:var(--fg-subtle)
 .apex-kb__chev:hover{background:color-mix(in oklch,var(--fg-default) 8%,transparent);color:var(--fg-default)}
 .apex-kb__chev:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-kb__lane-head{position:sticky;inset-inline-start:0;z-index:2;
-display:flex;align-items:flex-start;gap:6px;padding:var(--kb-pad);border-radius:var(--r-sm);
-background:var(--bg-surface);font-size:var(--kb-fs);font-weight:650}
+display:flex;align-items:flex-start;gap:6px;padding:var(--apex-kb-pad);border-radius:var(--r-sm);
+background:var(--bg-surface);font-size:var(--apex-kb-fs);font-weight:650}
 .apex-kb__lane-title{flex:1;min-inline-size:0;text-wrap:pretty}
 .apex-kb__lane-icon{color:var(--fg-subtle)}
 /* A rule between lanes, not around them: a border on the row itself would double
    up where two lanes meet and leave a stray line under the last one. */
 .apex-kb[data-lanes="true"] .apex-kb__row+.apex-kb__row{
-border-block-start:1px solid var(--border-default);padding-block-start:var(--kb-gap)}
+border-block-start:1px solid var(--border-default);padding-block-start:var(--apex-kb-gap)}
 .apex-kb__row[data-closed="true"] .apex-kb__cell{display:none}
 .apex-kb__cell{display:flex;flex-direction:column;gap:9px;overflow-y:auto;
-min-block-size:70px;padding:var(--kb-pad);border-radius:var(--r-md);background:var(--kb-col-bg)}
+min-block-size:70px;padding:var(--apex-kb-pad);border-radius:var(--r-md);background:var(--apex-kb-col-bg)}
 .apex-kb__cell[data-collapsed="true"]{padding:0;background:transparent;min-block-size:0}
-.apex-kb__cell[data-target="true"]{background:color-mix(in oklch,var(--kb-accent) 8%,var(--kb-col-bg))}
-.apex-kb__cell[data-blocked="true"]{background:color-mix(in oklch,var(--accent-danger) 10%,var(--kb-col-bg))}
-.apex-kb__card{padding:var(--kb-card-pad);border:1px solid var(--border-subtle);
-border-radius:var(--kb-card-radius);background:var(--kb-card-bg);box-shadow:var(--shadow-xs,0 1px 2px rgba(0,0,0,.05));
+.apex-kb__cell[data-target="true"]{background:color-mix(in oklch,var(--apex-kb-accent) 8%,var(--apex-kb-col-bg))}
+.apex-kb__cell[data-blocked="true"]{background:color-mix(in oklch,var(--accent-danger) 10%,var(--apex-kb-col-bg))}
+.apex-kb__card{padding:var(--apex-kb-card-pad);border:1px solid var(--border-subtle);
+border-radius:var(--apex-kb-card-radius);background:var(--apex-kb-card-bg);box-shadow:var(--shadow-xs,0 1px 2px rgba(0,0,0,.05));
 cursor:grab;touch-action:none}
 .apex-kb__card:focus-visible{outline:none;box-shadow:var(--focus-ring)}
-.apex-kb__card[data-selected="true"]{border-color:var(--kb-accent);
-box-shadow:0 0 0 1px var(--kb-accent)}
+.apex-kb__card[data-selected="true"]{border-color:var(--apex-kb-accent);
+box-shadow:0 0 0 1px var(--apex-kb-accent)}
 /* the dragged card keeps its place as a ghost, so the column does not reflow
    under the pointer while the preview is in flight */
 .apex-kb__card[data-ghost="true"]{opacity:.35}
@@ -1756,7 +1756,7 @@ box-shadow:0 0 0 1px var(--kb-accent)}
 /* the windowing spacers are flex items like everything else in the cell, and a
    default flex-shrink collapsed them — taking the cell's scroll range with them */
 .apex-kb__pad{flex:0 0 auto}
-.apex-kb__ind{block-size:3px;border-radius:999px;background:var(--kb-accent)}
+.apex-kb__ind{block-size:3px;border-radius:999px;background:var(--apex-kb-accent)}
 .apex-kb__empty{margin:0;padding:10px 2px;color:var(--fg-subtle);font-size:12.5px}
 .apex-kb__add{display:flex;align-items:center;gap:6px;padding:8px;border:0;border-radius:var(--r-sm);
 background:transparent;color:var(--fg-subtle);font:inherit;font-size:12.5px;cursor:pointer;text-align:start}
@@ -1766,14 +1766,14 @@ background:transparent;color:var(--fg-subtle);font:inherit;font-size:12.5px;curs
 filter:drop-shadow(0 14px 28px rgba(15,20,28,.22))}
 .apex-kb__badge{position:absolute;inset-block-start:-8px;inset-inline-end:-8px;
 display:grid;place-items:center;min-inline-size:22px;block-size:22px;padding-inline:6px;
-border-radius:999px;background:var(--kb-accent);color:#FFF;font-size:11.5px;font-weight:700}
+border-radius:999px;background:var(--apex-kb-accent);color:#FFF;font-size:11.5px;font-weight:700}
 /* ── default card anatomy ── */
 .apex-kb__body{display:flex;flex-direction:column;gap:7px}
 .apex-kb__labels{display:flex;flex-wrap:wrap;gap:5px}
 .apex-kb__label{padding:2px 7px;border-radius:var(--r-sm);
 background:color-mix(in oklch,var(--fg-default) 8%,transparent);
 color:var(--fg-muted);font-size:10.5px;font-weight:650;letter-spacing:.02em}
-.apex-kb__title{margin:0;font-size:var(--kb-fs);font-weight:600;line-height:1.35;text-wrap:pretty}
+.apex-kb__title{margin:0;font-size:var(--apex-kb-fs);font-weight:600;line-height:1.35;text-wrap:pretty}
 .apex-kb__meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px;
 color:var(--fg-subtle);font-size:11.5px}
 .apex-kb__chip{display:inline-flex;align-items:center;gap:3px;font-variant-numeric:tabular-nums}

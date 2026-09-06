@@ -45,7 +45,7 @@ const FAMILY = [
   'components/ApexCarousel.vue', 'components/ApexCarouselContent.vue',
   'components/ApexCarouselItem.vue', 'components/ApexCarouselControls.vue',
   'components/ApexCarouselIndicators.vue', 'components/ApexCarouselNav.vue',
-  'components/ApexGallery.vue', 'components/ApexTaskBoard.vue',
+  'components/ApexGallery.vue', 'components/ApexTaskBoard.vue', 'components/ApexTaskCard.vue',
   'components/ApexChart.vue', 'components/ApexChartGroup.vue',
   'core/sidebar.ts', 'core/speedDial.ts', 'core/carousel.ts', 'core/taskboard.ts',
 ];
@@ -66,7 +66,7 @@ const INTENDED = [
      `name: undefined` pairs in the defaults is the shape of the fix. */
   { why: 'AF2-167/231: absent booleans arrive false, not undefined', test: (l) => /^\s*(\w+: undefined,\s*)+$/.test(l) },
   { why: 'AF2-200: the `padding` the original declares twice in one interface', test: (l) => /padding/.test(l) },
-  { why: 'AF2-133/143/169: the ui class map', test: (l) => /\bui\?\.|ui\?:|ApexUiClasses|ApexContainerClasses|ApexDisplayClasses|ApexMediaClasses/.test(l) },
+  { why: 'AF2-133/143/169: the ui class map', test: (l) => /\bui\?\.|ui\?:|ApexUiClasses|ApexContainerClasses|ApexDisplayClasses|ApexMediaClasses|ApexBoardProps|ApexBoardClasses|:ui="ui"/.test(l) },
   /* The carousel's parts live in five files, so one map on the root travels
      through the context every part already reads. ApexCarouselItem gains a
      script for the first time purely to inject it. */

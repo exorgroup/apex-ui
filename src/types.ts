@@ -520,6 +520,54 @@ export interface ApexMediaProps {
   ui?: ApexMediaClasses;
 }
 
+/**
+ * ApexTaskBoard and ApexTaskCard.
+ *
+ * The board's own family. Not folded into ApexMediaClasses: a board shares no
+ * part with a carousel or a viewer, and one interface holding both would offer
+ * every caller ten keys that do nothing for their control.
+ *
+ * The scaffolding is deliberately absent \u2014 the spacer rows windowing uses, the
+ * corner cell above the lane column, the collapse chevrons, the over-limit and
+ * lock glyphs. Those are the board's internal geometry, and a class map is for
+ * the parts a caller means to restyle, not for everything with a class.
+ */
+export interface ApexBoardClasses {
+  root?: string;
+  /** The stack of rows inside the board. */
+  grid?: string;
+  /** The column-header row, one header in it, and a column-group cell above. */
+  head?: string;
+  column?: string;
+  group?: string;
+  columnTitle?: string;
+  count?: string;
+  /** A swimlane's header, and its title. */
+  lane?: string;
+  laneTitle?: string;
+  /** One column \u00d7 lane cell, its empty note, and its add-card button. */
+  cell?: string;
+  empty?: string;
+  add?: string;
+  /** One card, the drop indicator, and the clone that follows the pointer. */
+  card?: string;
+  indicator?: string;
+  preview?: string;
+
+  /** ApexTaskCard \u2014 the default card's own parts. A `card` slot replaces the
+      whole card, so these matter only while the default renderer is in use. */
+  body?: string;
+  cardTitle?: string;
+  labels?: string;
+  label?: string;
+  meta?: string;
+  chip?: string;
+}
+export interface ApexBoardProps {
+  /** Your own class on any part. See ApexBoardClasses. */
+  ui?: ApexBoardClasses;
+}
+
 export interface ApexContainerProps {
   /** Your own class on any part. See ApexContainerClasses. */
   ui?: ApexContainerClasses;

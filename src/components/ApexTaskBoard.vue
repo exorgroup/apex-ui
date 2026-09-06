@@ -18,13 +18,14 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexTaskCard from './ApexTaskCard.vue';
+import type { ApexBoardProps } from '../types';
 import {
   canMove, cellKey, groupItems, DEFAULT_CARD_FIELDS as DEFAULT_CARD_FIELDS_LOCAL,
   type TaskBoardColumn, type TaskBoardItem, type TaskBoardMove,
   type TaskBoardColumnGroup, type TaskBoardPermissions, type TaskBoardSwimlane, type TaskCardFields,
 } from '../core/taskboard';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexBoardProps & {
   items?: TaskBoardItem[];
   columns?: TaskBoardColumn[];
   /** Omit for a plain column board; provide lanes for a grouped one. */
@@ -531,17 +532,17 @@ const template = computed(() => {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {
-    '--kb-col-w': props.columnWidth,
-    '--kb-lane-w': props.laneWidth,
-    '--kb-gap': props.gap,
-    '--kb-template': template.value,
+    '--apex-kb-col-w': props.columnWidth,
+    '--apex-kb-lane-w': props.laneWidth,
+    '--apex-kb-gap': props.gap,
+    '--apex-kb-template': template.value,
   };
   if (props.height) s.blockSize = props.height;
-  if (props.background) s['--kb-bg'] = props.background;
-  if (props.columnBackground) s['--kb-col-bg'] = props.columnBackground;
-  if (props.cardBackground) s['--kb-card-bg'] = props.cardBackground;
-  if (props.cardRadius) s['--kb-card-radius'] = props.cardRadius;
-  if (props.accent) s['--kb-accent'] = props.accent;
+  if (props.background) s['--apex-kb-bg'] = props.background;
+  if (props.columnBackground) s['--apex-kb-col-bg'] = props.columnBackground;
+  if (props.cardBackground) s['--apex-kb-card-bg'] = props.cardBackground;
+  if (props.cardRadius) s['--apex-kb-card-radius'] = props.cardRadius;
+  if (props.accent) s['--apex-kb-accent'] = props.accent;
   return s;
 });
 
@@ -622,18 +623,18 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
 </script>
 
 <template>
-  <div ref="root" class="apex-kb" :style="rootStyle" :data-density="density"
+  <div ref="root" class="apex-kb" :style="rootStyle" :class="ui?.root" :data-density="density"
        :data-lanes="swimlanes?.length ? 'true' : 'false'"
        :data-dragging="drag ? 'true' : 'false'"
        :data-reorder="reorderableColumns ? 'true' : 'false'"
        :data-virtual="virtual ? 'true' : 'false'">
-    <div class="apex-kb__grid">
+    <div class="apex-kb__grid" :class="ui?.grid">
       <!-- phase headers, each spanning exactly its own columns -->
-      <div v-if="columnGroups?.length" class="apex-kb__groups">
+      <div v-if="columnGroups?.length" class="apex-kb__groups" :class="ui?.head">
         <div v-if="swimlanes?.length" class="apex-kb__corner"></div>
-        <div v-for="(cellSpan, gi) in groupCells" :key="gi" class="apex-kb__group"
+        <div v-for="(cellSpan, gi) in groupCells" :key="gi" class="apex-kb__group" :class="ui?.group"
              :style="{ gridColumn: 'span ' + cellSpan.span,
-                       ...(cellSpan.group?.accent ? { '--kb-accent': cellSpan.group.accent } : {}),
+                       ...(cellSpan.group?.accent ? { '--apex-kb-accent': cellSpan.group.accent } : {}),
                        ...(cellSpan.col ? pinStyle(cellSpan.col) || {} : {}) }"
              :data-pinned="cellSpan.col?.pinned || 'false'"
              :data-empty="cellSpan.group ? 'false' : 'true'">
@@ -641,15 +642,15 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
         </div>
       </div>
       <!-- column headers, sticky so they survive a tall board -->
-      <div class="apex-kb__head">
+      <div class="apex-kb__head" :class="ui?.head">
         <div v-if="swimlanes?.length" class="apex-kb__corner"></div>
-        <div v-for="(col, ci) in cols" :key="col.id" class="apex-kb__col-head"
+        <div v-for="(col, ci) in cols" :key="col.id" class="apex-kb__col-head" :class="ui?.column"
              :data-kb-head="ci"
              :data-collapsed="collapsed.has(col.id) ? 'true' : 'false'"
              :data-pinned="col.pinned || 'false'"
              :data-drag="headDrag?.columnId === col.id ? 'true' : 'false'"
              :data-drop="headOver === ci && headDrag && headDrag.fromIndex !== ci ? 'true' : 'false'"
-             :style="{ ...(col.accent ? { '--kb-accent': col.accent } : {}), ...(pinStyle(col) || {}) }"
+             :style="{ ...(col.accent ? { '--apex-kb-accent': col.accent } : {}), ...(pinStyle(col) || {}) }"
              @pointerdown="onHeadDown($event, col, ci)">
           <slot name="column-header" :column="col" :count="columnCount(col.id)" :over="over(col)">
             <button v-if="collapsibleColumns" type="button" class="apex-kb__chev"
@@ -657,8 +658,8 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
                     @click="toggleColumn(col)">
               <ApexIcon :name="collapsed.has(col.id) ? 'chevron_right' : 'expand_more'" :size="18" />
             </button>
-            <span class="apex-kb__col-title">{{ col.title }}</span>
-            <span v-if="showCounts" class="apex-kb__count" :data-over="over(col) ? 'true' : 'false'">
+            <span class="apex-kb__col-title" :class="ui?.columnTitle">{{ col.title }}</span>
+            <span v-if="showCounts" class="apex-kb__count" :class="ui?.count" :data-over="over(col) ? 'true' : 'false'">
               {{ columnCount(col.id) }}<template v-if="col.limit !== undefined">/{{ col.limit }}</template>
             </span>
             <ApexIcon v-if="over(col)" name="warning" :size="16" class="apex-kb__warn" />
@@ -669,7 +670,7 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
 
       <template v-for="(lane, li) in lanes" :key="lane?.id || li">
         <div class="apex-kb__row" :data-closed="lane && laneClosed.has(lane.id) ? 'true' : 'false'">
-          <div v-if="lane" class="apex-kb__lane-head">
+          <div v-if="lane" class="apex-kb__lane-head" :class="ui?.lane">
             <slot name="swimlane-header" :swimlane="lane"
                   :count="(items || []).filter((i) => i.swimlaneId === lane.id).length">
               <button type="button" class="apex-kb__chev" :aria-label="'Toggle ' + lane.title"
@@ -677,12 +678,12 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
                 <ApexIcon :name="laneClosed.has(lane.id) ? 'chevron_right' : 'expand_more'" :size="18" />
               </button>
               <ApexIcon v-if="lane.icon" :name="lane.icon" :size="17" class="apex-kb__lane-icon" />
-              <span class="apex-kb__lane-title">{{ lane.title }}</span>
-              <span class="apex-kb__count">{{ (items || []).filter((i) => i.swimlaneId === lane.id).length }}</span>
+              <span class="apex-kb__lane-title" :class="ui?.laneTitle">{{ lane.title }}</span>
+              <span class="apex-kb__count" :class="ui?.count">{{ (items || []).filter((i) => i.swimlaneId === lane.id).length }}</span>
             </slot>
           </div>
 
-          <div v-for="col in cols" :key="col.id" class="apex-kb__cell"
+          <div v-for="col in cols" :key="col.id" class="apex-kb__cell" :class="ui?.cell"
                :data-kb-cell="cellKey(col.id, lane?.id)" :data-kb-column="col.id" :data-kb-lane="lane?.id || ''"
                @scroll="onCellScroll($event, cellKey(col.id, lane?.id))"
                :data-collapsed="collapsed.has(col.id) ? 'true' : 'false'"
@@ -699,10 +700,10 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
               <template v-for="(item, i) in cards(col.id, lane?.id)" :key="item.id">
                 <div v-if="target && target.columnId === col.id
                        && (target.swimlaneId ?? undefined) === (lane?.id ?? undefined) && target.index === i"
-                     class="apex-kb__ind"></div>
+                     class="apex-kb__ind" :class="ui?.indicator"></div>
                 <div v-if="i >= windowFor(cellKey(col.id, lane?.id), cards(col.id, lane?.id).length).start
                        && i < windowFor(cellKey(col.id, lane?.id), cards(col.id, lane?.id).length).end"
-                     class="apex-kb__card" :data-kb-card="item.id" tabindex="0"
+                     class="apex-kb__card" :class="ui?.card" :data-kb-card="item.id" tabindex="0"
                      :data-selected="isSelected(item) ? 'true' : 'false'"
                      :data-ghost="drag?.items.some((d) => d.id === item.id) ? 'true' : 'false'"
                      :data-locked="may.drag(item) ? 'false' : 'true'"
@@ -714,7 +715,7 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
                      @keydown="onCardKey($event, item, i)">
                   <slot name="card" :item="item" :selected="isSelected(item)"
                         :can-edit="may.edit(item)" :can-delete="may.del(item)" :can-drag="may.drag(item)">
-                    <ApexTaskCard :item="item" :fields="cardFields" :selected="isSelected(item)" />
+                    <ApexTaskCard :item="item" :fields="cardFields" :selected="isSelected(item)" :ui="ui" />
                   </slot>
                 </div>
               </template>
@@ -725,12 +726,12 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
               <div v-if="target && target.columnId === col.id
                      && (target.swimlaneId ?? undefined) === (lane?.id ?? undefined)
                      && target.index >= cards(col.id, lane?.id).length"
-                   class="apex-kb__ind"></div>
+                   class="apex-kb__ind" :class="ui?.indicator"></div>
               <slot v-if="!cards(col.id, lane?.id).length" name="empty" :column="col" :swimlane="lane">
-                <p class="apex-kb__empty">No cards</p>
+                <p class="apex-kb__empty" :class="ui?.empty">No cards</p>
               </slot>
               <slot name="column-footer" :column="col" />
-              <button v-if="showAddCard && may.create(col.id, lane?.id)" type="button" class="apex-kb__add"
+              <button v-if="showAddCard && may.create(col.id, lane?.id)" type="button" class="apex-kb__add" :class="ui?.add"
                       @click="emit('add-card', { columnId: col.id, swimlaneId: lane?.id })">
                 <ApexIcon name="add" :size="16" />Add card
               </button>
@@ -744,7 +745,7 @@ defineExpose({ clearSelection, selectAll, getState, setState, exportJson, export
          a ghost, so the board's own layout never shifts mid-drag. The slot replaces
          its contents; the positioning stays with the board, since a consumer
          cannot know the pointer offset the drag started from. -->
-    <div v-if="drag" class="apex-kb__preview" :style="previewStyle" aria-hidden="true">
+    <div v-if="drag" class="apex-kb__preview" :class="ui?.preview" :style="previewStyle" aria-hidden="true">
       <slot name="drag-preview" :items="drag.items" :count="drag.items.length">
         <div class="apex-kb__card" data-preview="true" v-html="drag.html"></div>
       </slot>

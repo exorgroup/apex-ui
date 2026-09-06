@@ -8,8 +8,9 @@ import { computed } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexAvatar from './ApexAvatar.vue';
 import { DEFAULT_CARD_FIELDS, type TaskBoardItem, type TaskCardFields } from '../core/taskboard';
+import type { ApexBoardProps } from '../types';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexBoardProps & {
   item: TaskBoardItem;
   fields?: TaskCardFields;
   selected?: boolean;
@@ -37,19 +38,19 @@ const image = (a: string | { image?: string }) => (typeof a === 'string' ? undef
 </script>
 
 <template>
-  <div class="apex-kb__body">
-    <div v-if="labels.length" class="apex-kb__labels">
-      <span v-for="l in labels" :key="l" class="apex-kb__label" :data-label="l">{{ l }}</span>
+  <div class="apex-kb__body" :class="ui?.body">
+    <div v-if="labels.length" class="apex-kb__labels" :class="ui?.labels">
+      <span v-for="l in labels" :key="l" class="apex-kb__label" :class="ui?.label" :data-label="l">{{ l }}</span>
     </div>
-    <p class="apex-kb__title">{{ val(f.title) }}</p>
+    <p class="apex-kb__title" :class="ui?.cardTitle">{{ val(f.title) }}</p>
     <div v-if="priority || checklist || due || hasDescription || metaChips.length || assignees.length"
-         class="apex-kb__meta">
+         class="apex-kb__meta" :class="ui?.meta">
       <span v-if="priority" class="apex-kb__prio" :data-prio="String(priority).toLowerCase()">{{ priority }}</span>
-      <span v-if="checklist" class="apex-kb__chip">
+      <span v-if="checklist" class="apex-kb__chip" :class="ui?.chip">
         <ApexIcon name="check_box" :size="14" />{{ checklist.done }}/{{ checklist.total }}
       </span>
-      <span v-if="due" class="apex-kb__chip"><ApexIcon name="event" :size="14" />{{ due }}</span>
-      <span v-for="m in metaChips" :key="m.key" class="apex-kb__chip">
+      <span v-if="due" class="apex-kb__chip" :class="ui?.chip"><ApexIcon name="event" :size="14" />{{ due }}</span>
+      <span v-for="m in metaChips" :key="m.key" class="apex-kb__chip" :class="ui?.chip">
         <ApexIcon v-if="m.icon" :name="m.icon" :size="14" />{{ m.label ? m.label + ' ' : '' }}{{ m.value }}
       </span>
       <ApexIcon v-if="hasDescription" name="notes" :size="15" class="apex-kb__note" />
