@@ -26,7 +26,8 @@ const TYPES = Object.values(
    table for a different question. Without this the guard compares a page
    against the wrong declaration and reports every documented option as
    invented. */
-const CORE = import.meta.glob('../src/core/*.ts', {
+/* Recursive: the chart keeps its types a directory down, in core/chart/. */
+const CORE = import.meta.glob('../src/core/**/*.ts', {
   query: '?raw', import: 'default', eager: true,
 }) as Record<string, string>;
 
@@ -114,6 +115,12 @@ describe('every prop the docs name is declared by the component', () => {
         : declaredProps(name);
     } catch {
       return; // ApexField and friends live elsewhere; covered by their own pages
+    }
+    /* A table may span two objects — see DocEntry.alsoDeclaredIn. The union
+       still fails on a name that exists on neither, which is the typo this
+       guard is for. */
+    if (entry.alsoDeclaredIn) {
+      for (const f of interfaceFields(entry.alsoDeclaredIn)) declared.add(f);
     }
     const claimed = entry.props.flatMap((row) => namesIn(row[0]));
     const missing = claimed.filter((p) => !declared.has(p));
