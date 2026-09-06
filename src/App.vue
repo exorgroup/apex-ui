@@ -15,7 +15,7 @@ import {
   SPLIT_EVENTS, SPLIT_STATEFUL, SPLIT_NAV, PANEL_REPEAT, LEGEND_ALIGNS,
   FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
   BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS,
-  AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW, TEAM,
+  AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW, TEAM, CAR_SHOTS, CAR_TRACKS, CAR_NAV_POS,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS, DLG_POSITIONS, MSG_TEXT,
   TOAST_POSITIONS, TOAST_LINES,
@@ -235,6 +235,21 @@ const dialGated: SpeedDialItem[] = [
 /* The toolbar has no model, so its Permissions section gates the way a caller
    would: the same resolver, read directly, driving a v-if. */
 const pageCan = useCan();
+
+/* ── ApexCarousel page ────────────────── */
+const carCard = ref(0);
+/* Two carousels share this one index — that is the Gallery example. */
+const carGallery = ref(0);
+
+/** The ui map's parts, for the Customising table. */
+const CAR_PARTS: string[][] = [
+  ['root', 'The ApexCarousel element itself'],
+  ['track', 'The scroll-snap scroller'],
+  ['item', 'One snap child'],
+  ['nav', 'A prev or next button'],
+  ['dots', 'The indicator row'],
+  ['dot', 'One indicator'],
+];
 
 /* ── ApexCompare page ─────────────────── */
 /** The ui map's parts, for the Customising table. */
@@ -3673,6 +3688,220 @@ function pick(city) {
           demos I wrote instead were toys that made the control look broken.
         -->
         <!-- The gallery's six, ported. -->
+        <!-- The gallery's eight, ported. -->
+        <template v-if="entry.id === 'carousel'">
+          <h2>Basic</h2>
+          <p class="note">
+            Five parts: the root owns the state, <code>ApexCarouselContent</code> is the
+            scroll-snap track, and items, nav buttons and indicators read from the root
+            through context — so they can sit anywhere in the markup.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCarousel align="center">
+              <ApexCarouselContent style="height:210px">
+                <ApexCarouselItem v-for="n in 5" :key="n"><div class="car-tile">{{ n }}</div></ApexCarouselItem>
+              </ApexCarouselContent>
+              <div class="car-bar">
+                <ApexCarouselIndicators />
+                <div class="iconstrip">
+                  <ApexCarouselNav dir="prev" />
+                  <ApexCarouselNav dir="next" />
+                </div>
+              </div>
+            </ApexCarousel>
+          </div>
+
+          <h2>Controls</h2>
+          <p class="note">
+            <code>ApexCarouselControls</code> is the standard row — one tag instead of
+            hand-composing nav buttons and indicators per carousel. <code>navPosition</code>
+            places the arrows and <code>indicatorPosition</code> the dots;
+            <code>indicators</code> off removes them wherever they are composed. The
+            individual parts stay available for anything this arrangement doesn't cover.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell" v-for="p in CAR_NAV_POS" :key="p"><span class="cell__tag">navPosition {{ p }}</span>
+              <ApexCarousel :nav-position="p" align="center">
+                <ApexCarouselContent style="height:130px">
+                  <ApexCarouselItem v-for="n in 5" :key="n"><div class="car-tile car-tile--sm">{{ n }}</div></ApexCarouselItem>
+                </ApexCarouselContent>
+                <ApexCarouselControls />
+              </ApexCarousel>
+            </div>
+          </div>
+          <div class="grid grid--2" style="margin-top:14px">
+            <div class="cell" v-for="p in (['left', 'center', 'right'] as const)" :key="p">
+              <span class="cell__tag">indicatorPosition {{ p }}</span>
+              <ApexCarousel :indicator-position="p" align="center">
+                <ApexCarouselContent style="height:110px">
+                  <ApexCarouselItem v-for="n in 5" :key="n"><div class="car-tile car-tile--sm">{{ n }}</div></ApexCarouselItem>
+                </ApexCarouselContent>
+                <ApexCarouselControls />
+              </ApexCarousel>
+            </div>
+            <div class="cell"><span class="cell__tag">indicators off</span>
+              <ApexCarousel :indicators="false" align="center">
+                <ApexCarouselContent style="height:110px">
+                  <ApexCarouselItem v-for="n in 5" :key="n"><div class="car-tile car-tile--sm">{{ n }}</div></ApexCarouselItem>
+                </ApexCarouselContent>
+                <ApexCarouselControls />
+              </ApexCarousel>
+            </div>
+          </div>
+
+          <h2>Alignment</h2>
+          <p class="note">
+            <code>align</code> sets where the active item lands. <code>slidesPerPage</code>
+            takes fractions — 2.5 leaves a partial slide showing, which is what tells the
+            user there is more to the right.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell" v-for="a in (['start', 'center', 'end'] as const)" :key="a">
+              <span class="cell__tag">align {{ a }}, 2.5 per page</span>
+              <ApexCarousel :align="a" :slides-per-page="2.5">
+                <ApexCarouselContent style="height:120px">
+                  <ApexCarouselItem v-for="n in 8" :key="n"><div class="car-tile car-tile--sm">{{ n }}</div></ApexCarouselItem>
+                </ApexCarouselContent>
+                <div class="car-bar"><ApexCarouselIndicators variant="dot" /></div>
+              </ApexCarousel>
+            </div>
+          </div>
+
+          <h2>Orientation</h2>
+          <p class="note">
+            Set <code>orientation</code> to <code>vertical</code> and the track snaps on the
+            block axis instead; the nav buttons pick up the matching chevrons on their own.
+          </p>
+          <div class="car-frame" style="margin-top:12px;max-width:340px">
+            <ApexCarousel orientation="vertical" align="center">
+              <ApexCarouselContent style="height:260px">
+                <ApexCarouselItem v-for="n in 5" :key="n"><div class="car-tile">{{ n }}</div></ApexCarouselItem>
+              </ApexCarouselContent>
+              <div class="car-bar">
+                <ApexCarouselIndicators />
+                <div class="iconstrip">
+                  <ApexCarouselNav dir="prev" />
+                  <ApexCarouselNav dir="next" />
+                </div>
+              </div>
+            </ApexCarousel>
+          </div>
+
+          <h2>Loop</h2>
+          <p class="note">
+            <code>loop</code> wraps past the ends, so neither nav button ever disables —
+            next at the last item returns to the first.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCarousel loop :slides-per-page="2.5" gap="12px">
+              <ApexCarouselContent style="height:150px">
+                <ApexCarouselItem v-for="n in 7" :key="n"><div class="car-tile car-tile--sm">{{ n }}</div></ApexCarouselItem>
+              </ApexCarouselContent>
+              <div class="car-bar">
+                <ApexCarouselIndicators />
+                <div class="iconstrip">
+                  <ApexCarouselNav dir="prev" />
+                  <ApexCarouselNav dir="next" />
+                </div>
+              </div>
+            </ApexCarousel>
+          </div>
+
+          <h2>Variable size</h2>
+          <p class="note">
+            <code>autoSize</code> stops the track dividing itself and lets each item keep its
+            own width.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCarousel auto-size align="center">
+              <ApexCarouselContent style="height:150px">
+                <ApexCarouselItem v-for="n in 6" :key="n">
+                  <div class="car-tile car-tile--sm" :style="{ width: `${80 + n * 40}px` }">{{ n }}</div>
+                </ApexCarouselItem>
+              </ApexCarouselContent>
+              <div class="car-bar">
+                <ApexCarouselIndicators />
+                <div class="iconstrip">
+                  <ApexCarouselNav dir="prev" />
+                  <ApexCarouselNav dir="next" />
+                </div>
+              </div>
+            </ApexCarousel>
+          </div>
+
+          <h2>Content cards</h2>
+          <p class="note">
+            An item holds any markup — here a media card with its own actions.
+            Placeholders stand in for artwork; drop real images in and the layout is
+            unchanged.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCarousel :slides-per-page="3.2" gap="14px" v-model:slide="carCard">
+              <div class="car-head">
+                <strong style="font-size:14px">Last played</strong>
+                <div class="iconstrip">
+                  <ApexCarouselNav dir="prev" />
+                  <ApexCarouselNav dir="next" />
+                </div>
+              </div>
+              <ApexCarouselContent style="padding-block-end:4px">
+                <ApexCarouselItem v-for="t in CAR_TRACKS" :key="t.title">
+                  <div class="car-card">
+                    <div class="car-card__art">{{ t.title.charAt(0) }}</div>
+                    <strong style="font-size:13.5px">{{ t.title }}</strong>
+                    <span style="font-size:12.5px;color:var(--fg-subtle)">{{ t.artist }}</span>
+                  </div>
+                </ApexCarouselItem>
+              </ApexCarouselContent>
+            </ApexCarousel>
+          </div>
+
+          <h2>Gallery</h2>
+          <p class="note">
+            Two carousels bound to the same index — <code>v-model:slide</code> on both.
+            Picking a thumbnail moves the stage; dragging the stage moves the thumbnails,
+            because the track reports the active item as it scrolls rather than only on a
+            button press.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexCarousel v-model:slide="carGallery" align="center">
+              <ApexCarouselContent style="height:300px">
+                <ApexCarouselItem v-for="(sh, i) in CAR_SHOTS" :key="i">
+                  <div class="car-shot" :style="{ background: sh.bg }">{{ sh.label }}</div>
+                </ApexCarouselItem>
+              </ApexCarouselContent>
+            </ApexCarousel>
+            <ApexCarousel v-model:slide="carGallery" align="center" :slides-per-page="4.5"
+                          gap="10px" style="margin-top:10px">
+              <ApexCarouselContent style="height:66px">
+                <ApexCarouselItem v-for="(sh, i) in CAR_SHOTS" :key="i">
+                  <button type="button" class="car-thumb" :data-active="carGallery === i ? 'true' : 'false'"
+                          :style="{ background: sh.bg }" @click="carGallery = i">{{ i + 1 }}</button>
+                </ApexCarouselItem>
+              </ApexCarouselContent>
+            </ApexCarousel>
+          </div>
+
+          <h2>Customising</h2>
+          <p class="note">
+            The parts live in five components, so the <code>ui</code> map goes on the root
+            and travels through the same context the parts already read their state from.
+            One object classes the whole carousel.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>ui key</th><th>Part</th></tr></thead>
+            <tbody>
+              <tr v-for="r in CAR_PARTS" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td>{{ r[1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="note">
+            <code>gap</code> and <code>slidesPerPage</code> reach the same
+            <code>--apex-car-*</code> variables the classes do.
+          </p>
+        </template>
+
         <template v-if="entry.id === 'compare'">
           <h2>Basic</h2>
           <p class="note">

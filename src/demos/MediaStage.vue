@@ -10,6 +10,21 @@
       </ApexCompare>
       <p class="cfm-log">Position <code>{{ Math.round(cmpPg) }}%</code></p>
     </div>
+
+    <!-- A carousel with no slides is an empty rail, so the stage supplies six
+         and a control row — the rail's navPosition and indicatorPosition have
+         nothing to arrange otherwise. -->
+    <div v-else-if="id === 'carousel'" class="cfm-stage" style="max-width:520px">
+      <ApexCarousel v-bind="bind" v-model:slide="carPg" style="width:100%">
+        <ApexCarouselContent :style="bind?.orientation === 'vertical' ? 'height:240px' : 'height:180px'">
+          <ApexCarouselItem v-for="n in 6" :key="n">
+            <div class="car-tile" :style="bind?.autoSize ? { width: `${90 + n * 34}px` } : undefined">{{ n }}</div>
+          </ApexCarouselItem>
+        </ApexCarouselContent>
+        <ApexCarouselControls />
+      </ApexCarousel>
+      <p class="cfm-log">Slide <code>{{ carPg + 1 }}</code> of 6</p>
+    </div>
   </div>
 </template>
 
@@ -29,7 +44,10 @@
  * blank, and how the dock spent a week in a plain grey box.
  */
 import { ref } from 'vue';
-import { ApexCompare, ApexCompareItem } from '@exorgroup/apex-ui';
+import {
+  ApexCompare, ApexCompareItem,
+  ApexCarousel, ApexCarouselContent, ApexCarouselItem, ApexCarouselControls,
+} from '@exorgroup/apex-ui';
 
 defineProps<{
   /** The registry id, which decides which control is shown. */
@@ -40,4 +58,7 @@ defineProps<{
 
 /** The divider position, so the rail and the drag agree on one number. */
 const cmpPg = ref(50);
+
+/** The active slide, bound so the caption follows a drag as well as a press. */
+const carPg = ref(0);
 </script>

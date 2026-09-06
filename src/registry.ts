@@ -352,6 +352,28 @@ export const MTR_ICONS = [
  * The people the context menu's per-row example acts on. Ported from the
  * gallery, where the same list backs several controls.
  */
+/** Two carousels share this list in the Gallery example. */
+export const CAR_SHOTS = [
+  { label: 'Placeholder 1', bg: 'linear-gradient(140deg,#8FB6D9,#DCE9F2)' },
+  { label: 'Placeholder 2', bg: 'linear-gradient(140deg,#C9A88F,#EFE2D5)' },
+  { label: 'Placeholder 3', bg: 'linear-gradient(140deg,#9BB894,#E3EDDF)' },
+  { label: 'Placeholder 4', bg: 'linear-gradient(140deg,#B79BC4,#EBE1F0)' },
+  { label: 'Placeholder 5', bg: 'linear-gradient(140deg,#D99C9C,#F5E3E3)' },
+  { label: 'Placeholder 6', bg: 'linear-gradient(140deg,#9AA9BD,#E4E9EF)' },
+];
+
+export const CAR_TRACKS = [
+  { title: 'Velvet Haze', artist: 'Aurora Skies' },
+  { title: 'Dissolve', artist: 'Phantom Echo' },
+  { title: 'Still Life', artist: 'Glass Arbour' },
+  { title: 'Northbound', artist: 'Kite Season' },
+  { title: 'Paper Lanterns', artist: 'Mira Vale' },
+  { title: 'Undertow', artist: 'Low Tide Club' },
+];
+
+/** The six navPosition values, one cell each in the Controls section. */
+export const CAR_NAV_POS = ['bottom', 'top', 'middle', 'both-start', 'both-end', 'split'] as const;
+
 export const TEAM = [
   { id: 'u1', name: 'A. Borg', role: 'Founder & CEO', icon: 'person' },
   { id: 'u2', name: 'L. Rossi', role: 'Product Lead', icon: 'lightbulb' },
@@ -4239,6 +4261,46 @@ export const ENTRIES: DocEntry[] = [
       ['v-apex-tooltip.top="’Text’"', 'modifier', 'top, bottom, left or right'],
       ['v-apex-tooltip="{ value, … }"', 'object', 'Every option above, and reactive — a live tooltip picks up new text without a re-hover'],
       ['app.use(ApexUI)', 'plugin', 'Registers the directive; import { apexTooltip } to register it yourself'],
+    ],
+  },
+  {
+    id: 'carousel', name: 'ApexCarousel', group: 'Media',
+    blurb: 'A composed content slider: a root that owns the state, a scroll-snap track, items, nav buttons and indicators. Movement is native scroll-snap rather than a transformed track \u2014 the browser already does momentum, touch and trackpad gestures well, and the track stays reachable by keyboard and screen reader. Because slide is bindable, a thumbnail gallery is two carousels sharing one index rather than a separate component.',
+    noField: true, demo: 'media',
+    lead: [],
+    tail: '>\n  \u2026\n</ApexCarousel>',
+    base: { align: 'start', slidesPerPage: 1, orientation: 'horizontal' },
+    controls: [
+      { key: 'align', type: 'select', options: ['start', 'center', 'end'] },
+      { key: 'slidesPerPage', type: 'number' },
+      { key: 'orientation', type: 'select', options: ['horizontal', 'vertical'] },
+      { key: 'loop', type: 'bool' }, { key: 'autoSize', type: 'bool' },
+      { key: 'gap', type: 'text' },
+      { key: 'indicators', type: 'bool' },
+      { key: 'indicatorPosition', type: 'select', options: ['left', 'center', 'right'] },
+      { key: 'navPosition', type: 'select', options: ['bottom', 'top', 'middle', 'both-start', 'both-end', 'split'] },
+    ],
+    props: [
+      ['slide', 'number', '0', 'v-model:slide \u2014 the active index, which is how two carousels drive each other'],
+      ['align', "'start' | 'center' | 'end'", "'start'", 'Where the active item lands in the viewport'],
+      ['slidesPerPage', 'number', '1', 'Fractions are allowed: 2.5 shows a partial slide as an affordance'],
+      ['orientation', "'horizontal' | 'vertical'", "'horizontal'", ''],
+      ['loop', 'boolean', 'false', 'Wraps past the ends instead of stopping, and keeps both nav buttons enabled'],
+      ['autoSize', 'boolean', 'false', 'Items size themselves instead of dividing the track \u2014 for variable widths'],
+      ['gap', 'string', "'16px'", 'Space between items'],
+      ['indicators', 'boolean', 'true', 'Off removes the indicators wherever they are composed'],
+      ['indicatorPosition', "'left' | 'center' | 'right'", "'left'", 'Where the indicators sit in the control row'],
+      ['navPosition', "'bottom' | 'top' | 'middle' | 'both-start' | 'both-end' | 'split'", "'bottom'", 'Arrows in the control row below or above the track \u2014 taking whichever side the indicators are not using \u2014 overlaid on the track\u2019s edges (middle), both pinned to the start or the end of the row, or one at each end (split)'],
+    ],
+    events: [['update:slide', 'number \u2014 fires for drags and flicks too, not just button presses']],
+    slots: [['default', 'The composed parts \u2014 in any arrangement']],
+    serviceTitle: 'Sub-components',
+    serviceRows: [
+      ['ApexCarouselContent', 'track', 'The scroll-snap scroller; reports the active item back as you drag'],
+      ['ApexCarouselItem', 'item', 'One snap child \u2014 sizing comes from the track'],
+      ['ApexCarouselNav', 'dir="prev" | "next"', 'One button; disables itself at the end of the track unless the carousel loops. icon and size override the default chevron, or use its slot'],
+      ['ApexCarouselIndicators', 'variant="bar" | "dot"', 'One control per item, doubling as position'],
+      ['ApexCarouselControls', 'variant="bar" | "dot"', 'The standard control row, arranged by navPosition and indicatorPosition \u2014 one tag instead of hand-composing a row, with the parts still available separately'],
     ],
   },
   {

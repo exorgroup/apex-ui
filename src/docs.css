@@ -1011,3 +1011,20 @@ box-shadow:var(--shadow-md)}
 .cmp-card__head{display:flex;align-items:center;gap:10px}
 .cmp-card__row{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--fg-subtle)}
 .car-frame{padding:16px;border:1px solid var(--border-default);border-radius:var(--r-lg);background:var(--bg-surface)}
+
+/* The carousel's demo chrome, ported from the gallery. car-frame is already
+   above, shared with the comparison. */
+.car-tile{display:grid;place-items:center;block-size:100%;min-block-size:110px;border-radius:var(--r-md);
+background:var(--bg-muted);font-size:40px;font-weight:600;color:var(--fg-default)}
+.car-tile--sm{font-size:26px;min-block-size:0}
+.car-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-block-start:14px}
+.car-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-block-end:12px}
+.car-card{display:flex;flex-direction:column;gap:2px}
+.car-card__art{display:grid;place-items:center;aspect-ratio:1;margin-block-end:8px;border-radius:var(--r-md);
+background:var(--bg-muted);font-size:30px;font-weight:600;color:var(--fg-subtle)}
+.car-shot{display:grid;place-items:center;block-size:100%;border-radius:var(--r-md);
+font-size:13px;font-weight:600;color:#33404F}
+.car-thumb{display:grid;place-items:center;inline-size:100%;block-size:100%;padding:0;cursor:pointer;
+border:2px solid transparent;border-radius:var(--r-sm);font-size:12px;font-weight:600;color:#33404F}
+.car-thumb[data-active="true"]{border-color:var(--accent-primary)}
+.car-thumb:focus-visible{outline:none;box-shadow:var(--focus-ring)}
