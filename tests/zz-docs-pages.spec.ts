@@ -251,6 +251,8 @@ describe('the ported gallery examples are on the page', () => {
     ApexButton: ['Severity × variant', 'Raised', 'Rounded and icon-only', 'Icon position',
       'Badge', 'Link', 'Sizes and states'],
     ApexCompare: ['Basic', 'Custom handle', 'Hover', 'Vertical', 'Controlled', 'Template'],
+    ApexCarousel: ['Basic', 'Controls', 'Alignment', 'Orientation', 'Loop', 'Variable size',
+      'Content cards', 'Gallery'],
     /* These two were built before the guard existed and were never listed.
        Adding them with their Permissions sections covers both at once. */
     ApexSplitButton: ['Severity', 'Variants', 'Menu content', 'Sizes and states',
