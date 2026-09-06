@@ -250,6 +250,7 @@ describe('the ported gallery examples are on the page', () => {
        reader. Keeping it here means that cannot come back unnoticed. */
     ApexButton: ['Severity × variant', 'Raised', 'Rounded and icon-only', 'Icon position',
       'Badge', 'Link', 'Sizes and states'],
+    ApexCompare: ['Basic', 'Custom handle', 'Hover', 'Vertical', 'Controlled', 'Template'],
     /* These two were built before the guard existed and were never listed.
        Adding them with their Permissions sections covers both at once. */
     ApexSplitButton: ['Severity', 'Variants', 'Menu content', 'Sizes and states',
