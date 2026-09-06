@@ -63,7 +63,11 @@ const INTENDED = [
   { why: 'AF2-203: CrumbItem, and the breadcrumb’s `to`', test: (l) => /CrumbItem|MenuItem|linkComponent|markRaw|toRaw|cutShort|walkable|isCurrent|\bfull\b|\blist\b|\bto\?:|label\?|icon\?|href\?|target\?|disabled\?|current\?|command\?|\[key: string\]|^\s*\}$|home\?|items\?/.test(l) },
   { why: 'AF2-167: absent booleans arrive false, not undefined', test: (l) => /open: undefined/.test(l) },
   { why: 'AF2-200: the `padding` the original declares twice in one interface', test: (l) => /padding/.test(l) },
-  { why: 'AF2-133/143/169: the ui class map', test: (l) => /\bui\?\.|ui\?:|ApexUiClasses|ApexContainerClasses|ApexDisplayClasses/.test(l) },
+  { why: 'AF2-133/143/169: the ui class map', test: (l) => /\bui\?\.|ui\?:|ApexUiClasses|ApexContainerClasses|ApexDisplayClasses|ApexMediaClasses/.test(l) },
+  /* The carousel's parts live in five files, so one map on the root travels
+     through the context every part already reads. ApexCarouselItem gains a
+     script for the first time purely to inject it. */
+  { why: 'AF2-229: the ui map carried on the carousel context', test: (l) => /ctx\.ui\.value\?\.|ui: toRef\(props, 'ui'\)|CAROUSEL_CTX|^import \{ inject \} from 'vue';$/.test(l.trim()) },
   { why: 'AF2-62/64/67/68: the shared appearance props and their style block', test: (l) => /ApexButtonAppearance|ApexContainerProps|ApexDisplayProps|ApexMediaProps|(menu|action)[A-Z]\w*\?:|withDefaults\(defineProps<|btnStyle|Record<string, string>|Array<\[string \| undefined, string\]>|map\.forEach|^\s*(out|return out|\]|\);|\}\);)/.test(l) },
   { why: 'AF2-203: the breadcrumb’s routing helpers, and hiding an empty trail', test: (l) => /hrefFor|isRouted|linkAs|tagFor|all\.length|entry\.item|item\.to\b/.test(l) },
   { why: 'AF2-131/141/170: variables renamed to --apex-*', test: (l) => /--apex-[a-z]+-/.test(l) || /--(tbar|mnu|sbar|bc|dial|dock|mbar|mega)-/.test(l) },

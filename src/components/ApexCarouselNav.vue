@@ -23,7 +23,7 @@ const fallback = () => (props.dir === 'prev'
 </script>
 
 <template>
-  <button type="button" class="apex-carousel__nav" :data-dir="dir"
+  <button type="button" class="apex-carousel__nav" :class="ctx.ui.value?.nav" :data-dir="dir"
           :aria-label="dir === 'prev' ? 'Previous slide' : 'Next slide'"
           :disabled="dir === 'prev' ? !ctx.canPrev.value : !ctx.canNext.value"
           @click="dir === 'prev' ? ctx.prev() : ctx.next()">

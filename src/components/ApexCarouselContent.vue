@@ -67,13 +67,13 @@ onBeforeUnmount(() => {
 });
 
 const style = computed(() => ({
-  '--car-gap': ctx.gap.value,
-  '--car-per': String(ctx.slidesPerPage.value),
+  '--apex-car-gap': ctx.gap.value,
+  '--apex-car-per': String(ctx.slidesPerPage.value),
 }));
 </script>
 
 <template>
-  <div ref="el" class="apex-carousel__track" :style="style"
+  <div ref="el" class="apex-carousel__track" :class="ctx.ui.value?.track" :style="style"
        :data-orientation="ctx.orientation.value" :data-align="ctx.align.value"
        :data-auto="ctx.autoSize.value ? 'true' : 'false'" @scroll="onScroll">
     <slot />

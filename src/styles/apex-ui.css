@@ -1142,20 +1142,20 @@ opacity var(--dur-slow) var(--ease-out),margin var(--dur-slow) var(--ease-out)}
 .apex-toast[data-position="center"][data-fanned="false"] .apex-toast__item:not(:first-child){inset-block-start:0}
 
 /* ─── carousel ─────────────────────────────────────────── */
-.apex-carousel{--car-gap:16px;--car-per:1;position:relative;display:flex;flex-direction:column;font-family:var(--font-sans)}
+.apex-carousel{--apex-car-gap:16px;--apex-car-per:1;position:relative;display:flex;flex-direction:column;font-family:var(--font-sans)}
 /* native scroll-snap: the browser owns momentum, touch and trackpad gestures,
    and the track stays a real scroller for keyboard and assistive tech */
-.apex-carousel__track{display:flex;gap:var(--car-gap);overflow:auto;scroll-snap-type:x mandatory;
+.apex-carousel__track{display:flex;gap:var(--apex-car-gap);overflow:auto;scroll-snap-type:x mandatory;
 scrollbar-width:none;overscroll-behavior-inline:contain}
 .apex-carousel__track::-webkit-scrollbar{display:none}
 .apex-carousel__track[data-orientation="vertical"]{flex-direction:column;scroll-snap-type:y mandatory}
-.apex-carousel__item{flex:0 0 calc((100% - (var(--car-per) - 1) * var(--car-gap)) / var(--car-per));
+.apex-carousel__item{flex:0 0 calc((100% - (var(--apex-car-per) - 1) * var(--apex-car-gap)) / var(--apex-car-per));
 min-inline-size:0;scroll-snap-align:start}
 .apex-carousel__track[data-align="center"] .apex-carousel__item{scroll-snap-align:center}
 .apex-carousel__track[data-align="end"] .apex-carousel__item{scroll-snap-align:end}
 .apex-carousel__track[data-auto="true"] .apex-carousel__item{flex:0 0 auto}
 .apex-carousel__track[data-orientation="vertical"] .apex-carousel__item{
-flex:0 0 calc((100% - (var(--car-per) - 1) * var(--car-gap)) / var(--car-per))}
+flex:0 0 calc((100% - (var(--apex-car-per) - 1) * var(--apex-car-gap)) / var(--apex-car-per))}
 .apex-carousel__nav{display:grid;place-items:center;inline-size:34px;block-size:34px;flex:0 0 auto;
 border:1px solid var(--border-default);border-radius:999px;background:var(--bg-surface);
 color:var(--fg-default);cursor:pointer;transition:background var(--dur-fast) var(--ease-out)}

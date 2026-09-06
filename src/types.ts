@@ -489,6 +489,13 @@ export interface ApexMediaClasses {
   handle?: string;
   grip?: string;
   chev?: string;
+
+  /** ApexCarousel — the scrolling track, the arrows and the indicator dots.
+      `item` is shared with ApexCompare: both mean "one child of the set". */
+  track?: string;
+  nav?: string;
+  dots?: string;
+  dot?: string;
 }
 
 export interface ApexDisplayProps {

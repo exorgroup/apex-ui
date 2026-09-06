@@ -13,8 +13,9 @@
  */
 import { computed, provide, ref, toRef, watch } from 'vue';
 import { CAROUSEL_CTX } from '../core/carousel';
+import type { ApexMediaProps } from '../types';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexMediaProps & {
   /** v-model:slide — the active item index. */
   slide?: number;
   /** Where the active item lands in the viewport. */
@@ -115,6 +116,7 @@ const canPrev = computed(() => props.loop || current.value > 0);
 const canNext = computed(() => props.loop || current.value < count.value - 1);
 
 provide(CAROUSEL_CTX, {
+  ui: toRef(props, 'ui'),
   align: toRef(props, 'align'),
   slidesPerPage: toRef(props, 'slidesPerPage'),
   orientation: toRef(props, 'orientation'),
@@ -138,7 +140,7 @@ provide(CAROUSEL_CTX, {
 </script>
 
 <template>
-  <div class="apex-carousel" :data-orientation="orientation">
+  <div class="apex-carousel" :class="ui?.root" :data-orientation="orientation">
     <slot />
   </div>
 </template>
