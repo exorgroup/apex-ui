@@ -28,8 +28,13 @@
      is excluded for the same reason as the spec above. */
   /* service-stage mounts the docs app for the same reason, and drags in the
      same undeclared imports, so it is excluded on the same grounds. */
+  /* zz-docs-classes reads the stylesheets with `fs` for the same reason
+     zz-hidden-reset does — Vite stubs a CSS import to an empty string under
+     vitest, which would make the guard pass by finding nothing. Excluded on
+     the same grounds: Node types are not installed here. */
   "exclude": [
     "tests/zz-docs-pages.spec.ts",
+    "tests/zz-docs-classes.spec.ts",
     "tests/zz-hidden-reset.spec.ts",
     "tests/service-stage.spec.ts",
     "tests/alert-ui.spec.ts"
