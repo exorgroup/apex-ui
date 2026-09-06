@@ -253,6 +253,8 @@ describe('the ported gallery examples are on the page', () => {
     ApexCompare: ['Basic', 'Custom handle', 'Hover', 'Vertical', 'Controlled', 'Template'],
     ApexCarousel: ['Basic', 'Controls', 'Alignment', 'Orientation', 'Loop', 'Variable size',
       'Content cards', 'Gallery'],
+    ApexGallery: ['Basic', 'Toolbar', 'Per-button switches', 'Hover chrome', 'Styling',
+      'Single', 'Grid lightbox'],
     /* These two were built before the guard existed and were never listed.
        Adding them with their Permissions sections covers both at once. */
     ApexSplitButton: ['Severity', 'Variants', 'Menu content', 'Sizes and states',
