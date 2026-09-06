@@ -1,8 +1,15 @@
 <template>
   <div class="media-stage">
+    <!-- The viewer needs images; without them the stage is an empty frame and
+         every rail control looks inert. -->
+    <div v-if="id === 'gallery'" class="cfm-stage" style="max-width:520px">
+      <ApexGallery v-bind="bind" v-model="galPg" :images="GAL_IMAGES" style="width:100%" />
+      <p class="cfm-log">Image <code>{{ galPg + 1 }}</code> of {{ GAL_IMAGES.length }}</p>
+    </div>
+
     <!-- A comparison needs two children to compare; the rail drives the
          divider, the orientation and every piece of its chrome. -->
-    <div v-if="id === 'compare'" class="cfm-stage" style="max-width:460px">
+    <div v-else-if="id === 'compare'" class="cfm-stage" style="max-width:460px">
       <ApexCompare v-bind="bind" v-model="cmpPg"
                    :aspect-ratio="(bind?.aspectRatio as string) || '16/10'" style="width:100%">
         <ApexCompareItem position="before"><div class="cmp-plate cmp-plate--a">Before</div></ApexCompareItem>
@@ -44,7 +51,9 @@
  * blank, and how the dock spent a week in a plain grey box.
  */
 import { ref } from 'vue';
+import { GAL_IMAGES } from '../registry';
 import {
+  ApexGallery,
   ApexCompare, ApexCompareItem,
   ApexCarousel, ApexCarouselContent, ApexCarouselItem, ApexCarouselControls,
 } from '@exorgroup/apex-ui';
@@ -61,4 +70,7 @@ const cmpPg = ref(50);
 
 /** The active slide, bound so the caption follows a drag as well as a press. */
 const carPg = ref(0);
+
+/** The active image, bound so the caption follows the arrows and the strip. */
+const galPg = ref(0);
 </script>

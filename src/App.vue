@@ -15,7 +15,7 @@ import {
   SPLIT_EVENTS, SPLIT_STATEFUL, SPLIT_NAV, PANEL_REPEAT, LEGEND_ALIGNS,
   FAQ_PANELS, FAQ_ZONES, CARD_MEDIA,
   BDG_SEVERITIES, BDG_COUNT, MTR_DISK, MTR_COLOURS, MTR_ICONS, INP_COLUMNS, INP_ROWS,
-  AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW, TEAM, CAR_SHOTS, CAR_TRACKS, CAR_NAV_POS,
+  AOS_PLANS, AOS_PEOPLE, AOS_STATS, AOS_ZOOMS, CHIP_TAGS, CHIP_SEVERITIES, CHIP_INTERESTS, CREW, TEAM, CAR_SHOTS, CAR_TRACKS, CAR_NAV_POS, GAL_IMAGES,
   SUMMARY_ERRORS, SWITCH_LABEL_CASES, SWITCH_LABELS_SNIPPET,
   TOKEN_SWATCHES, TONE_CASES, UI_KEYS, ZONE_OPTIONS, DLG_POSITIONS, MSG_TEXT,
   TOAST_POSITIONS, TOAST_LINES,
@@ -235,6 +235,32 @@ const dialGated: SpeedDialItem[] = [
 /* The toolbar has no model, so its Permissions section gates the way a caller
    would: the same resolver, read directly, driving a v-if. */
 const pageCan = useCan();
+
+/* ── ApexGallery page ─────────────── */
+const galBasic = ref(0);
+const galTbA = ref(0);
+const galTbB = ref(0);
+const galSwA = ref(0);
+const galSwB = ref(0);
+const galHover = ref(0);
+const galStyleA = ref(0);
+const galStyleB = ref(0);
+/* The lightbox: an index and whether it is up. */
+const galLbIndex = ref(0);
+const galLbOpen = ref(false);
+
+/** The ui map's parts, for the Customising table. */
+const GAL_PARTS: string[][] = [
+  ['root', 'The ApexGallery element itself'],
+  ['stage', 'The image frame'],
+  ['img', 'The picture, or the placeholder standing in for one'],
+  ['bar', 'The floating toolbar'],
+  ['act', 'One toolbar button'],
+  ['nav', 'A prev or next arrow'],
+  ['count', 'The \u201c3 / 8\u201d counter'],
+  ['thumbs', 'The thumbnail strip'],
+  ['thumb', 'One thumbnail'],
+];
 
 /* ── ApexCarousel page ────────────────── */
 const carCard = ref(0);
@@ -3688,6 +3714,135 @@ function pick(city) {
           demos I wrote instead were toys that made the control look broken.
         -->
         <!-- The gallery's six, ported. -->
+        <!-- The gallery's seven, ported. -->
+        <template v-if="entry.id === 'gallery'">
+          <h2>Basic</h2>
+          <p class="note">
+            A collection of images with arrows and a thumbnail strip. Arrow keys move
+            between images, <code>+</code> and <code>−</code> zoom, <code>0</code> resets, and
+            ctrl or cmd with the wheel zooms on the stage. Placeholders stand in for
+            artwork here — real <code>src</code> values drop in unchanged.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexGallery v-model="galBasic" :images="GAL_IMAGES" show-counter loop
+                         style="max-width:560px;margin:0 auto" />
+          </div>
+
+          <h2>Toolbar</h2>
+          <p class="note">
+            <code>actions</code> chooses which buttons appear and in what order; an empty
+            array removes the toolbar entirely. Zoom past 1× and the stage becomes
+            draggable.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell"><span class="cell__tag">zoom and reset only</span>
+              <ApexGallery v-model="galTbA" :images="GAL_IMAGES" :actions="['zoom-in', 'zoom-out', 'zoom-reset']"
+                           :show-thumbnails="false" toolbar-position="bottom" />
+            </div>
+            <div class="cell"><span class="cell__tag">no toolbar</span>
+              <ApexGallery v-model="galTbB" :images="GAL_IMAGES" :actions="[]" :show-thumbnails="false" show-counter />
+            </div>
+          </div>
+
+          <h2>Per-button switches</h2>
+          <p class="note">
+            Each button also has its own prop — <code>zoomIn</code>, <code>rotateLeft</code>,
+            <code>downloadable</code>, <code>fullscreen</code> and so on. A switch overrides
+            <code>actions</code> for that one button and undefined leaves the array in charge,
+            so the two can be mixed: keep the default set and drop just the flips, or start
+            from an empty array and turn on the two you want.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell"><span class="cell__tag">default set, flips and download off</span>
+              <ApexGallery v-model="galSwA" :images="GAL_IMAGES" :flip-horizontal="false" :flip-vertical="false"
+                           :downloadable="false" :show-thumbnails="false" />
+            </div>
+            <div class="cell"><span class="cell__tag">empty array, two switched on</span>
+              <ApexGallery v-model="galSwB" :images="GAL_IMAGES" :actions="[]" zoom-in zoom-out
+                           :show-thumbnails="false" />
+            </div>
+          </div>
+          <p class="note" style="margin-top:8px">
+            The download button disables itself when the active image has no <code>src</code>
+            — which is the case for these placeholders. Given a real URL it fetches the
+            bytes and saves a blob, so a cross-origin image still saves rather than
+            navigating away.
+          </p>
+
+          <h2>Hover chrome</h2>
+          <p class="note">
+            <code>hoverToolbar</code> and <code>hoverNav</code> keep the controls out of the
+            way until the pointer is over the gallery. They fade rather than snap, and
+            keyboard focus counts as hover so the controls are still reachable without a
+            mouse.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexGallery v-model="galHover" :images="GAL_IMAGES" hover-toolbar hover-nav show-counter
+                         style="max-width:560px;margin:0 auto" />
+          </div>
+
+          <h2>Styling</h2>
+          <p class="note">
+            Stage, toolbar, arrows and thumbnails each take their own colours, sizes and
+            corners.
+          </p>
+          <div class="grid grid--2" style="margin-top:12px">
+            <div class="cell"><span class="cell__tag">light stage, square chrome</span>
+              <ApexGallery v-model="galStyleA" :images="GAL_IMAGES" stage-background="var(--bg-muted)"
+                           radius="18px" toolbar-background="var(--bg-elevated)" toolbar-color="var(--fg-default)"
+                           toolbar-radius="10px" nav-background="var(--bg-elevated)" nav-color="var(--fg-default)"
+                           nav-radius="10px" nav-size="32px" thumb-radius="10px" thumb-size="58px" />
+            </div>
+            <div class="cell"><span class="cell__tag">thumbnails on top, accent active</span>
+              <ApexGallery v-model="galStyleB" :images="GAL_IMAGES" thumbnails-position="top"
+                           thumb-active-color="var(--accent-success)" :thumb-inactive-opacity="0.3"
+                           thumb-size="90px" thumb-gap="12px" toolbar-position="bottom" />
+            </div>
+          </div>
+
+          <h2>Single</h2>
+          <p class="note">
+            One image, no strip and no arrows — the viewer reduces to a stage with its
+            toolbar.
+          </p>
+          <div class="car-frame" style="margin-top:12px">
+            <ApexGallery :images="[GAL_IMAGES[2]]"
+                         :actions="['zoom-in', 'zoom-out', 'rotate-right', 'download', 'fullscreen']"
+                         style="max-width:460px;margin:0 auto" />
+          </div>
+
+          <h2>Grid lightbox</h2>
+          <p class="note">
+            <code>overlay</code> with <code>v-model:open</code> makes the same viewer a
+            full-screen lightbox: a grid of thumbnails sets the index and opens it. Escape
+            closes it, and the page behind stops scrolling while it is up.
+          </p>
+          <div class="gal-grid" style="margin-top:12px">
+            <button v-for="(im, i) in GAL_IMAGES" :key="i" type="button" class="gal-cell"
+                    :style="{ background: im.background }" @click="galLbIndex = i; galLbOpen = true">
+              <span>{{ im.caption }}</span>
+            </button>
+          </div>
+          <ApexGallery v-model="galLbIndex" v-model:open="galLbOpen" overlay :images="GAL_IMAGES" loop show-counter
+                       :actions="['rotate-left', 'rotate-right', 'zoom-in', 'zoom-out', 'flip-h', 'flip-v', 'download', 'close']" />
+
+          <h2>Customising</h2>
+          <p class="note">
+            The <code>ui</code> map classes the nine parts of the viewer. Every colour, size
+            and corner also has a prop, and each writes the matching
+            <code>--apex-gal-*</code> variable — so the Styling section above and this map
+            are two routes to the same thing.
+          </p>
+          <table class="doc-table">
+            <thead><tr><th>ui key</th><th>Part</th></tr></thead>
+            <tbody>
+              <tr v-for="r in GAL_PARTS" :key="r[0]">
+                <td class="mono">{{ r[0] }}</td><td>{{ r[1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </template>
+
         <!-- The gallery's eight, ported. -->
         <template v-if="entry.id === 'carousel'">
           <h2>Basic</h2>

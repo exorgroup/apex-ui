@@ -352,6 +352,18 @@ export const MTR_ICONS = [
  * The people the context menu's per-row example acts on. Ported from the
  * gallery, where the same list backs several controls.
  */
+/** The gallery's eight placeholders \u2014 every ApexGallery example uses these. */
+export const GAL_IMAGES = [
+  { caption: 'Coastline', background: 'linear-gradient(140deg,#8FB6D9,#DCE9F2)' },
+  { caption: 'Dunes', background: 'linear-gradient(140deg,#C9A88F,#EFE2D5)' },
+  { caption: 'Valley', background: 'linear-gradient(140deg,#9BB894,#E3EDDF)' },
+  { caption: 'Dusk', background: 'linear-gradient(140deg,#B79BC4,#EBE1F0)' },
+  { caption: 'Canyon', background: 'linear-gradient(140deg,#D99C9C,#F5E3E3)' },
+  { caption: 'Harbour', background: 'linear-gradient(140deg,#9AA9BD,#E4E9EF)' },
+  { caption: 'Ridge', background: 'linear-gradient(140deg,#8FA9A0,#DEEAE6)' },
+  { caption: 'Field', background: 'linear-gradient(140deg,#CFC08F,#F1EBD8)' },
+];
+
 /** Two carousels share this list in the Gallery example. */
 export const CAR_SHOTS = [
   { label: 'Placeholder 1', bg: 'linear-gradient(140deg,#8FB6D9,#DCE9F2)' },
@@ -4261,6 +4273,65 @@ export const ENTRIES: DocEntry[] = [
       ['v-apex-tooltip.top="’Text’"', 'modifier', 'top, bottom, left or right'],
       ['v-apex-tooltip="{ value, … }"', 'object', 'Every option above, and reactive — a live tooltip picks up new text without a re-hover'],
       ['app.use(ApexUI)', 'plugin', 'Registers the directive; import { apexTooltip } to register it yourself'],
+    ],
+  },
+  {
+    id: 'gallery', name: 'ApexGallery', group: 'Media',
+    blurb: 'An image viewer with zoom, rotate, flip, download and a thumbnail strip. The transforms compose into one CSS transform on the stage image rather than nesting wrappers, so zoom, rotation and both flips can hold at once and every combination stays predictable. Panning turns on only once the image outgrows its frame \u2014 dragging an image that already fits reads as a broken control.',
+    noField: true, demo: 'media',
+    lead: [':images="images"', 'v-model="index"'],
+    tail: '\n/>',
+    base: { showNav: true, showThumbnails: true, thumbnailsPosition: 'bottom', toolbarPosition: 'top' },
+    controls: [
+      { key: 'showNav', type: 'bool' }, { key: 'hoverNav', type: 'bool' },
+      { key: 'showThumbnails', type: 'bool' },
+      { key: 'thumbnailsPosition', type: 'select', options: ['bottom', 'top'] },
+      { key: 'hoverToolbar', type: 'bool' },
+      { key: 'rotateLeft', type: 'bool' }, { key: 'rotateRight', type: 'bool' },
+      { key: 'zoomIn', type: 'bool' }, { key: 'zoomOut', type: 'bool' },
+      { key: 'zoomReset', type: 'bool' },
+      { key: 'flipHorizontal', type: 'bool' }, { key: 'flipVertical', type: 'bool' },
+      { key: 'downloadable', type: 'bool' }, { key: 'fullscreen', type: 'bool' },
+      { key: 'closable', type: 'bool' },
+      { key: 'toolbarPosition', type: 'select', options: ['top', 'bottom'] },
+      { key: 'showCounter', type: 'bool' }, { key: 'loop', type: 'bool' },
+      { key: 'aspectRatio', type: 'text' }, { key: 'radius', type: 'text' },
+      { key: 'stageBackground', type: 'color' },
+      { key: 'toolbarBackground', type: 'color' }, { key: 'toolbarColor', type: 'color' },
+      { key: 'toolbarRadius', type: 'text' },
+      { key: 'navBackground', type: 'color' }, { key: 'navColor', type: 'color' },
+      { key: 'navSize', type: 'text' }, { key: 'navRadius', type: 'text' },
+      { key: 'thumbSize', type: 'text' }, { key: 'thumbGap', type: 'text' },
+      { key: 'thumbRadius', type: 'text' }, { key: 'thumbActiveColor', type: 'color' },
+      { key: 'zoomStep', type: 'number' }, { key: 'maxZoom', type: 'number' },
+    ],
+    props: [
+      ['images', 'GalleryImage[]', '[]', '{ src, thumbnail, alt, caption, filename } \u2014 or background for a placeholder standing in for artwork. Download fetches the bytes and saves a blob so a cross-origin URL still saves rather than navigating, falling back to opening the image when the server refuses; the button disables itself for an image with no src'],
+      ['modelValue', 'number', '0', 'v-model \u2014 the active index'],
+      ['open / overlay', 'boolean', 'false', 'overlay renders a full-screen viewer driven by v-model:open \u2014 the lightbox case'],
+      ['actions', 'GalleryAction[]', 'rotate, zoom, flip, download, fullscreen', "Which toolbar buttons appear, in this order: 'rotate-left', 'rotate-right', 'zoom-in', 'zoom-out', 'zoom-reset', 'flip-h', 'flip-v', 'download', 'fullscreen', 'close'. An empty array removes the toolbar"],
+      ['rotateLeft / rotateRight / zoomIn / zoomOut / zoomReset / flipHorizontal / flipVertical / downloadable / fullscreen / closable', 'boolean', 'undefined', 'Per-button switches. Each overrides actions for that one button; undefined leaves the array in charge, so the two can be mixed. Buttons the array does not list are appended in the toolbar\u2019s canonical order'],
+      ['hoverToolbar / hoverNav', 'boolean', 'false', 'Reveal the toolbar or the arrows only on hover \u2014 they fade rather than snap, and keyboard focus counts as hover'],
+      ['showNav / showThumbnails / showCounter', 'boolean', 'true / true / false', ''],
+      ['thumbnailsPosition / toolbarPosition', "'bottom' | 'top' / 'top' | 'bottom'", "'bottom' / 'top'", ''],
+      ['loop', 'boolean', 'false', 'Wraps past the ends'],
+      ['zoomStep / maxZoom', 'number', '0.25 / 4', 'Also driven by ctrl or cmd with the wheel, and by + and \u2212'],
+      ['width / height / aspectRatio / radius / padding', 'string', 'tokens', 'The frame'],
+      ['stageBackground', 'string', 'near-black', 'What shows around a contained image'],
+      ['toolbarBackground / toolbarColor / toolbarRadius', 'string', 'tokens', ''],
+      ['navBackground / navColor / navSize / navRadius', 'string', 'tokens', ''],
+      ['thumbSize / thumbGap / thumbRadius / thumbActiveColor / thumbInactiveOpacity', 'string / string / string / string / number', 'tokens / 0.55', 'The strip; inactive thumbnails dim to that opacity'],
+    ],
+    events: [['update:modelValue', 'number'], ['update:open', 'boolean'], ['change', 'number \u2014 the new index']],
+    slots: [
+      ['image', 'Replaces the stage image; receives { image, index, style } \u2014 apply the style to keep zoom, rotation and flips'],
+      ['toolbar', 'Replaces the toolbar contents; receives { act } to drive any action'],
+    ],
+    serviceTitle: 'Methods',
+    serviceRows: [
+      ['act(action)', 'void', 'Runs any toolbar action from outside'],
+      ['go(index)', 'void', 'Moves and resets the view'],
+      ['reset()', 'void', 'Back to 1\u00d7, unrotated, unflipped'],
     ],
   },
   {

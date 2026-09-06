@@ -1028,3 +1028,13 @@ font-size:13px;font-weight:600;color:#33404F}
 border:2px solid transparent;border-radius:var(--r-sm);font-size:12px;font-weight:600;color:#33404F}
 .car-thumb[data-active="true"]{border-color:var(--accent-primary)}
 .car-thumb:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+/* ── ApexGallery demos ─────────────────────────────────────
+   The lightbox grid. The viewer's own chrome is in apex-ui.css; these two
+   rules are only the thumbnails that open it. */
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.gal-cell{display:grid;place-items:center;aspect-ratio:4/3;padding:0;cursor:pointer;border:0;
+border-radius:var(--r-md);font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+color:#33404F;transition:transform var(--dur-fast) var(--ease-out)}
+.gal-cell:hover{transform:scale(1.02)}
+.gal-cell:focus-visible{outline:none;box-shadow:var(--focus-ring)}
