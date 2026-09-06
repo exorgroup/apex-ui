@@ -568,6 +568,62 @@ export interface ApexBoardProps {
   ui?: ApexBoardClasses;
 }
 
+/**
+ * ApexChart, and the family renderers it hands the map to.
+ *
+ * The chart names sixty elements. This is twenty-six of them: the frame, the
+ * axes, the legend, the tooltip, one key per mark type, and one each for the
+ * treemap tile and the heat cell so a map on the chart still reaches the two
+ * families that now render themselves.
+ *
+ * Absent on purpose \u2014 the navigator's internals (mask, grip, window, its own
+ * svg), the brush rectangle, the screen-reader table, the canvas fallback, the
+ * plugin layers and the gauge track. Those are machinery, not parts a caller
+ * restyles, and a key for each would treble the map to no end.
+ */
+export interface ApexChartClasses {
+  root?: string;
+  svg?: string;
+  /** The plot rect the series are drawn into. */
+  plot?: string;
+  /** The caption block above the chart, and its two lines. */
+  head?: string;
+  title?: string;
+  caption?: string;
+  /** The legend, one entry, and the colour chip on it. */
+  legend?: string;
+  key?: string;
+  swatch?: string;
+  /** The axis layer, a tick label, the gridlines and an axis title. */
+  axis?: string;
+  tick?: string;
+  grid?: string;
+  axisTitle?: string;
+  /** The series layer, and one mark of each kind drawn in it. */
+  series?: string;
+  line?: string;
+  area?: string;
+  bar?: string;
+  point?: string;
+  slice?: string;
+  /** The tooltip, its heading and one row of it. */
+  tip?: string;
+  tipTitle?: string;
+  tipRow?: string;
+  /** The navigator strip, the toolbar, and one of its buttons. */
+  nav?: string;
+  toolbar?: string;
+  tool?: string;
+  /** ApexChartTreemap and ApexChartHeat \u2014 handed down, so one map on the
+      chart classes the families that render themselves. */
+  tile?: string;
+  cell?: string;
+}
+export interface ApexChartProps {
+  /** Your own class on any part. See ApexChartClasses. */
+  ui?: ApexChartClasses;
+}
+
 export interface ApexContainerProps {
   /** Your own class on any part. See ApexContainerClasses. */
   ui?: ApexContainerClasses;

@@ -10,7 +10,7 @@ import type { ResolvedSeries } from './data';
 /**
  * Serializes the live SVG, resolving CSS custom properties to literal colours.
  * A standalone file has no design system to look them up in, so an exported
- * chart that kept `var(--cht-series-1)` would come out black.
+ * chart that kept `var(--apex-cht-series-1)` would come out black.
  */
 export function exportSvg(svg: SVGSVGElement, options?: { background?: string }): string {
   const clone = svg.cloneNode(true) as SVGSVGElement;
@@ -19,10 +19,10 @@ export function exportSvg(svg: SVGSVGElement, options?: { background?: string })
 
   const resolved: string[] = [];
   for (let i = 1; i <= 8; i += 1) {
-    const v = styles.getPropertyValue(`--cht-series-${i}`).trim();
-    if (v) resolved.push(`--cht-series-${i}:${v}`);
+    const v = styles.getPropertyValue(`--apex-cht-series-${i}`).trim();
+    if (v) resolved.push(`--apex-cht-series-${i}:${v}`);
   }
-  ['--cht-grid', '--cht-axis', '--cht-tick', '--fg-default', '--fg-muted', '--fg-subtle',
+  ['--apex-cht-grid', '--apex-cht-axis', '--apex-cht-tick', '--fg-default', '--fg-muted', '--fg-subtle',
     '--bg-surface', '--border-default', '--border-subtle', '--font-sans'].forEach((name) => {
     const v = styles.getPropertyValue(name).trim();
     if (v) resolved.push(`${name}:${v}`);
@@ -33,9 +33,9 @@ export function exportSvg(svg: SVGSVGElement, options?: { background?: string })
   clone.setAttribute('height', String(Math.round(rect.height)));
 
   const css = `:root{${resolved.join(';')}}
-.apex-cht__grid line{stroke:var(--cht-grid)}
-.apex-cht__axis line{stroke:var(--cht-axis)}
-.apex-cht__tick{fill:var(--cht-tick);font:11px var(--font-sans,system-ui)}
+.apex-cht__grid line{stroke:var(--apex-cht-grid)}
+.apex-cht__axis line{stroke:var(--apex-cht-axis)}
+.apex-cht__tick{fill:var(--apex-cht-tick);font:11px var(--font-sans,system-ui)}
 .apex-cht__axis-title{fill:var(--fg-muted);font:600 11.5px var(--font-sans,system-ui)}
 .apex-cht__label{fill:var(--fg-muted);font:600 10.5px var(--font-sans,system-ui)}
 .apex-cht__line{fill:none;stroke-linejoin:round;stroke-linecap:round}

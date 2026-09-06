@@ -17,12 +17,13 @@
  * pointer over the plot would have produced.
  */
 import { computed } from 'vue';
+import type { ApexChartProps } from '../types';
 import { seriesColor } from '../core/chart/layout';
 import { heatGrid, heatIntensity, heatBand } from '../core/chart/special';
 import type { ChartSeries } from '../core/chart/data';
 import type { Rect } from '../core/chart/layout';
 
-const props = defineProps<{
+const props = defineProps<ApexChartProps & {
   /** The resolved series; the first heatmap in it is the one drawn. */
   series: ChartSeries[];
   /** The plot rect the grid fills — the chart measures it from the axes. */
@@ -91,17 +92,17 @@ defineExpose({ view });
 
 <template>
   <g v-if="view" class="apex-cht__heat">
-    <rect v-for="c in view.cells" :key="c.key" class="apex-cht__cell"
+    <rect v-for="c in view.cells" :key="c.key" class="apex-cht__cell" :class="props.ui?.cell"
           :x="c.x" :y="c.y" :width="c.width" :height="c.height" :rx="view.radius"
           :fill="c.fill" :fill-opacity="c.opacity"
           @pointerenter="emit('hover', c)" @pointerleave="emit('leave')" />
     <text v-if="view.showLabels" v-for="c in view.cells" :key="c.key + '-l'"
           class="apex-cht__cell-label" :x="c.x + c.width / 2" :y="c.y + c.height / 2"
           text-anchor="middle" dominant-baseline="middle">{{ c.label }}</text>
-    <text v-for="col in view.columns" :key="col.key" class="apex-cht__tick"
+    <text v-for="col in view.columns" :key="col.key" class="apex-cht__tick" :class="props.ui?.tick"
           :x="col.x" :y="plot.y + plot.height + 15"
           text-anchor="middle">{{ col.label }}</text>
-    <text v-for="row in view.rows" :key="row.key" class="apex-cht__tick"
+    <text v-for="row in view.rows" :key="row.key" class="apex-cht__tick" :class="props.ui?.tick"
           :x="plot.x - 8" :y="row.y" text-anchor="end"
           dominant-baseline="middle">{{ row.label }}</text>
   </g>

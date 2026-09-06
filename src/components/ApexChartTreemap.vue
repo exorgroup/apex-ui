@@ -19,11 +19,12 @@
  * navigation.
  */
 import { computed } from 'vue';
+import type { ApexChartProps } from '../types';
 import { seriesColor } from '../core/chart/layout';
 import { treemapLayout, type TreeNode, type TreeTile } from '../core/chart/special';
 import type { ChartSeries } from '../core/chart/data';
 
-const props = defineProps<{
+const props = defineProps<ApexChartProps & {
   /** The resolved series; the first treemap in it is the one drawn. */
   series: ChartSeries[];
   /** How far the user has drilled — an empty path is the top level. */
@@ -65,7 +66,7 @@ const view = computed(() => {
 
 <template>
   <g v-if="view" class="apex-cht__tree">
-    <g v-for="t in view" :key="t.key" class="apex-cht__tile"
+    <g v-for="t in view" :key="t.key" class="apex-cht__tile" :class="props.ui?.tile"
        :data-drillable="t.drillable ? 'true' : 'false'"
        @click="emit('drill', t)">
       <rect :x="t.x" :y="t.y" :width="Math.max(0, t.width - 2)"

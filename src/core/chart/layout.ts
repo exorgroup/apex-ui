@@ -627,8 +627,8 @@ export function placeLabels(
  */
 export const PALETTE_SIZE = 8;
 export function seriesColor(index: number, override?: string | ChartGradient) {
-  if (override && typeof override === 'object') return `var(--cht-series-${(index % PALETTE_SIZE) + 1})`;
-  return override || `var(--cht-series-${(index % PALETTE_SIZE) + 1})`;
+  if (override && typeof override === 'object') return `var(--apex-cht-series-${(index % PALETTE_SIZE) + 1})`;
+  return override || `var(--apex-cht-series-${(index % PALETTE_SIZE) + 1})`;
 }
 
 /**

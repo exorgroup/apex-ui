@@ -68,7 +68,7 @@ const INTENDED = [
      `name: undefined` pairs in the defaults is the shape of the fix. */
   { why: 'AF2-167/231: absent booleans arrive false, not undefined', test: (l) => /^\s*(\w+: undefined,\s*)+$/.test(l) },
   { why: 'AF2-200: the `padding` the original declares twice in one interface', test: (l) => /padding/.test(l) },
-  { why: 'AF2-133/143/169: the ui class map', test: (l) => /\bui\?\.|ui\?:|ApexUiClasses|ApexContainerClasses|ApexDisplayClasses|ApexMediaClasses|ApexBoardProps|ApexBoardClasses|:ui="ui"/.test(l) },
+  { why: 'AF2-133/143/169: the ui class map', test: (l) => /\bui\?\.|ui\?:|ApexUiClasses|ApexContainerClasses|ApexDisplayClasses|ApexMediaClasses|ApexBoardProps|ApexBoardClasses|ApexChartProps|ApexChartClasses|:ui="ui"/.test(l) },
   /* The carousel's parts live in five files, so one map on the root travels
      through the context every part already reads. ApexCarouselItem gains a
      script for the first time purely to inject it. */

@@ -1813,37 +1813,37 @@ grid-template-columns:repeat(auto-fit,minmax(180px,1fr))!important}
 /* One palette, from tokens: series colours are never a per-chart array, so a
    hundred charts restyle at once and dark mode costs nothing. Eight hues at one
    lightness and chroma, so no series shouts louder than its neighbours. */
-.apex-cht{--cht-series-1:oklch(0.62 0.15 250);--cht-series-2:oklch(0.68 0.12 195);
---cht-series-3:oklch(0.74 0.14 85);--cht-series-4:oklch(0.62 0.19 25);
---cht-series-5:oklch(0.58 0.17 300);--cht-series-6:oklch(0.66 0.15 150);
---cht-series-7:oklch(0.64 0.16 350);--cht-series-8:oklch(0.60 0.05 250);
---cht-grid:var(--border-subtle);--cht-axis:var(--border-default);--cht-tick:var(--fg-subtle);
---cht-h:320px;
+.apex-cht{--apex-cht-series-1:oklch(0.62 0.15 250);--apex-cht-series-2:oklch(0.68 0.12 195);
+--apex-cht-series-3:oklch(0.74 0.14 85);--apex-cht-series-4:oklch(0.62 0.19 25);
+--apex-cht-series-5:oklch(0.58 0.17 300);--apex-cht-series-6:oklch(0.66 0.15 150);
+--apex-cht-series-7:oklch(0.64 0.16 350);--apex-cht-series-8:oklch(0.60 0.05 250);
+--apex-cht-grid:var(--border-subtle);--apex-cht-axis:var(--border-default);--apex-cht-tick:var(--fg-subtle);
+--apex-cht-h:320px;
 display:flex;flex-direction:column;gap:8px;margin:0;font-family:var(--font-sans)}
 .apex-cht__head{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
 .apex-cht__title{font-size:15px;font-weight:650;color:var(--fg-default)}
 .apex-cht__caption{font-size:12.5px;color:var(--fg-subtle);text-wrap:pretty}
 /* the plot is the only flexible row, so title, caption and legend reduce the
    chart area rather than floating over it */
-.apex-cht__plot{position:relative;flex:1 1 auto;min-block-size:0;block-size:var(--cht-h)}
+.apex-cht__plot{position:relative;flex:1 1 auto;min-block-size:0;block-size:var(--apex-cht-h)}
 .apex-cht__svg{position:absolute;inset:0;inline-size:100%;block-size:100%;overflow:visible;
 touch-action:none}
 .apex-cht__svg:focus-visible{outline:none;border-radius:var(--r-sm);box-shadow:var(--focus-ring)}
 .apex-cht__canvas{position:absolute;inset:0;pointer-events:none}
-.apex-cht__grid line{stroke:var(--cht-grid);stroke-width:1}
-.apex-cht__axis line{stroke:var(--cht-axis);stroke-width:1}
-.apex-cht__tick{fill:var(--cht-tick);font-size:11px}
+.apex-cht__grid line{stroke:var(--apex-cht-grid);stroke-width:1}
+.apex-cht__axis line{stroke:var(--apex-cht-axis);stroke-width:1}
+.apex-cht__tick{fill:var(--apex-cht-tick);font-size:11px}
 .apex-cht__axis-title{fill:var(--fg-muted);font-size:11.5px;font-weight:600}
-.apex-cht__cross{stroke:var(--cht-axis);stroke-width:1;stroke-dasharray:3 3}
+.apex-cht__cross{stroke:var(--apex-cht-axis);stroke-width:1;stroke-dasharray:3 3}
 /* zoom affordances */
 .apex-cht__plot[data-zoom="true"]{cursor:crosshair;touch-action:none}
-.apex-cht__brush{fill:color-mix(in oklch,var(--cht-series-1) 14%,transparent);
-stroke:var(--cht-series-1);stroke-width:1;pointer-events:none}
+.apex-cht__brush{fill:color-mix(in oklch,var(--apex-cht-series-1) 14%,transparent);
+stroke:var(--apex-cht-series-1);stroke-width:1;pointer-events:none}
 .apex-cht__ref-label{font-size:10.5px;font-weight:650;paint-order:stroke;
 stroke:var(--bg-surface);stroke-width:3px;stroke-linejoin:round}
 .apex-cht__plugin text{font-family:var(--font-sans)}
 /* the overview keeps its own row, so it reduces the chart rather than covering it */
-.apex-cht__nav{position:relative;block-size:var(--cht-nav-h,54px);flex:0 0 auto}
+.apex-cht__nav{position:relative;block-size:var(--apex-cht-nav-h,54px);flex:0 0 auto}
 .apex-cht__nav-svg{position:absolute;inset:0;inline-size:100%;block-size:100%;touch-action:none}
 .apex-cht__nav-area{opacity:.16;stroke:none}
 .apex-cht__nav-bar{opacity:.3;stroke:none}
@@ -1852,9 +1852,9 @@ stroke:var(--bg-surface);stroke-width:3px;stroke-linejoin:round}
 .apex-cht[data-zoomed] .apex-cht__nav-win{cursor:move}
 .apex-cht__nav-line{fill:none;stroke-width:1.25;opacity:.55}
 .apex-cht__nav-mask{fill:var(--bg-surface);opacity:.62;pointer-events:none}
-.apex-cht__nav-win{fill:transparent;stroke:var(--cht-axis);stroke-width:1;cursor:grab}
+.apex-cht__nav-win{fill:transparent;stroke:var(--apex-cht-axis);stroke-width:1;cursor:grab}
 .apex-cht__nav-win:active{cursor:grabbing}
-.apex-cht__nav-grip{fill:var(--cht-tick);opacity:.5;cursor:ew-resize;rx:2}
+.apex-cht__nav-grip{fill:var(--apex-cht-tick);opacity:.5;cursor:ew-resize;rx:2}
 .apex-cht__nav-grip:hover{opacity:.9}
 .apex-cht-group{display:flex;flex-direction:column;gap:10px}
 .apex-cht__line{fill:none;stroke-linejoin:round;stroke-linecap:round}
@@ -1881,12 +1881,12 @@ stroke:var(--bg-surface);stroke-width:3px;stroke-linejoin:round}
 .apex-cht__slice[data-on="true"]{filter:brightness(1.08)}
 .apex-cht__gauge-track{fill:var(--bg-muted)}
 .apex-cht__gauge-value{stroke:none}
-.apex-cht__radar-grid path{fill:none;stroke:var(--cht-grid);stroke-width:1}
-.apex-cht__radar-grid line{stroke:var(--cht-grid);stroke-width:1}
+.apex-cht__radar-grid path{fill:none;stroke:var(--apex-cht-grid);stroke-width:1}
+.apex-cht__radar-grid line{stroke:var(--apex-cht-grid);stroke-width:1}
 .apex-cht__radar-shape{stroke-width:2;stroke-linejoin:round}
 /* the connector is hairline and the text is plain: a leader line exists to be
    followed, not looked at */
-.apex-cht__leaders path{fill:none;stroke:var(--cht-tick);stroke-width:1;opacity:.6}
+.apex-cht__leaders path{fill:none;stroke:var(--apex-cht-tick);stroke-width:1;opacity:.6}
 .apex-cht__leader-text{fill:var(--fg-muted);font-size:11px;font-weight:600}
 .apex-cht__center-value{fill:var(--fg-default);font-size:22px;font-weight:700;
 font-variant-numeric:tabular-nums}

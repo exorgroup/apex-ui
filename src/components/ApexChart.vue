@@ -46,6 +46,7 @@ import {
 } from '../core/chart/special';
 import ApexChartTreemap from './ApexChartTreemap.vue';
 import ApexChartHeat from './ApexChartHeat.vue';
+import type { ApexChartProps } from '../types';
 
 export interface ChartLegendSpec {
   show?: boolean;
@@ -145,7 +146,7 @@ export interface ChartDataLabelSpec {
   sparse?: boolean;
 }
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexChartProps & {
   series?: ChartSeries[];
   xAxis?: AxisSpec;
   yAxis?: AxisSpec;
@@ -2447,8 +2448,8 @@ const cfgCaption = merged.caption;
 const cfgNavigator = merged.navigator;
 
 const rootStyle = computed(() => ({
-  '--cht-h': toLength(props.height),
-  '--cht-nav-h': `${navHeight.value}px`,
+  '--apex-cht-h': toLength(props.height),
+  '--apex-cht-nav-h': `${navHeight.value}px`,
 }));
 
 const svgEl = ref<SVGSVGElement | null>(null);
@@ -2478,7 +2479,7 @@ defineExpose({
 </script>
 
 <template>
-  <figure ref="root" class="apex-cht" :style="rootStyle"
+  <figure ref="root" class="apex-cht" :style="rootStyle" :class="ui?.root"
           :data-decimated="decimated ? 'true' : 'false'"
           :data-family="radial ? 'radial' : (hasTreemap ? 'treemap' : (hasHeatmap ? 'heatmap' : 'cartesian'))"
           :data-orientation="orientation" :data-dir="rtl ? 'rtl' : 'ltr'"
@@ -2491,25 +2492,25 @@ defineExpose({
       <button type="button" class="apex-cht__crumb-up" @click="drillOut()">Back</button>
     </nav>
 
-    <figcaption v-if="cfgTitle || cfgCaption" class="apex-cht__head">
-      <span v-if="cfgTitle" class="apex-cht__title">{{ cfgTitle }}</span>
-      <span v-if="cfgCaption" class="apex-cht__caption">{{ cfgCaption }}</span>
+    <figcaption v-if="cfgTitle || cfgCaption" class="apex-cht__head" :class="ui?.head">
+      <span v-if="cfgTitle" class="apex-cht__title" :class="ui?.title">{{ cfgTitle }}</span>
+      <span v-if="cfgCaption" class="apex-cht__caption" :class="ui?.caption">{{ cfgCaption }}</span>
     </figcaption>
 
     <div v-if="!radial && cfgLegend?.show !== false && live.length > 1 && cfgLegend?.position === 'top'"
-         class="apex-cht__legend" :data-align="cfgLegend?.align || 'center'">
+         class="apex-cht__legend" :class="ui?.legend" :data-align="cfgLegend?.align || 'center'">
       <slot v-if="$slots.legend" name="legend" :series="live" :colors="live.map((s, i) => seriesColor(i, s.color))"
             :hidden="live.filter((s) => s.hidden).map((s) => s.id)" :toggle="toggleSeries" />
       <template v-else>
-        <button v-for="(s, i) in live" :key="s.id" type="button" class="apex-cht__key"
+        <button v-for="(s, i) in live" :key="s.id" type="button" class="apex-cht__key" :class="ui?.key"
                 :data-off="s.hidden ? 'true' : 'false'" @click="toggleSeries(s)">
-          <span class="apex-cht__swatch" :style="{ background: seriesColor(i, s.color) }"></span>{{ s.name }}
+          <span class="apex-cht__swatch" :class="ui?.swatch" :style="{ background: seriesColor(i, s.color) }"></span>{{ s.name }}
         </button>
       </template>
     </div>
 
-    <div v-if="toolbarItems.length" class="apex-cht__toolbar">
-      <button type="button" class="apex-cht__tool" :aria-expanded="toolbarOpen"
+    <div v-if="toolbarItems.length" class="apex-cht__toolbar" :class="ui?.toolbar">
+      <button type="button" class="apex-cht__tool" :class="ui?.tool" :aria-expanded="toolbarOpen"
               aria-label="Chart menu" @click="toolbarOpen = !toolbarOpen">
         <span></span><span></span><span></span>
       </button>
@@ -2521,8 +2522,8 @@ defineExpose({
       </div>
     </div>
 
-    <div ref="plotBox" class="apex-cht__plot" @pointermove="onMove" @pointerleave="clearHit" @click="onClick">
-      <svg ref="svgEl" class="apex-cht__svg" :viewBox="`0 0 ${size.width} ${size.height}`" role="img"
+    <div ref="plotBox" class="apex-cht__plot" :class="ui?.plot" @pointermove="onMove" @pointerleave="clearHit" @click="onClick">
+      <svg ref="svgEl" class="apex-cht__svg" :class="ui?.svg" :viewBox="`0 0 ${size.width} ${size.height}`" role="img"
            :aria-label="summary" tabindex="0" @keydown="onKey" @blur="clearHit">
         <defs>
           <clipPath :id="uidClip">
@@ -2557,14 +2558,14 @@ defineExpose({
         <!-- radial: no plot rect, no axes, so the cartesian layer is skipped
              entirely rather than drawn and hidden -->
         <!-- a treemap owns the whole frame: no scales, no axes, no plot rect -->
-        <ApexChartTreemap v-if="hasTreemap" :series="allSeries" :drill-path="drillPath"
+        <ApexChartTreemap v-if="hasTreemap" :ui="ui" :series="allSeries" :drill-path="drillPath"
                           :width="size.width" :height="size.height" :locale="locale"
                           @drill="drillInto" />
 
         <g v-else-if="radial" class="apex-cht__radial">
           <template v-if="radialKind === 'pie'">
             <g v-for="ring in pieRings" :key="ring.seriesId">
-              <path v-for="sl in ring.slices" :key="sl.key" class="apex-cht__slice" :d="sl.d"
+              <path v-for="sl in ring.slices" :key="sl.key" class="apex-cht__slice" :class="ui?.slice" :d="sl.d"
                     :fill="sl.color"
                     :data-on="hit && hit.entries[0].point === sl.point ? 'true' : 'false'"
                     @pointerenter="radialHover(sl.seriesId, sl.point, sl.label)"
@@ -2583,12 +2584,12 @@ defineExpose({
               <line v-for="sp in radarView.spokes" :key="sp.key" :x1="radarView.frame.cx"
                     :y1="radarView.frame.cy" :x2="sp.x2" :y2="sp.y2" />
             </g>
-            <text v-for="sp in radarView.spokes" :key="sp.key + '-t'" class="apex-cht__tick"
+            <text v-for="sp in radarView.spokes" :key="sp.key + '-t'" class="apex-cht__tick" :class="ui?.tick"
                   :x="sp.lx" :y="sp.ly" :text-anchor="sp.anchor" dominant-baseline="middle">{{ sp.text }}</text>
             <template v-for="shape in radarView.shapes" :key="shape.id">
               <path v-if="shape.polygon" class="apex-cht__radar-shape" :d="shape.polygon"
                     :fill="shape.color" :fill-opacity="shape.fillOpacity" :stroke="shape.color" />
-              <path v-for="sec in shape.sectors" :key="sec.key" class="apex-cht__slice" :d="sec.d"
+              <path v-for="sec in shape.sectors" :key="sec.key" class="apex-cht__slice" :class="ui?.slice" :d="sec.d"
                     :fill="shape.color" :fill-opacity="shape.fillOpacity"
                     @pointerenter="radialHover(shape.id, sec.point, sec.label)"
                     @pointerleave="clearHit" />
@@ -2620,23 +2621,23 @@ defineExpose({
                between them is noise. -->
           <template v-if="paneViews.length > 1">
             <g v-for="pv in paneViews" :key="`pane-${pv.index}`">
-              <g v-if="(cfgYAxis?.grid ?? true)" class="apex-cht__grid">
+              <g v-if="(cfgYAxis?.grid ?? true)" class="apex-cht__grid" :class="ui?.grid">
                 <line v-for="t in pv.ticks" :key="`pg${pv.index}-${t.value}`"
                       :x1="pv.rect.x" :x2="pv.rect.x + pv.rect.width"
                       :y1="pv.scale.map(t.value)" :y2="pv.scale.map(t.value)" />
               </g>
-              <text v-for="t in pv.ticks" :key="`pt${pv.index}-${t.value}`" class="apex-cht__tick"
+              <text v-for="t in pv.ticks" :key="`pt${pv.index}-${t.value}`" class="apex-cht__tick" :class="ui?.tick"
                     :x="rtl ? pv.rect.x + pv.rect.width + 8 : pv.rect.x - 8"
                     :y="pv.scale.map(t.value)"
                     :text-anchor="rtl ? 'start' : 'end'" dominant-baseline="middle">{{ t.label }}</text>
-              <text v-if="pv.label" class="apex-cht__axis-title" text-anchor="middle"
+              <text v-if="pv.label" class="apex-cht__axis-title" :class="ui?.axisTitle" text-anchor="middle"
                     :transform="`translate(11 ${pv.rect.y + pv.rect.height / 2}) rotate(-90)`">{{ pv.label }}</text>
             </g>
           </template>
 
           <!-- gridlines follow the VALUE axis, so turning the chart turns them:
                a gridline exists to read a value against, not to divide categories -->
-          <g v-if="paneViews.length === 1 && (cfgYAxis?.grid ?? true)" class="apex-cht__grid">
+          <g v-if="paneViews.length === 1 && (cfgYAxis?.grid ?? true)" class="apex-cht__grid" :class="ui?.grid">
             <line v-for="t in (horizontal ? scales.x.ticks : scales.left.ticks)" :key="`g${t.value}`"
                   :x1="horizontal ? scales.x.map(t.value) : layoutState.plot.x"
                   :x2="horizontal ? scales.x.map(t.value) : layoutState.plot.x + layoutState.plot.width"
@@ -2668,14 +2669,14 @@ defineExpose({
                       :stroke-width="n.width" :opacity="n.opacity" />
             </template>
           </g>
-          <g class="apex-cht__axis">
+          <g class="apex-cht__axis" :class="ui?.axis">
             <line v-if="(cfgXAxis?.line ?? true)" :x1="layoutState.plot.x"
                   :x2="layoutState.plot.x + layoutState.plot.width"
                   :y1="layoutState.plot.y + layoutState.plot.height"
                   :y2="layoutState.plot.y + layoutState.plot.height" />
             <template v-if="(cfgXAxis?.ticks ?? true) && !hasHeatmap">
               <text v-for="i in layoutState.xVisible" :key="`x${i}`"
-                    class="apex-cht__tick"
+                    class="apex-cht__tick" :class="ui?.tick"
                     :x="scales.x.map(scales.x.ticks[i].value)"
                     :y="layoutState.plot.y + layoutState.plot.height + 17"
                     :text-anchor="layoutState.xRotate ? 'end' : 'middle'"
@@ -2686,21 +2687,21 @@ defineExpose({
             <!-- the heatmap labels its own rows and columns; drawing the value
                  scale's ticks as well is what doubled them up -->
             <template v-if="paneViews.length === 1 && (cfgYAxis?.ticks ?? true) && !hasHeatmap">
-              <text v-for="t in scales.left.ticks" :key="`y${t.value}`" class="apex-cht__tick"
+              <text v-for="t in scales.left.ticks" :key="`y${t.value}`" class="apex-cht__tick" :class="ui?.tick"
                     :x="rtl ? layoutState.plot.x + layoutState.plot.width + 8 : layoutState.plot.x - 8"
                     :y="scales.left.map(t.value)"
                     :text-anchor="rtl ? 'start' : 'end'" dominant-baseline="middle">{{ t.label }}</text>
             </template>
             <template v-if="scales.right && (cfgY2Axis?.ticks ?? true)">
-              <text v-for="t in scales.right.ticks" :key="`y2${t.value}`" class="apex-cht__tick"
+              <text v-for="t in scales.right.ticks" :key="`y2${t.value}`" class="apex-cht__tick" :class="ui?.tick"
                     :x="layoutState.plot.x + layoutState.plot.width + 8" :y="scales.right.map(t.value)"
                     text-anchor="start" dominant-baseline="middle">{{ t.label }}</text>
             </template>
-            <text v-if="cfgXAxis?.label" class="apex-cht__axis-title" :x="layoutState.plot.x + layoutState.plot.width / 2"
+            <text v-if="cfgXAxis?.label" class="apex-cht__axis-title" :class="ui?.axisTitle" :x="layoutState.plot.x + layoutState.plot.width / 2"
                   :y="size.height - 2" text-anchor="middle">{{ cfgXAxis.label }}</text>
-            <text v-if="cfgYAxis?.label" class="apex-cht__axis-title" text-anchor="middle"
+            <text v-if="cfgYAxis?.label" class="apex-cht__axis-title" :class="ui?.axisTitle" text-anchor="middle"
                   :transform="`translate(11 ${layoutState.plot.y + layoutState.plot.height / 2}) rotate(-90)`">{{ cfgYAxis.label }}</text>
-            <text v-if="cfgY2Axis?.label && scales.right" class="apex-cht__axis-title" text-anchor="middle"
+            <text v-if="cfgY2Axis?.label && scales.right" class="apex-cht__axis-title" :class="ui?.axisTitle" text-anchor="middle"
                   :transform="`translate(${size.width - 5} ${layoutState.plot.y + layoutState.plot.height / 2}) rotate(90)`">{{ cfgY2Axis.label }}</text>
           </g>
 
@@ -2718,19 +2719,19 @@ defineExpose({
                 :y2="horizontal ? crossPos : layoutState.plot.y + layoutState.plot.height" />
 
           <!-- heatmap: both axes categorical, so the value scale is unused -->
-          <ApexChartHeat v-if="hasHeatmap" :series="allSeries" :plot="layoutState.plot"
+          <ApexChartHeat v-if="hasHeatmap" :ui="ui" :series="allSeries" :plot="layoutState.plot"
                          :locale="locale" @hover="heatHover" @leave="clearHit" />
 
-          <g v-else-if="!useCanvas" class="apex-cht__series" :clip-path="seriesClip">
+          <g v-else-if="!useCanvas" class="apex-cht__series" :class="ui?.series" :clip-path="seriesClip">
             <g v-for="entry in paths" :key="entry.series.id" :opacity="entry.opacity"
                :style="{ transition: 'opacity 120ms' }">
               <template v-if="!entry.series.hidden">
                 <!-- fills first, then halos, then strokes: a later series' halo
                      must sit over an earlier series' fill but under its own line -->
-                <path v-if="entry.area" class="apex-cht__area" :d="entry.area"
+                <path v-if="entry.area" class="apex-cht__area" :class="ui?.area" :d="entry.area"
                       :fill="entry.fillPaint" :opacity="entry.fillOpacity" />
                 <template v-if="entry.fillOpacity > 0">
-                  <path v-for="p in entry.pieces" :key="`a-${p.key}`" class="apex-cht__area"
+                  <path v-for="p in entry.pieces" :key="`a-${p.key}`" class="apex-cht__area" :class="ui?.area"
                         :d="p.area" :fill="p.fill" :opacity="entry.fillOpacity" />
                 </template>
                 <path v-if="entry.border && entry.line" class="apex-cht__border" :d="entry.line"
@@ -2760,7 +2761,7 @@ defineExpose({
                           : 'none'"
                         :stroke="c.tone === 'neutral' ? entry.neutralColor : (c.tone === 'up' ? entry.upColor : entry.downColor)" />
                 </template>
-                <path v-for="b in entry.barRects" :key="`bar-${b.key}`" class="apex-cht__bar"
+                <path v-for="b in entry.barRects" :key="`bar-${b.key}`" class="apex-cht__bar" :class="ui?.bar"
                       :d="b.d" :fill="b.fill" />
                 <template v-if="entry.barBorder">
                   <path v-for="b in entry.barRects" :key="`bb-${b.key}`" class="apex-cht__bar-border"
@@ -2768,22 +2769,22 @@ defineExpose({
                         :stroke-width="entry.barBorder.width" :stroke-dasharray="entry.barBorder.dash" />
                 </template>
                 <template v-for="pt in entry.points" :key="`pt-${pt.key}`">
-                  <path v-if="pt.d" class="apex-cht__point" :d="pt.d" :fill="pt.fill"
+                  <path v-if="pt.d" class="apex-cht__point" :class="ui?.point" :d="pt.d" :fill="pt.fill"
                         :fill-opacity="entry.type === 'bubble' ? (entry.fillOpacity || 0.55) : 1"
                         :stroke="entry.pointBorder.color || entry.strokePaint"
                         :stroke-width="entry.pointBorder.width"
                         :transform="`translate(${pt.cx} ${pt.cy})`" />
-                  <circle v-else class="apex-cht__point" :cx="pt.cx" :cy="pt.cy" :r="pt.r"
+                  <circle v-else class="apex-cht__point" :class="ui?.point" :cx="pt.cx" :cy="pt.cy" :r="pt.r"
                           :fill="entry.radial ? entry.fillPaint : pt.fill"
                           :fill-opacity="entry.type === 'bubble' ? (entry.fillOpacity || 0.55) : 1"
                           :stroke="entry.pointBorder.color || entry.strokePaint"
                           :stroke-width="entry.pointBorder.width" />
                 </template>
-                <path v-if="entry.line" class="apex-cht__line" :d="entry.line"
+                <path v-if="entry.line" class="apex-cht__line" :class="ui?.line" :d="entry.line"
                       :stroke="entry.strokePaint" :stroke-width="entry.width"
                       :stroke-dasharray="entry.dash" :stroke-dashoffset="entry.dashOffset"
                       :stroke-linecap="entry.cap" :stroke-linejoin="entry.join" />
-                <path v-for="p in entry.pieces" :key="`l-${p.key}`" class="apex-cht__line"
+                <path v-for="p in entry.pieces" :key="`l-${p.key}`" class="apex-cht__line" :class="ui?.line"
                       :d="p.line" :stroke="p.color" :stroke-width="p.width"
                       :stroke-dasharray="p.dash" :stroke-linecap="entry.cap" />
                 <template v-for="m in entry.markers" :key="`m-${entry.series.id}-${m.p.key}`">
@@ -2840,20 +2841,20 @@ defineExpose({
       <canvas v-if="useCanvas" ref="canvasEl" class="apex-cht__canvas"
               :style="{ width: size.width + 'px', height: size.height + 'px' }"></canvas>
 
-      <div v-if="hit && cfgTooltip?.show !== false" class="apex-cht__tip" :style="tooltipStyle">
+      <div v-if="hit && cfgTooltip?.show !== false" class="apex-cht__tip" :class="ui?.tip" :style="tooltipStyle">
         <!-- the slot replaces the rows entirely: a computed total or a delta
              against a threshold cannot come out of a value formatter -->
         <slot v-if="$slots.tooltip" name="tooltip" :entries="hit.entries"
               :category="tooltipTitle" :rows="tooltipRows" :hit="hit" />
         <template v-else>
-        <span class="apex-cht__tip-title">{{ tooltipTitle }}</span>
+        <span class="apex-cht__tip-title" :class="ui?.tipTitle">{{ tooltipTitle }}</span>
         <template v-if="ohlcRows">
-          <span v-for="r in ohlcRows.rows" :key="r.label" class="apex-cht__tip-row">
+          <span v-for="r in ohlcRows.rows" :key="r.label" class="apex-cht__tip-row" :class="ui?.tipRow">
             <span class="apex-cht__tip-name">{{ r.label }}</span><b>{{ r.value }}</b>
           </span>
         </template>
-        <span v-for="r in (ohlcRows ? otherRows : tooltipRows)" :key="r.key" class="apex-cht__tip-row">
-          <span class="apex-cht__swatch" :style="{ background: r.color }"></span>
+        <span v-for="r in (ohlcRows ? otherRows : tooltipRows)" :key="r.key" class="apex-cht__tip-row" :class="ui?.tipRow">
+          <span class="apex-cht__swatch" :class="ui?.swatch" :style="{ background: r.color }"></span>
           <span class="apex-cht__tip-name">{{ r.name }}</span>
           <b>{{ r.value }}</b>
         </span>
@@ -2864,13 +2865,13 @@ defineExpose({
     <!-- a pie's legend names its SLICES: the parts are what is being compared,
          and one series would make a legend of one entry -->
     <div v-if="radial && radialKind === 'pie' && cfgLegend?.show !== false && pieRings.length"
-         class="apex-cht__legend" :data-align="cfgLegend?.align || 'center'">
-      <span v-for="sl in pieRings[0].slices" :key="sl.key" class="apex-cht__key">
-        <span class="apex-cht__swatch" :style="{ background: sl.color, blockSize: '9px', inlineSize: '9px', borderRadius: '3px' }"></span>{{ sl.label }}
+         class="apex-cht__legend" :class="ui?.legend" :data-align="cfgLegend?.align || 'center'">
+      <span v-for="sl in pieRings[0].slices" :key="sl.key" class="apex-cht__key" :class="ui?.key">
+        <span class="apex-cht__swatch" :class="ui?.swatch" :style="{ background: sl.color, blockSize: '9px', inlineSize: '9px', borderRadius: '3px' }"></span>{{ sl.label }}
       </span>
     </div>
 
-    <div v-if="cfgNavigator && navigator" ref="navBox" class="apex-cht__nav">
+    <div v-if="cfgNavigator && navigator" ref="navBox" class="apex-cht__nav" :class="ui?.nav">
       <svg class="apex-cht__nav-svg" :viewBox="`0 0 ${size.width} ${navHeight}`">
         <!-- the overview draws what it is an overview OF: an area under a bar or
              point chart misrepresents what you are panning across -->
@@ -2917,13 +2918,13 @@ defineExpose({
     </div>
 
     <div v-if="!radial && cfgLegend?.show !== false && live.length > 1 && cfgLegend?.position !== 'top'"
-         class="apex-cht__legend" :data-align="cfgLegend?.align || 'center'">
+         class="apex-cht__legend" :class="ui?.legend" :data-align="cfgLegend?.align || 'center'">
       <slot v-if="$slots.legend" name="legend" :series="live" :colors="live.map((s, i) => seriesColor(i, s.color))"
             :hidden="live.filter((s) => s.hidden).map((s) => s.id)" :toggle="toggleSeries" />
       <template v-else>
-        <button v-for="(s, i) in live" :key="s.id" type="button" class="apex-cht__key"
+        <button v-for="(s, i) in live" :key="s.id" type="button" class="apex-cht__key" :class="ui?.key"
                 :data-off="s.hidden ? 'true' : 'false'" @click="toggleSeries(s)">
-          <span class="apex-cht__swatch" :style="{ background: seriesColor(i, s.color) }"></span>{{ s.name }}
+          <span class="apex-cht__swatch" :class="ui?.swatch" :style="{ background: seriesColor(i, s.color) }"></span>{{ s.name }}
         </button>
       </template>
     </div>
