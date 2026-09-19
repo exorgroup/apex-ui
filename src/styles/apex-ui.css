@@ -146,39 +146,39 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 [dir="rtl"] .apex-pop__opt .apex-icon[data-glyph="chevron_right"]{transform:scaleX(-1)}
 
 /* ─── date picker ──────────────────────────────────────── */
-.apex-cal{position:absolute;z-index:40;inset-block-start:calc(100% + 6px);inset-inline-start:0;background:var(--apex-cal-bg,var(--bg-elevated));border:1px solid var(--apex-cal-border,var(--border-default));border-radius:var(--apex-cal-radius,var(--r-md));box-shadow:var(--apex-cal-shadow,var(--shadow-md));padding:10px;inline-size:max-content;min-inline-size:100%}
+.apex-cal{position:absolute;z-index:40;inset-block-start:calc(100% + 6px);inset-inline-start:0;background:var(--apex-dp-bg,var(--bg-elevated));border:1px solid var(--apex-dp-border,var(--border-default));border-radius:var(--apex-dp-radius,var(--r-md));box-shadow:var(--apex-dp-shadow,var(--shadow-md));padding:10px;inline-size:max-content;min-inline-size:100%}
 .apex-cal--inline{position:static;box-shadow:none;inline-size:auto;min-inline-size:0}
 .apex-cal__nav{display:flex;align-items:center;justify-content:space-between;gap:6px;padding-block-end:6px}
 .apex-cal__title{display:flex;align-items:center;gap:6px}
-.apex-cal__title button{border:0;background:transparent;font:inherit;font-size:14px;font-weight:700;color:var(--apex-cal-nav-fg,var(--fg-default));cursor:pointer;padding:4px 8px;border-radius:var(--apex-cal-day-radius,var(--r-sm))}
-.apex-cal__title button:hover{background:var(--apex-cal-nav-hover-bg,var(--bg-muted));color:var(--apex-cal-nav-hover-fg,var(--accent-primary))}
+.apex-cal__title button{border:0;background:transparent;font:inherit;font-size:14px;font-weight:700;color:var(--apex-dp-nav-fg,var(--fg-default));cursor:pointer;padding:4px 8px;border-radius:var(--apex-dp-day-radius,var(--r-sm))}
+.apex-cal__title button:hover{background:var(--apex-dp-nav-hover-bg,var(--bg-muted));color:var(--apex-dp-nav-hover-fg,var(--accent-primary))}
 .apex-cal__months{display:flex;gap:16px}
 .apex-cal__month{flex:1 1 0;min-inline-size:238px}
-.apex-cal__mlabel{margin:0 0 6px;text-align:center;font-size:12px;font-weight:700;color:var(--apex-cal-month-fg,var(--fg-muted))}
+.apex-cal__mlabel{margin:0 0 6px;text-align:center;font-size:12px;font-weight:700;color:var(--apex-dp-month-fg,var(--fg-muted))}
 .apex-cal__grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.apex-cal__wd{display:grid;place-items:center;block-size:28px;font-size:11px;font-weight:700;color:var(--apex-cal-wd-fg,var(--fg-subtle));text-transform:uppercase;letter-spacing:.04em}
-.apex-cal__day{block-size:32px;min-inline-size:32px;display:grid;place-items:center;border:0;background:transparent;font:inherit;font-size:13px;color:var(--apex-cal-day-fg,var(--fg-default));border-radius:var(--apex-cal-day-radius,var(--r-sm));cursor:pointer;transition:background var(--dur-fast),color var(--dur-fast)}
-.apex-cal__day:hover:not(:disabled){background:var(--apex-cal-day-hover-bg,var(--bg-muted))}
-.apex-cal__day[data-outside="true"]{color:var(--apex-cal-day-outside-fg,var(--fg-subtle));opacity:.6}
-.apex-cal__day[data-today="true"]{box-shadow:inset 0 0 0 1px var(--apex-cal-day-today-ring,var(--border-strong));font-weight:700}
-.apex-cal__day[data-inrange="true"]{background:var(--apex-cal-day-range-bg,color-mix(in srgb,var(--accent-primary) 12%,transparent));border-radius:0}
-.apex-cal__day[data-selected="true"]{background:var(--apex-cal-day-selected-bg,var(--accent-primary));color:var(--apex-cal-day-selected-fg,#fff);font-weight:600;box-shadow:none}
+.apex-cal__wd{display:grid;place-items:center;block-size:28px;font-size:11px;font-weight:700;color:var(--apex-dp-wd-fg,var(--fg-subtle));text-transform:uppercase;letter-spacing:.04em}
+.apex-cal__day{block-size:32px;min-inline-size:32px;display:grid;place-items:center;border:0;background:transparent;font:inherit;font-size:13px;color:var(--apex-dp-day-fg,var(--fg-default));border-radius:var(--apex-dp-day-radius,var(--r-sm));cursor:pointer;transition:background var(--dur-fast),color var(--dur-fast)}
+.apex-cal__day:hover:not(:disabled){background:var(--apex-dp-day-hover-bg,var(--bg-muted))}
+.apex-cal__day[data-outside="true"]{color:var(--apex-dp-day-outside-fg,var(--fg-subtle));opacity:.6}
+.apex-cal__day[data-today="true"]{box-shadow:inset 0 0 0 1px var(--apex-dp-day-today-ring,var(--border-strong));font-weight:700}
+.apex-cal__day[data-inrange="true"]{background:var(--apex-dp-day-range-bg,color-mix(in srgb,var(--accent-primary) 12%,transparent));border-radius:0}
+.apex-cal__day[data-selected="true"]{background:var(--apex-dp-day-selected-bg,var(--accent-primary));color:var(--apex-dp-day-selected-fg,#fff);font-weight:600;box-shadow:none}
 .apex-cal__day:disabled{opacity:.3;cursor:not-allowed}
 .apex-cal__pick{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:4px 0}
-.apex-cal__pick button{padding:11px 6px;border:0;background:transparent;font:inherit;font-size:13px;font-weight:500;color:var(--apex-cal-pick-fg,var(--fg-default));border-radius:var(--apex-cal-day-radius,var(--r-sm));cursor:pointer}
-.apex-cal__pick button:hover{background:var(--apex-cal-pick-hover-bg,var(--bg-muted))}
-.apex-cal__pick button[data-selected="true"]{background:var(--apex-cal-pick-selected-bg,var(--accent-primary));color:var(--apex-cal-pick-selected-fg,#fff);font-weight:600}
-.apex-cal__time{display:flex;align-items:center;justify-content:center;gap:6px;padding-block-start:10px;margin-block-start:8px;border-block-start:1px solid var(--apex-cal-time-border,var(--border-subtle))}
-.apex-cal__time em{font-style:normal;font-family:var(--apex-cal-time-font,var(--font-mono));font-weight:700;color:var(--apex-cal-time-fg,var(--fg-muted))}
+.apex-cal__pick button{padding:11px 6px;border:0;background:transparent;font:inherit;font-size:13px;font-weight:500;color:var(--apex-dp-pick-fg,var(--fg-default));border-radius:var(--apex-dp-day-radius,var(--r-sm));cursor:pointer}
+.apex-cal__pick button:hover{background:var(--apex-dp-pick-hover-bg,var(--bg-muted))}
+.apex-cal__pick button[data-selected="true"]{background:var(--apex-dp-pick-selected-bg,var(--accent-primary));color:var(--apex-dp-pick-selected-fg,#fff);font-weight:600}
+.apex-cal__time{display:flex;align-items:center;justify-content:center;gap:6px;padding-block-start:10px;margin-block-start:8px;border-block-start:1px solid var(--apex-dp-time-border,var(--border-subtle))}
+.apex-cal__time em{font-style:normal;font-family:var(--apex-dp-time-font,var(--font-mono));font-weight:700;color:var(--apex-dp-time-fg,var(--fg-muted))}
 .apex-cal__spin{display:flex;flex-direction:column;align-items:center}
-.apex-cal__spin>span:not(.apex-icon){font-family:var(--apex-cal-time-font,var(--font-mono));font-size:16px;font-weight:600;padding-block:2px}
-.apex-cal__spin button{border:0;background:transparent;color:var(--apex-cal-spin-fg,var(--fg-subtle));cursor:pointer;padding:1px 6px;border-radius:var(--apex-cal-day-radius,var(--r-sm));display:grid;place-items:center;min-inline-size:34px;line-height:1}
-.apex-cal__spin button:hover{background:var(--apex-cal-spin-hover-bg,var(--bg-muted));color:var(--apex-cal-spin-hover-fg,var(--accent-primary))}
-.apex-cal__mer{margin-inline-start:6px;border:1px solid var(--apex-cal-mer-border,var(--border-default));background:var(--apex-cal-mer-bg,var(--bg-surface));font:inherit;font-size:12px;font-weight:700;color:var(--apex-cal-mer-fg,var(--fg-default));padding:6px 10px;border-radius:var(--apex-cal-day-radius,var(--r-sm));cursor:pointer}
-.apex-cal__mer:hover{border-color:var(--apex-cal-mer-hover,var(--accent-primary));color:var(--apex-cal-mer-hover,var(--accent-primary))}
-.apex-cal__bar{display:flex;justify-content:space-between;gap:8px;padding-block-start:9px;margin-block-start:8px;border-block-start:1px solid var(--apex-cal-bar-border,var(--border-subtle))}
-.apex-cal__bar button{border:0;background:transparent;font:inherit;font-size:13px;font-weight:600;color:var(--apex-cal-bar-fg,var(--accent-primary));cursor:pointer;padding:5px 9px;border-radius:var(--apex-cal-day-radius,var(--r-sm))}
-.apex-cal__bar button:hover{background:var(--apex-cal-bar-hover-bg,var(--bg-muted))}
+.apex-cal__spin>span:not(.apex-icon){font-family:var(--apex-dp-time-font,var(--font-mono));font-size:16px;font-weight:600;padding-block:2px}
+.apex-cal__spin button{border:0;background:transparent;color:var(--apex-dp-spin-fg,var(--fg-subtle));cursor:pointer;padding:1px 6px;border-radius:var(--apex-dp-day-radius,var(--r-sm));display:grid;place-items:center;min-inline-size:34px;line-height:1}
+.apex-cal__spin button:hover{background:var(--apex-dp-spin-hover-bg,var(--bg-muted));color:var(--apex-dp-spin-hover-fg,var(--accent-primary))}
+.apex-cal__mer{margin-inline-start:6px;border:1px solid var(--apex-dp-mer-border,var(--border-default));background:var(--apex-dp-mer-bg,var(--bg-surface));font:inherit;font-size:12px;font-weight:700;color:var(--apex-dp-mer-fg,var(--fg-default));padding:6px 10px;border-radius:var(--apex-dp-day-radius,var(--r-sm));cursor:pointer}
+.apex-cal__mer:hover{border-color:var(--apex-dp-mer-hover,var(--accent-primary));color:var(--apex-dp-mer-hover,var(--accent-primary))}
+.apex-cal__bar{display:flex;justify-content:space-between;gap:8px;padding-block-start:9px;margin-block-start:8px;border-block-start:1px solid var(--apex-dp-bar-border,var(--border-subtle))}
+.apex-cal__bar button{border:0;background:transparent;font:inherit;font-size:13px;font-weight:600;color:var(--apex-dp-bar-fg,var(--accent-primary));cursor:pointer;padding:5px 9px;border-radius:var(--apex-dp-day-radius,var(--r-sm))}
+.apex-cal__bar button:hover{background:var(--apex-dp-bar-hover-bg,var(--bg-muted))}
 
 /* ─── colour picker ────────────────────────────────────── */
 .apex-swatch{--sw:#000;position:relative;inline-size:var(--apex-swatch-size,24px);block-size:var(--apex-swatch-size,24px);flex:0 0 auto;border:1px solid var(--apex-swatch-border,var(--border-default));border-radius:var(--apex-swatch-radius,var(--r-sm));padding:0;cursor:pointer;overflow:hidden;background-image:linear-gradient(45deg,var(--apex-swatch-check,var(--bg-muted)) 25%,transparent 25%,transparent 75%,var(--apex-swatch-check,var(--bg-muted)) 75%),linear-gradient(45deg,var(--apex-swatch-check,var(--bg-muted)) 25%,transparent 25%,transparent 75%,var(--apex-swatch-check,var(--bg-muted)) 75%);background-size:8px 8px;background-position:0 0,4px 4px}
@@ -302,19 +302,19 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 /* ─── tree select ──────────────────────────────────────── */
 .apex-tree{padding:5px}
 .apex-tree__branch{display:block}
-.apex-tree__row{display:flex;align-items:center;gap:8px;padding-block:var(--apex-tree-row-pad,8px);padding-inline-end:10px;border-radius:var(--apex-tree-row-radius,var(--r-sm));cursor:pointer;font-size:var(--apex-tree-row-fs,14px);color:var(--apex-tree-row-fg,var(--fg-default))}
-.apex-tree__row:hover{background:var(--apex-tree-row-hover-bg,var(--bg-muted))}
-.apex-tree__row[data-state="on"]{background:var(--apex-tree-row-selected-bg,color-mix(in srgb,var(--accent-primary) 12%,transparent));color:var(--apex-tree-row-selected-fg,var(--accent-primary));font-weight:600}
+.apex-tree__row{display:flex;align-items:center;gap:8px;padding-block:var(--apex-treesel-row-pad,8px);padding-inline-end:10px;border-radius:var(--apex-treesel-row-radius,var(--r-sm));cursor:pointer;font-size:var(--apex-treesel-row-fs,14px);color:var(--apex-treesel-row-fg,var(--fg-default))}
+.apex-tree__row:hover{background:var(--apex-treesel-row-hover-bg,var(--bg-muted))}
+.apex-tree__row[data-state="on"]{background:var(--apex-treesel-row-selected-bg,color-mix(in srgb,var(--accent-primary) 12%,transparent));color:var(--apex-treesel-row-selected-fg,var(--accent-primary));font-weight:600}
 .apex-tree__row[data-disabled="true"]{opacity:.45;cursor:not-allowed}
-.apex-tree__twisty{display:grid;place-items:center;border:0;background:transparent;color:var(--apex-tree-twisty-fg,var(--fg-subtle));cursor:pointer;padding:0;inline-size:var(--apex-tree-twisty-size,20px);block-size:var(--apex-tree-twisty-size,20px);border-radius:var(--apex-tree-twisty-radius,var(--r-xs));flex:0 0 auto}
-.apex-tree__twisty:hover{background:var(--apex-tree-twisty-hover-bg,var(--bg-subtle));color:var(--apex-tree-twisty-hover-fg,var(--fg-default))}
+.apex-tree__twisty{display:grid;place-items:center;border:0;background:transparent;color:var(--apex-treesel-twisty-fg,var(--fg-subtle));cursor:pointer;padding:0;inline-size:var(--apex-treesel-twisty-size,20px);block-size:var(--apex-treesel-twisty-size,20px);border-radius:var(--apex-treesel-twisty-radius,var(--r-xs));flex:0 0 auto}
+.apex-tree__twisty:hover{background:var(--apex-treesel-twisty-hover-bg,var(--bg-subtle));color:var(--apex-treesel-twisty-hover-fg,var(--fg-default))}
 /* One variable for both: the spacer exists to hold a leaf's row in line with
    its siblings' twisties, so the two widths must never drift apart. */
-.apex-tree__spacer{inline-size:var(--apex-tree-twisty-size,20px);flex:0 0 auto}
+.apex-tree__spacer{inline-size:var(--apex-treesel-twisty-size,20px);flex:0 0 auto}
 .apex-tree__label{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
 /* The Add New row sits at a branch's own depth, so it lines up with the
    children it will join rather than with the branch that owns it. */
-.apex-tree .apex-pop__add{position:static;margin:0;inline-size:auto;padding-block:7px;padding-inline-end:14px;border:0;border-radius:var(--apex-tree-row-radius,var(--r-sm));font-size:13px}
+.apex-tree .apex-pop__add{position:static;margin:0;inline-size:auto;padding-block:7px;padding-inline-end:14px;border:0;border-radius:var(--apex-treesel-row-radius,var(--r-sm));font-size:13px}
 /* Standalone boxes — pick list, data table, listbox, tree select, org chart — carry
    data-on/data-partial on the box itself, rather than on an .apex-cb wrapper. */
 .apex-cb__box[data-on="true"],.apex-cb__box[data-partial="true"]{background:var(--apex-cb-on-bg,var(--accent-primary));border-color:var(--apex-cb-on-bg,var(--accent-primary));color:var(--apex-cb-tick,#fff)}
@@ -398,6 +398,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-field[data-tone="danger"] .apex-tb{border-color:var(--apex-field-danger)}
 
 /* ─── switch ───────────────────────────────────────────── */
+.apex-switch[data-readonly="true"]{cursor:default}
 .apex-switch{position:relative;inline-size:44px;block-size:25px;border:0;border-radius:var(--r-full);background:var(--apex-switch-off-bg,var(--border-strong));cursor:pointer;flex:0 0 auto;transition:background var(--dur-mid) var(--ease-out);padding:0}
 .apex-switch[data-size="sm"]{inline-size:36px;block-size:21px}
 .apex-switch[data-size="lg"]{inline-size:52px;block-size:30px}
@@ -413,7 +414,7 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 /* Labelled switch. The track stops being a fixed width and grows to fit its
    text; the padding leaves room for the knob on whichever side it currently
    sits, so the word is never underneath it. */
-.apex-switch[data-labelled="true"]{display:inline-grid;align-items:center;inline-size:auto;min-inline-size:44px;padding-inline:31px 12px}
+.apex-switch[data-labelled="true"]{display:inline-grid;align-items:center;align-self:start;inline-size:auto;min-inline-size:44px;padding-inline:31px 12px}
 .apex-switch[data-labelled="true"][data-on="true"]{padding-inline:12px 31px}
 .apex-switch[data-labelled="true"][data-size="sm"]{min-inline-size:36px;padding-inline:25px 10px}
 .apex-switch[data-labelled="true"][data-size="sm"][data-on="true"]{padding-inline:10px 25px}
@@ -523,6 +524,90 @@ background:var(--accent-primary);transform-origin:left center}
 .apex-dlg-scale-enter-active,.apex-dlg-scale-leave-active,
 .apex-dlg-slide-enter-active,.apex-dlg-slide-leave-active,
 .apex-dlg-fade-enter-active,.apex-dlg-fade-leave-active{transition:opacity var(--dur-mid) var(--ease-out)}
+/* AF2-332, closing the gap recorded at 131: the kit had ten
+   reduced-motion blocks and NOT ONE covered an overlay preset. A modal
+   flying in is exactly the motion someone who turned this on wants
+   stopped. Custom classes stay the caller's business — animate.css
+   carries its own !important block for the same purpose.
+
+   One entry per DECLARED selector. An earlier cut listed class names
+   it had scraped loosely and so named rules that do not exist. */
+@media (prefers-reduced-motion:reduce){
+.apex-dlg-fade-enter-active,
+.apex-dlg-fade-leave-active,
+.apex-dlg-scale-enter-active .apex-dlg__panel,
+.apex-dlg-scale-leave-active,
+.apex-dlg-scale-leave-active .apex-dlg__panel,
+.apex-dlg-slide-enter-active,
+.apex-dlg-slide-enter-active .apex-dlg__panel,
+.apex-dlg-slide-leave-active,
+.apex-dlg-slide-leave-active .apex-dlg__panel,
+.apex-drw-bottom-enter-active,
+.apex-drw-bottom-enter-active .apex-drw__panel,
+.apex-drw-bottom-leave-active,
+.apex-drw-bottom-leave-active .apex-drw__panel,
+.apex-drw-full-enter-active,
+.apex-drw-full-enter-active .apex-drw__panel,
+.apex-drw-full-leave-active,
+.apex-drw-full-leave-active .apex-drw__panel,
+.apex-drw-left-enter-active .apex-drw__panel,
+.apex-drw-left-leave-active,
+.apex-drw-left-leave-active .apex-drw__panel,
+.apex-drw-right-enter-active,
+.apex-drw-right-enter-active .apex-drw__panel,
+.apex-drw-right-leave-active,
+.apex-drw-right-leave-active .apex-drw__panel,
+.apex-drw-top-enter-active,
+.apex-drw-top-enter-active .apex-drw__panel,
+.apex-drw-top-leave-active,
+.apex-drw-top-leave-active .apex-drw__panel,
+.apex-pop-fade-enter-active,
+.apex-pop-fade-leave-active,
+.apex-pov-enter-active,
+.apex-pov-leave-active{transition:none;animation:none}}
+/* ApexAlert — AF2-331.
+
+   The panel used to animate itself: `.apex-alert { animation: apex-alert-pop }`
+   ran on mount, with `.apex-alert--fade/--slide` swapping the keyframes. That
+   gives an entrance and can never give an EXIT, because v-if takes the element
+   away with no phase to animate — which is why `leaveClass` was declared on
+   AlertOptions and did nothing.
+
+   Same keyframes, now owned by the transition, so entry and exit come from one
+   mechanism and a caller's own classes replace it cleanly instead of fighting a
+   base rule. Leave runs the entrance in reverse and quicker: an alert should
+   not take as long to go as it took to arrive. */
+.apex-alert-scale-enter-active{animation:apex-alert-pop var(--dur-slow) var(--ease-spring) both}
+.apex-alert-scale-leave-active{animation:apex-alert-pop var(--dur-mid) var(--ease-out) reverse both}
+.apex-alert-fade-enter-active{animation:apex-alert-fade var(--dur-mid) var(--ease-out) both}
+.apex-alert-fade-leave-active{animation:apex-alert-fade var(--dur-fast) var(--ease-out) reverse both}
+.apex-alert-slide-enter-active{animation:apex-alert-slide var(--dur-slow) var(--ease-spring) both}
+.apex-alert-slide-leave-active{animation:apex-alert-slide var(--dur-mid) var(--ease-out) reverse both}
+@media (prefers-reduced-motion:reduce){
+.apex-alert-scale-enter-active,.apex-alert-scale-leave-active,
+.apex-alert-fade-enter-active,.apex-alert-fade-leave-active,
+.apex-alert-slide-enter-active,.apex-alert-slide-leave-active{animation:none}}
+/* ApexForm's modal panel — AF2-331.
+
+   The classes land on the PANEL, not on a mask, because the scrim is a
+   sibling with its own v-if and deliberately does not animate: a panel that
+   flies in over a scrim that fades looks like two things happening. There is
+   no `-none` rule, here or for the dialog; nothing matching is what makes
+   `transition="none"` instant. */
+.apex-form-scale-enter-active,.apex-form-scale-leave-active{transition:opacity var(--dur-mid) var(--ease-out),transform var(--dur-mid) var(--ease-spring)}
+.apex-form-scale-enter-from,.apex-form-scale-leave-to{opacity:0;transform:scale(.94)}
+.apex-form-fade-enter-active,.apex-form-fade-leave-active{transition:opacity var(--dur-mid) var(--ease-out)}
+.apex-form-fade-enter-from,.apex-form-fade-leave-to{opacity:0}
+.apex-form-slide-enter-active,.apex-form-slide-leave-active{transition:opacity var(--dur-mid) var(--ease-out),transform var(--dur-mid) var(--ease-out)}
+.apex-form-slide-enter-from,.apex-form-slide-leave-to{opacity:0;transform:translateY(-24px)}
+/* The kit had ten reduced-motion blocks and none covered an overlay preset.
+   A modal flying in is exactly the motion someone turning this on wants
+   stopped. Custom classes are the caller's business — animate.css carries
+   its own !important block for this. */
+@media (prefers-reduced-motion:reduce){
+.apex-form-scale-enter-active,.apex-form-scale-leave-active,
+.apex-form-fade-enter-active,.apex-form-fade-leave-active,
+.apex-form-slide-enter-active,.apex-form-slide-leave-active{transition:none}}
 .apex-dlg-scale-enter-active .apex-dlg__panel,.apex-dlg-scale-leave-active .apex-dlg__panel{transition:transform var(--dur-mid) var(--ease-spring)}
 .apex-dlg-slide-enter-active .apex-dlg__panel,.apex-dlg-slide-leave-active .apex-dlg__panel{transition:transform var(--dur-mid) var(--ease-out)}
 .apex-dlg-scale-enter-from,.apex-dlg-scale-leave-to,
@@ -702,6 +787,44 @@ opacity:0;transform:scale(.96);transition:opacity var(--dur-fast) var(--ease-out
 @media (prefers-color-scheme:dark){:root:not(.light):not([data-theme="light"]) .apex-tip{--tip-bg:#F2F5F9;--tip-fg:#161B22}}
 
 /* ─── file upload ──────────────────────────────────────── */
+/* ── ApexImageCrop ─────────────────────────────────────────────────────
+   The dimmed surround is ONE box-shadow on the crop box, not four overlay
+   panels: four panels have to be kept in step with the box on every pointer
+   move, and they drift. A 9999px spread darkens everything outside it for
+   free. */
+.apex-ic{--ic-bg:var(--bg-muted,#f4f4f5);--ic-scrim:rgba(0,0,0,.55);--ic-handle:#fff;--ic-max-h:420px;
+  display:flex;flex-direction:column;gap:10px}
+.apex-ic__bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.apex-ic__size{margin-inline-start:auto;font-family:var(--font-mono,ui-monospace,monospace);font-size:11px;
+  letter-spacing:.06em;color:var(--fg-muted)}
+.apex-ic__size em{font-style:normal;color:var(--accent-primary)}
+.apex-ic__frame{position:relative;overflow:hidden;background:var(--ic-bg);border:1px solid var(--border-default);
+  border-radius:var(--r-md);max-block-size:var(--ic-max-h);
+  /* The frame IS the measuring stick: `scale` divides its clientWidth by the
+     image's natural width, so the image must fill it exactly. */
+  touch-action:none;cursor:crosshair;user-select:none}
+.apex-ic__img{display:block;inline-size:100%;block-size:auto;pointer-events:none;
+  /* The default since Chrome 81 and stated anyway: a phone photograph must
+     appear upright, because the crop box is chosen against what is on screen
+     and the canvas reads the same orientation back. */
+  image-orientation:from-image}
+.apex-ic__busy{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.6)}
+.apex-ic__box{position:absolute;box-sizing:border-box;border:1px solid #fff;cursor:move;
+  box-shadow:0 0 0 9999px var(--ic-scrim);outline:1px solid rgba(0,0,0,.35)}
+.apex-ic__handle{position:absolute;inline-size:12px;block-size:12px;background:var(--ic-handle);
+  border:1px solid rgba(0,0,0,.45);border-radius:2px}
+.apex-ic__handle[data-hidden="true"]{display:none}
+.apex-ic__handle--nw{inset-block-start:-6px;inset-inline-start:-6px;cursor:nwse-resize}
+.apex-ic__handle--n{inset-block-start:-6px;inset-inline-start:calc(50% - 6px);cursor:ns-resize}
+.apex-ic__handle--ne{inset-block-start:-6px;inset-inline-end:-6px;cursor:nesw-resize}
+.apex-ic__handle--e{inset-block-start:calc(50% - 6px);inset-inline-end:-6px;cursor:ew-resize}
+.apex-ic__handle--se{inset-block-end:-6px;inset-inline-end:-6px;cursor:nwse-resize}
+.apex-ic__handle--s{inset-block-end:-6px;inset-inline-start:calc(50% - 6px);cursor:ns-resize}
+.apex-ic__handle--sw{inset-block-end:-6px;inset-inline-start:-6px;cursor:nesw-resize}
+.apex-ic__handle--w{inset-block-start:calc(50% - 6px);inset-inline-start:-6px;cursor:ew-resize}
+/* Locked to a ratio means one degree of freedom. Offering eight handles that
+   cannot be used would be a control lying about what it does. */
+.apex-ic[data-locked="true"] .apex-ic__box{cursor:move}
 .apex-fu{--fu-bg:var(--bg-surface);--fu-border:var(--border-default);--fu-radius:var(--r-md);--fu-thumb:44px;
 --fu-w:auto;inline-size:var(--fu-w);display:flex;flex-direction:column;gap:12px;font-family:var(--font-sans);color:var(--fg-default)}
 .apex-fu[data-disabled="true"]{opacity:.6;pointer-events:none}
@@ -1566,10 +1689,18 @@ border-radius:inherit;pointer-events:none}
 .apex-ripple__ink{--rp-opacity:.28;--rp-dur:600ms;
 position:absolute;z-index:0;border-radius:var(--r-full);pointer-events:none;
 background:currentColor;opacity:0;transform:scale(0);
-animation:apex-ripple-out var(--rp-dur) var(--ease-out) forwards}
-@keyframes apex-ripple-out{
-0%{transform:scale(0);opacity:var(--rp-opacity)}
-100%{transform:scale(1);opacity:0}}
+animation:apex-ripple-scale var(--rp-dur) var(--ease-out) forwards,apex-ripple-fade var(--rp-dur) linear forwards}
+/* Scale and fade on SEPARATE timelines — AF2-327.
+   One keyframe under --ease-out (cubic-bezier(.22,1,.36,1)) faded the ink
+   as fast as it grew it: ~90% done in the first third, measured at 0.03
+   opacity by 220ms. The wave should REACH its size quickly and leave
+   slowly, which is two curves, not one. */
+@keyframes apex-ripple-scale{
+0%{transform:scale(0)}
+100%{transform:scale(1)}}
+@keyframes apex-ripple-fade{
+0%{opacity:var(--rp-opacity)}
+100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){
 .apex-ripple__ink{animation-duration:1ms}}
 
@@ -2151,8 +2282,8 @@ border:0;background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;paddi
 
 /* ─── button ───────────────────────────────────────────── */
 /* Each severity supplies --b (base), --bh (hover), --bt (text on solid), --bs (soft tint). */
-.apex-btn{--apex-btn-color:var(--accent-primary);--apex-btn-hover:var(--accent-primary-hover);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--accent-primary) 10%,transparent);
-display:inline-flex;align-items:center;justify-content:center;gap:7px;position:relative;font-family:var(--font-sans);font-size:14px;font-weight:600;letter-spacing:-.005em;border-radius:var(--r-md);border:1px solid transparent;padding-block:0;padding-inline:16px;block-size:42px;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast),box-shadow var(--dur-fast),transform var(--dur-fast)}
+.apex-btn{--apex-btn-color:var(--accent-primary);--apex-btn-hover:var(--accent-primary-hover);--apex-btn-label:#fff;--apex-btn-tint:color-mix(in srgb,var(--accent-primary) 10%,transparent);--apex-btn-h:42px;--apex-btn-fs:14px;--apex-btn-pad:16px;
+display:inline-flex;align-items:center;justify-content:center;gap:7px;position:relative;font-family:var(--font-sans);font-size:var(--apex-btn-fs);font-weight:600;letter-spacing:-.005em;border-radius:var(--apex-btn-radius,var(--r-md));border:1px solid transparent;padding-block:0;padding-inline:var(--apex-btn-pad);block-size:var(--apex-btn-h);cursor:pointer;white-space:nowrap;text-decoration:none;transition:background var(--dur-fast),border-color var(--dur-fast),color var(--dur-fast),box-shadow var(--dur-fast),transform var(--dur-fast)}
 .apex-btn[data-size="sm"]{--apex-btn-h:34px;--apex-btn-fs:13px;--apex-btn-pad:12px;--apex-icon-size:17px}
 .apex-btn[data-size="lg"]{--apex-btn-h:50px;--apex-btn-fs:15px;--apex-btn-pad:22px;--apex-icon-size:21px}
 .apex-btn[data-block="true"]{display:flex;inline-size:100%}
@@ -2193,9 +2324,7 @@ display:inline-flex;align-items:center;justify-content:center;gap:7px;position:r
 .apex-btn[data-raised="true"][data-variant="text"]:active:not(:disabled),.apex-btn[data-raised="true"][data-variant="outlined"]:active:not(:disabled){box-shadow:0 1px 0 0 var(--border-default)}
 .apex-btn[data-raised="true"][data-variant="text"],.apex-btn[data-raised="true"][data-variant="outlined"]{background:var(--bg-surface)}
 .apex-btn[data-rounded="true"]{border-radius:var(--r-full)}
-.apex-btn[data-icon-only="true"]{padding-inline:0;inline-size:42px;gap:0}
-.apex-btn[data-icon-only="true"][data-size="sm"]{inline-size:34px}
-.apex-btn[data-icon-only="true"][data-size="lg"]{inline-size:50px}
+.apex-btn[data-icon-only="true"]{padding-inline:0;inline-size:var(--apex-btn-h);gap:0}
 .apex-btn[data-icon-pos="top"],.apex-btn[data-icon-pos="bottom"]{flex-direction:column;gap:5px;block-size:auto;padding-block:11px;line-height:1.25}
 .apex-btn[data-icon-pos="top"][data-size="sm"],.apex-btn[data-icon-pos="bottom"][data-size="sm"]{padding-block:8px}
 .apex-btn[data-icon-pos="top"][data-size="lg"],.apex-btn[data-icon-pos="bottom"][data-size="lg"]{padding-block:14px}
@@ -2549,7 +2678,6 @@ display:flex;flex-direction:column;gap:var(--apex-accordion-gap);font-family:var
 .apex-ac__inner>p:last-child{margin-block-end:0}
 
 /* ─── tree table (rides on the data table's chrome) ─────── */
-.apex-tt{--tt-indent:18px}
 .apex-tt__cell{display:inline-flex;align-items:center;gap:7px;min-width:0}
 .apex-tt__label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .apex-tt .apex-tr__toggle{inline-size:22px;block-size:22px}
@@ -2560,7 +2688,7 @@ display:flex;flex-direction:column;gap:var(--apex-accordion-gap);font-family:var
 .apex-tt .apex-dt__global{position:static;margin:0;border-radius:var(--r-md);background:var(--bg-surface);min-inline-size:200px;margin-inline-start:auto}
 
 /* ─── tree ─────────────────────────────────────────────── */
-.apex-tr{--tr-indent:20px;--tr-hover:var(--bg-muted);--tr-sel-bg:color-mix(in srgb,var(--accent-primary) 12%,transparent);--tr-sel-fg:var(--accent-primary);--tr-icon:var(--fg-subtle);--tr-radius:var(--r-sm);
+.apex-tr{--apex-tree-indent:20px;--apex-tree-hover:var(--bg-muted);--apex-tree-sel-bg:color-mix(in srgb,var(--accent-primary) 12%,transparent);--apex-tree-sel-fg:var(--accent-primary);--apex-tree-icon:var(--fg-subtle);--apex-tree-radius:var(--r-sm);
 display:flex;flex-direction:column;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
 .apex-tr[data-bordered="true"]{border:1px solid var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);overflow:hidden}
 .apex-tr__head{display:flex;align-items:center;gap:10px;padding:9px 12px;border-block-end:1px solid var(--border-default);background:var(--bg-subtle)}
@@ -2568,10 +2696,10 @@ display:flex;flex-direction:column;font-family:var(--font-sans);color:var(--fg-d
 .apex-tr__filter{position:static;margin:0;border-radius:0;background:transparent;flex:1 1 auto;border:0;padding:0}
 .apex-tr__main{position:relative;min-width:0}
 .apex-tr__list{list-style:none;margin:0;padding:5px;overflow:auto;display:flex;flex-direction:column;gap:1px}
-.apex-tr__row{display:flex;align-items:center;gap:7px;padding-block:7px;padding-inline-end:10px;border-radius:var(--tr-radius);font-size:13.5px;cursor:pointer;position:relative;outline:none}
-.apex-tr__row:hover{background:var(--tr-hover)}
+.apex-tr__row{display:flex;align-items:center;gap:7px;padding-block:7px;padding-inline-end:10px;border-radius:var(--apex-tree-radius);font-size:13.5px;cursor:pointer;position:relative;outline:none}
+.apex-tr__row:hover{background:var(--apex-tree-hover)}
 .apex-tr__row:focus-visible{box-shadow:inset 0 0 0 2px var(--accent-primary)}
-.apex-tr__row[data-state="on"]{background:var(--tr-sel-bg);color:var(--tr-sel-fg);font-weight:600}
+.apex-tr__row[data-state="on"]{background:var(--apex-tree-sel-bg);color:var(--apex-tree-sel-fg);font-weight:600}
 .apex-tr__row--skel{gap:10px;cursor:default}
 .apex-tr__row--skel:hover{background:transparent}
 .apex-tr__toggle{display:grid;place-items:center;inline-size:20px;block-size:20px;flex:0 0 auto;border:0;background:transparent;color:var(--fg-subtle);cursor:pointer;padding:0;border-radius:var(--r-xs)}
@@ -2579,7 +2707,7 @@ display:flex;flex-direction:column;font-family:var(--font-sans);color:var(--fg-d
 .apex-tr__toggle:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-tr__spacer{inline-size:20px;flex:0 0 auto}
 .apex-tr__box{flex:0 0 auto}
-.apex-tr__icon{color:var(--tr-icon);flex:0 0 auto}
+.apex-tr__icon{color:var(--apex-tree-icon);flex:0 0 auto}
 .apex-tr__row[data-state="on"] .apex-tr__icon{color:currentColor}
 .apex-tr__label{min-width:0;flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* drop hints: a line above or below, a ring for dropping inside */
@@ -2591,21 +2719,21 @@ display:flex;flex-direction:column;font-family:var(--font-sans);color:var(--fg-d
 .apex-tr__overlay{position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--bg-surface) 72%,transparent);color:var(--accent-primary);z-index:5}
 
 /* ─── progress bar ─────────────────────────────────────── */
-.apex-pb{--pb-h:8px;--pb-track:var(--bg-muted);--pb-fill:var(--accent-primary);--pb-radius:var(--r-full);
---pb-fill-radius:inherit;--pb-value-fg:#FFF;--pb-value-fs:10px;--pb-sweep:1.4s;
+.apex-pb{--apex-pb-h:8px;--apex-pb-track:var(--bg-muted);--apex-pb-fill:var(--accent-primary);--apex-pb-radius:var(--r-full);
+--apex-pb-fill-radius:inherit;--apex-pb-value-fg:#FFF;--apex-pb-value-fs:10px;--apex-pb-sweep:1.4s;
 display:flex;flex-direction:column;gap:8px;font-family:var(--font-sans);min-width:0}
 .apex-pb__row{display:flex;align-items:center;gap:10px;min-width:0}
 .apex-pb__label{display:flex;align-items:center;justify-content:space-between;gap:12px;
 font-size:13.5px;font-weight:600;color:var(--fg-default)}
-.apex-pb[data-tone="success"]{--pb-fill:var(--accent-success)}
-.apex-pb[data-tone="warning"]{--pb-fill:var(--accent-warning)}
-.apex-pb[data-tone="danger"]{--pb-fill:var(--accent-danger)}
-.apex-pb__track{position:relative;flex:1 1 auto;min-width:0;block-size:var(--pb-h);background:var(--pb-track);border-radius:var(--pb-radius);overflow:hidden}
-.apex-pb__fill{position:relative;block-size:100%;inline-size:0;background:var(--pb-fill);border-radius:var(--pb-fill-radius);display:flex;align-items:center;justify-content:flex-end;transition:inline-size var(--dur-mid) var(--ease-out)}
+.apex-pb[data-tone="success"]{--apex-pb-fill:var(--accent-success)}
+.apex-pb[data-tone="warning"]{--apex-pb-fill:var(--accent-warning)}
+.apex-pb[data-tone="danger"]{--apex-pb-fill:var(--accent-danger)}
+.apex-pb__track{position:relative;flex:1 1 auto;min-width:0;block-size:var(--apex-pb-h);background:var(--apex-pb-track);border-radius:var(--apex-pb-radius);overflow:hidden}
+.apex-pb__fill{position:relative;block-size:100%;inline-size:0;background:var(--apex-pb-fill);border-radius:var(--apex-pb-fill-radius);display:flex;align-items:center;justify-content:flex-end;transition:inline-size var(--dur-mid) var(--ease-out)}
 /* the sweep animates a margin, so it always travels the track's own width — a
    translate would have to know the container's width and gets it wrong on resize */
 .apex-pb__fill[data-indeterminate="true"]{inline-size:38%;
-animation:apex-pb-sweep var(--pb-sweep) var(--ease-out) infinite;transition:none}
+animation:apex-pb-sweep var(--apex-pb-sweep) var(--ease-out) infinite;transition:none}
 @keyframes apex-pb-sweep{0%{margin-inline-start:-38%}100%{margin-inline-start:100%}}
 /* Stripes live on their own layer: sharing the fill meant the stripe animation
    replaced the indeterminate sweep, since both set the animation shorthand and
@@ -2616,14 +2744,14 @@ rgba(255,255,255,.24) 25%,transparent 25%,transparent 50%,
 rgba(255,255,255,.24) 50%,rgba(255,255,255,.24) 75%,transparent 75%);background-size:14px 14px}
 .apex-pb[data-stripe-anim="true"] .apex-pb__fill::after{animation:apex-pb-stripes .8s linear infinite}
 @keyframes apex-pb-stripes{to{background-position:14px 0}}
-.apex-pb__inside{font-size:var(--pb-value-fs);font-weight:700;color:var(--pb-value-fg);
+.apex-pb__inside{font-size:var(--apex-pb-value-fs);font-weight:700;color:var(--apex-pb-value-fg);
 padding-inline-end:7px;letter-spacing:.02em;white-space:nowrap}
 .apex-pb__readout{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--fg-muted);flex:0 0 auto;min-inline-size:38px;text-align:end}
 
 /* ─── timeline ─────────────────────────────────────────── */
-.apex-tl{--tl-line:var(--border-default);--tl-line-w:2px;--tl-line-style:solid;
---tl-marker:14px;--tl-marker-bg:var(--bg-surface);--tl-marker-border:var(--accent-primary);--tl-marker-bw:2px;--tl-marker-radius:var(--r-full);
---tl-gap:16px;--tl-event-gap:6px;
+.apex-tl{--apex-tl-line:var(--border-default);--apex-tl-line-w:2px;--apex-tl-line-style:solid;
+--apex-tl-marker:14px;--apex-tl-marker-bg:var(--bg-surface);--apex-tl-marker-border:var(--accent-primary);--apex-tl-marker-bw:2px;--apex-tl-marker-radius:var(--r-full);
+--apex-tl-gap:16px;--apex-tl-event-gap:6px;
 display:flex;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
 .apex-tl[data-layout="vertical"]{flex-direction:column}
 .apex-tl[data-layout="horizontal"]{flex-direction:row;overflow-x:auto}
@@ -2631,18 +2759,18 @@ display:flex;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
 /* the drawn column: marker, then the connector filling the rest of the event */
 .apex-tl__sep{display:flex;align-items:center;flex:0 0 auto}
 .apex-tl[data-layout="vertical"] .apex-tl__sep{flex-direction:column}
-.apex-tl__marker{display:grid;place-items:center;inline-size:var(--tl-marker);block-size:var(--tl-marker);border-radius:var(--tl-marker-radius);background:var(--tl-marker-bg);border:var(--tl-marker-bw) solid var(--tl-marker-border);box-sizing:content-box;flex:0 0 auto;color:var(--tl-marker-border)}
+.apex-tl__marker{display:grid;place-items:center;inline-size:var(--apex-tl-marker);block-size:var(--apex-tl-marker);border-radius:var(--apex-tl-marker-radius);background:var(--apex-tl-marker-bg);border:var(--apex-tl-marker-bw) solid var(--apex-tl-marker-border);box-sizing:content-box;flex:0 0 auto;color:var(--apex-tl-marker-border)}
 .apex-tl__marker .apex-icon{color:currentColor}
 .apex-tl__conn{flex:1 1 auto;align-self:center}
-.apex-tl[data-layout="vertical"] .apex-tl__conn{inline-size:0;border-inline-start:var(--tl-line-w) var(--tl-line-style) var(--tl-line);min-block-size:var(--tl-gap)}
-.apex-tl[data-layout="horizontal"] .apex-tl__conn{block-size:0;border-block-start:var(--tl-line-w) var(--tl-line-style) var(--tl-line);min-inline-size:var(--tl-gap)}
+.apex-tl[data-layout="vertical"] .apex-tl__conn{inline-size:0;border-inline-start:var(--apex-tl-line-w) var(--apex-tl-line-style) var(--apex-tl-line);min-block-size:var(--apex-tl-gap)}
+.apex-tl[data-layout="horizontal"] .apex-tl__conn{block-size:0;border-block-start:var(--apex-tl-line-w) var(--apex-tl-line-style) var(--apex-tl-line);min-inline-size:var(--apex-tl-gap)}
 
 /* vertical: opposite | line | content, either way round */
-.apex-tl[data-layout="vertical"] .apex-tl__event{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:var(--tl-gap)}
+.apex-tl[data-layout="vertical"] .apex-tl__event{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:var(--apex-tl-gap)}
 .apex-tl[data-layout="vertical"][data-opposite="true"] .apex-tl__event{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
 .apex-tl[data-layout="vertical"] .apex-tl__opposite,.apex-tl[data-layout="vertical"] .apex-tl__sep,.apex-tl[data-layout="vertical"] .apex-tl__content{grid-row:1}
 .apex-tl[data-layout="vertical"] .apex-tl__sep{justify-self:center}
-.apex-tl[data-layout="vertical"] .apex-tl__content,.apex-tl[data-layout="vertical"] .apex-tl__opposite{padding-block-end:var(--tl-event-gap)}
+.apex-tl[data-layout="vertical"] .apex-tl__content,.apex-tl[data-layout="vertical"] .apex-tl__opposite{padding-block-end:var(--apex-tl-event-gap)}
 /* content after the line */
 .apex-tl[data-layout="vertical"] .apex-tl__event[data-side="start"] .apex-tl__sep{grid-column:1}
 .apex-tl[data-layout="vertical"] .apex-tl__event[data-side="start"] .apex-tl__content{grid-column:2;text-align:start}
@@ -2657,14 +2785,14 @@ display:flex;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
 .apex-tl[data-layout="vertical"][data-opposite="true"] .apex-tl__event[data-side="end"] .apex-tl__opposite{grid-column:3;text-align:start}
 
 /* horizontal: content above the line, opposite below */
-.apex-tl[data-layout="horizontal"] .apex-tl__event{display:grid;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);row-gap:var(--tl-gap);flex:1 1 auto;min-inline-size:120px}
+.apex-tl[data-layout="horizontal"] .apex-tl__event{display:grid;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);row-gap:var(--apex-tl-gap);flex:1 1 auto;min-inline-size:120px}
 .apex-tl[data-layout="horizontal"] .apex-tl__opposite,.apex-tl[data-layout="horizontal"] .apex-tl__sep,.apex-tl[data-layout="horizontal"] .apex-tl__content{grid-column:1}
 .apex-tl[data-layout="horizontal"] .apex-tl__sep{grid-row:2;align-self:center}
 .apex-tl[data-layout="horizontal"] .apex-tl__event[data-side="start"] .apex-tl__content{grid-row:3;align-self:start}
 .apex-tl[data-layout="horizontal"] .apex-tl__event[data-side="start"] .apex-tl__opposite{grid-row:1;align-self:end;text-align:start}
 .apex-tl[data-layout="horizontal"] .apex-tl__event[data-side="end"] .apex-tl__content{grid-row:1;align-self:end}
 .apex-tl[data-layout="horizontal"] .apex-tl__event[data-side="end"] .apex-tl__opposite{grid-row:3;align-self:start}
-.apex-tl[data-layout="horizontal"] .apex-tl__content,.apex-tl[data-layout="horizontal"] .apex-tl__opposite{padding-inline-end:var(--tl-event-gap)}
+.apex-tl[data-layout="horizontal"] .apex-tl__content,.apex-tl[data-layout="horizontal"] .apex-tl__opposite{padding-inline-end:var(--apex-tl-event-gap)}
 .apex-tl[data-layout="horizontal"]:not([data-opposite="true"]) .apex-tl__event{grid-template-rows:auto minmax(0,1fr)}
 .apex-tl[data-layout="horizontal"]:not([data-opposite="true"]) .apex-tl__sep{grid-row:1}
 .apex-tl[data-layout="horizontal"]:not([data-opposite="true"]) .apex-tl__event .apex-tl__content{grid-row:2;align-self:start}
@@ -2672,23 +2800,23 @@ display:flex;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
 .apex-tl__opposite{color:var(--fg-subtle);font-size:12.5px;line-height:1.5}
 
 /* ─── pick list ────────────────────────────────────────── */
-.apex-pl{--pl-border:var(--border-default);--pl-border-w:1px;--pl-radius:var(--r-md);
---pl-head-bg:var(--bg-subtle);--pl-head-fg:var(--fg-muted);--pl-list-bg:var(--bg-surface);--pl-item-fg:var(--fg-default);
---pl-sel-bg:color-mix(in srgb,var(--accent-primary) 12%,transparent);--pl-sel-fg:var(--accent-primary);--pl-sel-border:var(--accent-primary);--pl-gap:12px;
-display:flex;align-items:stretch;gap:var(--pl-gap);font-family:var(--font-sans);min-width:0}
+.apex-pl{--apex-pl-border:var(--border-default);--apex-pl-border-w:1px;--apex-pl-radius:var(--r-md);
+--apex-pl-head-bg:var(--bg-subtle);--apex-pl-head-fg:var(--fg-muted);--apex-pl-list-bg:var(--bg-surface);--apex-pl-item-fg:var(--fg-default);
+--apex-pl-sel-bg:color-mix(in srgb,var(--accent-primary) 12%,transparent);--apex-pl-sel-fg:var(--accent-primary);--apex-pl-sel-border:var(--accent-primary);--apex-pl-gap:12px;
+display:flex;align-items:stretch;gap:var(--apex-pl-gap);font-family:var(--font-sans);min-width:0}
 .apex-pl[data-stacked="true"]{flex-direction:column;align-items:stretch}
 .apex-pl[data-disabled="true"]{opacity:.62}
 
-.apex-pl__panel{display:flex;flex-direction:column;min-width:0;flex:1 1 0;border:var(--pl-border-w) solid var(--pl-border);border-radius:var(--pl-radius);background:var(--pl-list-bg);overflow:hidden}
-.apex-pl__head{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--pl-head-bg);color:var(--pl-head-fg);border-block-end:var(--pl-border-w) solid var(--pl-border)}
+.apex-pl__panel{display:flex;flex-direction:column;min-width:0;flex:1 1 0;border:var(--apex-pl-border-w) solid var(--apex-pl-border);border-radius:var(--apex-pl-radius);background:var(--apex-pl-list-bg);overflow:hidden}
+.apex-pl__head{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--apex-pl-head-bg);color:var(--apex-pl-head-fg);border-block-end:var(--apex-pl-border-w) solid var(--apex-pl-border)}
 .apex-pl__title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .apex-pl__count{font-family:var(--font-mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:var(--r-full);background:color-mix(in srgb,currentColor 12%,transparent)}
 .apex-pl__all{margin-inline-start:auto;cursor:pointer}
-.apex-pl__filter{position:static;margin:0;border-radius:0;background:var(--pl-list-bg);border-block-end:var(--pl-border-w) solid var(--pl-border)}
+.apex-pl__filter{position:static;margin:0;border-radius:0;background:var(--apex-pl-list-bg);border-block-end:var(--apex-pl-border-w) solid var(--apex-pl-border)}
 .apex-pl__list{list-style:none;margin:0;padding:5px;overflow:auto;display:flex;flex-direction:column;gap:2px;flex:1 1 auto}
-.apex-pl__item{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid transparent;border-radius:var(--r-sm);font-size:13.5px;color:var(--pl-item-fg);cursor:pointer;background:transparent}
+.apex-pl__item{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid transparent;border-radius:var(--r-sm);font-size:13.5px;color:var(--apex-pl-item-fg);cursor:pointer;background:transparent}
 .apex-pl__item:hover{background:var(--bg-muted)}
-.apex-pl__item[data-selected="true"]{background:var(--pl-sel-bg);color:var(--pl-sel-fg);border-color:var(--pl-sel-border);font-weight:600}
+.apex-pl__item[data-selected="true"]{background:var(--apex-pl-sel-bg);color:var(--apex-pl-sel-fg);border-color:var(--apex-pl-sel-border);font-weight:600}
 .apex-pl__item:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-pl__item[data-over="true"]{box-shadow:inset 0 2px 0 0 var(--accent-primary)}
 .apex-pl__item[draggable="true"]{cursor:grab}
@@ -2702,70 +2830,70 @@ display:flex;align-items:stretch;gap:var(--pl-gap);font-family:var(--font-sans);
 .apex-pl[data-stacked="true"] .apex-pl__ctrls,.apex-pl[data-stacked="true"] .apex-pl__transfer{flex-direction:row;justify-content:center}
 .apex-pl[data-stacked="true"] .apex-pl__transfer button:nth-child(1) .apex-icon,.apex-pl[data-stacked="true"] .apex-pl__transfer button:nth-child(2) .apex-icon{transform:rotate(90deg)}
 .apex-pl[data-stacked="true"] .apex-pl__transfer button:nth-child(3) .apex-icon,.apex-pl[data-stacked="true"] .apex-pl__transfer button:nth-child(4) .apex-icon{transform:rotate(90deg)}
-.apex-pl__ctrls button,.apex-pl__transfer button{display:grid;place-items:center;inline-size:32px;block-size:32px;border:1px solid var(--pl-border);border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;padding:0;transition:color var(--dur-fast),border-color var(--dur-fast),background var(--dur-fast)}
+.apex-pl__ctrls button,.apex-pl__transfer button{display:grid;place-items:center;inline-size:32px;block-size:32px;border:1px solid var(--apex-pl-border);border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;padding:0;transition:color var(--dur-fast),border-color var(--dur-fast),background var(--dur-fast)}
 .apex-pl__ctrls button:hover:not(:disabled),.apex-pl__transfer button:hover:not(:disabled){border-color:var(--accent-primary);color:var(--accent-primary);background:color-mix(in srgb,var(--accent-primary) 8%,transparent)}
 .apex-pl__ctrls button:disabled,.apex-pl__transfer button:disabled{opacity:.4;cursor:not-allowed}
 .apex-pl__ctrls button:focus-visible,.apex-pl__transfer button:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 @media (max-width:620px){.apex-pl{flex-direction:column}.apex-pl__panel{flex:0 0 auto}.apex-pl__ctrls,.apex-pl__transfer{flex-direction:row;justify-content:center}}
 
 /* ─── org chart ────────────────────────────────────────── */
-.apex-oc{--oc-line:var(--border-strong);--oc-line-w:1px;--oc-gap:16px;--oc-level:36px;
---oc-node-bg:var(--bg-surface);--oc-node-fg:var(--fg-default);--oc-node-border:var(--border-default);--oc-node-border-w:1px;--oc-node-radius:var(--r-md);
---oc-sel-bg:color-mix(in srgb,var(--accent-primary) 8%,var(--bg-surface));--oc-sel-fg:var(--fg-default);--oc-sel-border:var(--accent-primary);--oc-partial-border:color-mix(in srgb,var(--accent-primary) 45%,transparent);
+.apex-oc{--apex-oc-line:var(--border-strong);--apex-oc-line-w:1px;--apex-oc-gap:16px;--apex-oc-level:36px;
+--apex-oc-node-bg:var(--bg-surface);--apex-oc-node-fg:var(--fg-default);--apex-oc-node-border:var(--border-default);--apex-oc-node-border-w:1px;--apex-oc-node-radius:var(--r-md);
+--apex-oc-sel-bg:color-mix(in srgb,var(--accent-primary) 8%,var(--bg-surface));--apex-oc-sel-fg:var(--fg-default);--apex-oc-sel-border:var(--accent-primary);--apex-oc-partial-border:color-mix(in srgb,var(--accent-primary) 45%,transparent);
 font-family:var(--font-sans);color:var(--fg-default);overflow:auto;padding:6px 2px}
-.apex-oc ul{list-style:none;margin:0;padding:0;display:flex;justify-content:center;gap:var(--oc-gap)}
+.apex-oc ul{list-style:none;margin:0;padding:0;display:flex;justify-content:center;gap:var(--apex-oc-gap)}
 .apex-oc>.apex-oc__root{justify-content:flex-start;inline-size:max-content;margin-inline:auto}
-.apex-oc__branch{position:relative;display:flex;flex-direction:column;align-items:center;padding-block-start:var(--oc-level)}
+.apex-oc__branch{position:relative;display:flex;flex-direction:column;align-items:center;padding-block-start:var(--apex-oc-level)}
 .apex-oc__root>.apex-oc__branch{padding-block-start:0}
 
 /* Connectors: ONE rail per parent, measured to span first child's centre to last
    child's centre, plus a single stub per child. Half-rails drawn from each child
    cannot work with unequal node widths — the ends always overhang or fall short. */
 .apex-oc__children{position:relative}
-.apex-oc__children::before{content:"";position:absolute;inset-block-start:0;inset-inline-start:50%;block-size:calc(var(--oc-level) / 2);border-inline-start:var(--oc-line-w) solid var(--oc-line)}
-.apex-oc__children::after{content:"";position:absolute;inset-block-start:calc(var(--oc-level) / 2);inset-inline-start:var(--oc-rail-start,0px);inline-size:var(--oc-rail-width,0px);border-block-start:var(--oc-line-w) solid var(--oc-line)}
-.apex-oc__children>.apex-oc__branch::after{content:"";position:absolute;inset-block-start:calc(var(--oc-level) / 2);inset-inline-start:50%;block-size:calc(var(--oc-level) / 2);border-inline-start:var(--oc-line-w) solid var(--oc-line)}
+.apex-oc__children::before{content:"";position:absolute;inset-block-start:0;inset-inline-start:50%;block-size:calc(var(--apex-oc-level) / 2);border-inline-start:var(--apex-oc-line-w) solid var(--apex-oc-line)}
+.apex-oc__children::after{content:"";position:absolute;inset-block-start:calc(var(--apex-oc-level) / 2);inset-inline-start:var(--apex-oc-rail-start,0px);inline-size:var(--apex-oc-rail-width,0px);border-block-start:var(--apex-oc-line-w) solid var(--apex-oc-line)}
+.apex-oc__children>.apex-oc__branch::after{content:"";position:absolute;inset-block-start:calc(var(--apex-oc-level) / 2);inset-inline-start:50%;block-size:calc(var(--apex-oc-level) / 2);border-inline-start:var(--apex-oc-line-w) solid var(--apex-oc-line)}
 /* an only child sits directly under its parent — the parent drop is the whole line */
-.apex-oc__children[data-single="true"]::before{block-size:var(--oc-level)}
+.apex-oc__children[data-single="true"]::before{block-size:var(--apex-oc-level)}
 .apex-oc__children[data-single="true"]::after,.apex-oc__children[data-single="true"]>.apex-oc__branch::after{display:none}
 
 /* A collapsed node still shows its control, which hangs into the level gap. With no
    children rendered nothing else reserves that space, so the control would fall
    outside the scroll container and be unreachable. */
-.apex-oc__branch[data-collapsed="true"]{padding-block-end:calc(var(--oc-level) / 2 + 13px)}
-.apex-oc[data-orientation="horizontal"] .apex-oc__branch[data-collapsed="true"]{padding-block-end:0;padding-inline-end:calc(var(--oc-level) / 2 + 13px)}
+.apex-oc__branch[data-collapsed="true"]{padding-block-end:calc(var(--apex-oc-level) / 2 + 13px)}
+.apex-oc[data-orientation="horizontal"] .apex-oc__branch[data-collapsed="true"]{padding-block-end:0;padding-inline-end:calc(var(--apex-oc-level) / 2 + 13px)}
 .apex-oc__nodewrap{position:relative;display:flex;flex-direction:column;align-items:center}
-.apex-oc__node{display:flex;align-items:center;gap:10px;padding:10px 14px;border:var(--oc-node-border-w) solid var(--oc-node-border);border-radius:var(--oc-node-radius);background:var(--oc-node-bg);color:var(--oc-node-fg);box-shadow:var(--shadow-xs);white-space:nowrap;transition:border-color var(--dur-fast),box-shadow var(--dur-fast),background var(--dur-fast),color var(--dur-fast)}
+.apex-oc__node{display:flex;align-items:center;gap:10px;padding:10px 14px;border:var(--apex-oc-node-border-w) solid var(--apex-oc-node-border);border-radius:var(--apex-oc-node-radius);background:var(--apex-oc-node-bg);color:var(--apex-oc-node-fg);box-shadow:var(--shadow-xs);white-space:nowrap;transition:border-color var(--dur-fast),box-shadow var(--dur-fast),background var(--dur-fast),color var(--dur-fast)}
 .apex-oc__node[data-selectable="true"]{cursor:pointer}
 .apex-oc__node[data-selectable="true"]:hover{border-color:var(--border-strong)}
 .apex-oc__node[data-selectable="true"]:focus-visible{outline:none;box-shadow:var(--focus-ring)}
-.apex-oc__node[data-state="on"]{border-color:var(--oc-sel-border);background:var(--oc-sel-bg);color:var(--oc-sel-fg)}
-.apex-oc__node[data-state="partial"]{border-color:var(--oc-partial-border)}
+.apex-oc__node[data-state="on"]{border-color:var(--apex-oc-sel-border);background:var(--apex-oc-sel-bg);color:var(--apex-oc-sel-fg)}
+.apex-oc__node[data-state="partial"]{border-color:var(--apex-oc-partial-border)}
 .apex-oc__img{inline-size:34px;block-size:34px;border-radius:var(--r-full);object-fit:cover;flex:0 0 auto;border:1px solid var(--border-subtle)}
 .apex-oc__icon{color:currentColor;opacity:.6}
 .apex-oc__text{display:flex;flex-direction:column;gap:1px;min-width:0;text-align:start}
 .apex-oc__label{font-size:13.5px;font-weight:600;letter-spacing:-.005em}
 .apex-oc__sub{font-size:11.5px;color:currentColor;opacity:.62}
-.apex-oc__toggle{position:absolute;inset-block-end:calc(-1 * (var(--oc-level) + 22px) / 2);inset-inline-start:50%;transform:translateX(-50%);display:grid;place-items:center;inline-size:22px;block-size:22px;border:1px solid var(--border-default);border-radius:var(--r-full);background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;padding:0;z-index:2;box-shadow:0 0 0 3px var(--bg-surface)}
+.apex-oc__toggle{position:absolute;inset-block-end:calc(-1 * (var(--apex-oc-level) + 22px) / 2);inset-inline-start:50%;transform:translateX(-50%);display:grid;place-items:center;inline-size:22px;block-size:22px;border:1px solid var(--border-default);border-radius:var(--r-full);background:var(--bg-surface);color:var(--fg-muted);cursor:pointer;padding:0;z-index:2;box-shadow:0 0 0 3px var(--bg-surface)}
 [dir="rtl"] .apex-oc__toggle{transform:translateX(50%)}
 .apex-oc__toggle:hover{border-color:var(--accent-primary);color:var(--accent-primary)}
 .apex-oc__toggle:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 
 /* horizontal: the same three strokes, rotated a quarter turn */
-.apex-oc[data-orientation="horizontal"]{--oc-gap:12px;--oc-level:52px}
+.apex-oc[data-orientation="horizontal"]{--apex-oc-gap:12px;--apex-oc-level:52px}
 .apex-oc[data-orientation="horizontal"] ul{flex-direction:column;justify-content:flex-start;align-items:flex-start}
 .apex-oc[data-orientation="horizontal"]>.apex-oc__root{block-size:max-content;inline-size:auto;margin-inline:0}
-.apex-oc[data-orientation="horizontal"] .apex-oc__branch{flex-direction:row;align-items:center;padding-block-start:0;padding-inline-start:var(--oc-level)}
+.apex-oc[data-orientation="horizontal"] .apex-oc__branch{flex-direction:row;align-items:center;padding-block-start:0;padding-inline-start:var(--apex-oc-level)}
 .apex-oc[data-orientation="horizontal"] .apex-oc__root>.apex-oc__branch{padding-inline-start:0}
 .apex-oc[data-orientation="horizontal"] .apex-oc__children{padding-block-start:0;padding-inline-start:0}
-.apex-oc[data-orientation="horizontal"] .apex-oc__children::before{inset-block-start:50%;inset-inline-start:0;inline-size:calc(var(--oc-level) / 2);block-size:0;border-inline-start:0;border-block-start:var(--oc-line-w) solid var(--oc-line)}
-.apex-oc[data-orientation="horizontal"] .apex-oc__children::after{inset-block-start:var(--oc-rail-start,0px);inset-inline-start:calc(var(--oc-level) / 2);inline-size:0;block-size:var(--oc-rail-width,0px);border-block-start:0;border-inline-start:var(--oc-line-w) solid var(--oc-line)}
-.apex-oc[data-orientation="horizontal"] .apex-oc__children>.apex-oc__branch::after{inset-block-start:50%;inset-inline-start:calc(var(--oc-level) / 2);inline-size:calc(var(--oc-level) / 2);block-size:0;border-inline-start:0;border-block-start:var(--oc-line-w) solid var(--oc-line)}
-.apex-oc[data-orientation="horizontal"] .apex-oc__children[data-single="true"]::before{inline-size:var(--oc-level)}
-.apex-oc[data-orientation="horizontal"] .apex-oc__toggle{inset-block-end:auto;inset-block-start:50%;inset-inline-start:auto;inset-inline-end:calc(-1 * (var(--oc-level) + 22px) / 2);transform:translateY(-50%)}
+.apex-oc[data-orientation="horizontal"] .apex-oc__children::before{inset-block-start:50%;inset-inline-start:0;inline-size:calc(var(--apex-oc-level) / 2);block-size:0;border-inline-start:0;border-block-start:var(--apex-oc-line-w) solid var(--apex-oc-line)}
+.apex-oc[data-orientation="horizontal"] .apex-oc__children::after{inset-block-start:var(--apex-oc-rail-start,0px);inset-inline-start:calc(var(--apex-oc-level) / 2);inline-size:0;block-size:var(--apex-oc-rail-width,0px);border-block-start:0;border-inline-start:var(--apex-oc-line-w) solid var(--apex-oc-line)}
+.apex-oc[data-orientation="horizontal"] .apex-oc__children>.apex-oc__branch::after{inset-block-start:50%;inset-inline-start:calc(var(--apex-oc-level) / 2);inline-size:calc(var(--apex-oc-level) / 2);block-size:0;border-inline-start:0;border-block-start:var(--apex-oc-line-w) solid var(--apex-oc-line)}
+.apex-oc[data-orientation="horizontal"] .apex-oc__children[data-single="true"]::before{inline-size:var(--apex-oc-level)}
+.apex-oc[data-orientation="horizontal"] .apex-oc__toggle{inset-block-end:auto;inset-block-start:50%;inset-inline-start:auto;inset-inline-end:calc(-1 * (var(--apex-oc-level) + 22px) / 2);transform:translateY(-50%)}
 
 /* ─── data view ────────────────────────────────────────── */
-.apex-dv{--dv-min:240px;--dv-gap:0px;display:flex;flex-direction:column;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
+.apex-dv{--apex-dv-min:240px;--apex-dv-gap:0px;display:flex;flex-direction:column;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
 .apex-dv[data-bordered="true"]{border:1px solid var(--border-default);border-radius:var(--r-md);background:var(--bg-surface);overflow:hidden}
 .apex-dv__bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 14px;border-block-end:1px solid var(--border-default);background:var(--bg-surface)}
 .apex-dv__caption{margin:0;font-size:14px;font-weight:600}
@@ -2781,7 +2909,7 @@ font-family:var(--font-sans);color:var(--fg-default);overflow:auto;padding:6px 2
 .apex-dv__switch button:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-dv__main{position:relative;min-width:0}
 .apex-dv__items{display:flex;flex-direction:column}
-.apex-dv[data-layout="grid"] .apex-dv__items{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--dv-min),1fr));gap:var(--dv-gap)}
+.apex-dv[data-layout="grid"] .apex-dv__items{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--apex-dv-min),1fr));gap:var(--apex-dv-gap)}
 .apex-dv[data-layout="grid"] .apex-dv__item{border-block-end:0;border-inline-end:1px solid var(--border-subtle);border-block-end:1px solid var(--border-subtle)}
 .apex-dv__item{padding:16px;min-width:0;border-block-end:1px solid var(--border-subtle)}
 .apex-dv__items>.apex-dv__item:last-child{border-block-end:0}
@@ -2794,25 +2922,25 @@ font-family:var(--font-sans);color:var(--fg-default);overflow:auto;padding:6px 2
 .apex-dv .apex-pager{border-block-start:1px solid var(--border-default)}
 
 /* ─── data table ───────────────────────────────────────── */
-.apex-dt{--dt-grid:var(--border-subtle);--dt-border:var(--border-default);--dt-stripe:var(--bg-subtle);--dt-sel:var(--accent-primary);--dt-head-bg:var(--bg-subtle);--dt-grid-size:1px;--dt-pad-y:11px;--dt-pad-x:14px;--dt-fs:13.5px;--dt-frozen-base:38px;--dt-frozen-top:var(--dt-frozen-base);--dt-frozen-bg:var(--bg-surface);
+.apex-dt{--apex-dt-grid:var(--border-subtle);--apex-dt-border:var(--border-default);--apex-dt-stripe:var(--bg-subtle);--apex-dt-sel:var(--accent-primary);--apex-dt-head-bg:var(--bg-subtle);--apex-dt-grid-size:1px;--apex-dt-pad-y:11px;--apex-dt-pad-x:14px;--apex-dt-fs:13.5px;--apex-dt-frozen-base:38px;--apex-dt-frozen-top:var(--apex-dt-frozen-base);--apex-dt-frozen-bg:var(--bg-surface);
 display:flex;flex-direction:column;gap:0;font-family:var(--font-sans);color:var(--fg-default);min-width:0}
-.apex-dt[data-size="small"]{--dt-pad-y:7px;--dt-pad-x:10px;--dt-fs:12.5px;--dt-frozen-base:30px}
-.apex-dt[data-size="large"]{--dt-pad-y:15px;--dt-pad-x:18px;--dt-fs:14.5px;--dt-frozen-base:46px}
-.apex-dt[data-bordered="true"]{border:1px solid var(--dt-border);border-radius:var(--r-md);background:var(--bg-surface);overflow:hidden}
+.apex-dt[data-size="small"]{--apex-dt-pad-y:7px;--apex-dt-pad-x:10px;--apex-dt-fs:12.5px;--apex-dt-frozen-base:30px}
+.apex-dt[data-size="large"]{--apex-dt-pad-y:15px;--apex-dt-pad-x:18px;--apex-dt-fs:14.5px;--apex-dt-frozen-base:46px}
+.apex-dt[data-bordered="true"]{border:1px solid var(--apex-dt-border);border-radius:var(--r-md);background:var(--bg-surface);overflow:hidden}
 .apex-dt[data-flexible="true"]{flex:1 1 auto;min-block-size:0}
 
-.apex-dt__bar{display:flex;align-items:center;gap:12px;padding:11px 14px;border-block-end:1px solid var(--dt-border);background:var(--bg-surface);flex-wrap:wrap}
+.apex-dt__bar{display:flex;align-items:center;gap:12px;padding:11px 14px;border-block-end:1px solid var(--apex-dt-border);background:var(--bg-surface);flex-wrap:wrap}
 .apex-dt__caption{margin:0;font-size:14px;font-weight:600}
-.apex-dt__count{margin-inline-start:auto;font-size:12px;font-weight:600;color:var(--accent-primary);background:color-mix(in srgb,var(--dt-sel) 12%,transparent);padding:4px 10px;border-radius:var(--r-full)}
+.apex-dt__count{margin-inline-start:auto;font-size:12px;font-weight:600;color:var(--accent-primary);background:color-mix(in srgb,var(--apex-dt-sel) 12%,transparent);padding:4px 10px;border-radius:var(--r-full)}
 
 .apex-dt__main{position:relative;min-width:0;display:flex;flex-direction:column}
 .apex-dt[data-flexible="true"] .apex-dt__main{flex:1 1 auto;min-block-size:0}
 .apex-dt__viewport{min-width:0;overflow:auto}
-.apex-dt__viewport[data-scrollable="true"]{max-block-size:var(--dt-scroll-h,340px)}
+.apex-dt__viewport[data-scrollable="true"]{max-block-size:var(--apex-dt-scroll-h,340px)}
 .apex-dt[data-flexible="true"] .apex-dt__viewport{flex:1 1 auto;max-block-size:none}
-.apex-dt__table{inline-size:100%;min-inline-size:var(--dt-min-w,auto);border-collapse:separate;border-spacing:0;font-size:var(--dt-fs)}
+.apex-dt__table{inline-size:100%;min-inline-size:var(--apex-dt-min-w,auto);border-collapse:separate;border-spacing:0;font-size:var(--apex-dt-fs)}
 
-.apex-dt__table thead th{position:relative;text-align:start;padding:var(--dt-pad-y) var(--dt-pad-x);font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-muted);background:var(--dt-head-bg);white-space:nowrap;border-block-end:1px solid var(--dt-border)}
+.apex-dt__table thead th{position:relative;text-align:start;padding:var(--apex-dt-pad-y) var(--apex-dt-pad-x);font-size:var(--apex-dt-head-fs,11px);font-weight:var(--apex-dt-head-fw,700);letter-spacing:var(--apex-dt-head-ls,.05em);text-transform:var(--apex-dt-head-tt,uppercase);color:var(--apex-dt-head-fg,var(--fg-muted));background:var(--apex-dt-head-bg);white-space:nowrap;border-block-end:1px solid var(--apex-dt-border)}
 .apex-dt__table[data-frozen-head="true"] thead th{position:sticky;inset-block-start:0;z-index:3}
 .apex-dt__sort{display:inline-flex;align-items:center;gap:5px;border:0;background:transparent;font:inherit;color:inherit;cursor:pointer;padding:0;text-transform:inherit;letter-spacing:inherit}
 .apex-dt__sort:hover{color:var(--fg-default)}
@@ -2821,16 +2949,24 @@ display:flex;flex-direction:column;gap:0;font-family:var(--font-sans);color:var(
 .apex-dt__arrow[data-active="true"]{color:var(--accent-primary)}
 .apex-dt__rank{display:grid;place-items:center;min-inline-size:15px;block-size:15px;padding-inline:3px;border-radius:var(--r-full);background:var(--accent-primary);color:#fff;font-size:9.5px;font-weight:700;letter-spacing:0}
 
-.apex-dt__table tbody td,.apex-dt__table tfoot td{padding:var(--dt-pad-y) var(--dt-pad-x);vertical-align:middle;color:var(--fg-default)}
-.apex-dt__table tbody tr{background:var(--bg-surface)}
-.apex-dt[data-grid="horizontal"] tbody td,.apex-dt[data-grid="both"] tbody td{border-block-end:var(--dt-grid-size) solid var(--dt-grid)}
-.apex-dt[data-grid="vertical"] tbody td,.apex-dt[data-grid="both"] tbody td,.apex-dt[data-grid="vertical"] thead th,.apex-dt[data-grid="both"] thead th{border-inline-end:var(--dt-grid-size) solid var(--dt-grid)}
+.apex-dt__table tbody td,.apex-dt__table tfoot td{padding:var(--apex-dt-pad-y) var(--apex-dt-pad-x);vertical-align:middle;color:var(--fg-default)}
+/* Every row state sets --apex-dt-row-bg as well as its own background, and
+   the frozen cells READ it — AF2-329. A frozen cell has to carry an opaque
+   background of its own or the scrolled content shows through it, and that
+   background painted over the row’s. Striped and selected had each been
+   given a duplicate rule for the frozen column; hover, selected+hover and
+   expanded had not, so the highlight stopped dead at the pinned column.
+   One inherited variable instead of a duplicate per state, so the next
+   state added cannot forget. */
+.apex-dt__table tbody tr{--apex-dt-row-bg:var(--bg-surface);background:var(--apex-dt-row-bg)}
+.apex-dt[data-grid="horizontal"] tbody td,.apex-dt[data-grid="both"] tbody td{border-block-end:var(--apex-dt-grid-size) solid var(--apex-dt-grid)}
+.apex-dt[data-grid="vertical"] tbody td,.apex-dt[data-grid="both"] tbody td,.apex-dt[data-grid="vertical"] thead th,.apex-dt[data-grid="both"] thead th{border-inline-end:var(--apex-dt-grid-size) solid var(--apex-dt-grid)}
 .apex-dt[data-grid="vertical"] tbody td:last-child,.apex-dt[data-grid="both"] tbody td:last-child,.apex-dt[data-grid="vertical"] thead th:last-child,.apex-dt[data-grid="both"] thead th:last-child{border-inline-end:0}
 .apex-dt[data-grid="none"] tbody td{border-block-end:0}
-.apex-dt[data-striped="true"] tbody tr:nth-child(even){background:var(--dt-stripe)}
-.apex-dt[data-hover="true"] tbody tr:hover{background:var(--bg-muted)}
-.apex-dt__table tbody tr[data-selected="true"]{background:color-mix(in srgb,var(--dt-sel) 12%,var(--bg-surface))}
-.apex-dt[data-hover="true"] tbody tr[data-selected="true"]:hover{background:color-mix(in srgb,var(--dt-sel) 18%,var(--bg-surface))}
+.apex-dt[data-striped="true"] tbody tr:nth-child(even){--apex-dt-row-bg:var(--apex-dt-stripe);background:var(--apex-dt-row-bg)}
+.apex-dt[data-hover="true"] tbody tr:hover{--apex-dt-row-bg:var(--bg-muted);background:var(--apex-dt-row-bg)}
+.apex-dt__table tbody tr[data-selected="true"]{--apex-dt-row-bg:color-mix(in srgb,var(--apex-dt-sel) 12%,var(--bg-surface));background:var(--apex-dt-row-bg)}
+.apex-dt[data-hover="true"] tbody tr[data-selected="true"]:hover{--apex-dt-row-bg:color-mix(in srgb,var(--apex-dt-sel) 18%,var(--bg-surface));background:var(--apex-dt-row-bg)}
 .apex-dt__table tbody tr:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--accent-primary)}
 .apex-dt__table tbody td[data-numeric="true"]{font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:end}
 
@@ -2843,8 +2979,8 @@ display:flex;flex-direction:column;gap:0;font-family:var(--font-sans);color:var(
 .apex-dt__clearall:hover{border-color:var(--accent-danger);color:var(--accent-danger)}
 
 /* filter row + menu */
-.apex-dt__table thead tr.apex-dt__filterrow th{padding-block:7px;border-block-end:1px solid var(--dt-border);text-transform:none;letter-spacing:0;font-weight:400}
-.apex-dt__table[data-frozen-head="true"] thead tr.apex-dt__filterrow th{inset-block-start:var(--dt-frozen-base)}
+.apex-dt__table thead tr.apex-dt__filterrow th{padding-block:7px;border-block-end:1px solid var(--apex-dt-border);text-transform:none;letter-spacing:0;font-weight:400}
+.apex-dt__table[data-frozen-head="true"] thead tr.apex-dt__filterrow th{inset-block-start:var(--apex-dt-frozen-base)}
 .apex-dtf{display:flex;align-items:center;gap:4px;min-width:0}
 .apex-dtf__ctl{inline-size:100%;min-width:0;font-family:var(--font-sans);font-size:12.5px;padding:5px 7px;border:1px solid var(--border-default);border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);outline:none}
 .apex-dtf__ctl:focus{border-color:var(--accent-primary);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent-primary) 15%,transparent)}
@@ -2866,12 +3002,12 @@ display:flex;flex-direction:column;gap:0;font-family:var(--font-sans);color:var(
 .apex-dtf__actions{display:flex;justify-content:flex-end;gap:6px;padding-block-start:4px;border-block-start:1px solid var(--border-subtle)}
 
 /* row groups */
-.apex-dt__group>td{background:var(--bg-muted)!important;padding-block:9px!important;font-weight:700;border-block-end:1px solid var(--dt-border)}
+.apex-dt__group>td{background:var(--bg-muted)!important;padding-block:9px!important;font-weight:700;border-block-end:1px solid var(--apex-dt-border)}
 .apex-dt__group>td>*{vertical-align:middle}
 .apex-dt__group .apex-dt__exp{display:inline-grid;margin-inline-end:4px}
 .apex-dt__grouplabel{font-size:13px;font-weight:700;letter-spacing:-.005em}
 .apex-dt__groupcount{display:inline-grid;place-items:center;min-inline-size:20px;block-size:18px;padding-inline:6px;margin-inline-start:8px;border-radius:var(--r-full);background:var(--bg-surface);color:var(--fg-muted);font-size:11px;font-weight:700}
-.apex-dt__groupfoot>td{background:var(--bg-subtle)!important;font-weight:700;font-size:calc(var(--dt-fs) - .5px);border-block-end:2px solid var(--dt-border)}
+.apex-dt__groupfoot>td{background:var(--bg-subtle)!important;font-weight:700;font-size:calc(var(--apex-dt-fs) - .5px);border-block-end:2px solid var(--apex-dt-border)}
 .apex-dt__table td[data-span="true"]{vertical-align:top;font-weight:600;background:var(--bg-subtle)}
 
 /* editing */
@@ -2886,7 +3022,7 @@ display:flex;flex-direction:column;gap:0;font-family:var(--font-sans);color:var(
 .apex-dt__table tbody td[data-editable="true"]{cursor:text;position:relative}
 .apex-dt__table tbody td[data-editable="true"]:hover{box-shadow:inset 0 0 0 1px var(--border-strong)}
 .apex-dte{display:flex;align-items:center;min-width:0}
-.apex-dte__ctl{inline-size:100%;min-width:0;font-family:var(--font-sans);font-size:var(--dt-fs);padding:5px 7px;border:1px solid var(--accent-primary);border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent-primary) 15%,transparent)}
+.apex-dte__ctl{inline-size:100%;min-width:0;font-family:var(--font-sans);font-size:var(--apex-dt-fs);padding:5px 7px;border:1px solid var(--accent-primary);border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);outline:none;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent-primary) 15%,transparent)}
 td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:end}
 .apex-dte__box{inline-size:18px;block-size:18px;margin-inline:auto;accent-color:var(--accent-primary);cursor:pointer}
 
@@ -2901,9 +3037,9 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
 .apex-dt__exp:hover{color:var(--accent-primary);background:var(--bg-muted)}
 .apex-dt__exp:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-dt__exp[data-on="true"]{color:var(--accent-primary)}
-.apex-dt__table tbody tr[data-expanded="true"]{background:color-mix(in srgb,var(--accent-primary) 6%,var(--bg-surface))}
+.apex-dt__table tbody tr[data-expanded="true"]{--apex-dt-row-bg:color-mix(in srgb,var(--accent-primary) 6%,var(--bg-surface));background:var(--apex-dt-row-bg)}
 .apex-dt__table tbody tr[data-expanded="true"] td{border-block-end-color:transparent}
-.apex-dt__detail>td{padding:0!important;background:var(--bg-subtle);border-block-end:1px solid var(--dt-border)}
+.apex-dt__detail>td{padding:0!important;background:var(--bg-subtle);border-block-end:1px solid var(--apex-dt-border)}
 .apex-dt__detail>td>*{padding:18px 20px}
 .apex-dt__detailgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px 22px;margin:0}
 .apex-dt__detailgrid dt{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-subtle);margin-block-end:3px}
@@ -2920,12 +3056,15 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
 .apex-dt__gutter .apex-radio__dot[data-on="true"]{border-color:var(--accent-primary);border-width:5px}
 
 /* frozen columns */
-.apex-dt__table th[data-frozen],.apex-dt__table td[data-frozen]{position:sticky;z-index:2;background:var(--bg-surface)}
-.apex-dt__table thead th[data-frozen]{z-index:4;background:var(--dt-head-bg)}
-.apex-dt__table td[data-frozen="start"]::after,.apex-dt__table th[data-frozen="start"]::after{content:"";position:absolute;inset-block:0;inset-inline-end:0;inline-size:1px;background:var(--dt-border)}
-.apex-dt__table td[data-frozen="end"]::before,.apex-dt__table th[data-frozen="end"]::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;inline-size:1px;background:var(--dt-border)}
-.apex-dt[data-striped="true"] tbody tr:nth-child(even) td[data-frozen]{background:var(--dt-stripe)}
-.apex-dt__table tbody tr[data-selected="true"] td[data-frozen]{background:color-mix(in srgb,var(--dt-sel) 12%,var(--bg-surface))}
+/* A rippling row hosts its wave on the CELLS — a <span> is not a legal
+   child of <tr> — so each cell needs to be a containing block for the
+   layer. Frozen cells are already `position: sticky`, which is one too, so
+   their slice travels with them as they stick. AF2-326. */
+.apex-dt[data-row-ripple="true"] .apex-dt__table tbody td{position:relative}
+.apex-dt__table th[data-frozen],.apex-dt__table td[data-frozen]{position:sticky;z-index:2;background:var(--apex-dt-row-bg,var(--bg-surface))}
+.apex-dt__table thead th[data-frozen]{z-index:4;background:var(--apex-dt-head-bg)}
+.apex-dt__table td[data-frozen="start"]::after,.apex-dt__table th[data-frozen="start"]::after{content:"";position:absolute;inset-block:0;inset-inline-end:0;inline-size:1px;background:var(--apex-dt-border)}
+.apex-dt__table td[data-frozen="end"]::before,.apex-dt__table th[data-frozen="end"]::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;inline-size:1px;background:var(--apex-dt-border)}
 
 /* frozen rows */
 /* Frozen rows sit under the sticky header and above the scrolling body, so every
@@ -2934,22 +3073,22 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
    it has to out-specify .apex-dt__table td[data-frozen]{background:var(--bg-surface)}.
    The block matches the body's own two row colours so it stripes alongside it, and
    stays distinguishable through its weight and bottom border. */
-.apex-dt__table .apex-dt__frozen-rows tr{background:var(--dt-frozen-bg)}
-.apex-dt__frozen-rows td,.apex-dt__frozen-rows td[data-frozen]{background:var(--dt-frozen-bg)}
-.apex-dt[data-striped="true"] .apex-dt__table .apex-dt__frozen-rows tr:nth-child(even),.apex-dt[data-striped="true"] .apex-dt__frozen-rows tr:nth-child(even) td,.apex-dt[data-striped="true"] .apex-dt__frozen-rows tr:nth-child(even) td[data-frozen]{background:var(--dt-stripe)}
+.apex-dt__table .apex-dt__frozen-rows tr{background:var(--apex-dt-frozen-bg)}
+.apex-dt__frozen-rows td,.apex-dt__frozen-rows td[data-frozen]{background:var(--apex-dt-frozen-bg)}
+.apex-dt[data-striped="true"] .apex-dt__table .apex-dt__frozen-rows tr:nth-child(even),.apex-dt[data-striped="true"] .apex-dt__frozen-rows tr:nth-child(even) td,.apex-dt[data-striped="true"] .apex-dt__frozen-rows tr:nth-child(even) td[data-frozen]{background:var(--apex-dt-stripe)}
 /* the gutter's 18px checkbox is taller than the 11px header text, so a table with
    a selection column needs 4px more clearance under the sticky header */
-.apex-dt:has(.apex-dt__gutter){--dt-frozen-top:calc(var(--dt-frozen-base) + 4px)}
+.apex-dt:has(.apex-dt__gutter){--apex-dt-frozen-top:calc(var(--apex-dt-frozen-base) + 4px)}
 /* inset-block-start is set inline from the measured stack; this is the pre-measure fallback */
-.apex-dt__frozen-rows td{position:sticky;inset-block-start:var(--dt-frozen-top);z-index:3;font-weight:600}
-.apex-dt__frozen-rows tr:last-child td{border-block-end:2px solid var(--dt-border)}
+.apex-dt__frozen-rows td{position:sticky;inset-block-start:var(--apex-dt-frozen-top);z-index:3;font-weight:600}
+.apex-dt__frozen-rows tr:last-child td{border-block-end:2px solid var(--apex-dt-border)}
 .apex-dt__frozen-rows td[data-frozen]{z-index:5}
-.apex-dt[data-grid="vertical"] .apex-dt__frozen-rows td,.apex-dt[data-grid="both"] .apex-dt__frozen-rows td{border-inline-end:var(--dt-grid-size) solid var(--dt-grid)}
+.apex-dt[data-grid="vertical"] .apex-dt__frozen-rows td,.apex-dt[data-grid="both"] .apex-dt__frozen-rows td{border-inline-end:var(--apex-dt-grid-size) solid var(--apex-dt-grid)}
 .apex-dt[data-grid="vertical"] .apex-dt__frozen-rows td:last-child,.apex-dt[data-grid="both"] .apex-dt__frozen-rows td:last-child{border-inline-end:0}
 .apex-dt__frozen-rows td[data-numeric="true"]{font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:end}
 
 /* footer */
-.apex-dt__table tfoot td{background:var(--bg-subtle);font-weight:700;font-size:calc(var(--dt-fs) - .5px);border-block-start:1px solid var(--dt-border)}
+.apex-dt__table tfoot td{background:var(--bg-subtle);font-weight:700;font-size:calc(var(--apex-dt-fs) - .5px);border-block-start:1px solid var(--apex-dt-border)}
 .apex-dt__footlabel{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-muted)}
 
 /* badges in cells */
@@ -2969,7 +3108,7 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
 @keyframes apex-shimmer{to{background-position:-200% 0}}
 
 /* paginator */
-.apex-pager{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;border-block-start:1px solid var(--dt-border,var(--border-default));background:var(--bg-surface);font-family:var(--font-sans)}
+.apex-pager{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 14px;border-block-start:1px solid var(--apex-dt-border,var(--border-default));background:var(--bg-surface);font-family:var(--font-sans)}
 .apex-pager__summary{margin:0;font-size:12.5px;color:var(--fg-muted)}
 .apex-pager__nav{display:flex;gap:3px;margin-inline-start:auto}
 .apex-pager__btn{display:grid;place-items:center;min-inline-size:30px;block-size:30px;padding-inline:6px;border:1px solid transparent;border-radius:var(--r-sm);background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--fg-muted);cursor:pointer;transition:background var(--dur-fast),color var(--dur-fast),border-color var(--dur-fast)}
@@ -3113,8 +3252,7 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 background:var(--apex-alert-mask,rgba(15,20,28,.5));backdrop-filter:blur(var(--apex-alert-mask-blur,7px));-webkit-backdrop-filter:blur(var(--apex-alert-mask-blur,7px))}
 .apex-alert{position:relative;width:100%;max-width:var(--apex-alert-width,480px);background:var(--apex-alert-bg,var(--bg-elevated));border-radius:var(--apex-alert-radius,var(--r-xl));
 box-shadow:var(--apex-alert-shadow,0 5px 5px rgba(8,12,20,.28),0 24px 60px -24px rgba(8,12,20,.45),0 0 0 1px var(--border-subtle));
-display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--apex-alert-pad,34px 36px 28px);
-animation:apex-alert-pop var(--dur-slow) var(--ease-spring) both}
+display:flex;flex-direction:column;align-items:center;text-align:center;padding:var(--apex-alert-pad,34px 36px 28px)}
 @keyframes apex-alert-pop{from{transform:translateY(14px) scale(.96)}to{transform:none}}
 @media (max-width:600px){.apex-alert{padding:30px 24px 24px}}
 
@@ -3218,7 +3356,1523 @@ transform-origin:left;animation:apex-alert-countdown var(--apex-alert-life,3000m
 @keyframes apex-alert-countdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 
 /* transition: the default is the pop; these replace it. */
-.apex-alert--fade{animation:apex-alert-fade var(--dur-mid) var(--ease-out) both}
-.apex-alert--slide{animation:apex-alert-slide var(--dur-slow) var(--ease-spring) both}
 .apex-alert--none{animation:none}
 @keyframes apex-alert-slide{from{transform:translateY(-24px);opacity:0}to{transform:none;opacity:1}}
+
+/* ══ ApexScheduler and ApexCalendar ════════════════════════════
+   Ported at AF2-268 with the two components. Neither carries a <style> block,
+   so without these rules they render as unstyled markup — the defect
+   zz-docs-classes exists for, at the scale of a whole control.
+   The `--apex-sched-*` and `--apex-cal-*` prefixes in here are normalised to
+   `--apex-*` at AF2-269. */
+/* ─── scheduler (resource timeline) ────────────────────── */
+/* Tones, not event types: the app names its own types and maps each to a tone,
+   so this stylesheet does not learn a consumer's vocabulary. */
+.apex-sched{--apex-sched-leftw:300px;--apex-sched-h:70vh;font-family:var(--font-sans);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-lg);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-xs);inline-size:100%;max-inline-size:100%;min-inline-size:0}
+.apex-sched__toolbar{display:flex;align-items:center;gap:14px;padding:12px 16px;border-block-end:1px solid var(--border-subtle);flex-wrap:wrap}
+.apex-sched__nav{display:flex;align-items:center;gap:4px}
+.apex-sched__nav button{block-size:34px;min-inline-size:34px;padding:0 10px;border-radius:var(--r-sm);display:inline-flex;align-items:center;justify-content:center;gap:6px;background:none;color:var(--fg-muted);font-family:inherit;font-size:var(--t-sm);font-weight:500;border:1px solid transparent;cursor:pointer;transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
+.apex-sched__nav button:hover{background:var(--bg-muted);color:var(--fg-default)}
+.apex-sched__nav button:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-sched__nav button[data-today="true"]{border-color:var(--border-default)}
+.apex-sched__range{font-size:var(--t-lg);font-weight:600;letter-spacing:-.01em;min-inline-size:220px}
+.apex-sched__spacer{flex:1}
+.apex-sched__legend{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--t-sm);color:var(--fg-muted)}
+.apex-sched__legend span{display:inline-flex;align-items:center;gap:6px}
+.apex-sched__swatch{inline-size:11px;block-size:11px;border-radius:3px;display:inline-block}
+.apex-sched__grouping{display:flex;align-items:center;gap:8px;padding:10px 16px;border-block-end:1px solid var(--border-subtle);background:var(--bg-subtle);flex-wrap:wrap;font-size:var(--t-sm)}
+.apex-sched__glabel{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-subtle);margin-inline-end:2px}
+.apex-sched__gchip{display:inline-flex;align-items:center;gap:6px;block-size:30px;padding:0 12px;border-radius:var(--r-full);border:1px solid var(--border-default);background:var(--bg-surface);color:var(--fg-muted);font-family:inherit;font-size:var(--t-sm);font-weight:500;cursor:pointer;transition:border-color var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
+.apex-sched__gchip:hover{border-color:var(--border-strong);color:var(--fg-default)}
+.apex-sched__gchip:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-sched__gchip[aria-pressed="true"]{background:var(--apex-blue-50);border-color:color-mix(in srgb,var(--accent-primary) 40%,transparent);color:var(--accent-primary)}
+.apex-sched__ord{font-size:10px;font-weight:700;inline-size:16px;block-size:16px;border-radius:50%;display:grid;place-items:center;background:var(--accent-primary);color:#fff}
+.apex-sched__gfixed{display:inline-flex;align-items:center;gap:6px;block-size:30px;padding:0 12px;border-radius:var(--r-full);background:var(--bg-muted);color:var(--fg-subtle);font-size:var(--t-sm);font-weight:500}
+.apex-sched__arrow{color:var(--fg-subtle)}
+.apex-sched__treebtns{display:flex;gap:6px}
+.apex-sched__treebtns button{block-size:30px;padding:0 10px;border-radius:var(--r-sm);border:1px solid var(--border-default);background:var(--bg-surface);color:var(--fg-muted);font-family:inherit;font-size:var(--t-sm);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
+.apex-sched__treebtns button:hover{background:var(--bg-muted);color:var(--fg-default)}
+.apex-sched__treebtns button:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-sched__scroll{overflow:auto;max-block-size:var(--apex-sched-h);position:relative}
+.apex-sched__canvas{position:relative;inline-size:max-content}
+.apex-sched__header{position:sticky;inset-block-start:0;z-index:5;display:flex;background:var(--bg-surface)}
+.apex-sched__corner{position:sticky;inset-inline-start:0;z-index:6;inline-size:var(--apex-sched-leftw);flex-shrink:0;background:var(--bg-surface);border-inline-end:1px solid var(--border-default);border-block-end:1px solid var(--border-default);display:flex;flex-direction:column;justify-content:center;padding:8px 16px}
+.apex-sched__corner h4{margin:0;font-size:var(--t-md);font-weight:600}
+.apex-sched__corner p{margin:1px 0 0;font-size:11px;color:var(--fg-subtle)}
+.apex-sched__axis{flex-shrink:0;border-block-end:1px solid var(--border-default)}
+.apex-sched__tier1,.apex-sched__tier2{display:flex}
+.apex-sched__tier1 > div{flex-shrink:0;border-inline-end:1px solid var(--border-default);padding:7px 12px;font-weight:600;font-size:var(--t-sm);color:var(--fg-default);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apex-sched__tier2 > div{flex-shrink:0;border-inline-end:1px solid var(--border-subtle);text-align:center;font-size:11px;color:var(--fg-muted);padding:5px 2px;display:flex;flex-direction:column;line-height:1.2}
+.apex-sched__wd{font-size:9px;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-subtle)}
+.apex-sched__tier2 > div[data-today="true"]{background:var(--apex-blue-50);color:var(--accent-primary);font-weight:700}
+.apex-sched__rows{position:relative}
+.apex-sched__row{display:flex}
+.apex-sched__rowhead{position:sticky;inset-inline-start:0;z-index:3;inline-size:var(--apex-sched-leftw);flex-shrink:0;background:var(--bg-surface);border-inline-end:1px solid var(--border-default);border-block-end:1px solid var(--border-subtle);display:flex;align-items:center;gap:8px;padding:0 12px 0 10px}
+.apex-sched__rowhead[data-group="true"]{background:var(--bg-muted)}
+.apex-sched__twirl{inline-size:22px;block-size:22px;flex-shrink:0;display:grid;place-items:center;border:0;border-radius:var(--r-sm);background:none;color:var(--fg-muted);cursor:pointer;padding:0;transition:background var(--dur-fast) var(--ease-out)}
+.apex-sched__twirl:hover{background:var(--bg-surface);color:var(--fg-default)}
+.apex-sched__twirl:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-sched__twirl::before{content:'';inline-size:6px;block-size:6px;border-inline-end:1.5px solid currentColor;border-block-end:1.5px solid currentColor;transform:rotate(-45deg);transition:transform var(--dur-fast) var(--ease-out)}
+.apex-sched__twirl[aria-expanded="true"]::before{transform:rotate(45deg)}
+.apex-sched__rhicon{flex-shrink:0;display:grid;place-items:center;color:var(--fg-muted)}
+.apex-sched__rowhead[data-group="true"] .apex-sched__rhicon{color:var(--accent-primary)}
+.apex-sched__rhbody{min-inline-size:0;flex:1}
+.apex-sched__rhname{font-size:var(--t-sm);font-weight:500;color:var(--fg-default);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apex-sched__rowhead[data-group="true"] .apex-sched__rhname{font-weight:600}
+.apex-sched__rhsub{font-size:11px;color:var(--fg-subtle)}
+.apex-sched__rhcount{flex-shrink:0;font-size:10px;font-weight:600;padding:2px 7px;border-radius:var(--r-full);background:var(--bg-elevated);color:var(--fg-muted);border:1px solid var(--border-subtle)}
+.apex-sched__track{position:relative;flex-shrink:0;border-block-end:1px solid var(--border-subtle)}
+.apex-sched__track[data-group="true"]{background:var(--bg-muted)}
+.apex-sched__now{position:absolute;inset-block:0;inline-size:2px;background:var(--accent-danger);z-index:2;pointer-events:none}
+.apex-sched__now::before{content:'';position:absolute;inset-block-start:0;inset-inline-start:50%;transform:translateX(-50%);inline-size:9px;block-size:9px;border-radius:50%;background:var(--accent-danger)}
+.apex-sched__ev{position:absolute;border-radius:var(--r-sm);padding:3px;font-size:11px;line-height:1.25;color:#fff;overflow:hidden;cursor:grab;display:flex;gap:6px;align-items:stretch;box-shadow:0 1px 2px rgba(8,12,20,.18),inset 0 1px 0 rgba(255,255,255,.18);transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast) var(--ease-out);z-index:1}
+.apex-sched__ev:hover{transform:translateY(-1px);box-shadow:0 6px 16px -4px rgba(8,12,20,.35);z-index:3}
+.apex-sched__ev:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-sched__ev:active{cursor:grabbing}
+.apex-sched__ev[data-recurring="true"],.apex-sched__ev[data-draggable="false"]{cursor:pointer}
+.apex-sched__ev[data-compact="true"]{padding:2px}
+.apex-sched__evthumb{flex-shrink:0;inline-size:var(--apex-sched-thumb,30px);border-radius:4px;background:rgba(255,255,255,.22);display:grid;place-items:center;color:#fff;overflow:hidden}
+.apex-sched__ev[data-compact="true"] .apex-sched__evthumb{inline-size:100%}
+.apex-sched__evmain{min-inline-size:0;flex:1;display:flex;flex-direction:column;justify-content:center}
+.apex-sched__evrow{display:flex;align-items:center;gap:4px;min-inline-size:0}
+.apex-sched__evtitle{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apex-sched__evtime{opacity:.85;font-size:10px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.apex-sched__ev[data-tone="info"]{background:linear-gradient(160deg,var(--apex-blue-400),var(--apex-blue-600))}
+.apex-sched__ev[data-tone="success"]{background:linear-gradient(160deg,#1aa05c,var(--apex-green-600))}
+.apex-sched__ev[data-tone="warn"]{background:linear-gradient(160deg,#e0701a,var(--apex-orange-600))}
+.apex-sched__ev[data-tone="danger"]{background:linear-gradient(160deg,var(--apex-red-500),var(--apex-red-600))}
+.apex-sched__ev[data-tone="help"]{background:linear-gradient(160deg,var(--apex-purple-500),var(--apex-purple-600))}
+.apex-sched__ev[data-tone="neutral"]{background:repeating-linear-gradient(45deg,rgba(255,255,255,.14) 0 6px,transparent 6px 12px),var(--apex-n-500)}
+.apex-sched__cellrow{display:flex;block-size:100%}
+.apex-sched__cell{flex-shrink:0;border-inline-end:1px solid var(--border-subtle);padding:5px;display:flex;flex-direction:column;gap:3px;overflow:hidden}
+.apex-sched__cell[data-today="true"]{background:color-mix(in srgb,var(--accent-primary) 6%,transparent)}
+/* One --apex-sched-tone-ink per tone, background mixed from it: the accent tokens flip with
+   the theme, where a fixed pale-plus-dark-text pair does not and goes unreadable. */
+.apex-sched__chip{--apex-sched-tone-ink:var(--accent-primary);display:flex;flex-direction:row;align-items:flex-start;gap:5px;border-radius:4px;padding:2px 6px;font-size:10px;line-height:1.2;cursor:pointer;border:0;border-inline-start:3px solid var(--apex-sched-tone-ink);background:color-mix(in srgb,var(--apex-sched-tone-ink) 12%,var(--bg-surface));color:var(--apex-sched-tone-ink);font-family:inherit;text-align:start;overflow:hidden;transition:filter var(--dur-fast) var(--ease-out)}
+.apex-sched__chip:hover{filter:brightness(.97)}
+.apex-sched__chip:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-sched__chip[data-tone="success"]{--apex-sched-tone-ink:var(--accent-success)}
+.apex-sched__chip[data-tone="warn"]{--apex-sched-tone-ink:var(--accent-warning)}
+.apex-sched__chip[data-tone="danger"]{--apex-sched-tone-ink:var(--accent-danger)}
+.apex-sched__chip[data-tone="help"]{--apex-sched-tone-ink:var(--accent-help)}
+.apex-sched__chip[data-tone="neutral"]{--apex-sched-tone-ink:var(--fg-muted);background:var(--bg-muted)}
+.apex-sched__chipthumb{inline-size:18px;block-size:18px;flex-shrink:0;border-radius:3px;display:grid;place-items:center;background:color-mix(in srgb,currentColor 16%,transparent);margin-block-start:1px}
+.apex-sched__chipmain{min-inline-size:0;display:flex;flex-direction:column}
+.apex-sched__chiprow{display:flex;align-items:center;gap:3px;min-inline-size:0}
+.apex-sched__ctitle{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apex-sched__ctime{font-size:9px;opacity:.8;font-variant-numeric:tabular-nums}
+.apex-sched__more{font-size:10px;color:var(--fg-subtle);font-weight:600;padding-inline-start:2px}
+.apex-sched__catch{position:fixed;inset:0;z-index:1200}
+.apex-sched__pop{position:fixed;z-index:1201;font-family:var(--font-sans);color:var(--fg-default);inline-size:280px;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--r-md);box-shadow:var(--shadow-lg);overflow:hidden}
+.apex-sched__popbar{block-size:4px}
+.apex-sched__popbar[data-tone="info"]{background:var(--apex-blue-500)}
+.apex-sched__popbar[data-tone="success"]{background:var(--apex-green-500)}
+.apex-sched__popbar[data-tone="warn"]{background:var(--apex-orange-500)}
+.apex-sched__popbar[data-tone="danger"]{background:var(--apex-red-500)}
+.apex-sched__popbar[data-tone="help"]{background:var(--apex-purple-500)}
+.apex-sched__popbar[data-tone="neutral"]{background:var(--apex-n-500)}
+.apex-sched__popbody{padding:14px 16px}
+.apex-sched__popbody h4{margin:0 0 8px;font-size:var(--t-md);font-weight:600}
+.apex-sched__popmeta{display:grid;grid-template-columns:16px 1fr;gap:6px 8px;font-size:var(--t-sm);color:var(--fg-muted);align-items:center}
+.apex-sched__popmeta .apex-icon{color:var(--fg-subtle)}
+.apex-sched__poprec{display:flex;align-items:center;gap:6px;margin-block-start:10px;padding:8px 10px;border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent-primary) 12%,var(--bg-surface));color:var(--accent-primary);font-size:11px;font-weight:500}
+.apex-sched__popfoot{display:flex;gap:8px;padding:0 16px 14px}
+.apex-sched__ctx{position:fixed;z-index:1250;font-family:var(--font-sans);min-inline-size:210px;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--r-md);box-shadow:var(--shadow-lg);padding:4px;overflow:hidden}
+.apex-sched__ctxtime{padding:8px 10px 6px;font-size:11px;color:var(--fg-subtle);border-block-end:1px solid var(--border-subtle);margin-block-end:4px}
+.apex-sched__ctxtime b{color:var(--fg-default);font-weight:600}
+.apex-sched__ctxitem{display:flex;align-items:center;gap:8px;inline-size:100%;padding:7px 10px;border:0;border-radius:var(--r-sm);background:none;color:var(--fg-default);font-family:inherit;font-size:var(--t-sm);text-align:start;cursor:pointer}
+.apex-sched__ctxitem:hover{background:var(--bg-muted)}
+.apex-sched__ctxitem:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-sched__ghost{position:fixed;z-index:1300;font-family:var(--font-sans);pointer-events:none;border-radius:var(--r-sm);padding:6px 10px;color:#fff;font-size:12px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px;transform:translate(10px,10px);opacity:.96}
+.apex-sched__ghost[data-tone="info"]{background:linear-gradient(160deg,var(--apex-blue-400),var(--apex-blue-600))}
+.apex-sched__ghost[data-tone="success"]{background:linear-gradient(160deg,#1aa05c,var(--apex-green-600))}
+.apex-sched__ghost[data-tone="warn"]{background:linear-gradient(160deg,#e0701a,var(--apex-orange-600))}
+.apex-sched__ghost[data-tone="danger"]{background:linear-gradient(160deg,var(--apex-red-500),var(--apex-red-600))}
+.apex-sched__ghost[data-tone="help"]{background:linear-gradient(160deg,var(--apex-purple-500),var(--apex-purple-600))}
+.apex-sched__ghost[data-tone="neutral"]{background:var(--apex-n-500)}
+.apex-sched__ghost b{font-weight:600;white-space:nowrap}
+.apex-sched__ghost span{font-variant-numeric:tabular-nums;opacity:.9;white-space:nowrap}
+body[data-sched-dragging="true"]{cursor:grabbing !important;user-select:none !important}
+.apex-sched__grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.apex-sched__grid > [data-span="2"]{grid-column:1 / -1}
+@media (max-width:760px){.apex-sched{--apex-sched-leftw:200px}}
+
+/* ─── calendar (month view) ────────────────────────────────
+   A distinct family from .apex-cal, which is ApexDatePicker's popup calendar.
+   Cells, bars and the "+N more" row share ONE column track, so a bar spanning
+   Tue–Thu lines up with those cells rather than being positioned in pixels. */
+.apex-calendar{--apex-cal-lane:22px;--apex-cal-row:96px;--apex-cal-week:0px;--apex-cal-cols:repeat(7,minmax(0,1fr));--apex-cal-grid:var(--apex-cal-cols);font-family:var(--font-sans);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-lg);box-shadow:var(--shadow-xs);display:flex;flex-direction:column;overflow:hidden;inline-size:100%;max-inline-size:100%;min-inline-size:0}
+.apex-calendar[data-week-numbers="true"]{--apex-cal-week:42px;--apex-cal-grid:var(--apex-cal-week) var(--apex-cal-cols)}
+.apex-calendar__bar{display:flex;align-items:center;gap:12px;padding:12px 14px;border-block-end:1px solid var(--border-subtle);flex-wrap:wrap}
+.apex-calendar__nav{display:flex;align-items:center;gap:4px}
+.apex-calendar__nav button{block-size:32px;min-inline-size:32px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid transparent;border-radius:var(--r-sm);background:none;color:var(--fg-muted);font-family:inherit;font-size:var(--t-sm);font-weight:500;cursor:pointer;transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
+.apex-calendar__nav button:hover{background:var(--bg-muted);color:var(--fg-default)}
+.apex-calendar__nav button:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-calendar__nav button[data-today="true"]{border-color:var(--border-default)}
+.apex-calendar__title{font-size:var(--t-lg);font-weight:600;letter-spacing:-.01em;min-inline-size:180px}
+.apex-calendar__spacer{flex:1}
+.apex-calendar__head{position:sticky;inset-block-start:0;z-index:2;display:grid;grid-template-columns:var(--apex-cal-grid);border-block-end:1px solid var(--border-default);background:var(--bg-subtle)}
+.apex-calendar__wd{padding:7px 6px;text-align:center;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-subtle);min-inline-size:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apex-calendar__body{flex:1;overflow:auto;display:flex;flex-direction:column}
+.apex-calendar__row{position:relative;flex:1 0 auto;min-block-size:var(--apex-cal-row);border-block-end:1px solid var(--border-subtle);padding-block-end:4px}
+.apex-calendar__row:last-child{border-block-end:0}
+/* the cell layer sits behind everything and owns borders, tint and the today ring */
+.apex-calendar__cells{position:absolute;inset:0;display:grid;grid-template-columns:var(--apex-cal-grid);pointer-events:none}
+.apex-calendar__cell{border-inline-start:1px solid var(--border-subtle);min-inline-size:0;pointer-events:auto;cursor:pointer;transition:background var(--dur-fast) var(--ease-out)}
+.apex-calendar__cell:first-child{border-inline-start:0}
+.apex-calendar__cell:hover{background:color-mix(in srgb,var(--accent-primary) 4%,transparent)}
+.apex-calendar__cell[data-outside="true"]{background:var(--bg-subtle)}
+.apex-calendar__cell[data-today="true"]{background:color-mix(in srgb,var(--accent-primary) 7%,transparent)}
+.apex-calendar__cell[data-selected="true"]{box-shadow:inset 0 0 0 2px var(--accent-primary)}
+.apex-calendar__weekno{display:grid;place-items:center;font-size:10px;font-weight:600;color:var(--fg-subtle);background:var(--bg-subtle);border-inline-end:1px solid var(--border-subtle)}
+/* one tinted span per background event, drawn over the cells and under the bars */
+.apex-calendar__bg{position:absolute;inset-block:0;display:grid;grid-template-columns:var(--apex-cal-grid);pointer-events:none;inset-inline:0}
+.apex-calendar__bgspan{--apex-cal-tone-ink:var(--accent-success);background:color-mix(in srgb,var(--apex-cal-tone-ink) 14%,transparent)}
+.apex-calendar__bgspan[data-tone="warn"]{--apex-cal-tone-ink:var(--accent-warning)}
+.apex-calendar__bgspan[data-tone="danger"]{--apex-cal-tone-ink:var(--accent-danger)}
+.apex-calendar__bgspan[data-tone="info"]{--apex-cal-tone-ink:var(--accent-primary)}
+.apex-calendar__bgspan[data-tone="neutral"]{--apex-cal-tone-ink:var(--fg-muted)}
+/* The bar, number and "+N more" layers paint ABOVE the cells, so they must not
+   take the pointer: without this a click in the lower half of a cell hit an empty
+   lane instead of the day, and a drag could not find the day under the pointer at
+   all. Only their real children are interactive. */
+.apex-calendar__nums,.apex-calendar__lanes,.apex-calendar__mores{position:relative;display:grid;grid-template-columns:var(--apex-cal-grid);pointer-events:none}
+.apex-calendar__lanes .apex-calendar__bar-ev,.apex-calendar__mores .apex-calendar__more{pointer-events:auto}
+.apex-calendar__lanes{grid-auto-rows:var(--apex-cal-lane);align-content:start;gap:2px 0}
+.apex-calendar__num{grid-row:1;padding:4px 6px 2px;text-align:end;font-size:var(--t-sm);font-variant-numeric:tabular-nums;color:var(--fg-default);pointer-events:none}
+.apex-calendar__num[data-outside="true"]{color:var(--fg-subtle)}
+.apex-calendar__num[data-today="true"]{font-weight:700;color:var(--accent-primary)}
+/* bars: one grid item per row segment, so the span IS the cell span */
+.apex-calendar__bar-ev{--apex-cal-tone-ink:var(--accent-primary);display:flex;align-items:center;gap:5px;min-inline-size:0;margin-inline:3px;padding:1px 7px;border-radius:var(--r-xs);background:var(--apex-cal-tone-ink);color:#fff;font-size:11px;line-height:18px;font-weight:500;text-align:start;border:0;cursor:pointer;overflow:hidden;white-space:nowrap;font-family:inherit}
+.apex-calendar__bar-ev[data-tone="success"]{--apex-cal-tone-ink:var(--accent-success)}
+.apex-calendar__bar-ev[data-tone="warn"]{--apex-cal-tone-ink:var(--accent-warning)}
+.apex-calendar__bar-ev[data-tone="danger"]{--apex-cal-tone-ink:var(--accent-danger)}
+.apex-calendar__bar-ev[data-tone="help"]{--apex-cal-tone-ink:var(--accent-help)}
+.apex-calendar__bar-ev[data-tone="neutral"]{--apex-cal-tone-ink:var(--fg-muted)}
+.apex-calendar__bar-ev:hover{filter:brightness(1.06)}
+.apex-calendar__bar-ev:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+/* an open-ended bar loses its corner on the side it continues past */
+.apex-calendar__bar-ev[data-start="false"]{border-start-start-radius:0;border-end-start-radius:0;margin-inline-start:0}
+.apex-calendar__bar-ev[data-end="false"]{border-start-end-radius:0;border-end-end-radius:0;margin-inline-end:0}
+/* a timed event is a dot and a time, not a filled bar: it occupies a moment */
+.apex-calendar__bar-ev[data-timed="true"]{background:none;color:var(--fg-default);padding-inline:5px}
+.apex-calendar__bar-ev[data-timed="true"] .apex-calendar__dot{inline-size:7px;block-size:7px;border-radius:50%;background:var(--apex-cal-tone-ink);flex-shrink:0}
+.apex-calendar__bar-ev[data-timed="true"]:hover{background:var(--bg-muted);filter:none}
+.apex-calendar__time{color:var(--fg-muted);font-variant-numeric:tabular-nums;flex-shrink:0}
+.apex-calendar__evtitle{overflow:hidden;text-overflow:ellipsis;min-inline-size:0}
+.apex-calendar__more{margin-inline:5px;padding:1px 4px;border:0;border-radius:var(--r-xs);background:none;color:var(--fg-subtle);font-family:inherit;font-size:10px;font-weight:600;text-align:start;cursor:pointer}
+.apex-calendar__more:hover{background:var(--bg-muted);color:var(--accent-primary)}
+.apex-calendar__more:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-scope-catch{position:fixed;inset:0;z-index:1200}
+.apex-calendar__pop{box-sizing:border-box;position:fixed;z-index:1201;inline-size:260px;max-block-size:320px;overflow:auto;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--r-md);box-shadow:var(--shadow-lg);padding:10px;font-family:var(--font-sans);display:flex;flex-direction:column;gap:2px}
+.apex-calendar__pop h4{margin:0 0 6px;font-size:var(--t-sm);font-weight:600;color:var(--fg-default)}
+.apex-calendar__empty{padding:8px;font-size:var(--t-sm);color:var(--fg-subtle)}
+@media (max-width:620px){.apex-calendar{--apex-cal-row:76px}.apex-calendar[data-week-numbers="true"]{--apex-cal-week:28px}}
+
+/* ─── calendar: the time grid (week and day views) ─────────
+   The axis is a CLOCK: heights come from wall-clock minutes, so an event at
+   09:00 sits against the 09:00 label on the 23-hour day too. */
+.apex-calendar__views{display:flex;gap:2px;padding:2px;border-radius:var(--r-sm);background:var(--bg-muted)}
+.apex-calendar__views button{block-size:28px;padding:0 12px;border:0;border-radius:var(--r-xs);background:none;color:var(--fg-muted);font-family:inherit;font-size:var(--t-sm);font-weight:500;cursor:pointer}
+.apex-calendar__views button[aria-pressed="true"]{background:var(--bg-surface);color:var(--fg-default);box-shadow:var(--shadow-xs)}
+.apex-calendar__views button:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-calendar__tg{--apex-cal-gutter:64px;--apex-cal-slot:24px;flex:1;overflow:auto;position:relative;display:flex;flex-direction:column}
+/* flex-shrink:0 on both header bands. The scroller is a flex column, and with a
+   1152px axis below them the bands were being SQUEEZED — the all-day strip
+   measured 27px while its own label was 52px and overflowed into the axis, which
+   is what collided with the first tick. Their height is their content's. */
+.apex-calendar__daybar{position:sticky;inset-block-start:0;z-index:3;flex:0 0 auto;display:grid;grid-template-columns:var(--apex-cal-gutter) var(--apex-cal-cols);background:var(--bg-surface);border-block-end:1px solid var(--border-default)}
+.apex-calendar__dayhead{padding:6px 4px;text-align:center;border-inline-start:1px solid var(--border-subtle);min-inline-size:0}
+.apex-calendar__dayhead em{display:block;font-style:normal;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-subtle)}
+.apex-calendar__dayhead b{display:block;font-size:var(--t-lg);font-weight:600;font-variant-numeric:tabular-nums;color:var(--fg-default)}
+.apex-calendar__dayhead[data-today="true"] b{color:var(--accent-primary)}
+.apex-calendar__dayhead[data-today="true"] em{color:var(--accent-primary)}
+/* the all-day strip IS a one-row month matrix, so it reuses the bar layers */
+.apex-calendar__allday{flex:0 0 auto;display:grid;grid-template-columns:var(--apex-cal-gutter) var(--apex-cal-cols);border-block-end:1px solid var(--border-default);background:var(--bg-subtle);min-block-size:26px}
+.apex-calendar__alllabel{grid-row:1;display:flex;align-items:center;justify-content:flex-end;padding:4px 8px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-subtle)}
+.apex-calendar__allrow{grid-column:2 / -1;grid-row:1;display:grid;grid-template-columns:var(--apex-cal-cols);grid-auto-rows:var(--apex-cal-lane);align-content:start;gap:2px 0;padding-block:3px}
+.apex-calendar__slots{position:relative;display:grid;grid-template-columns:var(--apex-cal-gutter) var(--apex-cal-cols);flex:1 0 auto}
+.apex-calendar__axis{position:relative;border-inline-end:1px solid var(--border-subtle)}
+.apex-calendar__tick{position:absolute;inset-inline-end:6px;transform:translateY(-50%);font-size:10px;font-variant-numeric:tabular-nums;color:var(--fg-subtle);white-space:nowrap}
+/* The first tick sits AT the top of the axis, so centring it on its own line put
+   half of it above the axis and into the all-day strip. It hangs below its line
+   instead — the only tick that cannot be centred. */
+.apex-calendar__tick:first-child{transform:none}
+.apex-calendar__col{position:relative;border-inline-start:1px solid var(--border-subtle);min-inline-size:0;background-repeat:repeat;cursor:pointer}
+.apex-calendar__col[data-today="true"]{background-color:color-mix(in srgb,var(--accent-primary) 4%,transparent)}
+.apex-calendar__tgbg{position:absolute;inset-inline:0;--apex-cal-tone-ink:var(--accent-success);background:color-mix(in srgb,var(--apex-cal-tone-ink) 14%,transparent);pointer-events:none}
+.apex-calendar__tgbg[data-tone="warn"]{--apex-cal-tone-ink:var(--accent-warning)}
+.apex-calendar__tgbg[data-tone="danger"]{--apex-cal-tone-ink:var(--accent-danger)}
+.apex-calendar__tgbg[data-tone="neutral"]{--apex-cal-tone-ink:var(--fg-muted)}
+.apex-calendar__block{--apex-cal-tone-ink:var(--accent-primary);position:absolute;overflow:hidden;border-radius:var(--r-xs);border:1px solid color-mix(in srgb,#000 12%,var(--apex-cal-tone-ink));background:var(--apex-cal-tone-ink);color:#fff;padding:2px 5px;font-size:11px;line-height:1.25;text-align:start;font-family:inherit;cursor:pointer;box-shadow:0 1px 2px rgba(8,12,20,.16)}
+.apex-calendar__block[data-tone="success"]{--apex-cal-tone-ink:var(--accent-success)}
+.apex-calendar__block[data-tone="warn"]{--apex-cal-tone-ink:var(--accent-warning)}
+.apex-calendar__block[data-tone="danger"]{--apex-cal-tone-ink:var(--accent-danger)}
+.apex-calendar__block[data-tone="help"]{--apex-cal-tone-ink:var(--accent-help)}
+.apex-calendar__block[data-tone="neutral"]{--apex-cal-tone-ink:var(--fg-muted)}
+.apex-calendar__block:hover{filter:brightness(1.06);z-index:2}
+.apex-calendar__block:focus-visible{outline:none;box-shadow:var(--focus-ring);z-index:3}
+/* Both lines are single-line and clip with an ellipsis. The time WRAPPING is what
+   pushed the title out of the box — a wrapped "22:00 – 0:30" is three lines in a
+   33px overlap column, and the title then rendered below the clip. */
+.apex-calendar__block b{display:block;font-weight:600;font-variant-numeric:tabular-nums;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.apex-calendar__block span{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Under two lines' worth of height the TITLE wins and the time is dropped: the
+   block's position against the axis already says when it is, and a booking with a
+   time and no name identifies nothing. */
+.apex-calendar__block[data-compact="true"] b{display:none}
+.apex-calendar__block[data-compact="true"]{padding-block:1px;display:flex;align-items:center}
+.apex-calendar__block[data-clip-start="true"]{border-start-start-radius:0;border-start-end-radius:0;border-block-start-style:dashed}
+.apex-calendar__block[data-clip-end="true"]{border-end-start-radius:0;border-end-end-radius:0;border-block-end-style:dashed}
+.apex-calendar__now{position:absolute;inset-inline:0;block-size:0;border-block-start:2px solid var(--accent-danger);z-index:4;pointer-events:none}
+.apex-calendar__now::before{content:'';position:absolute;inset-block-start:-4px;inset-inline-start:-3px;inline-size:7px;block-size:7px;border-radius:50%;background:var(--accent-danger)}
+@media (max-width:620px){.apex-calendar__tg{--apex-cal-gutter:44px}}
+
+/* ─── calendar: the agenda list ────────────────────────────
+   A multi-day event appears under every day it covers: the list answers "what is
+   happening on this day", and listing a conference once hides it from Thursday. */
+.apex-calendar__list{flex:1;overflow:auto;display:flex;flex-direction:column}
+.apex-calendar__lday{position:sticky;inset-block-start:0;z-index:1;display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 14px;background:var(--bg-muted);border-block:1px solid var(--border-subtle);font-size:var(--t-sm);font-weight:600;color:var(--fg-default)}
+.apex-calendar__lday span{font-weight:500;color:var(--fg-subtle);font-variant-numeric:tabular-nums}
+.apex-calendar__litem{display:grid;grid-template-columns:minmax(96px,auto) 14px 1fr;align-items:center;gap:10px;inline-size:100%;padding:9px 14px;border:0;border-block-end:1px solid var(--border-subtle);background:none;color:var(--fg-default);font-family:inherit;font-size:var(--t-sm);text-align:start;cursor:pointer}
+.apex-calendar__litem:hover{background:var(--bg-subtle)}
+.apex-calendar__litem:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-calendar__ltime{color:var(--fg-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.apex-calendar__ldot{--apex-cal-tone-ink:var(--accent-primary);inline-size:10px;block-size:10px;border-radius:50%;background:var(--apex-cal-tone-ink)}
+.apex-calendar__ldot[data-tone="success"]{--apex-cal-tone-ink:var(--accent-success)}
+.apex-calendar__ldot[data-tone="warn"]{--apex-cal-tone-ink:var(--accent-warning)}
+.apex-calendar__ldot[data-tone="danger"]{--apex-cal-tone-ink:var(--accent-danger)}
+.apex-calendar__ldot[data-tone="help"]{--apex-cal-tone-ink:var(--accent-help)}
+.apex-calendar__ldot[data-tone="neutral"]{--apex-cal-tone-ink:var(--fg-muted)}
+.apex-calendar__ltitle{display:flex;align-items:center;gap:6px;min-inline-size:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ─── calendar: editing gestures ───────────────────────────
+   The grab handle is a zone of the block, not an extra element: a 6px child on
+   every event is a lot of DOM for something only the pointer ever finds. */
+.apex-calendar__block[data-editable="true"]{cursor:grab}
+.apex-calendar__block[data-editable="true"]::after{content:'';position:absolute;inset-inline:0;inset-block-end:0;block-size:7px;cursor:ns-resize}
+.apex-calendar__bar-ev[data-editable="true"]{cursor:grab}
+.apex-calendar__bar-ev[data-editable="true"]::after{content:'';position:absolute;inset-block:0;inset-inline-end:0;inline-size:7px;cursor:ew-resize}
+.apex-calendar__bar-ev[data-editable="true"]{position:relative}
+.apex-calendar__block[data-dragging="true"],.apex-calendar__bar-ev[data-dragging="true"]{opacity:.85;box-shadow:0 6px 18px -6px rgba(8,12,20,.5);z-index:5}
+/* While a drag is running, events are not pointer TARGETS: the drop day is read
+   from the element under the pointer, and an event sitting there (very often the
+   dragged one, which follows the pointer) hid the cell underneath it. */
+body[data-cal-dragging] .apex-calendar__bar-ev,body[data-cal-dragging] .apex-calendar__block{pointer-events:none}
+body[data-cal-dragging="move"]{cursor:grabbing !important;user-select:none !important}
+body[data-cal-dragging="resize"]{cursor:ns-resize !important;user-select:none !important}
+/* The scope prompt: three choices, because editing a series is three operations.
+   Shared by ApexCalendar and ApexScheduler — the same question, asked once. */
+.apex-scope{box-sizing:border-box;position:fixed;z-index:1300;inline-size:270px;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--r-md);box-shadow:var(--shadow-lg);padding:12px;font-family:var(--font-sans);display:flex;flex-direction:column;gap:6px}
+.apex-scope h4{margin:0 0 2px;font-size:var(--t-sm);font-weight:600;color:var(--fg-default)}
+.apex-scope p{margin:0 0 6px;font-size:12px;color:var(--fg-muted)}
+.apex-scope button{padding:7px 10px;border:1px solid var(--border-default);border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);font-family:inherit;font-size:var(--t-sm);text-align:start;cursor:pointer}
+.apex-scope button:hover{border-color:var(--accent-primary);color:var(--accent-primary)}
+.apex-scope button:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-scope button[data-cancel="true"]{border:0;background:none;color:var(--fg-subtle);text-align:center;padding-block:4px}
+/* the editor's field grid — two columns, with full-width rows for the long ones */
+.apex-calendar__grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.apex-calendar__grid > [data-span="2"]{grid-column:1 / -1}
+/* resource columns: the header names a resource, not a date */
+.apex-calendar__dayhead[data-resource="true"]{padding-block:9px}
+.apex-calendar__dayhead[data-resource="true"] b{font-size:var(--t-sm);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apex-calendar__allcell{grid-row:1;display:flex;flex-direction:column;gap:2px;padding:3px;border-inline-start:1px solid var(--border-subtle);min-inline-size:0}
+/* ─── calendar: the year view ──────────────────────────────
+   Twelve month matrices at a smaller scale, segmented by the SAME packer the
+   month view uses — so the "+N more" arithmetic and the lane order cannot drift
+   between the two. Only the metrics change. */
+.apex-calendar__year{flex:1;min-block-size:0;overflow:auto;padding:14px;display:grid;gap:16px;align-content:start;grid-auto-rows:min-content}
+.apex-calendar__year[data-layout="grid"]{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.apex-calendar__year[data-layout="stack"]{grid-template-columns:minmax(0,1fr)}
+.apex-calendar__year[data-layout="continuous"]{grid-template-columns:minmax(0,1fr);gap:0}
+/* `--apex-cal-grid` is the month grid's column template, declared ONCE.
+
+   It was previously written out in each layer's own rule and then corrected by two
+   hand-maintained selector lists, and `.apex-calendar__bg` was missing from both:
+   `--apex-cal-week: 0px` leaves the track in place, so every background tint addressed
+   the zero-width column and landed one day toward the row start, with the first
+   day invisible and the last untintable. An incomplete list was the defect, so the
+   list is gone — a layer that reads `--apex-cal-grid` cannot be forgotten.
+
+   The week column is ADDED by the state that wants it rather than always declared
+   and then zeroed. Historical note on the original: `--apex-cal-week: 0px` leaves the
+   track in place, so the seven day items filled tracks 1..7 with track 1 at zero
+   width and track 8 unused — the first weekday header and every row's first day
+   collapsed onto their neighbours. Declared away rather than zeroed, on the root's
+   own state, so `showWeekNumbers ? 1 : 0` in the components stays correct.
+
+   It survived every earlier check because the demo and the gallery both pass
+   `show-week-numbers`, which gives a real 42px track that absorbs the offset. */
+
+/* A mini month has no week-number column, and zeroing `--apex-cal-week` was not the
+   same as not having one: the track still existed at 0px, so every layer placed
+   its first day into it. Day 1 collapsed to 8px on top of day 2, the rest shifted
+   a column, and the seventh had no track left — 63 overlapping day numbers, all
+   from one phantom column. The mini drops the track instead. */
+.apex-calendar__mini{--apex-cal-grid:var(--apex-cal-cols);--apex-cal-row:auto;--apex-cal-lane:13px;min-inline-size:0;border:1px solid var(--border-subtle);border-radius:var(--r-md);overflow:hidden;background:var(--bg-surface)}
+.apex-calendar__year[data-layout="continuous"] .apex-calendar__mini{border-radius:0;border-block-end:0}
+.apex-calendar__year[data-layout="continuous"] .apex-calendar__mini:last-child{border-block-end:1px solid var(--border-subtle)}
+.apex-calendar__minihead{margin:0;padding:7px 10px;font-size:var(--t-sm);font-weight:600;color:var(--fg-default);background:var(--bg-subtle);border-block-end:1px solid var(--border-subtle)}
+.apex-calendar__mini .apex-calendar__wd{padding:3px 2px;font-size:9px}
+.apex-calendar__mini .apex-calendar__row{min-block-size:0;padding-block-end:2px}
+/* The bar and "+N" layers are absolute-ish overlays with no intrinsic height, so
+   without a floor the row collapsed toward the day number's line box and adjacent
+   numbers overlapped. One lane's worth is the minimum a month row can be. */
+.apex-calendar__mini .apex-calendar__row{min-block-size:calc(var(--apex-cal-lane) + 8px)}
+.apex-calendar__mini .apex-calendar__num{padding:2px 4px 1px;font-size:10px}
+.apex-calendar__mini .apex-calendar__bar-ev{margin-inline:1px;padding:0 4px;font-size:9px;line-height:12px;border-radius:2px}
+.apex-calendar__mini .apex-calendar__dot{inline-size:5px;block-size:5px}
+.apex-calendar__mini .apex-calendar__more{margin-inline:2px;font-size:9px;padding:0 2px}
+.apex-calendar__mini .apex-calendar__lanes{gap:1px 0}
+/* constraints: a refused position is SHOWN refused, mid-drag and in the editor.
+   Reverting silently is how an author concludes the drag is broken rather than
+   disallowed. */
+.apex-calendar__block[data-invalid="true"],.apex-calendar__bar-ev[data-invalid="true"]{background:repeating-linear-gradient(135deg,var(--accent-danger) 0 6px,color-mix(in srgb,var(--accent-danger) 62%,#000) 6px 12px);border-color:var(--accent-danger);color:#fff}
+.apex-calendar__block[data-invalid="true"]{cursor:not-allowed}
+.apex-calendar__refusal{margin:2px 0 0;padding:8px 10px;border-radius:var(--r-sm);background:color-mix(in srgb,var(--accent-danger) 12%,transparent);color:var(--accent-danger);font-size:var(--t-sm);font-weight:500}
+/* An allow-window's off-hours are dimmed rather than tinted: the rule is about
+   what is NOT bookable, and a colour would compete with background events. */
+.apex-calendar__offhours{position:absolute;inset-inline:0;background:color-mix(in srgb,var(--bg-app) 55%,transparent);pointer-events:none;z-index:0}
+/* The scheduler's resize edge — the same zone-not-handle approach as the
+   calendar's, since a 8px child on every block is a lot of DOM for something only
+   the pointer finds. */
+.apex-sched__ev[data-resizable="true"]::after{content:'';position:absolute;inset-block:0;inset-inline-end:0;inline-size:8px;cursor:ew-resize}
+body[data-sched-dragging="resize"]{cursor:ew-resize !important;user-select:none !important}
+
+/* ─── calendar: event variants ─────────────────────────────
+   The paint, not the structure. A competitor's soft look — a tone-tinted wash
+   with a coloured inline-start edge and dark text — is the SAME two lines we
+   already render, so it must not require a template: a host that wrote one would
+   have to re-implement the compact rule, the recurring icon, the clipped dashes,
+   the ellipsis and the invalid stripes, and would get two of them wrong.
+
+   Slots are for structure; variants are for paint. Everything here hangs off
+   `--apex-cal-tone-ink`, so a variant costs nothing per tone and a custom template can use
+   the same variable and stay inside the design system. */
+.apex-calendar[data-variant="soft"] .apex-calendar__block,
+.apex-calendar[data-variant="soft"] .apex-calendar__bar-ev[data-timed="false"]{background:color-mix(in srgb,var(--apex-cal-tone-ink) 14%,var(--bg-surface));color:var(--fg-default);border-color:color-mix(in srgb,var(--apex-cal-tone-ink) 32%,transparent);border-inline-start:3px solid var(--apex-cal-tone-ink)}
+.apex-calendar[data-variant="soft"] .apex-calendar__block b{color:var(--fg-muted);opacity:1}
+/* An open-ended bar keeps its flat edge: the accent marks a START, so a segment
+   continuing in from the previous row must not claim one. */
+.apex-calendar[data-variant="soft"] .apex-calendar__bar-ev[data-start="false"]{border-inline-start-width:0}
+.apex-calendar[data-variant="outline"] .apex-calendar__block,
+.apex-calendar[data-variant="outline"] .apex-calendar__bar-ev[data-timed="false"]{background:var(--bg-surface);color:var(--fg-default);border:1px solid var(--apex-cal-tone-ink)}
+.apex-calendar[data-variant="outline"] .apex-calendar__block b{color:var(--fg-muted);opacity:1}
+.apex-calendar[data-variant="outline"] .apex-calendar__block::before,
+.apex-calendar[data-variant="outline"] .apex-calendar__bar-ev[data-timed="false"]::before{content:'';position:absolute;inset-block:0;inset-inline-start:0;inline-size:3px;background:var(--apex-cal-tone-ink)}
+.apex-calendar[data-variant="outline"] .apex-calendar__bar-ev[data-timed="false"]{position:relative;padding-inline-start:10px}
+/* The invalid and dragging states must still win, or a refused drop looks legal
+   in any variant but the default. */
+.apex-calendar[data-variant] .apex-calendar__block[data-invalid="true"],
+.apex-calendar[data-variant] .apex-calendar__bar-ev[data-invalid="true"]{background:repeating-linear-gradient(135deg,var(--accent-danger) 0 6px,color-mix(in srgb,var(--accent-danger) 62%,#000) 6px 12px);border-color:var(--accent-danger);color:#fff}
+/* A custom template owns its own box: the wrapper's padding is dropped when one
+   is supplied, so the host is not fighting a 2px inset it did not ask for. The
+   DEFAULT path is untouched — the padding stays exactly where it was. */
+/* Matched by ATTRIBUTE and UNSCOPED — not by a list of wrapper classes, and not
+   scoped to the component roots either. The list version named 2 of the 6 wrappers that set `data-custom`, so
+   a host supplying #chip, #list-item or the scheduler's #event kept 2-9px of
+   inset it could not remove: the third time in this project that a
+   hand-maintained list of targets was the defect rather than its contents. A slot
+   site added later cannot be forgotten by an attribute selector.
+
+   Root-scoping was the second attempt and had the same shape of hole: it assumed
+   CONTAINMENT, and the "+N more" popover is teleported to <body>. The attribute
+   is vendor-prefixed precisely so it can be matched with no ancestor at all
+   without colliding with a consumer's own `data-custom`.
+
+   The selector is REPEATED to reach specificity (0,2,0): variant rules like
+   `.apex-calendar__bar-ev[data-timed="true"]` set `padding-inline` and would
+   otherwise outrank a single attribute. Being last in the file wins the tie.
+   `!important` would also work but would override a HOST's own padding on the
+   wrapper, which is theirs to set.
+
+   "The template owns its box" has to mean our internal LAYOUT steps aside too,
+   not just the padding: `.apex-calendar__litem` is a three-track grid, and a
+   single slot child would otherwise land in its 96px first column instead of
+   filling the row. */
+[data-apex-custom="true"][data-apex-custom="true"]{padding:0;display:block}
+/* The compact block is the exception that keeps its centring: a host's one child
+   in a 16px box still wants vertical alignment, and it costs the host nothing. */
+.apex-calendar__block[data-apex-custom="true"][data-compact="true"]{display:flex;align-items:center}
+/* The zone, in the axis corner. A grid that answers every date question through
+   an IANA zone should name the one it used — two viewers of the same data in
+   different zones otherwise see different grids with nothing to explain it. */
+.apex-calendar__zone{display:flex;align-items:flex-end;justify-content:center;padding:0 4px 4px;font-size:9px;font-weight:600;letter-spacing:.02em;color:var(--fg-subtle);white-space:nowrap;overflow:hidden}
+
+
+/* ────────────────────────────────────────────────────────────────────────
+   ApexEditor and ApexHTMLEditor — AF2-283.
+
+   237 rules, from `.apex-ed` through `.apex-edimg`, `.apex-edbar`,
+   `.apex-edlink`, `.apex-eddlg`, `.apex-edgrid`, `.apex-edslash`,
+   `.apex-edwc`, `.apex-edbub`, `.apex-objbar`, `.apex-tbl-tools` and
+   `.apex-hed`. Neither component carries a <style> block, so without these
+   the whole family renders as unstyled markup.
+
+   TWO variable families, not eleven: `--apex-ed-*` for the rich-text editor
+   and everything it draws, `--apex-hed-*` for the page editor. §4.2 forbids
+   one family prefix being a prefix of another, so a `--apex-edbar-*`
+   alongside `--apex-ed-*` is not available — the bar's own variable is
+   `--apex-ed-bar-btn`. Fifteen names came across bare: `--ed-*`, `--hl-*`,
+   `--edbar-btn`, `--grid-cols`, `--fig-w`, `--embed-w`, `--hed-min-h`.
+   Four of them are written from JS rather than declared here, which is why
+   the sweep read the components too (the AF2-269 lesson).
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* The toolbar's block select is a raw element rather than ApexSelect, so it needs
+   the same option colours the control shell already declares. */
+.apex-edbar__select{color-scheme:inherit}
+
+.apex-edbar__select option{background:var(--bg-elevated);color:var(--fg-default)}
+
+.apex-edbar__select option:disabled{color:var(--fg-subtle)}
+
+.apex-edbar__select option:checked{background:color-mix(in srgb,var(--accent-primary) 22%,var(--bg-elevated))}
+
+/* ─── editor ───────────────────────────────────────────── */
+.apex-ed{--apex-ed-min-h:180px;--apex-ed-max-h:none;--apex-ed-pad:14px 16px;--apex-ed-fs:15px;--apex-ed-lh:1.65;
+display:flex;flex-direction:column;gap:0;font-family:var(--font-sans);color:var(--fg-default)}
+
+.apex-ed[data-size="sm"]{--apex-ed-fs:13.5px;--apex-ed-pad:10px 12px}
+
+.apex-ed[data-size="lg"]{--apex-ed-fs:16.5px;--apex-ed-pad:18px 20px}
+
+.apex-ed__frame{position:relative;flex:1 1 auto;min-block-size:0}
+
+.apex-ed[data-bordered="true"] .apex-ed__frame{border:1px solid var(--border-default);
+border-radius:var(--r-md);background:var(--bg-surface)}
+
+/* the frame carries the focus ring, since the contenteditable inside it is what
+   actually takes focus but the border is what the reader sees */
+.apex-ed[data-bordered="true"] .apex-ed__frame:focus-within{border-color:var(--accent-primary);
+box-shadow:var(--focus-ring)}
+
+.apex-ed[data-disabled="true"]{opacity:.6;pointer-events:none}
+
+.apex-ed[data-readonly="true"] .apex-ed__frame{background:var(--bg-subtle)}
+
+.apex-ed__host{block-size:100%}
+
+.apex-ed__host .ProseMirror{min-block-size:var(--apex-ed-min-h);max-block-size:var(--apex-ed-max-h);
+overflow-y:auto;padding:var(--apex-ed-pad);outline:none;
+font-size:var(--apex-ed-fs);line-height:var(--apex-ed-lh);white-space:pre-wrap;word-wrap:break-word}
+
+/* the placeholder sits over the first line rather than inside the document: text
+   in the document would make an empty editor non-empty and export itself */
+.apex-ed__placeholder{position:absolute;inset-block-start:0;inset-inline-start:0;
+margin:0;padding:var(--apex-ed-pad);font-size:var(--apex-ed-fs);line-height:var(--apex-ed-lh);
+color:var(--fg-subtle);pointer-events:none}
+
+.apex-ed__error{margin:6px 0 0;font-size:12.5px;color:var(--accent-danger)}
+
+.apex-ed__loading{position:absolute;inset-block-start:0;inset-inline-start:0;margin:0;
+padding:var(--apex-ed-pad);font-size:var(--apex-ed-fs);line-height:var(--apex-ed-lh);color:var(--fg-subtle)}
+
+/* the writing area is empty until the engine lands, so the frame keeps its height
+   rather than snapping open once the document arrives */
+.apex-ed[data-ready="false"] .apex-ed__host{min-block-size:var(--apex-ed-min-h)}
+
+/* ── document typography ──
+   The document owns its own type, explicitly.
+   A host page that styles h2 or p — which is near-universal — would otherwise
+   bleed through every property these rules do not name: the specificity is ours,
+   but an undeclared property has nothing to win with. So the inheritable set is
+   stated on the surface and re-stated on each element that a page is likely to
+   have an opinion about. */
+.apex-ed__host .ProseMirror{color:var(--fg-default);font-family:var(--font-sans);
+font-weight:400;font-style:normal;letter-spacing:normal;text-transform:none;
+text-align:start;text-indent:0;font-variant:normal}
+
+.apex-ed__host .ProseMirror>*+*{margin-block-start:.75em}
+
+.apex-ed__host .ProseMirror>*:first-child{margin-block-start:0}
+
+.apex-ed__host .ProseMirror p,.apex-ed__host .ProseMirror li,
+.apex-ed__host .ProseMirror td,.apex-ed__host .ProseMirror th{
+margin:0;color:var(--fg-default);font-size:1em;font-weight:400;letter-spacing:normal;
+text-transform:none}
+
+.apex-ed__host .ProseMirror p{text-wrap:pretty}
+
+.apex-ed__host .ProseMirror h1,.apex-ed__host .ProseMirror h2,
+.apex-ed__host .ProseMirror h3,.apex-ed__host .ProseMirror h4,
+.apex-ed__host .ProseMirror h5,.apex-ed__host .ProseMirror h6{
+margin:0;color:var(--fg-default);font-family:inherit;letter-spacing:-0.006em;
+text-transform:none;text-wrap:pretty}
+
+.apex-ed__host .ProseMirror h1{font-size:1.72em;font-weight:680;line-height:1.24}
+
+.apex-ed__host .ProseMirror h2{font-size:1.4em;font-weight:660;line-height:1.28}
+
+.apex-ed__host .ProseMirror h3{font-size:1.18em;font-weight:650;line-height:1.34}
+
+.apex-ed__host .ProseMirror h4,.apex-ed__host .ProseMirror h5,
+.apex-ed__host .ProseMirror h6{font-size:1.02em;font-weight:650}
+
+.apex-ed__host .ProseMirror blockquote{margin:0;padding-inline-start:14px;
+border-inline-start:3px solid var(--border-default);color:var(--fg-muted);
+font-size:1em;font-style:normal;letter-spacing:normal}
+
+.apex-ed__host .ProseMirror hr{margin:0;border:0;border-block-start:1px solid var(--border-default)}
+
+.apex-ed__host .ProseMirror code{padding:.12em .34em;border-radius:var(--r-sm);
+background:var(--bg-muted);color:var(--fg-default);
+font-family:var(--font-mono);font-size:.9em;font-weight:400;letter-spacing:normal}
+
+.apex-ed__host .ProseMirror a{color:var(--accent-primary);text-decoration:underline;
+text-underline-offset:2px;font-weight:inherit;letter-spacing:normal}
+
+.apex-ed__host .ProseMirror a:hover{color:color-mix(in oklch,var(--accent-primary) 78%,#000)}
+
+/* the browser's own selection colour is nearly invisible on a light surface once
+   the editor is not focused, so the inactive case gets its own */
+.apex-ed__host .ProseMirror-selectednode{outline:2px solid var(--accent-primary);
+border-radius:var(--r-sm)}
+
+.apex-ed__host .ProseMirror ::selection{background:color-mix(in oklch,var(--accent-primary) 24%,transparent)}
+
+/* ── lists ── */
+.apex-ed__host .ProseMirror ul,.apex-ed__host .ProseMirror ol{margin:0;
+padding-inline-start:1.5em;color:var(--fg-default);font-size:1em;list-style-position:outside}
+
+.apex-ed__host .ProseMirror ul{list-style-type:disc}
+
+.apex-ed__host .ProseMirror ol{list-style-type:decimal}
+
+.apex-ed__host .ProseMirror li{margin:0}
+
+.apex-ed__host .ProseMirror li>*+*{margin-block-start:.4em}
+
+/* a tight list closes the gap BETWEEN items but keeps it inside them, which is
+   what distinguishes a list of phrases from a list of paragraphs */
+.apex-ed__host .ProseMirror ul[data-tight]>li>p,
+.apex-ed__host .ProseMirror ol[data-tight]>li>p{margin:0}
+
+.apex-ed__host .ProseMirror ul[data-tight]>li+li,
+.apex-ed__host .ProseMirror ol[data-tight]>li+li{margin-block-start:.18em}
+
+/* ── task lists ── */
+.apex-ed__host .ProseMirror ul[data-task-list]{padding-inline-start:0;list-style:none}
+
+.apex-ed__host .ProseMirror li[data-checked]{position:relative;padding-inline-start:26px}
+
+/* the box is drawn rather than an input: a real checkbox inside contenteditable
+   takes focus away from the document and cannot be reached by the caret */
+.apex-ed__host .ProseMirror li[data-checked]::before{content:"";position:absolute;
+inset-inline-start:0;inset-block-start:.28em;inline-size:15px;block-size:15px;
+border:1.5px solid var(--border-strong,var(--border-default));border-radius:4px;
+background:var(--bg-surface);cursor:pointer}
+
+.apex-ed__host .ProseMirror li[data-checked="true"]::before{
+background:var(--accent-primary);border-color:var(--accent-primary)}
+
+.apex-ed__host .ProseMirror li[data-checked="true"]::after{content:"";position:absolute;
+inset-inline-start:4.5px;inset-block-start:.52em;inline-size:6px;block-size:3px;
+border-inline-start:2px solid #FFF;border-block-end:2px solid #FFF;rotate:-45deg}
+
+.apex-ed__host .ProseMirror li[data-checked="true"]{color:var(--fg-subtle)}
+
+.apex-ed__host .ProseMirror li[data-checked="true"]>p{text-decoration:line-through}
+
+/* ── code block ── */
+.apex-ed__host .ProseMirror pre{margin:0;padding:12px 14px;border-radius:var(--r-md);
+background:var(--bg-muted);overflow-x:auto;
+font-family:var(--font-mono);font-size:.88em;line-height:1.5;white-space:pre}
+
+.apex-ed__host .ProseMirror pre code{padding:0;background:none;font-size:1em}
+
+/* the language sits in the corner as a label rather than in the document, so it
+   round-trips as an attribute and never becomes text someone can edit */
+.apex-ed__host .ProseMirror pre[data-language]:not([data-language=""])::before{
+content:attr(data-language);float:inline-end;margin-block-start:-4px;
+font-family:var(--font-sans);font-size:10px;font-weight:700;letter-spacing:.06em;
+text-transform:uppercase;color:var(--fg-subtle)}
+
+/* ── alignment ── */
+.apex-ed__host .ProseMirror [data-align="center"]{text-align:center}
+
+.apex-ed__host .ProseMirror [data-align="right"]{text-align:right}
+
+.apex-ed__host .ProseMirror [data-align="justify"]{text-align:justify}
+
+.apex-ed__host .ProseMirror [data-align="left"]{text-align:left}
+
+/* ── the slice-2 marks ── */
+.apex-ed__host .ProseMirror u{text-decoration-thickness:1px;text-underline-offset:2px}
+
+.apex-ed__host .ProseMirror s{text-decoration-color:var(--fg-subtle)}
+
+.apex-ed__host .ProseMirror sub,.apex-ed__host .ProseMirror sup{font-size:.74em;line-height:0}
+
+/* highlights are named tones, not stored hex: a document carrying #FFF3A0 cannot
+   follow a theme into dark mode, where a token can */
+.apex-ed__host .ProseMirror mark{padding:.06em .18em;border-radius:3px;
+background:var(--apex-ed-hl-yellow);color:inherit}
+
+.apex-ed{--apex-ed-hl-yellow:oklch(0.93 0.14 100);--apex-ed-hl-green:oklch(0.90 0.13 150);
+--apex-ed-hl-blue:oklch(0.90 0.09 235);--apex-ed-hl-pink:oklch(0.90 0.09 350);--apex-ed-hl-orange:oklch(0.90 0.12 65)}
+
+.apex-ed__host .ProseMirror mark[data-color="green"]{background:var(--apex-ed-hl-green)}
+
+.apex-ed__host .ProseMirror mark[data-color="blue"]{background:var(--apex-ed-hl-blue)}
+
+.apex-ed__host .ProseMirror mark[data-color="pink"]{background:var(--apex-ed-hl-pink)}
+
+.apex-ed__host .ProseMirror mark[data-color="orange"]{background:var(--apex-ed-hl-orange)}
+
+/* ─── editor toolbar ──────────────────────────────────── */
+.apex-edbar{--apex-ed-bar-btn:30px;display:flex;align-items:center;gap:1px;
+padding:5px 7px;background:var(--bg-subtle);border:1px solid var(--border-default);
+border-block-end:0;border-start-start-radius:var(--r-md);border-start-end-radius:var(--r-md);
+font-family:var(--font-sans)}
+
+.apex-edbar[data-size="md"]{--apex-ed-bar-btn:34px}
+
+.apex-edbar[data-wrap="true"]{flex-wrap:wrap}
+
+/* sticky needs a stacking context above the document but below any popover */
+.apex-edbar[data-sticky="true"]{position:sticky;inset-block-start:0;z-index:3}
+
+/* the frame below drops its top corners, so bar and document read as one control */
+.apex-edbar+.apex-ed__frame,.apex-ed .apex-edbar+.apex-ed__frame{
+border-start-start-radius:0;border-start-end-radius:0}
+
+.apex-edbar__btn{display:grid;place-items:center;inline-size:var(--apex-ed-bar-btn);
+block-size:var(--apex-ed-bar-btn);padding:0;border:0;border-radius:var(--r-sm);
+background:transparent;color:var(--fg-muted);font:inherit;font-size:12.5px;cursor:pointer;
+transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out)}
+
+.apex-edbar__btn:hover:not(:disabled){background:color-mix(in oklch,var(--fg-default) 8%,transparent);
+color:var(--fg-default)}
+
+.apex-edbar__btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+/* an active button is filled rather than tinted: at 30px a tint reads as hover,
+   and the two states have to be tellable apart at a glance */
+.apex-edbar__btn[data-on="true"]{background:var(--accent-primary);color:#FFF}
+
+.apex-edbar__btn[data-on="true"]:hover{background:color-mix(in oklch,var(--accent-primary) 88%,#000)}
+
+.apex-edbar__btn:disabled{opacity:.35;cursor:default}
+
+.apex-edbar__sep{inline-size:1px;block-size:20px;margin-inline:5px;
+background:var(--border-default);flex:0 0 auto}
+
+.apex-edbar__select{block-size:var(--apex-ed-bar-btn);max-inline-size:130px;padding:0 6px;
+border:1px solid transparent;border-radius:var(--r-sm);background:transparent;
+color:var(--fg-default);font:inherit;font-size:12.5px;cursor:pointer}
+
+.apex-edbar__select:hover{background:color-mix(in oklch,var(--fg-default) 8%,transparent)}
+
+.apex-edbar__select:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+/* ─── editor bubble menu ──────────────────────────────── */
+/* absolute inside the frame rather than fixed on the page: the frame is the
+   coordinate space the selection was measured in, and it scrolls with it */
+.apex-edbub{position:absolute;z-index:6}
+
+.apex-edbub .apex-edbar{border:1px solid var(--border-default);border-radius:var(--r-md);
+background:var(--bg-elevated);box-shadow:var(--shadow-lg);padding:4px 5px}
+
+.apex-edbub-enter-active,.apex-edbub-leave-active{
+transition:opacity var(--dur-fast) var(--ease-out),transform var(--dur-fast) var(--ease-out)}
+
+.apex-edbub-enter-from,.apex-edbub-leave-to{opacity:0}
+
+.apex-edbub-enter-from[data-flip="false"],.apex-edbub-leave-to[data-flip="false"]{
+transform:translate(-50%,-100%) translateY(4px)}
+
+.apex-edbub-enter-from[data-flip="true"],.apex-edbub-leave-to[data-flip="true"]{
+transform:translate(-50%,0) translateY(-4px)}
+
+/* ─── link editor ─────────────────────────────────────── */
+.apex-edlink{position:relative;display:inline-flex}
+
+.apex-edlink__pop{position:absolute;inset-block-start:calc(100% + 6px);inset-inline-start:0;
+z-index:7;inline-size:230px;display:flex;flex-direction:column;gap:8px;padding:10px;
+border:1px solid var(--border-default);border-radius:var(--r-md);
+background:var(--bg-elevated);box-shadow:var(--shadow-lg)}
+
+.apex-edlink__input{inline-size:100%;padding:6px 8px;border:1px solid var(--border-default);
+border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);
+font:inherit;font-size:13px}
+
+.apex-edlink__input:focus{outline:none;border-color:var(--accent-primary);box-shadow:var(--focus-ring)}
+
+.apex-edlink__check{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--fg-muted)}
+
+.apex-edlink__row{display:flex;gap:6px}
+
+.apex-edlink__go,.apex-edlink__rm,.apex-edlink__cancel{flex:1;padding:6px 10px;border:0;
+border-radius:var(--r-sm);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+
+.apex-edlink__go{background:var(--accent-primary);color:#FFF}
+
+.apex-edlink__go:disabled{opacity:.4;cursor:default}
+
+.apex-edlink__rm{background:transparent;color:var(--accent-danger)}
+
+.apex-edlink__rm:hover{background:color-mix(in oklch,var(--accent-danger) 12%,transparent)}
+
+/* Quiet, because cancelling is the reversible choice and the primary action
+   should stay the loudest thing in the row. */
+.apex-edlink__cancel{background:transparent;color:var(--fg-muted);font-weight:500}
+
+.apex-edlink__cancel:hover{background:var(--bg-muted);color:var(--fg-default)}
+
+/* ─── editor dialogs ─────────────────────────────────────
+   The shell is shared: a modal in this editor is a modal, and one set of
+   metrics for the scrim, the head and the footer is what keeps the image
+   dialog and the word count from drifting apart. */
+.apex-edimg__scrim,.apex-eddlg__scrim{position:fixed;inset:0;z-index:820;
+display:grid;place-items:center;padding:24px;background:rgb(0 0 0/.42)}
+
+.apex-edimg,.apex-eddlg{width:min(100%,440px);max-height:min(88vh,720px);
+overflow:auto;border-radius:var(--r-lg);border:1px solid var(--border-default);
+background:var(--bg-surface);box-shadow:0 24px 60px -20px rgb(0 0 0/.5)}
+
+.apex-edimg__head,.apex-eddlg__head{display:flex;align-items:center;
+justify-content:space-between;gap:12px;padding:14px 16px 10px}
+
+.apex-edimg__title,.apex-eddlg__title{margin:0;font-family:var(--font-sans);
+font-size:15px;font-weight:650;color:var(--fg-default)}
+
+.apex-edimg__x,.apex-eddlg__x{display:grid;place-items:center;width:28px;
+height:28px;border:0;border-radius:var(--r-sm);background:transparent;
+color:var(--fg-subtle);cursor:pointer}
+
+.apex-edimg__x:hover,.apex-eddlg__x:hover{background:var(--bg-muted);
+color:var(--fg-default)}
+
+.apex-edimg__foot,.apex-eddlg__foot{display:flex;justify-content:flex-end;gap:8px;
+padding:12px 16px 14px;border-block-start:1px solid var(--border-subtle)}
+
+.apex-eddlg__close{padding:7px 15px;border:0;border-radius:var(--r-sm);font:inherit;
+font-size:12.5px;font-weight:600;background:var(--accent-primary);color:#FFF;
+cursor:pointer}
+
+.apex-eddlg__note{margin:0;padding:0 16px 10px;font-family:var(--font-sans);
+font-size:11.5px;color:var(--fg-subtle)}
+
+/* Figures right-aligned and tabular, because the eye compares columns of
+   numbers down their last digit. */
+.apex-edwc{width:calc(100% - 32px);margin:2px 16px 10px;border-collapse:collapse;
+font-family:var(--font-sans);font-size:12.5px}
+
+.apex-edwc th,.apex-edwc td{padding:5px 8px;text-align:end;
+border-block-end:1px solid var(--border-subtle)}
+
+.apex-edwc thead th{font-size:11px;font-weight:600;color:var(--fg-subtle);
+text-transform:uppercase;letter-spacing:.04em}
+
+.apex-edwc tbody th{text-align:start;font-weight:450;color:var(--fg-muted)}
+
+.apex-edwc td{font-family:var(--font-mono);font-variant-numeric:tabular-nums;
+color:var(--fg-default)}
+
+.apex-edwc tbody tr:last-child th,.apex-edwc tbody tr:last-child td{border:0}
+
+/* ─── image dialog ───────────────────────────────────────
+   ONE dialog with two tabs rather than a three-way split button: the same
+   fields that insert an image also edit one, and two surfaces would have to
+   agree about alt text, dimensions and the ratio lock. */
+.apex-edimg__tabs{display:flex;gap:2px;padding:0 16px;
+border-block-end:1px solid var(--border-subtle)}
+
+.apex-edimg__tab{padding:7px 12px;border:0;border-block-end:2px solid transparent;
+background:transparent;color:var(--fg-subtle);font:inherit;font-size:13px;
+font-weight:550;cursor:pointer}
+
+.apex-edimg__tab[data-on="true"]{color:var(--accent-primary);
+border-block-end-color:var(--accent-primary)}
+
+.apex-edimg__pane{display:flex;flex-direction:column;gap:11px;padding:14px 16px}
+
+.apex-edimg__field{display:flex;flex-direction:column;gap:4px;flex:1;
+font-family:var(--font-sans);font-size:12px;color:var(--fg-muted)}
+
+.apex-edimg__input{padding:7px 9px;border:1px solid var(--border-default);
+border-radius:var(--r-sm);background:var(--bg-default);color:var(--fg-default);
+font:inherit;font-size:13px}
+
+.apex-edimg__input:focus{outline:2px solid var(--accent-primary);outline-offset:-1px}
+
+.apex-edimg__input:disabled{opacity:.5}
+
+.apex-edimg__check{display:flex;align-items:center;gap:7px;font-family:var(--font-sans);
+font-size:12.5px;color:var(--fg-muted)}
+
+.apex-edimg__dims{display:flex;align-items:flex-end;gap:8px}
+
+.apex-edimg__lock{display:grid;place-items:center;width:32px;height:32px;
+border:1px solid var(--border-default);border-radius:var(--r-sm);
+background:var(--bg-default);color:var(--fg-subtle);cursor:pointer}
+
+.apex-edimg__lock[data-on="true"]{border-color:var(--accent-primary);
+color:var(--accent-primary)}
+
+.apex-edimg__drop{display:flex;flex-direction:column;align-items:center;gap:10px;
+padding:26px 16px;border:1.5px dashed var(--border-default);border-radius:var(--r-md);
+background:var(--bg-subtle);text-align:center}
+
+.apex-edimg__drop[data-over="true"]{border-color:var(--accent-primary);
+background:color-mix(in oklch,var(--accent-primary) 8%,var(--bg-subtle))}
+
+.apex-edimg__dropmsg{margin:0;font-family:var(--font-sans);font-size:13px;
+color:var(--fg-muted)}
+
+.apex-edimg__browse{padding:7px 13px;border:1px solid var(--border-default);
+border-radius:var(--r-sm);background:var(--bg-default);color:var(--fg-default);
+font:inherit;font-size:12.5px;font-weight:550;cursor:pointer}
+
+.apex-edimg__browse:hover{background:var(--bg-muted)}
+
+.apex-edimg__file{display:none}
+
+.apex-edimg__note{margin:0;font-family:var(--font-sans);font-size:11.5px;
+color:var(--fg-subtle)}
+
+.apex-edimg__err{margin:0;padding:0 16px 4px;font-family:var(--font-sans);
+font-size:12.5px;color:var(--accent-danger)}
+
+.apex-edimg__preview{margin:0;padding:0 16px 10px}
+
+.apex-edimg__preview img{display:block;max-width:100%;max-height:160px;
+border-radius:var(--r-sm);border:1px solid var(--border-subtle)}
+
+.apex-edimg__cancel,.apex-edimg__save{padding:7px 15px;border:0;
+border-radius:var(--r-sm);font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+
+.apex-edimg__cancel{background:transparent;color:var(--fg-muted);font-weight:500}
+
+.apex-edimg__cancel:hover{background:var(--bg-muted);color:var(--fg-default)}
+
+.apex-edimg__save{background:var(--accent-primary);color:#FFF}
+
+.apex-edimg__save:disabled{opacity:.4;cursor:default}
+
+/* ─── table size picker ──────────────────────────────────
+   A grid rather than two number fields: choosing a table size is a gesture, not
+   data entry, which is why every reference editor does it this way. */
+.apex-edgrid{position:relative;display:inline-flex}
+
+/* As a menu panel it is the submenu's whole content, so it drops the popover's
+   own frame and lets the menu provide it. */
+.apex-edgrid[data-inline="true"]{display:block}
+
+.apex-edgrid[data-inline="true"] .apex-edgrid__pop{position:static;border:0;
+box-shadow:none;background:transparent;padding:6px 8px}
+
+.apex-edgrid__pop{position:absolute;z-index:70;inset-block-start:calc(100% + 6px);
+inset-inline-start:0;padding:8px;border-radius:var(--r-md);
+border:1px solid var(--border-default);background:var(--bg-elevated);
+box-shadow:0 12px 30px -14px rgb(0 0 0/.4)}
+
+.apex-edgrid__grid{display:grid;grid-template-columns:repeat(var(--apex-ed-grid-cols),1fr);gap:2px}
+
+.apex-edgrid__cell{inline-size:15px;block-size:15px;padding:0;
+border:1px solid var(--border-default);border-radius:2px;
+background:var(--bg-default);cursor:pointer}
+
+.apex-edgrid__cell[data-on="true"]{border-color:var(--accent-primary);
+background:color-mix(in oklch,var(--accent-primary) 45%,transparent)}
+
+.apex-edgrid__readout{margin:7px 0 0;text-align:center;font-family:var(--font-mono);
+font-size:11.5px;color:var(--fg-muted)}
+
+/* ─── slash menu ──────────────────────────────────────── */
+.apex-edslash{position:absolute;z-index:6;inline-size:238px;max-block-size:290px;
+overflow-y:auto;padding:5px;border:1px solid var(--border-default);
+border-radius:var(--r-md);background:var(--bg-elevated);box-shadow:var(--shadow-lg);
+font-family:var(--font-sans)}
+
+.apex-edslash__label{margin:6px 8px 3px;font-size:10px;font-weight:700;letter-spacing:.07em;
+text-transform:uppercase;color:var(--fg-subtle)}
+
+.apex-edslash__group:first-child .apex-edslash__label{margin-block-start:2px}
+
+.apex-edslash__item{display:flex;align-items:center;gap:9px;inline-size:100%;
+padding:7px 8px;border:0;border-radius:var(--r-sm);background:transparent;
+color:var(--fg-default);font:inherit;font-size:13px;text-align:start;cursor:pointer}
+
+/* the highlight follows the keyboard, so hover only moves it rather than adding
+   a second lit row — two highlights at once is ambiguous about what Enter does */
+.apex-edslash__item[data-on="true"]{background:var(--bg-muted)}
+
+.apex-edslash__item .apex-icon{color:var(--fg-subtle)}
+
+.apex-edslash__item[data-on="true"] .apex-icon{color:var(--accent-primary)}
+
+/* ── tables ── */
+/* Fixed layout is what makes resizing work at all: with auto layout the browser
+   redistributes widths on every keystroke, so a dragged column springs back as
+   its content changes. */
+.apex-ed__host .ProseMirror table{width:100%;margin:0;table-layout:fixed;
+border-collapse:collapse;overflow:hidden}
+
+.apex-ed__host .ProseMirror td,.apex-ed__host .ProseMirror th{
+position:relative;min-inline-size:48px;padding:7px 9px;vertical-align:top;
+border:1px solid var(--border-default);box-sizing:border-box}
+
+.apex-ed__host .ProseMirror th{background:var(--bg-subtle);font-weight:650;text-align:start}
+
+.apex-ed__host .ProseMirror td>*,.apex-ed__host .ProseMirror th>*{margin-block-start:0}
+
+.apex-ed__host .ProseMirror td>*+*,.apex-ed__host .ProseMirror th>*+*{margin-block-start:.5em}
+
+.apex-ed__host .ProseMirror td[data-align="center"],.apex-ed__host .ProseMirror th[data-align="center"]{text-align:center}
+
+.apex-ed__host .ProseMirror td[data-align="right"],.apex-ed__host .ProseMirror th[data-align="right"]{text-align:right}
+
+/* a cell selection is a range of CELLS, not of text, so it needs its own paint:
+   the browser's text selection cannot express it */
+.apex-ed__host .ProseMirror .selectedCell::after{content:"";position:absolute;
+inset:0;background:color-mix(in oklch,var(--accent-primary) 18%,transparent);
+pointer-events:none}
+
+/* the grip is wider than the line it draws, because a 1px hit target is not a
+   hit target */
+.apex-ed__host .ProseMirror .column-resize-handle{position:absolute;
+inset-block:0;inset-inline-end:-2px;inline-size:5px;
+background:var(--accent-primary);pointer-events:none;z-index:2}
+
+.apex-ed__host .ProseMirror.resize-cursor{cursor:col-resize}
+
+/* ─── html editor ──────────────────────────────────────── */
+/* The surface is an iframe, so almost nothing here is about the CONTENT — the
+   page's own stylesheet owns that. This is only the chrome around it. */
+.apex-hed{display:flex;flex-direction:column;border:1px solid var(--border-default);
+border-radius:var(--r-md);background:var(--bg-surface);overflow:hidden}
+
+.apex-hed__frame{display:block;inline-size:100%;min-block-size:var(--apex-hed-min-h,320px);
+border:0;background:#FFF}
+
+.apex-hed__loading,.apex-hed__error{padding:14px 16px;font-family:var(--font-sans);font-size:13px}
+
+.apex-hed__loading{color:var(--fg-subtle)}
+
+.apex-hed__error{background:color-mix(in oklch,var(--accent-danger) 12%,transparent);
+color:color-mix(in oklch,var(--accent-danger) 82%,#000)}
+
+/* The status bar. The element path is how an author sees and selects the
+   container they are inside — a structure tree nobody asked for is the
+   alternative — and the word count sits at the far end, as it does in every
+   reference editor. */
+.apex-hed__status{display:flex;align-items:center;justify-content:space-between;
+gap:12px;padding:5px 10px;border-block-start:1px solid var(--border-subtle);
+background:var(--bg-subtle);font-family:var(--font-mono);font-size:11px}
+
+.apex-hed__words{color:var(--fg-subtle);white-space:nowrap}
+
+.apex-hed__path{display:flex;flex-wrap:wrap;align-items:center;gap:2px;
+font-family:var(--font-mono);font-size:11px}
+
+.apex-hed__crumb{padding:2px 6px;border:0;border-radius:var(--r-sm);
+background:transparent;color:var(--fg-subtle);font:inherit;cursor:pointer}
+
+.apex-hed__crumb:hover{background:var(--bg-muted);color:var(--fg-default)}
+
+.apex-hed__crumb:not(:last-child)::after{content:"\203A";margin-inline-start:6px;
+color:var(--border-default)}
+
+/* Fullscreen is fixed positioning on the editor's own root, not the browser's
+   Fullscreen API: the API takes the element out of the page's stacking context,
+   which drops the overlays (link editor, object bars) that are teleported to
+   body and would then render behind it. */
+.apex-hed[data-fullscreen="true"]{position:fixed;inset:0;z-index:800;
+border-radius:0;background:var(--bg-surface);display:flex;flex-direction:column}
+
+.apex-hed[data-fullscreen="true"] .apex-hed__frame{flex:1 1 auto;height:auto!important}
+
+/* The styles gallery. Each button previews in the TARGET css where it can, which
+   is the whole reason the surface is a real document. */
+.apex-hed__styles{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;
+border-block-end:1px solid var(--border-subtle);background:var(--bg-subtle)}
+
+.apex-hed__style{min-inline-size:78px;padding:6px 10px;border:1px solid var(--border-default);
+border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);
+font-family:var(--font-sans);font-size:12px;text-align:start;cursor:pointer;
+white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.apex-hed__style:hover{border-color:var(--accent-primary)}
+
+.apex-hed__style[data-on="true"]{border-color:var(--accent-primary);
+box-shadow:0 0 0 1px var(--accent-primary)}
+
+.apex-hed__style[data-scope="character"]{font-style:italic}
+
+/* ── source view ──
+   Monospaced and full-width: this is markup, not prose, and wrapping it at a
+   reading measure would make tags harder to follow rather than easier. */
+.apex-ed__source{display:block;inline-size:100%;min-block-size:var(--apex-ed-min-h,220px);
+padding:14px 16px;border:0;background:var(--bg-subtle);color:var(--fg-default);
+font-family:var(--font-mono);font-size:12.5px;line-height:1.6;
+resize:vertical;white-space:pre;overflow:auto;tab-size:2}
+
+.apex-ed__source:focus{outline:none}
+
+.apex-ed__source-error{margin:0;padding:8px 16px;
+background:color-mix(in oklch,var(--accent-danger) 12%,transparent);
+color:color-mix(in oklch,var(--accent-danger) 82%,#000);
+font-family:var(--font-sans);font-size:12.5px}
+
+/* ── assist ──
+   The range being worked on, marked while the request is out so the author can
+   see what is being changed rather than guessing. */
+.apex-ed__host .ProseMirror .apex-ed__assist-range{
+background:color-mix(in oklch,var(--accent-primary) 13%,transparent);
+border-block-end:2px dotted color-mix(in oklch,var(--accent-primary) 65%,transparent)}
+
+/* an empty selection has no range to paint, so a caret-height bar stands in */
+.apex-ed__assist-caret{display:inline-block;inline-size:2px;block-size:1.05em;
+vertical-align:text-bottom;background:var(--accent-primary);
+animation:apex-ed-assist-pulse 1s ease-in-out infinite}
+
+@media (prefers-reduced-motion:reduce){.apex-ed__assist-caret{animation:none}}
+
+/* ── suggestions ──
+   Green for added, struck red for removed: the deleted text is still THERE and
+   still readable, which is the point — a reviewer has to see what would go. */
+.apex-ed__host .ProseMirror ins{text-decoration:none;
+background:color-mix(in oklch,var(--accent-success) 15%,transparent);
+border-block-end:1px solid color-mix(in oklch,var(--accent-success) 60%,transparent)}
+
+.apex-ed__host .ProseMirror del{text-decoration:line-through;
+text-decoration-color:color-mix(in oklch,var(--accent-danger) 75%,transparent);
+background:color-mix(in oklch,var(--accent-danger) 12%,transparent);
+color:var(--fg-muted)}
+
+/* the caret has to be placeable inside deleted text, or a reviewer cannot select
+   it to accept just part of a change */
+.apex-ed__host .ProseMirror del{-webkit-user-select:text;user-select:text}
+
+/* ── contextual table bar ──
+   Its CONTENTS. Where it is drawn is .apex-objbar's job below — the bar was
+   originally pinned into the toolbar stack because an overlay would cover the
+   cells being edited, and anchoring below the object with a flip is what makes
+   floating safe. */
+.apex-tbl-tools{display:flex;flex-wrap:wrap;align-items:center;gap:4px;
+padding:5px 8px;border-block-start:1px solid var(--border-subtle);
+background:color-mix(in oklch,var(--accent-primary) 5%,var(--bg-subtle))}
+
+/* ── the floating object bar ──
+   Anchored BELOW the selected object and flipped above only when there is no
+   room, so it never covers what it acts on. Inside the shell the border and
+   background of the contents are dropped: the shell owns them, and two nested
+   panels read as a rendering fault. */
+.apex-objbar{z-index:700;max-width:min(92vw,720px);border-radius:var(--r-md);
+border:1px solid var(--border-default);background:var(--bg-surface);
+box-shadow:0 10px 28px -12px rgb(0 0 0/.35),0 2px 6px -2px rgb(0 0 0/.2)}
+
+.apex-objbar .apex-tbl-tools{border-block-start:0;background:transparent;
+border-radius:inherit}
+
+.apex-tbl-tools__scope{padding-inline-end:4px;font-family:var(--font-sans);
+font-size:11.5px;font-weight:650;color:var(--fg-muted);white-space:nowrap}
+
+.apex-tbl-tools__scope em{font-style:normal;color:var(--fg-subtle)}
+
+.apex-tbl-tools__group{display:flex;align-items:center;gap:2px}
+
+.apex-tbl-tools__sep{inline-size:1px;align-self:stretch;margin-inline:3px;
+background:var(--border-default)}
+
+.apex-tbl-tools__btn{display:grid;place-items:center;inline-size:26px;block-size:26px;
+border:0;border-radius:var(--r-sm);background:transparent;color:var(--fg-muted);cursor:pointer}
+
+.apex-tbl-tools__btn:hover:not(:disabled){background:var(--bg-muted);color:var(--fg-default)}
+
+.apex-tbl-tools__btn[data-on="true"]{background:var(--accent-primary);color:#fff}
+
+.apex-tbl-tools__btn[data-danger="true"]:hover:not(:disabled){
+background:color-mix(in oklch,var(--accent-danger) 14%,transparent);color:var(--accent-danger)}
+
+.apex-tbl-tools__btn:disabled{opacity:.38;cursor:default}
+
+.apex-tbl-tools__btn:focus-visible,.apex-tbl-tools__swatch:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+
+/* The swatch shows the colour it applies, so the palette needs no labels — but
+   the ring has to come from a token or it vanishes in dark mode. */
+.apex-tbl-tools__swatch{display:grid;place-items:center;inline-size:22px;block-size:22px;
+border:1px solid var(--border-default);border-radius:var(--r-sm);
+background:var(--bg-surface);color:var(--fg-subtle);cursor:pointer;padding:0}
+
+.apex-tbl-tools__swatch[data-on="true"]{box-shadow:0 0 0 2px var(--accent-primary)}
+
+.apex-tbl-tools__swatch:disabled{opacity:.38;cursor:default}
+
+.apex-tbl-tools__select{block-size:26px;padding:0 6px;border:1px solid var(--border-default);
+border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);
+font-family:var(--font-sans);font-size:12px;color-scheme:inherit}
+
+.apex-tbl-tools__select option{background:var(--bg-elevated);color:var(--fg-default)}
+
+/* the disclosure reads as a toggle rather than a style: it opens the vocabulary
+   instead of applying one, so it must not look like the buttons beside it */
+.apex-hed__style[data-scope="disclosure"]{display:inline-flex;align-items:center;gap:5px;
+font-weight:600}
+
+.apex-hed__style[data-scope="disclosure"][data-on="true"]{
+background:color-mix(in oklch,var(--accent-primary) 14%,transparent);
+border-color:var(--accent-primary);color:var(--accent-primary)}
+
+/* the menubar sits above the toolbar in the same stack: an index that floated
+   over the document would cover the text it indexes */
+.apex-ed__menubar{border-block-end:1px solid var(--border-subtle);border-radius:0;
+background:transparent}
+
+.apex-ed__menubar .apex-mbar__root{font-size:12.5px}
+
+/* ── comments ──
+   An underline rather than a fill: a highlight mark already means "the author
+   highlighted this", and a comment is someone else's annotation on top of the
+   author's text — so it must be distinguishable from content. */
+.apex-ed__host .ProseMirror .apex-ed__comment{
+background:color-mix(in oklch,var(--accent-warning) 14%,transparent);
+border-block-end:2px solid color-mix(in oklch,var(--accent-warning) 55%,transparent);
+cursor:pointer}
+
+.apex-ed__host .ProseMirror .apex-ed__comment.is-active{
+background:color-mix(in oklch,var(--accent-warning) 28%,transparent);
+border-block-end-color:var(--accent-warning)}
+
+/* a resolved thread keeps its anchor but stops competing for attention: the text
+   is still findable, which is what "show resolved" is for */
+.apex-ed__host .ProseMirror .apex-ed__comment.is-resolved{
+background:transparent;border-block-end-style:dotted;
+border-block-end-color:color-mix(in oklch,var(--fg-subtle) 60%,transparent)}
+
+/* ── media ── */
+/* A figure, not a bare img: the caption is part of what the image means, and a
+   following paragraph would drift away from it on any reorder. */
+.apex-ed__host .ProseMirror figure{margin:0;display:flex;flex-direction:column;gap:6px}
+
+.apex-ed__host .ProseMirror figure img{display:block;max-inline-size:100%;
+inline-size:var(--apex-ed-fig-w,100%);block-size:auto;border-radius:var(--r-md)}
+
+.apex-ed__host .ProseMirror figure[data-width="50%"]{--apex-ed-fig-w:50%}
+
+.apex-ed__host .ProseMirror figure[data-width="33%"]{--apex-ed-fig-w:33%}
+
+/* margin-inline auto rather than text-align, because the img is a block and
+   text-align would only move an inline box */
+.apex-ed__host .ProseMirror figure[data-align="center"] img{margin-inline:auto}
+
+.apex-ed__host .ProseMirror figure[data-align="right"] img{margin-inline-start:auto}
+
+.apex-ed__host .ProseMirror figcaption{color:var(--fg-subtle);font-size:.86em;
+line-height:1.5;text-wrap:pretty;letter-spacing:normal;text-transform:none}
+
+/* An uncaptioned image is a different thing from one with an empty caption, so
+   the empty caption shows a prompt rather than collapsing to nothing.
+   NOT :empty — ProseMirror puts a trailing break in every empty textblock, so
+   the caption always has a child and :empty can never match. The break itself
+   is the signal that nothing has been written.
+   Styled from --fg-muted at full opacity, matching .apex-ed__placeholder: both
+   are placeholders, so they should agree — and stacking an opacity multiplier
+   on the already-dim --fg-subtle put this one under AA. */
+.apex-ed__host .ProseMirror figcaption:has(> br.ProseMirror-trailingBreak:only-child)::before{
+content:"Add a caption\2026";color:var(--fg-muted)}
+
+.apex-ed__host .ProseMirror figure.ProseMirror-selectednode img{outline:2px solid var(--accent-primary);
+outline-offset:2px}
+
+/* the placeholder is a decoration, so it is never part of the document and a
+   save mid-upload cannot persist it */
+.apex-ed__uploading{position:relative;block-size:120px;border-radius:var(--r-md);
+background:var(--bg-muted);overflow:hidden}
+
+.apex-ed__uploading::after{content:"";position:absolute;inset-block:0;inline-size:38%;
+background:linear-gradient(90deg,transparent,color-mix(in oklch,var(--fg-default) 8%,transparent),transparent);
+animation:apex-ed-shimmer 1.1s linear infinite}
+
+/* a preview card, not a live iframe: an iframe inside contenteditable swallows
+   every pointer event, so the node could not be selected, dragged or deleted */
+.apex-ed__embed{display:flex;align-items:center;gap:10px;
+inline-size:var(--apex-ed-embed-w,100%);padding:12px 14px;border:1px solid var(--border-default);
+border-radius:var(--r-md);background:var(--bg-subtle);font-family:var(--font-sans);
+font-size:13px;color:var(--fg-default)}
+
+.apex-ed__embed[data-align="center"]{margin-inline:auto}
+
+.apex-ed__embed[data-align="right"]{margin-inline-start:auto}
+
+.apex-ed__embed-label{padding:2px 7px;border-radius:999px;background:var(--bg-muted);
+font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+color:var(--fg-subtle)}
+
+.apex-ed__embed-title{flex:1;min-inline-size:0;overflow:hidden;text-overflow:ellipsis;
+white-space:nowrap}
+
+.apex-ed__embed-open{font-size:12.5px;font-weight:600}
+
+.apex-ed__embed.ProseMirror-selectednode{outline:2px solid var(--accent-primary);
+outline-offset:1px}
+
+@media (prefers-reduced-motion:reduce){.apex-ed__uploading::after{animation:none}}
+
+/* A menu row that is a control rather than a row — AF2-286. Paired with
+   ApexMenubar's `panel` slot; without it the grid sits inside a row's
+   padding and shows a bullet. */
+.apex-menu__custom{padding:0;list-style:none}
+
+/* ApexEditorImageTools — AF2-286. Fifteen rules, missed by 283's sweep
+   because `.apex-objtools` is a twelfth class prefix nobody had listed:
+   the component it styles exists only in the reference tree's mirror. */
+/* ── image tools ──
+   The object bar's contents for a selected image. It shares the table bar's
+   metrics deliberately — they are the same bar in the same shell, and two sets
+   of numbers for one visual would drift. */
+.apex-objtools{display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:5px 8px}
+.apex-objtools__sep{inline-size:1px;align-self:stretch;margin-inline:3px;
+background:var(--border-default)}
+.apex-objtools__group{display:flex;align-items:center;gap:2px}
+.apex-objtools__btn{display:grid;place-items:center;inline-size:26px;block-size:26px;
+border:0;border-radius:var(--r-sm);background:transparent;color:var(--fg-muted);cursor:pointer}
+.apex-objtools__btn:hover:not(:disabled){background:var(--bg-muted);color:var(--fg-default)}
+.apex-objtools__btn[data-on="true"]{background:var(--accent-primary);color:#fff}
+.apex-objtools__btn[data-danger="true"]:hover:not(:disabled){
+background:color-mix(in oklch,var(--accent-danger) 14%,transparent);color:var(--accent-danger)}
+.apex-objtools__btn:disabled{opacity:.38;cursor:default}
+.apex-objtools__btn:focus-visible,.apex-objtools__alt:focus-visible{outline:none;
+box-shadow:var(--focus-ring)}
+.apex-objtools__select{block-size:26px;padding:0 6px;border:1px solid var(--border-default);
+border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);
+font-family:var(--font-sans);font-size:12px;color-scheme:inherit}
+.apex-objtools__select option{background:var(--bg-elevated);color:var(--fg-default)}
+/* The description sits at the head of the bar because a missing one is a real
+   accessibility defect and this is where an author would notice it. */
+.apex-objtools__alt{display:flex;align-items:center;gap:5px;max-inline-size:190px;
+padding:3px 7px;border:0;border-radius:var(--r-sm);background:transparent;
+color:var(--fg-muted);font-family:var(--font-sans);font-size:12px;cursor:pointer}
+.apex-objtools__alt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.apex-objtools__alt:hover{background:var(--bg-muted);color:var(--fg-default)}
+.apex-objtools__alt[data-warn="true"]{color:var(--accent-warn)}
+
+/* ────────────────────────────────────────────────────────────────────────
+   ApexForm — AF2-292.
+
+   The whole of `web/apex-form.css`, appended entire rather than extracted.
+   Every one of its 55 blocks belongs to this control and the file is
+   self-contained — no @import, no :root, no element selectors — so
+   filtering would add the risk of dropping one and remove nothing.
+
+   These 66 rules existed ONLY in that file: **zero were in the package
+   stylesheet**, and a component port would never have touched them. Same
+   shape as AF2-268's 287 scheduler and calendar rules, except in a separate
+   file, which makes them easier both to miss and to lift.
+
+   No variable family of its own: every custom property here is a token —
+   --accent-*, --fg-*, --bg-*, --border-*, --r-*, --shadow-*, --focus-*,
+   --t-*. So there is nothing to normalise under §4.2 and no entry in
+   zz-var-families.
+
+   Two responsive rules, both carried across whole: a `@media (max-width:
+   720px)` and a `@container apexform (max-width: 560px)`. The container
+   query is the one that matters — it is measured against `__main` so a
+   620px modal inside a 924px window collapses, which a viewport media query
+   cannot see. The name is deliberate: a form can sit inside a host's own
+   container query, and an unnamed container would resolve against the
+   nearest one.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* apex-form.css — ApexForm's shell. Field visuals come from apex-ui.css; this
+   file is only the form-level chrome: the panel, the three layouts, the grid and
+   the action bar. Every value is a token, so a theme change carries. */
+
+/* inline-size:100% rather than relying on a block box: as a flex or grid ITEM the
+   root sizes to its content on the main axis and leaves empty space at the sides.
+   min-inline-size:0 is the companion guard -- a flex item's automatic minimum is
+   its content, so without it the root refuses to shrink and its own overflow
+   never applies. */
+.apex-form { font-family: var(--font-sans); color: var(--fg-default); inline-size: 100%; max-inline-size: 100%; min-inline-size: 0; }
+
+/* ─── shells ───────────────────────────────────────────────────
+   A modal is the same panel, lifted. Nothing about the layouts or the grid
+   changes between the two shells — only where the panel sits and how tall it is
+   allowed to grow. */
+.apex-form[data-shell="modal"][data-open="false"] { display: none; }
+.apex-form[data-shell="modal"] { position: fixed; inset: 0; z-index: 900; display: grid; place-items: center; padding: 28px 20px; }
+.apex-form__scrim { position: fixed; inset: 0; background: rgba(15, 23, 42, .32); backdrop-filter: blur(2px); }
+/* `--apex-form-w` is READ, never declared, so a host can set it anywhere up
+   the tree — including on the ApexForm root from a scoped stylesheet (§4.2).
+   The default is what it always was. A screen that wants "most of the
+   window" says `--apex-form-w: 80vw`. AF2-374. */
+.apex-form[data-shell="modal"] .apex-form__panel {
+  position: relative; inline-size: var(--apex-form-w, min(980px, 100%)); max-block-size: min(880px, 100%);
+  border-radius: var(--r-xl); box-shadow: var(--shadow-lg);
+}
+/* Fixed, not max: the panel is the same height in every section. */
+.apex-form[data-shell="modal"][data-layout="tabs"] .apex-form__panel,
+.apex-form[data-shell="modal"][data-layout="sidebar"] .apex-form__panel { block-size: min(660px, 100%); }
+/* And in a page, a tabbed form gets a floor so short sections do not shrink it
+   to a strip while tall ones scroll. */
+.apex-form[data-shell="page"][data-layout="tabs"] .apex-form__main,
+.apex-form[data-shell="page"][data-layout="sidebar"] .apex-form__main { min-block-size: 380px; }
+.apex-form[data-shell="page"] .apex-form__panel {
+  inline-size: 100%; max-inline-size: 980px; margin-inline: auto;
+  border-radius: var(--r-lg); box-shadow: var(--shadow-xs);
+}
+.apex-form__panel {
+  display: flex; flex-direction: column; min-block-size: 0;
+  background: var(--bg-surface); border: 1px solid var(--border-subtle); overflow: hidden;
+}
+
+/* ─── header ───────────────────────────────────────────────────
+   The text rules below are class-qualified on purpose. A host page that styles a
+   bare `h2` or `p` ties on specificity with a single-class rule, and source order
+   then decides — the gallery's own `.page h2` turned this title into a 12px grey
+   uppercase label. The extra class puts the component ahead of any element-scoped
+   host rule without resorting to !important — but specificity alone only wins for
+   properties the rule DECLARES, so `text-transform`, `letter-spacing` and `color`
+   are stated explicitly too. Raising the selector and leaving them unset fixed the
+   size and kept the grey uppercase. */
+.apex-form__head { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 14px; padding: 20px 24px 16px; }
+.apex-form__badge {
+  display: grid; place-items: center; inline-size: 44px; block-size: 44px; flex-shrink: 0;
+  border-radius: var(--r-md); background: var(--accent-primary); color: #fff;
+}
+.apex-form__titles { min-inline-size: 0; }
+.apex-form .apex-form__titles h2 { margin: 0; font-size: var(--t-2xl); font-weight: 700; letter-spacing: -.02em; text-transform: none; color: var(--fg-default); font-family: inherit; line-height: 1.25; }
+.apex-form .apex-form__titles p { margin: 3px 0 0; font-size: var(--t-sm); font-weight: 400; color: var(--fg-muted); text-transform: none; letter-spacing: normal; text-wrap: pretty; }
+
+/* ─── layouts ──────────────────────────────────────────────────
+   Tabs and sidebar are the same section list in two orientations, which is why
+   a schema can switch between them without knowing which is showing. */
+.apex-form__tabs { flex: 0 0 auto; display: flex; gap: 2px; padding: 0 24px; border-block-end: 1px solid var(--border-subtle); overflow-x: auto; }
+.apex-form__tabs button {
+  display: inline-flex; align-items: center; gap: 7px; padding: 11px 14px; border: 0;
+  border-block-end: 2px solid transparent; background: none; color: var(--fg-muted);
+  font: inherit; font-size: var(--t-sm); font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.apex-form__tabs button:hover { color: var(--fg-default); }
+.apex-form__tabs button[aria-selected="true"] { color: var(--accent-primary); border-block-end-color: var(--accent-primary); }
+.apex-form__tabs button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.apex-form__body { flex: 1 1 auto; min-block-size: 0; display: flex; background: var(--bg-subtle); }
+.apex-form__side {
+  flex: 0 0 216px; display: flex; flex-direction: column; gap: 2px; padding: 16px 12px;
+  background: var(--bg-surface); border-inline-end: 1px solid var(--border-subtle); overflow-y: auto;
+}
+.apex-form__side button {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 0;
+  border-radius: var(--r-md); background: none; color: var(--fg-muted);
+  font: inherit; font-size: var(--t-sm); font-weight: 600; text-align: start; cursor: pointer;
+}
+.apex-form__side button:hover { background: var(--bg-muted); color: var(--fg-default); }
+.apex-form__side button[aria-selected="true"] { background: color-mix(in srgb, var(--accent-primary) 10%, transparent); color: var(--accent-primary); }
+.apex-form__side button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.apex-form__side span { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* An error count on a section is only meaningful where the section can be
+   OFF-SCREEN, so it never appears in the long layout. */
+.apex-form__tabs button em, .apex-form__side button em {
+  display: grid; place-items: center; min-inline-size: 18px; block-size: 18px; padding: 0 5px;
+  border-radius: 9px; background: var(--accent-danger); color: #fff;
+  font-size: 10px; font-weight: 700; font-style: normal;
+}
+
+.apex-form__main { flex: 1 1 auto; min-inline-size: 0; overflow-y: auto; padding: 20px 24px 24px; container-type: inline-size; container-name: apexform; }
+
+/* ─── sections + grid ──────────────────────────────────────────
+   Columns on the section, spans on the field: one number per group to reason
+   about, and both survive a JSON round trip. */
+.apex-form__section + .apex-form__section { margin-block-start: 26px; padding-block-start: 22px; border-block-start: 1px solid var(--border-subtle); }
+.apex-form__sectionhead { margin-block-end: 16px; }
+.apex-form .apex-form__sectionhead h3 { display: flex; align-items: center; gap: 8px; margin: 0; font-size: var(--t-lg); font-weight: 600; letter-spacing: normal; text-transform: none; color: var(--fg-default); font-family: inherit; }
+.apex-form .apex-form__sectionhead p { margin: 4px 0 0; font-size: var(--t-sm); font-weight: 400; color: var(--fg-muted); text-transform: none; letter-spacing: normal; }
+/* `--apex-form-gap` is READ, never declared, so the app-wide option, a
+   section's own `gap` and a host stylesheet can all reach it (§4.2). The
+   fallback is the value it has always had. AF2-394. */
+.apex-form__grid { display: grid; grid-template-columns: repeat(var(--form-cols, 1), minmax(0, 1fr)); gap: var(--apex-form-gap, 18px 20px); align-items: start; }
+/* Placement comes from two custom properties the component writes inline,
+   NOT from an inline `grid-column` — an inline property cannot be beaten by
+   a media query, and the narrow collapse below has to beat it. AF2-393. */
+.apex-form__cell { min-inline-size: 0; grid-column: var(--cell-start, auto) / span var(--cell-span, 1); }
+/* A textarea or an editor is nearly always the full width of its group. */
+.apex-form__cell[data-type="textarea"], .apex-form__cell[data-type="richtext"],
+.apex-form__cell[data-type="html"], .apex-form__cell[data-type="picklist"],
+.apex-form__cell[data-type="file"] { grid-column: 1 / -1; }
+
+/* One media query, not a JS breakpoint: the panel can be narrower than the
+   viewport (a modal beside a sidebar), and only CSS sees that. */
+/* Measured against __main, so a narrow panel in a wide window collapses. */
+/* Both collapses reset the CELLS as well as the tracks. Without that a
+   span-2 field still asked for two tracks in a one-track grid, and CSS grid
+   answers by inventing an implicit column: the form did not stack, it went
+   lopsided — worse than the layout it was collapsing from. AF2-393. */
+@container apexform (max-width: 560px) {
+  .apex-form__grid { grid-template-columns: minmax(0, 1fr); }
+  .apex-form__grid > .apex-form__cell { grid-column: 1 / -1; }
+}
+@media (max-width: 720px) {
+  .apex-form__grid { grid-template-columns: minmax(0, 1fr); }
+  .apex-form__grid > .apex-form__cell { grid-column: 1 / -1; }
+  .apex-form__side { flex-basis: 64px; }
+  .apex-form__side span, .apex-form__side em { display: none; }
+  .apex-form__side button { justify-content: center; }
+}
+
+
+/* ─── read-only ────────────────────────────────────────────────
+   Text, not a disabled control: a greyed-out input reads as something the author
+   failed to fill in. */
+.apex-form__ro { display: flex; flex-direction: column; gap: 3px; }
+.apex-form__rolabel { font-size: var(--t-sm); font-weight: 500; color: var(--fg-muted); }
+.apex-form__rovalue { font-size: var(--t-base); color: var(--fg-default); text-wrap: pretty; }
+.apex-form__table { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+
+/* ─── action bar ───────────────────────────────────────────────*/
+.apex-form__foot {
+  flex: 0 0 auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 14px 24px; background: var(--bg-surface); border-block-start: 1px solid var(--border-subtle);
+}
+.apex-form__spacer { flex: 1; }
+.apex-form__dirty { display: inline-flex; align-items: center; gap: 6px; font-size: var(--t-sm); color: var(--fg-subtle); }
+/* The same shape as the dirty note -- they occupy the same slot in the footer
+   and swap, so a size difference between them would jog the action bar. */
+.apex-form__validating { display: inline-flex; align-items: center; gap: 6px; font-size: var(--t-sm); color: var(--fg-subtle); }
+
+/* The pane a tab controls takes focus on switch, so a keyboard user lands in the
+   content rather than back at the top of the form. */
+.apex-form__section[role="tabpanel"]:focus { outline: none; }
+.apex-form__section[role="tabpanel"]:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--r-sm); }
+
+/* ─── an invalid tab ───────────────────────────────────────────*/
+.apex-form__tabs button[data-invalid="true"],
+.apex-form__side button[data-invalid="true"] {
+  background: color-mix(in srgb, var(--accent-danger) 12%, transparent);
+  color: var(--accent-danger);
+}
+.apex-form__tabs button[data-invalid="true"] { border-block-end-color: var(--accent-danger); }
+/* Selected and invalid: the same colour at full strength, so selection still
+   reads without inventing a second hue for it. */
+.apex-form__tabs button[data-invalid="true"][aria-selected="true"],
+.apex-form__side button[data-invalid="true"][aria-selected="true"] {
+  background: color-mix(in srgb, var(--accent-danger) 22%, transparent);
+  font-weight: 700;
+}
+.apex-form__tabs button[data-invalid="true"]:hover,
+.apex-form__side button[data-invalid="true"]:hover { background: color-mix(in srgb, var(--accent-danger) 18%, transparent); color: var(--accent-danger); }
+.apex-form__tabs button[data-invalid="true"] em,
+.apex-form__side button[data-invalid="true"] em { background: var(--accent-danger); }
+
+/* ─── the tab's error list ─────────────────────────────────────
+   What the badge cannot say: which fields, and why. On hover and on FOCUS, so a
+   keyboard user gets it too. It will not appear on touch, which is acceptable
+   because opening the tab shows every message under its own field. */
+.apex-form__tiperr {
+  position: fixed; z-index: 960; inline-size: max-content; max-inline-size: 320px;
+  display: flex; flex-direction: column; gap: 5px; padding: 10px 12px; pointer-events: none;
+  background: var(--bg-elevated, #fff); color: var(--fg-default);
+  border: 1px solid color-mix(in srgb, var(--accent-danger) 40%, transparent);
+  border-radius: var(--r-md); box-shadow: var(--shadow-lg);
+  font-size: var(--t-sm); font-weight: 400; text-align: start; white-space: normal; cursor: default;
+}
+.apex-form__tiperr b { color: var(--accent-danger); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.apex-form__tiperr > span { display: block; color: var(--fg-muted); text-wrap: pretty; }
+/* Visibility is now the component's business (it renders one list at a time),
+   not a hover selector -- an element teleported to body has no hover ancestor. */
+/* A pass-through wrapper: an ordinary section needs no extra box, and the grid
+   must stay the section's own child for spacing to read the same. */
+.apex-form__pass { display: contents; }
