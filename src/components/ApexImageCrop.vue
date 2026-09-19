@@ -58,7 +58,7 @@
  * transport of any kind. That is what lets it live in the kit rather than beside
  * one screen, and it is the difference between this and a media picker.
  */
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import ApexButton from './ApexButton.vue';
 import ApexIcon from './ApexIcon.vue';
 
@@ -175,6 +175,12 @@ async function load(src: File | Blob | string) {
     emit('ready', { ...natural.value });
     checkSource();
     reset();
+    /* A new image starts whole and centred, whatever the last one was left at.
+       `measure()` first because the frame's aspect ratio only becomes known
+       with `natural`, so its height a moment ago was the OLD image's. */
+    await nextTick();
+    measure();
+    fitView();
   } catch (e) {
     emit('error', { message: e instanceof Error ? e.message : 'The image could not be read.' });
   } finally {
@@ -224,17 +230,177 @@ function auto() {
 /* ── screen ↔ image ─────────────────────────────────────────────────────
    Everything the operator does happens in screen pixels and everything stored
    is in image pixels. Keeping the conversion in one pair of functions is what
-   stops a 6500px image and a 400px preview disagreeing. */
-const scale = computed(() => {
-  const el = frame.value;
-  if (!el || !natural.value.width) return 1;
+   stops a 6500px image and a 400px preview disagreeing.
 
-  return el.clientWidth / natural.value.width;
+   There are now THREE numbers between the two: the fit, the zoom and the pan.
+
+     fit    how many screen pixels an image pixel gets when the whole image is
+            shown. A contain-fit, so a tall photograph is no longer clipped by
+            `max-block-size` with its bottom half unreachable.
+     zoom   the operator's multiplier on top. 100% is FIT, not 1:1 — there is no
+            useful 1:1 between a 6500px photograph and a 900px dialog.
+     pan    where the image's top-left corner sits inside the frame, in screen
+            pixels. Centred while the image fits; clamped to the edges once it
+            does not, so the image can never be dragged out of its own window.
+
+   `scale` stays the single conversion everything else uses, so the box, the
+   handles, the four gestures and `render()` needed no change at all. */
+const ZOOM_MIN = 0.25;
+const ZOOM_MAX = 8;
+const ZOOM_STEP = 1.25;    // per button press
+const ZOOM_WHEEL = 1.1;    // per wheel notch — gentler, it fires often
+const PAN_KEY_STEP = 40;   // px per arrow press
+
+const zoom = ref(1);
+const pan = ref({ x: 0, y: 0 });
+
+/* The frame's size, held reactively. `clientWidth` read inside a computed is
+   NOT reactive — it happened to be right because the first render followed
+   mount, and it silently stopped being right whenever the dialog resized. */
+const frameSize = ref({ width: 0, height: 0 });
+let frameObserver: ResizeObserver | null = null;
+
+const measure = () => {
+  const el = frame.value;
+  if (!el) return;
+  frameSize.value = { width: el.clientWidth, height: el.clientHeight };
+  clampPan();
+};
+
+onMounted(() => {
+  measure();
+  if (frame.value && typeof ResizeObserver !== 'undefined') {
+    frameObserver = new ResizeObserver(measure);
+    frameObserver.observe(frame.value);
+  }
 });
 
+onBeforeUnmount(() => {
+  frameObserver?.disconnect();
+  endPan();
+});
+
+const fit = computed(() => {
+  const { width: fw, height: fh } = frameSize.value;
+  const { width: nw, height: nh } = natural.value;
+  if (!fw || !nw) return 1;
+
+  /* Before layout the frame has no height. Width-fit is the sane answer then,
+     and it is what the component did for its whole life before this. */
+  return fh ? Math.min(fw / nw, fh / nh) : fw / nw;
+});
+
+const scale = computed(() => fit.value * zoom.value);
+
+/** The image's size on screen, which is what `pan` is clamped against. */
+const shown = computed(() => ({
+  width: natural.value.width * scale.value,
+  height: natural.value.height * scale.value,
+}));
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
+
+/* Centred while it fits, pinned to the edges once it does not. The two cases
+   are different on purpose: `clamp(x, fw - sw, 0)` with a POSITIVE free space
+   has its bounds the wrong way round, which is how a centred image ends up
+   jammed into a corner. */
+const clampAxis = (v: number, frameLen: number, shownLen: number) =>
+  (shownLen <= frameLen ? (frameLen - shownLen) / 2 : clamp(v, frameLen - shownLen, 0));
+
+function clampPan() {
+  pan.value = {
+    x: clampAxis(pan.value.x, frameSize.value.width, shown.value.width),
+    y: clampAxis(pan.value.y, frameSize.value.height, shown.value.height),
+  };
+}
+
+/** Back to the whole image, centred. What the percentage button does. */
+function fitView() {
+  zoom.value = 1;
+  pan.value = { x: 0, y: 0 };
+  clampPan();
+}
+
+const zoomPercent = computed(() => Math.round(zoom.value * 100));
+
+/**
+ * Zoom about a point, so what is under the cursor stays under the cursor.
+ *
+ * Without the anchor the image lurches away from whatever the operator was
+ * looking at on every notch, which on a crop tool is the one thing they were
+ * doing. `at` is in FRAME pixels; the buttons pass the middle.
+ */
+function zoomTo(next: number, at?: { x: number; y: number }) {
+  const before = scale.value;
+  zoom.value = clamp(next, ZOOM_MIN, ZOOM_MAX);
+  const after = scale.value;
+  if (!before || before === after) return clampPan();
+
+  const a = at ?? { x: frameSize.value.width / 2, y: frameSize.value.height / 2 };
+  const k = after / before;
+  pan.value = { x: a.x - (a.x - pan.value.x) * k, y: a.y - (a.y - pan.value.y) * k };
+  clampPan();
+}
+
+const zoomIn = () => zoomTo(zoom.value * ZOOM_STEP);
+const zoomOut = () => zoomTo(zoom.value / ZOOM_STEP);
+
+function onWheel(e: WheelEvent) {
+  if (!natural.value.width) return;
+  const r = frame.value!.getBoundingClientRect();
+  zoomTo(
+    e.deltaY < 0 ? zoom.value * ZOOM_WHEEL : zoom.value / ZOOM_WHEEL,
+    { x: e.clientX - r.left, y: e.clientY - r.top },
+  );
+}
+
+/* ── panning ────────────────────────────────────────────────────────────
+   The RIGHT button, matching the ticket designer. The left one is taken three
+   times over here too — move the box, resize it, draw a new one — and a
+   modifier would collide with the Shift that makes a nudge fine. */
+const isPanning = ref(false);
+let panFrom: { x: number; y: number; px: number; py: number } | null = null;
+
+function panBy(dx: number, dy: number) {
+  pan.value = { x: pan.value.x + dx, y: pan.value.y + dy };
+  clampPan();
+}
+
+function onPanMove(e: MouseEvent) {
+  if (!panFrom) return;
+  pan.value = { x: panFrom.px + (e.clientX - panFrom.x), y: panFrom.py + (e.clientY - panFrom.y) };
+  clampPan();
+}
+
+function endPan() {
+  isPanning.value = false;
+  panFrom = null;
+  window.removeEventListener('mousemove', onPanMove);
+  window.removeEventListener('mouseup', endPan);
+}
+
+function onMouseDown(e: MouseEvent) {
+  if (e.button !== 2 || !natural.value.width) return;
+  e.preventDefault();
+  isPanning.value = true;
+  panFrom = { x: e.clientX, y: e.clientY, px: pan.value.x, py: pan.value.y };
+  /* On the WINDOW: a pan that leaves the frame has to keep working, and has to
+     end wherever the button is actually released. */
+  window.addEventListener('mousemove', onPanMove);
+  window.addEventListener('mouseup', endPan);
+}
+
+/** Where the image is drawn, in frame pixels. */
+const imgStyle = computed(() => ({
+  left: `${pan.value.x}px`,
+  top: `${pan.value.y}px`,
+  width: `${shown.value.width}px`,
+  height: `${shown.value.height}px`,
+}));
+
 const box = computed(() => ({
-  left: rect.value.x * scale.value,
-  top: rect.value.y * scale.value,
+  left: pan.value.x + rect.value.x * scale.value,
+  top: pan.value.y + rect.value.y * scale.value,
   width: rect.value.w * scale.value,
   height: rect.value.h * scale.value,
 }));
@@ -243,12 +409,10 @@ function toImage(e: PointerEvent) {
   const r = frame.value!.getBoundingClientRect();
 
   return {
-    x: (e.clientX - r.left) / scale.value,
-    y: (e.clientY - r.top) / scale.value,
+    x: (e.clientX - r.left - pan.value.x) / scale.value,
+    y: (e.clientY - r.top - pan.value.y) / scale.value,
   };
 }
-
-const clamp = (v: number, lo: number, hi: number) => Math.min(Math.max(v, lo), hi);
 
 /* ── dragging ───────────────────────────────────────────────────────────
    One pointer handler for three gestures, because they are the same gesture
@@ -261,7 +425,9 @@ type Drag =
 const drag = ref<Drag | null>(null);
 
 function onDown(e: PointerEvent, handle?: string) {
-  if (!natural.value.width) return;
+  /* The right button pans the view, exactly as it does on the ticket canvas.
+     Without this it would draw a box at the same time. */
+  if (!natural.value.width || (e.button ?? 0) !== 0) return;
   e.preventDefault();
   (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
 
@@ -269,13 +435,6 @@ function onDown(e: PointerEvent, handle?: string) {
 
   if (handle) {
     drag.value = { kind: 'resize', handle };
-  } else if (e.button === 2) {
-    /* The RIGHT button always moves, wherever it goes down.
-       The left button cannot: outside the box it has to mean "draw", and that
-       leaves no way to nudge a box you have just drawn without starting over.
-       The gesture matches the ticket designer, where the right button moves the
-       view — in both places it is "reposition without changing". */
-    drag.value = { kind: 'move', ox: p.x - rect.value.x, oy: p.y - rect.value.y };
   } else if (inside(p) && !coversAll.value) {
     drag.value = { kind: 'move', ox: p.x - rect.value.x, oy: p.y - rect.value.y };
   } else {
@@ -287,22 +446,29 @@ function onDown(e: PointerEvent, handle?: string) {
 }
 
 /**
- * Ctrl + arrows nudge the box.
+ * Ctrl + arrows pan the view; bare arrows nudge the BOX.
  *
- * The step is in SCREEN pixels and converted, so the box moves the same visible
- * distance whether the image is 400px wide or 6500 — an image-pixel step would
- * be a crawl on the big one and a leap on the small one. Shift gives the
- * finest move the image can express.
- *
- * Ctrl because the ticket designer pans with Ctrl + arrows, and this is the
- * same question asked of a picture that always fits its frame: there is no view
- * to move, so what moves is the box.
+ * The same division as the ticket designer, and for the same reason: two things
+ * can move here, and the modifier is what says which. Panning is in screen
+ * pixels because that is what the operator is looking at; nudging is converted
+ * through `scale`, so the box moves the same visible distance whether the image
+ * is 400px wide or 6500. Shift makes the nudge as fine as the image allows.
  */
 function onKeydown(e: KeyboardEvent) {
   const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
-  if (!e.ctrlKey || !keys.includes(e.key) || !natural.value.width) return;
+  if (!keys.includes(e.key) || !natural.value.width) return;
 
   e.preventDefault();
+
+  if (e.ctrlKey) {
+    const d = PAN_KEY_STEP;
+    panBy(
+      e.key === 'ArrowLeft' ? d : e.key === 'ArrowRight' ? -d : 0,
+      e.key === 'ArrowUp' ? d : e.key === 'ArrowDown' ? -d : 0,
+    );
+    return;
+  }
+
   const step = e.shiftKey ? 1 : Math.max(1, Math.round(10 / scale.value));
   const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
   const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
@@ -543,15 +709,29 @@ const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
     <div
       ref="frame"
       class="apex-ic__frame"
+      :class="{ 'apex-ic__frame--panning': isPanning }"
       tabindex="0"
+      :style="natural.width ? { aspectRatio: `${natural.width} / ${natural.height}` } : undefined"
       @pointerdown="onDown"
       @pointermove="onMove"
       @pointerup="onUp"
       @pointercancel="onUp"
+      @mousedown="onMouseDown"
       @keydown="onKeydown"
+      @wheel.prevent="onWheel"
       @contextmenu.prevent
     >
-      <img v-if="previewSrc" :src="previewSrc" class="apex-ic__img" alt="" draggable="false" />
+      <!-- Positioned, not in flow: `pan` is its top-left corner and `shown` is
+           its size, both in frame pixels. The frame's own height comes from the
+           `aspect-ratio` above, which is what the image used to give it. -->
+      <img
+        v-if="previewSrc"
+        :src="previewSrc"
+        class="apex-ic__img"
+        :style="imgStyle"
+        alt=""
+        draggable="false"
+      />
 
       <div v-if="loading" class="apex-ic__busy">
         <ApexIcon name="progress_activity" :size="28" spin />
@@ -573,6 +753,25 @@ const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
           :data-hidden="locked ? 'true' : 'false'"
           @pointerdown.stop="(e) => !locked && onDown(e, h)"
         />
+      </div>
+
+      <!-- After the box, so it sits over the scrim that box casts. `.stop` on
+           the pointer events or a click on a button would also start a gesture
+           on the image underneath. -->
+      <div
+        v-if="natural.width"
+        class="apex-ic__zoom"
+        @pointerdown.stop
+        @mousedown.stop
+        @wheel.stop.prevent
+      >
+        <button type="button" class="apex-ic__zbtn" :disabled="zoom <= 0.25" title="Zoom out" @click="zoomOut">
+          <ApexIcon name="remove" :size="16" />
+        </button>
+        <button type="button" class="apex-ic__zval" title="Fit the whole image" @click="fitView">{{ zoomPercent }}%</button>
+        <button type="button" class="apex-ic__zbtn" :disabled="zoom >= 8" title="Zoom in" @click="zoomIn">
+          <ApexIcon name="add" :size="16" />
+        </button>
       </div>
     </div>
   </div>

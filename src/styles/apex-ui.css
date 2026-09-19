@@ -829,11 +829,28 @@ opacity:0;transform:scale(.96);transition:opacity var(--dur-fast) var(--ease-out
    focusable surface in the kit — .apex-picker__area is the closest relative. */
 .apex-ic__frame:focus{outline:none}
 .apex-ic__frame:focus-visible{outline:none;box-shadow:var(--focus-ring)}
-.apex-ic__img{display:block;inline-size:100%;block-size:auto;pointer-events:none;
+.apex-ic__frame--panning{cursor:grabbing}
+/* Positioned by `imgStyle`: the pan is its offset and the zoom its size. It was
+   `inline-size:100%` in flow, which is also where the frame got its height —
+   the `aspect-ratio` now set from the natural size does that job instead. */
+.apex-ic__img{position:absolute;display:block;pointer-events:none;
   /* The default since Chrome 81 and stated anyway: a phone photograph must
      appear upright, because the crop box is chosen against what is on screen
      and the canvas reads the same orientation back. */
   image-orientation:from-image}
+/* Zoom control — the ticket designer's, in the cropper's own class names. */
+.apex-ic__zoom{position:absolute;inset-inline-end:10px;inset-block-end:10px;z-index:2;
+  display:flex;align-items:center;gap:2px;padding:2px;border-radius:8px;
+  background:var(--surface-card,#fff);border:1px solid var(--border-default);
+  box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.apex-ic__zbtn,.apex-ic__zval{display:flex;align-items:center;justify-content:center;
+  block-size:26px;border:0;border-radius:6px;background:transparent;
+  color:var(--text-default);cursor:pointer;font:inherit}
+.apex-ic__zbtn{inline-size:26px}
+.apex-ic__zval{min-inline-size:48px;padding:0 4px;font-size:.75rem;font-variant-numeric:tabular-nums}
+.apex-ic__zbtn:hover:not(:disabled),.apex-ic__zval:hover{background:var(--surface-hover,rgba(0,0,0,.06))}
+.apex-ic__zbtn:disabled{opacity:.4;cursor:default}
+
 .apex-ic__busy{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.6)}
 .apex-ic__box{position:absolute;box-sizing:border-box;border:1px solid #fff;cursor:move;
   box-shadow:0 0 0 9999px var(--ic-scrim);outline:1px solid rgba(0,0,0,.35)}
