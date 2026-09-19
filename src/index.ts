@@ -100,6 +100,7 @@ import ApexDynamicDialog from './components/ApexDynamicDialog.vue';
 import ApexPopover from './components/ApexPopover.vue';
 import ApexFileUpload from './components/ApexFileUpload.vue';
 import ApexImageCrop from './components/ApexImageCrop.vue';
+import ApexImageField from './components/ApexImageField.vue';
 import ApexBreadcrumb from './components/ApexBreadcrumb.vue';
 import ApexContextMenu from './components/ApexContextMenu.vue';
 import ApexDock from './components/ApexDock.vue';
@@ -233,6 +234,7 @@ export const components = {
   Popover: ApexPopover,
   FileUpload: ApexFileUpload,
   ImageCrop: ApexImageCrop,
+  ImageField: ApexImageField,
   Breadcrumb: ApexBreadcrumb,
   ContextMenu: ApexContextMenu,
   Dock: ApexDock,
@@ -304,7 +306,7 @@ export default ApexUI;
 export {
   ApexIcon, ApexField, ApexInput, ApexTextarea, ApexNumber, ApexStepper,
   ApexSelect, ApexMultiselect, ApexCascadeSelect, ApexDatePicker, ApexColorPicker, ApexOtp, ApexPassword, ApexTags, ApexKnob, ApexListbox, ApexOrderList, ApexRating, ApexSelectButton, ApexSlider, ApexToggleButton, ApexTreeSelect, ApexCheckbox, ApexCheckboxGroup, ApexSwitch, ApexSegmented, ApexRadio, ApexRadioGroup,
-  ApexDrawer, ApexDynamicDialog, ApexPopover, ApexFileUpload, ApexImageCrop, ApexBreadcrumb, ApexContextMenu, ApexDock, ApexMegaMenu, ApexMenu, ApexMenubar, ApexTieredMenu, ApexMessage, ApexToast, ApexCarousel, ApexCarouselContent, ApexCarouselItem,
+  ApexDrawer, ApexDynamicDialog, ApexPopover, ApexFileUpload, ApexImageCrop, ApexImageField, ApexBreadcrumb, ApexContextMenu, ApexDock, ApexMegaMenu, ApexMenu, ApexMenubar, ApexTieredMenu, ApexMessage, ApexToast, ApexCarousel, ApexCarouselContent, ApexCarouselItem,
   ApexCarouselNav, ApexCarouselControls, ApexCarouselIndicators,
   ApexCompare, ApexCompareItem, ApexGallery, ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger,
   ApexButton, ApexButtonGroup, ApexSpeedDial, ApexSplitButton, ApexDataTable, ApexPaginator, ApexDataView, ApexOrgChart, ApexPickList, ApexTimeline, ApexTree, ApexTreeTable, ApexAccordion, ApexAvatar, ApexBadge, ApexOverlayBadge, ApexBlockUI, ApexChip, ApexInplace, ApexMeterGroup, ApexProgressSpinner, ApexScrollTop, ApexSkeleton, ApexChart, ApexChartGroup, ApexTaskBoard, ApexTaskCard, ApexAvatarGroup, ApexCard, ApexFieldset, ApexPanel, ApexScrollArea, ApexSplitter, ApexSteps, ApexTabs, ApexToolbar, ApexDialog, ApexConfirmPopup, ApexAlert, ApexProgressBar, ApexColumnFilter, ApexErrorSummary, ApexScheduler, ApexCalendar, ApexForm, ApexEditor, ApexHTMLEditor, ApexEditorToolbar, ApexEditorMenubar, ApexEditorBubble, ApexEditorTableGrid, ApexEditorImage, ApexEditorLink, ApexEditorTableTools, ApexEditorObjectBar, ApexEditorImageTools, ApexEditorWordCount, ApexEditorSlash,
