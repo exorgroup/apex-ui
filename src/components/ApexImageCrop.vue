@@ -141,6 +141,16 @@ async function load(src: File | Blob | string) {
   loading.value = true;
   release();
 
+  /* The object URL is for the PREVIEW and is made whatever happens.
+   *
+   * It used to be created only inside the `<img>` fallback below — so on every
+   * browser that HAS `createImageBitmap`, which is all of them, `previewSrc`
+   * stayed null, the `<img>` never rendered, the frame collapsed to zero height
+   * and the crop dialog opened empty. The bitmap is what `render()` draws FROM;
+   * this is what the operator looks at. Two jobs, and conflating them cost a
+   * screen. */
+  if (typeof src !== 'string') objectUrl.value = URL.createObjectURL(src);
+
   try {
     if (typeof src !== 'string' && 'createImageBitmap' in window) {
       /* `from-image` is the whole reason for the option: without it a phone
@@ -148,8 +158,7 @@ async function load(src: File | Blob | string) {
       bitmap.value = await createImageBitmap(src, { imageOrientation: 'from-image' });
       natural.value = { width: bitmap.value.width, height: bitmap.value.height };
     } else {
-      const url = typeof src === 'string' ? src : URL.createObjectURL(src);
-      if (typeof src !== 'string') objectUrl.value = url;
+      const url = typeof src === 'string' ? src : objectUrl.value!;
 
       const img = new Image();
       img.decoding = 'async';

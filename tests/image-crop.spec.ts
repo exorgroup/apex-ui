@@ -36,6 +36,13 @@ beforeAll(() => {
     close: () => {},
   }));
 
+  /* jsdom has no object URLs either, and the preview depends on one. */
+  let n = 0;
+  // @ts-expect-error
+  URL.createObjectURL = () => `blob:stub/${++n}`;
+  // @ts-expect-error
+  URL.revokeObjectURL = () => {};
+
   if (!('setPointerCapture' in Element.prototype)) {
     Element.prototype.setPointerCapture = () => {};
     Element.prototype.releasePointerCapture = () => {};
@@ -98,6 +105,32 @@ describe('where the box starts', () => {
     const w = await crop({ target: { width: 400, height: 400 }, mode: 'manual' });
 
     expect(rect(w)).toEqual({ x: 0, y: 0, w: NAT.width, h: NAT.height });
+    w.unmount();
+  });
+});
+
+describe('the preview', () => {
+  it('has a src — the image is actually SHOWN', async () => {
+    /* The bug this exists for: the object URL was created only in the `<img>`
+       FALLBACK path, so on every browser that has `createImageBitmap` — which is
+       all of them — `previewSrc` stayed null, the `<img>` never rendered, the
+       frame collapsed to zero height, and the dialog opened EMPTY.
+
+       The bitmap is what `render()` draws from; this is what the operator looks
+       at. Two jobs, and conflating them cost a screen. */
+    const w = await crop({ target: { width: 400, height: 400 } });
+
+    const img = w.find('.apex-ic__img');
+    expect(img.exists()).toBe(true);
+    expect(img.attributes('src')).toMatch(/^blob:/);
+    w.unmount();
+  });
+
+  it('shows a plain url straight through', async () => {
+    const w = mount(ApexImageCrop, { props: { src: 'https://x.test/a.webp' }, attachTo: document.body });
+    await flushPromises();
+
+    expect(w.find('.apex-ic__img').attributes('src')).toBe('https://x.test/a.webp');
     w.unmount();
   });
 });
