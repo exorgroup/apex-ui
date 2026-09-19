@@ -269,6 +269,13 @@ function onDown(e: PointerEvent, handle?: string) {
 
   if (handle) {
     drag.value = { kind: 'resize', handle };
+  } else if (e.button === 2) {
+    /* The RIGHT button always moves, wherever it goes down.
+       The left button cannot: outside the box it has to mean "draw", and that
+       leaves no way to nudge a box you have just drawn without starting over.
+       The gesture matches the ticket designer, where the right button moves the
+       view — in both places it is "reposition without changing". */
+    drag.value = { kind: 'move', ox: p.x - rect.value.x, oy: p.y - rect.value.y };
   } else if (inside(p) && !coversAll.value) {
     drag.value = { kind: 'move', ox: p.x - rect.value.x, oy: p.y - rect.value.y };
   } else {
@@ -277,6 +284,35 @@ function onDown(e: PointerEvent, handle?: string) {
     drag.value = { kind: 'draw', ax: p.x, ay: p.y };
     rect.value = { x: p.x, y: p.y, w: 0, h: 0 };
   }
+}
+
+/**
+ * Ctrl + arrows nudge the box.
+ *
+ * The step is in SCREEN pixels and converted, so the box moves the same visible
+ * distance whether the image is 400px wide or 6500 — an image-pixel step would
+ * be a crawl on the big one and a leap on the small one. Shift gives the
+ * finest move the image can express.
+ *
+ * Ctrl because the ticket designer pans with Ctrl + arrows, and this is the
+ * same question asked of a picture that always fits its frame: there is no view
+ * to move, so what moves is the box.
+ */
+function onKeydown(e: KeyboardEvent) {
+  const keys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+  if (!e.ctrlKey || !keys.includes(e.key) || !natural.value.width) return;
+
+  e.preventDefault();
+  const step = e.shiftKey ? 1 : Math.max(1, Math.round(10 / scale.value));
+  const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
+  const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
+
+  rect.value = {
+    ...rect.value,
+    x: clamp(rect.value.x + dx, 0, natural.value.width - rect.value.w),
+    y: clamp(rect.value.y + dy, 0, natural.value.height - rect.value.h),
+  };
+  announce();
 }
 
 const inside = (p: { x: number; y: number }) =>
@@ -507,10 +543,13 @@ const HANDLES = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
     <div
       ref="frame"
       class="apex-ic__frame"
+      tabindex="0"
       @pointerdown="onDown"
       @pointermove="onMove"
       @pointerup="onUp"
       @pointercancel="onUp"
+      @keydown="onKeydown"
+      @contextmenu.prevent
     >
       <img v-if="previewSrc" :src="previewSrc" class="apex-ic__img" alt="" draggable="false" />
 

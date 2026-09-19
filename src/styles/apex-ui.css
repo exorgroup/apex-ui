@@ -825,6 +825,10 @@ opacity:0;transform:scale(.96);transition:opacity var(--dur-fast) var(--ease-out
   /* The frame IS the measuring stick: `scale` divides its clientWidth by the
      image's natural width, so the image must fill it exactly. */
   touch-action:none;cursor:crosshair;user-select:none}
+/* The frame takes focus so Ctrl+arrows can reach it. Same ring as every other
+   focusable surface in the kit — .apex-picker__area is the closest relative. */
+.apex-ic__frame:focus{outline:none}
+.apex-ic__frame:focus-visible{outline:none;box-shadow:var(--focus-ring)}
 .apex-ic__img{display:block;inline-size:100%;block-size:auto;pointer-events:none;
   /* The default since Chrome 81 and stated anyway: a phone photograph must
      appear upright, because the crop box is chosen against what is on screen

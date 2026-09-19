@@ -74,6 +74,14 @@ async function drag(w: ReturnType<typeof mount>, from: [number, number], to: [nu
   await frame.trigger('pointerup', { clientX: to[0], clientY: to[1], pointerId: 1 });
 }
 
+/** The same drag with the RIGHT button held. */
+async function rightDrag(w: ReturnType<typeof mount>, from: [number, number], to: [number, number]) {
+  const frame = w.find('.apex-ic__frame');
+  await frame.trigger('pointerdown', { clientX: from[0], clientY: from[1], pointerId: 1, button: 2 });
+  await frame.trigger('pointermove', { clientX: to[0], clientY: to[1], pointerId: 1, button: 2 });
+  await frame.trigger('pointerup', { clientX: to[0], clientY: to[1], pointerId: 1, button: 2 });
+}
+
 describe('where the box starts', () => {
   it('auto centres the largest box of the target ratio', async () => {
     /* A 2000×1000 image and a 1:1 target: the box can only be 1000×1000, and
@@ -275,6 +283,104 @@ describe('the output size', () => {
     const w = await crop({ target: null, maxDim: 800 });
 
     expect(output(w)).toEqual({ width: 800, height: 400 });
+    w.unmount();
+  });
+});
+
+describe('moving the box WITHOUT changing it', () => {
+  /* Both gestures match the ticket designer, where the right button and
+     Ctrl+arrows move the view. A picture that always fits its frame has no view
+     to move, so what moves is the box — in both places the gesture means
+     "reposition without changing". */
+
+  it('a RIGHT drag moves the box even when it starts outside it', async () => {
+    /* The left button cannot do this: outside the box it has to mean "draw",
+       which leaves no way to nudge a box you have just drawn without starting
+       over. */
+    const w = await crop({ target: { width: 400, height: 400 } });
+    const before = { ...rect(w) };
+
+    /* x 100 is outside a box that starts at 500 — a left drag here would draw. */
+    await rightDrag(w, [100, 500], [200, 500]);
+
+    const after = rect(w);
+    expect(after.w).toBe(before.w);
+    expect(after.h).toBe(before.h);
+    expect(after.x).toBe(before.x + 100);
+    w.unmount();
+  });
+
+  it('a LEFT drag in the same place still DRAWS', async () => {
+    /* The pair to the test above: the right button adding a meaning must not
+       take one away from the left. */
+    const w = await crop({ target: { width: 400, height: 400 }, mode: 'manual' });
+    await drag(w, [100, 500], [200, 600]);
+
+    expect(rect(w)).toMatchObject({ x: 100, y: 500, w: 100, h: 100 });
+    w.unmount();
+  });
+
+  it('a right drag cannot push the box off the image', async () => {
+    const w = await crop({ target: { width: 400, height: 400 } });
+    await rightDrag(w, [1000, 500], [-5000, 500]);
+
+    expect(rect(w).x).toBe(0);
+    w.unmount();
+  });
+
+  it('Ctrl + arrow nudges the box', async () => {
+    const w = await crop({ target: { width: 400, height: 400 } });
+    const before = { ...rect(w) };
+
+    await w.find('.apex-ic__frame').trigger('keydown', { key: 'ArrowRight', ctrlKey: true });
+
+    const after = rect(w);
+    expect(after.x).toBeGreaterThan(before.x);
+    expect(after.w).toBe(before.w);
+    w.unmount();
+  });
+
+  it('the step is in SCREEN pixels, so it does not depend on the image size', async () => {
+    /* An image-pixel step would crawl on a 6500px photograph and leap on a
+       400px one. The frame is 1:1 here, so ten screen pixels IS ten image
+       pixels — which is the whole point of the conversion. */
+    const w = await crop({ target: { width: 400, height: 400 } });
+    const before = rect(w).x;
+
+    await w.find('.apex-ic__frame').trigger('keydown', { key: 'ArrowRight', ctrlKey: true });
+
+    expect(rect(w).x).toBe(before + 10);
+    w.unmount();
+  });
+
+  it('shift makes the nudge as fine as the image allows', async () => {
+    const w = await crop({ target: { width: 400, height: 400 } });
+    const before = rect(w).x;
+
+    await w.find('.apex-ic__frame').trigger('keydown', { key: 'ArrowRight', ctrlKey: true, shiftKey: true });
+
+    expect(rect(w).x).toBe(before + 1);
+    w.unmount();
+  });
+
+  it('a BARE arrow does nothing — the modifier is the gesture', async () => {
+    const w = await crop({ target: { width: 400, height: 400 } });
+    const before = { ...rect(w) };
+
+    await w.find('.apex-ic__frame').trigger('keydown', { key: 'ArrowRight' });
+
+    expect(rect(w)).toEqual(before);
+    w.unmount();
+  });
+
+  it('a nudge cannot push the box off the image either', async () => {
+    const w = await crop({ target: { width: 400, height: 400 } });
+
+    for (let i = 0; i < 200; i++) {
+      await w.find('.apex-ic__frame').trigger('keydown', { key: 'ArrowLeft', ctrlKey: true });
+    }
+
+    expect(rect(w).x).toBe(0);
     w.unmount();
   });
 });
