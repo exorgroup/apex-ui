@@ -5,6 +5,7 @@
  */
 import { nextTick, onMounted, onUpdated, ref } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import type { ApexOrgChartClasses } from '../types';
 
 export interface OrgNode {
   key: string;
@@ -25,6 +26,8 @@ export interface OrgNode {
 }
 
 const props = defineProps<{
+  /** Your own class on any part. See ApexOrgChartClasses. */
+  ui?: ApexOrgChartClasses;
   node: OrgNode;
   collapsible: boolean;
   isCollapsed: (key: string) => boolean;
@@ -41,9 +44,9 @@ const hasKids = (n: OrgNode) => !!n.children && n.children.length > 0;
 /** A node may carry its own colours; they set the same properties the chart uses. */
 function nodeStyle(n: OrgNode) {
   const s: Record<string, string> = {};
-  if (n.background) s['--oc-node-bg'] = n.background;
-  if (n.color) s['--oc-node-fg'] = n.color;
-  if (n.borderColor) s['--oc-node-border'] = n.borderColor;
+  if (n.background) s['--apex-oc-node-bg'] = n.background;
+  if (n.color) s['--apex-oc-node-fg'] = n.color;
+  if (n.borderColor) s['--apex-oc-node-border'] = n.borderColor;
   return s;
 }
 
@@ -62,18 +65,18 @@ function measureRail() {
   const horizontal = !!ul.closest('[data-orientation="horizontal"]');
   const a = horizontal ? first.offsetTop + first.offsetHeight / 2 : first.offsetLeft + first.offsetWidth / 2;
   const b = horizontal ? last.offsetTop + last.offsetHeight / 2 : last.offsetLeft + last.offsetWidth / 2;
-  ul.style.setProperty('--oc-rail-start', a + 'px');
-  ul.style.setProperty('--oc-rail-width', (b - a) + 'px');
+  ul.style.setProperty('--apex-oc-rail-start', a + 'px');
+  ul.style.setProperty('--apex-oc-rail-width', (b - a) + 'px');
 }
 onMounted(() => nextTick(measureRail));
 onUpdated(() => nextTick(measureRail));
 </script>
 
 <template>
-  <li class="apex-oc__branch"
+  <li class="apex-oc__branch" :class="ui?.branch"
       :data-collapsed="collapsible && hasKids(node) && isCollapsed(node.key) ? 'true' : undefined">
-    <div class="apex-oc__nodewrap">
-      <div class="apex-oc__node" :class="node.styleClass" :style="nodeStyle(node)" :data-type="node.type"
+    <div class="apex-oc__nodewrap" :class="ui?.nodeWrap">
+      <div class="apex-oc__node" :class="[node.styleClass, ui?.node]" :style="nodeStyle(node)" :data-type="node.type"
            :data-state="selectState(node)"
            :data-selectable="selectionMode && node.selectable !== false ? 'true' : undefined"
            :tabindex="selectionMode && node.selectable !== false ? 0 : -1"
@@ -91,16 +94,16 @@ onUpdated(() => nextTick(measureRail));
             <ApexIcon v-if="selectState(node) === 'on'" name="check" :size="14" />
             <ApexIcon v-else-if="selectState(node) === 'partial'" name="remove" :size="14" />
           </span>
-          <img v-if="node.image" class="apex-oc__img" :src="node.image" :alt="node.label || ''" />
-          <ApexIcon v-else-if="node.icon" :name="node.icon" :size="20" class="apex-oc__icon" />
-          <span class="apex-oc__text">
-            <span class="apex-oc__label">{{ node.label }}</span>
-            <span v-if="node.subtitle" class="apex-oc__sub">{{ node.subtitle }}</span>
+          <img v-if="node.image" class="apex-oc__img" :class="ui?.image" :src="node.image" :alt="node.label || ''" />
+          <ApexIcon v-else-if="node.icon" :name="node.icon" :size="20" class="apex-oc__icon" :class="ui?.icon" />
+          <span class="apex-oc__text" :class="ui?.text">
+            <span class="apex-oc__label" :class="ui?.label">{{ node.label }}</span>
+            <span v-if="node.subtitle" class="apex-oc__sub" :class="ui?.sub">{{ node.subtitle }}</span>
           </span>
         </slot>
       </div>
 
-      <button v-if="collapsible && hasKids(node)" type="button" class="apex-oc__toggle"
+      <button v-if="collapsible && hasKids(node)" type="button" class="apex-oc__toggle" :class="ui?.toggle"
               :aria-expanded="!isCollapsed(node.key)"
               :aria-label="isCollapsed(node.key) ? 'Expand' : 'Collapse'"
               @click.stop="emit('toggle', node)">
@@ -110,9 +113,9 @@ onUpdated(() => nextTick(measureRail));
       </button>
     </div>
 
-    <ul v-if="hasKids(node) && !isCollapsed(node.key)" ref="kidsEl" class="apex-oc__children"
+    <ul v-if="hasKids(node) && !isCollapsed(node.key)" ref="kidsEl" class="apex-oc__children" :class="ui?.children"
         :data-single="node.children!.length === 1 ? 'true' : 'false'">
-      <ApexOrgNode v-for="child in node.children" :key="child.key" :node="child"
+      <ApexOrgNode v-for="child in node.children" :key="child.key" :node="child" :ui="ui"
                    :collapsible="collapsible" :is-collapsed="isCollapsed"
                    :selection-mode="selectionMode" :select-state="selectState"
                    @toggle="emit('toggle', $event)" @select="emit('select', $event)">

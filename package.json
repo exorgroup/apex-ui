@@ -1,7 +1,7 @@
 {
   "name": "@exorgroup/apex-ui",
   "version": "0.1.0",
-  "description": "APEX Pando UI \u00e2\u20ac\u201d Vue 3 form controls for Laravel applications.",
+  "description": "APEX Pando UI â€” Vue 3 form controls for Laravel applications.",
   "license": "proprietary",
   "type": "module",
   "files": [
@@ -31,16 +31,56 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "peerDependencies": {
+    "prosemirror-commands": "^1.7.2",
+    "prosemirror-history": "^1.5.0",
+    "prosemirror-inputrules": "^1.5.1",
+    "prosemirror-keymap": "^1.2.3",
+    "prosemirror-model": "^1.25.11",
+    "prosemirror-schema-list": "^1.5.1",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-tables": "^1.8.5",
+    "prosemirror-transform": "^1.12.1",
+    "prosemirror-view": "^1.42.3",
     "vue": "^3.4.0"
   },
   "peerDependenciesMeta": {
+    "laravel-precognition-vue": {
+      "optional": true
+    },
+    "prosemirror-commands": {
+      "optional": true
+    },
+    "prosemirror-history": {
+      "optional": true
+    },
+    "prosemirror-inputrules": {
+      "optional": true
+    },
+    "prosemirror-keymap": {
+      "optional": true
+    },
+    "prosemirror-model": {
+      "optional": true
+    },
+    "prosemirror-schema-list": {
+      "optional": true
+    },
+    "prosemirror-state": {
+      "optional": true
+    },
+    "prosemirror-tables": {
+      "optional": true
+    },
+    "prosemirror-transform": {
+      "optional": true
+    },
+    "prosemirror-view": {
+      "optional": true
+    },
     "vue-i18n": {
       "optional": true
     },
     "zod": {
-      "optional": true
-    },
-    "laravel-precognition-vue": {
       "optional": true
     }
   },
@@ -48,6 +88,16 @@
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/test-utils": "^2.4.6",
     "happy-dom": "^15.11.7",
+    "prosemirror-commands": "^1.7.2",
+    "prosemirror-history": "^1.5.0",
+    "prosemirror-inputrules": "^1.5.1",
+    "prosemirror-keymap": "^1.2.3",
+    "prosemirror-model": "^1.25.11",
+    "prosemirror-schema-list": "^1.5.1",
+    "prosemirror-state": "^1.4.4",
+    "prosemirror-tables": "^1.8.5",
+    "prosemirror-transform": "^1.12.1",
+    "prosemirror-view": "^1.42.3",
     "typescript": "^5.7.2",
     "vite": "^6.0.7",
     "vitest": "^2.1.8",

@@ -9,10 +9,13 @@
  */
 import { computed, ref } from 'vue';
 import ApexOrgNode, { type OrgNode } from './ApexOrgNode.vue';
+import type { ApexOrgChartClasses } from '../types';
 
 export type { OrgNode };
 
 const props = withDefaults(defineProps<{
+  /** Your own class on any part. See ApexOrgChartClasses. */
+  ui?: ApexOrgChartClasses;
   /** One root, or several. */
   value?: OrgNode | OrgNode[];
   /** Show a collapse control on every node with children. */
@@ -117,27 +120,27 @@ function select(node: OrgNode) {
 }
 
 const rootStyle = computed(() => {
-  const s: Record<string, string> = { '--oc-line-w': props.lineWidth + 'px' };
-  if (props.lineColor) s['--oc-line'] = props.lineColor;
-  if (props.nodeGap) s['--oc-gap'] = props.nodeGap;
-  if (props.levelGap) s['--oc-level'] = props.levelGap;
-  if (props.nodeBackground) s['--oc-node-bg'] = props.nodeBackground;
-  if (props.nodeColor) s['--oc-node-fg'] = props.nodeColor;
-  if (props.nodeBorderColor) s['--oc-node-border'] = props.nodeBorderColor;
-  if (props.nodeBorderWidth != null) s['--oc-node-border-w'] = props.nodeBorderWidth + 'px';
-  if (props.nodeRadius) s['--oc-node-radius'] = props.nodeRadius;
-  if (props.selectedBackground) s['--oc-sel-bg'] = props.selectedBackground;
-  if (props.selectedColor) s['--oc-sel-fg'] = props.selectedColor;
-  if (props.selectedBorderColor) s['--oc-sel-border'] = props.selectedBorderColor;
-  if (props.partialBorderColor) s['--oc-partial-border'] = props.partialBorderColor;
+  const s: Record<string, string> = { '--apex-oc-line-w': props.lineWidth + 'px' };
+  if (props.lineColor) s['--apex-oc-line'] = props.lineColor;
+  if (props.nodeGap) s['--apex-oc-gap'] = props.nodeGap;
+  if (props.levelGap) s['--apex-oc-level'] = props.levelGap;
+  if (props.nodeBackground) s['--apex-oc-node-bg'] = props.nodeBackground;
+  if (props.nodeColor) s['--apex-oc-node-fg'] = props.nodeColor;
+  if (props.nodeBorderColor) s['--apex-oc-node-border'] = props.nodeBorderColor;
+  if (props.nodeBorderWidth != null) s['--apex-oc-node-border-w'] = props.nodeBorderWidth + 'px';
+  if (props.nodeRadius) s['--apex-oc-node-radius'] = props.nodeRadius;
+  if (props.selectedBackground) s['--apex-oc-sel-bg'] = props.selectedBackground;
+  if (props.selectedColor) s['--apex-oc-sel-fg'] = props.selectedColor;
+  if (props.selectedBorderColor) s['--apex-oc-sel-border'] = props.selectedBorderColor;
+  if (props.partialBorderColor) s['--apex-oc-partial-border'] = props.partialBorderColor;
   return s;
 });
 </script>
 
 <template>
-  <div class="apex-oc" :style="rootStyle" :data-orientation="orientation">
-    <ul class="apex-oc__root">
-      <ApexOrgNode v-for="root in roots" :key="root.key" :node="root"
+  <div class="apex-oc" :class="ui?.root" :style="rootStyle" :data-orientation="orientation">
+    <ul class="apex-oc__root" :class="ui?.top">
+      <ApexOrgNode v-for="root in roots" :key="root.key" :node="root" :ui="ui"
                    :collapsible="collapsible" :is-collapsed="isCollapsed"
                    :selection-mode="selectionMode" :select-state="selectState"
                    @toggle="toggle" @select="select">

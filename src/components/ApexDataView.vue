@@ -11,10 +11,13 @@ import { computed, ref, watch } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexPaginator from './ApexPaginator.vue';
 import { getField, sortRows, type SortOrder } from '../core/table';
+import type { ApexDataViewClasses } from '../types';
 
 type Row = Record<string, unknown>;
 
 const props = withDefaults(defineProps<{
+  /** Your own class on any part. See ApexDataViewClasses. */
+  ui?: ApexDataViewClasses;
   value?: Row[];
   dataKey?: string;
   layout?: 'list' | 'grid';
@@ -111,18 +114,18 @@ function pickSort(index: string) {
 }
 
 const keyOf = (row: Row, i: number) => (props.dataKey ? String(getField(row, props.dataKey)) : String(i));
-const rootStyle = computed(() => ({ '--dv-min': props.gridMinWidth, '--dv-gap': props.gap }));
+const rootStyle = computed(() => ({ '--apex-dv-min': props.gridMinWidth, '--apex-dv-gap': props.gap }));
 const skeletons = computed(() => Array.from({ length: props.skeletonCount }, (_, i) => i));
 </script>
 
 <template>
-  <div class="apex-dv" :style="rootStyle" :data-layout="layout"
+  <div class="apex-dv" :class="ui?.root" :style="rootStyle" :data-layout="layout"
        :data-bordered="bordered ? 'true' : 'false'" :data-loading="loading ? 'true' : 'false'">
-    <div v-if="caption || showLayoutSwitcher || sortOptions || $slots.header" class="apex-dv__bar">
+    <div v-if="caption || showLayoutSwitcher || sortOptions || $slots.header" class="apex-dv__bar" :class="ui?.bar">
       <slot name="header">
-        <p v-if="caption" class="apex-dv__caption">{{ caption }}</p>
+        <p v-if="caption" class="apex-dv__caption" :class="ui?.caption">{{ caption }}</p>
 
-        <label v-if="sortOptions && sortOptions.length" class="apex-dv__sort">
+        <label v-if="sortOptions && sortOptions.length" class="apex-dv__sort" :class="ui?.sort">
           <span class="sr-only">{{ sortPlaceholder }}</span>
           <select :value="sortValue" :aria-label="sortPlaceholder"
                   @change="pickSort(($event.target as HTMLSelectElement).value)">
@@ -132,7 +135,7 @@ const skeletons = computed(() => Array.from({ length: props.skeletonCount }, (_,
           <ApexIcon name="expand_more" :size="18" />
         </label>
 
-        <div v-if="showLayoutSwitcher" class="apex-dv__switch" role="radiogroup" aria-label="Layout">
+        <div v-if="showLayoutSwitcher" class="apex-dv__switch" :class="ui?.layoutSwitch" role="radiogroup" aria-label="Layout">
           <button v-for="l in (['list', 'grid'] as const)" :key="l" type="button" role="radio"
                   :aria-checked="layout === l" :aria-label="l === 'list' ? 'List layout' : 'Grid layout'"
                   :data-on="layout === l" @click="emit('update:layout', l)">
@@ -142,9 +145,9 @@ const skeletons = computed(() => Array.from({ length: props.skeletonCount }, (_,
       </slot>
     </div>
 
-    <div class="apex-dv__main">
-      <div v-if="loading && loadingMode === 'skeleton'" class="apex-dv__items">
-        <div v-for="n in skeletons" :key="'sk' + n" class="apex-dv__item apex-dv__item--skel">
+    <div class="apex-dv__main" :class="ui?.main">
+      <div v-if="loading && loadingMode === 'skeleton'" class="apex-dv__items" :class="ui?.items">
+        <div v-for="n in skeletons" :key="'sk' + n" class="apex-dv__item apex-dv__item--skel" :class="ui?.item">
           <slot name="skeleton">
             <span class="apex-skel apex-dv__skelmedia"></span>
             <span class="apex-dv__skellines">
@@ -156,8 +159,8 @@ const skeletons = computed(() => Array.from({ length: props.skeletonCount }, (_,
         </div>
       </div>
 
-      <div v-else-if="windowed.length" class="apex-dv__items">
-        <div v-for="(row, i) in windowed" :key="keyOf(row, i)" class="apex-dv__item">
+      <div v-else-if="windowed.length" class="apex-dv__items" :class="ui?.items">
+        <div v-for="(row, i) in windowed" :key="keyOf(row, i)" class="apex-dv__item" :class="ui?.item">
           <slot v-if="layout === 'grid'" name="grid" :item="row" :index="i" :layout="layout">
             <slot name="item" :item="row" :index="i" :layout="layout" />
           </slot>
@@ -167,14 +170,14 @@ const skeletons = computed(() => Array.from({ length: props.skeletonCount }, (_,
         </div>
       </div>
 
-      <div v-else class="apex-dv__empty">
+      <div v-else class="apex-dv__empty" :class="ui?.empty">
         <slot name="empty">
           <ApexIcon name="inbox" :size="26" />
           <span>{{ emptyMessage || 'No records found' }}</span>
         </slot>
       </div>
 
-      <div v-if="loading && loadingMode === 'overlay'" class="apex-dv__overlay">
+      <div v-if="loading && loadingMode === 'overlay'" class="apex-dv__overlay" :class="ui?.overlay">
         <slot name="loading"><ApexIcon name="progress_activity" spin :size="30" /></slot>
       </div>
     </div>

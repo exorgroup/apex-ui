@@ -53,12 +53,38 @@ function layerFor(el: HTMLElement) {
   return layer;
 }
 
-function spawn(el: HTMLElement, options: RippleOptions, x?: number, y?: number) {
+/**
+ * Ink one element, optionally sized to a LARGER box than itself.
+ *
+ * `bounds` is what makes a ripple span several elements: give every cell in
+ * a table row the same bounds — the row — and each one draws its slice of a
+ * single circle, which reads as one wave crossing the row rather than a
+ * cell-sized blob. Without it each cell would size its own wave and the
+ * result is a row of little circles. AF2-326.
+ *
+ * Exported because a `<span>` is not a legal child of `<tr>`: hosting the
+ * layer on the cells is the only structurally sound way to ripple a row.
+ */
+export function rippleAt(
+  el: HTMLElement,
+  options: RippleOptions = {},
+  x?: number,
+  y?: number,
+  bounds?: HTMLElement,
+) {
+  spawn(el, options, x, y, bounds);
+}
+
+function spawn(el: HTMLElement, options: RippleOptions, x?: number, y?: number, bounds?: HTMLElement) {
   const rect = el.getBoundingClientRect();
   const cx = options.centered || x === undefined ? rect.width / 2 : x - rect.left;
   const cy = options.centered || y === undefined ? rect.height / 2 : y - rect.top;
-  /* Furthest corner, so the wave covers the element from wherever it started. */
-  const radius = Math.hypot(Math.max(cx, rect.width - cx), Math.max(cy, rect.height - cy));
+  /* Furthest corner, so the wave covers the element from wherever it started
+     — of `bounds` when one is given, so slices of one wave agree on its size. */
+  const box = bounds ? bounds.getBoundingClientRect() : rect;
+  const bx = options.centered || x === undefined ? box.width / 2 : x - box.left;
+  const by = options.centered || y === undefined ? box.height / 2 : y - box.top;
+  const radius = Math.hypot(Math.max(bx, box.width - bx), Math.max(by, box.height - by));
 
   const ink = document.createElement('span');
   ink.className = 'apex-ripple__ink';
@@ -67,7 +93,21 @@ function spawn(el: HTMLElement, options: RippleOptions, x?: number, y?: number) 
   ink.style.insetBlockStart = cy - radius + 'px';
   if (options.color) ink.style.background = options.color;
   if (options.opacity !== undefined) ink.style.setProperty('--rp-opacity', String(options.opacity));
-  if (options.duration) ink.style.setProperty('--rp-dur', options.duration);
+  /* A wave's life scales with how far it has to travel — AF2-327.
+     The kit's --ease-out is cubic-bezier(.22,1,.36,1), which is ~90% done in
+     the first third of its run. On a 42px button that reads as a ripple. On
+     a table row the radius is half the ROW's diagonal, so the circle is over
+     2000px across and covers everything before the eye catches it moving:
+     measured 0.03 opacity at 220ms. The effect was firing correctly and was
+     simply invisible.
+
+     Only ever LENGTHENS — the floor is the 600ms every small control has
+     always had, so nothing existing changes — and is capped so a very wide
+     surface does not linger. */
+  ink.style.setProperty(
+    '--rp-dur',
+    options.duration ?? `${Math.round(Math.max(600, Math.min(1200, radius * 0.8)))}ms`,
+  );
 
   /* Removed on animationend rather than reused: one node cannot show two
      overlapping presses, and restarting it mid-flight reads as a stutter. */

@@ -213,3 +213,127 @@ describe('the stage carries nothing stale', () => {
     await p;
   });
 });
+
+describe('the progress and result bags', () => {
+  /* Added for the first real CRUD screen (AF2-308). `run()` could set a
+     progress TITLE and nothing else, and the result stage took its whole
+     shape from the outcome — so a caller could not ask for "gears while it
+     saves, and close itself after three seconds", which is the ordinary
+     thing every save wants. */
+
+  it('carries the progress bag onto the progress stage', async () => {
+    let release!: () => void;
+    const held = new Promise<void>((r) => { release = r; });
+    const p = alert.run({
+      progress: { title: 'Saving…', icon: 'settings' },
+      action: () => held,
+    });
+
+    await Promise.resolve();
+    expect(__alertState.stage).toBe('progress');
+    expect(__alertState.title).toBe('Saving…');
+    expect(__alertState.icon).toBe('settings');
+
+    release();
+    await Promise.resolve(); await Promise.resolve();
+    press('confirm');
+    await p;
+  });
+
+  it('still offers nothing to press, whatever the progress bag asks for', async () => {
+    /* The one invariant the bag must not be able to break: a Cancel over a
+       spinner promises an abort no caller has wired up. */
+    let release!: () => void;
+    const held = new Promise<void>((r) => { release = r; });
+    const p = alert.run({
+      progress: { cancelText: 'Stop', confirmText: 'Now', buttons: [{ label: 'Abort' }] },
+      action: () => held,
+    });
+
+    await Promise.resolve();
+    expect(__alertState.cancelText).toBeNull();
+    expect(__alertState.confirmText).toBeUndefined();
+    expect(__alertState.buttons).toBeUndefined();
+
+    release();
+    await Promise.resolve(); await Promise.resolve();
+    press('confirm');
+    await p;
+  });
+
+  it('progressTitle still wins, because it was the only way to say it', async () => {
+    let release!: () => void;
+    const held = new Promise<void>((r) => { release = r; });
+    const p = alert.run({
+      progressTitle: 'Old way',
+      progress: { title: 'New way' },
+      action: () => held,
+    });
+    await Promise.resolve();
+    expect(__alertState.title).toBe('Old way');
+    release();
+    await Promise.resolve(); await Promise.resolve();
+    press('confirm'); await p;
+  });
+
+  it('carries the result bag onto the result stage', async () => {
+    const p = alert.run({
+      result: { autoClose: 3000, showTimer: true, confirmText: 'Dismiss' },
+      action: () => ({ ok: true, title: 'Record saved' }),
+    });
+    await Promise.resolve(); await Promise.resolve();
+
+    expect(__alertState.stage).toBe('result');
+    expect(__alertState.autoClose).toBe(3000);
+    expect(__alertState.showTimer).toBe(true);
+    expect(__alertState.confirmText).toBe('Dismiss');
+    press('confirm');
+    expect(await p).toBe(true);
+  });
+
+  it('the outcome still overrules the bag', async () => {
+    /* The bag is presentation; the outcome is the judgement. A result bag
+       carrying an optimistic title must not silence a refusal. */
+    const p = alert.run({
+      result: { title: 'Record saved', tone: 'success', autoClose: 3000 },
+      action: () => ({ ok: false, title: 'Not deleted', message: 'Still in use' }),
+    });
+    await Promise.resolve(); await Promise.resolve();
+
+    expect(__alertState.title).toBe('Not deleted');
+    expect(__alertState.message).toBe('Still in use');
+    expect(__alertState.tone).toBe('warn');
+    /* And the presentation the outcome says nothing about survives. */
+    expect(__alertState.autoClose).toBe(3000);
+    press('confirm');
+    expect(await p).toBe(false);
+  });
+
+  it('the bag supplies a title only when the outcome has none', async () => {
+    const p = alert.run({
+      result: { title: 'Done' },
+      action: () => undefined,
+    });
+    await Promise.resolve(); await Promise.resolve();
+    expect(__alertState.title).toBe('Done');
+    press('confirm'); await p;
+  });
+
+  it('neither bag leaks into the other stage', async () => {
+    let release!: () => void;
+    const held = new Promise<void>((r) => { release = r; });
+    const p = alert.run({
+      progress: { icon: 'settings' },
+      result: { autoClose: 3000 },
+      action: () => held,
+    });
+
+    await Promise.resolve();
+    expect(__alertState.autoClose, 'a progress stage that closes itself abandons the work').toBeUndefined();
+
+    release();
+    await Promise.resolve(); await Promise.resolve();
+    expect(__alertState.icon, 'the gears belonged to the work, which is over').toBeUndefined();
+    press('confirm'); await p;
+  });
+});

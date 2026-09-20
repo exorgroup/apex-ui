@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { resolve } from 'node:path';
+import pkg from './package.json';
 
 export default defineConfig({
   plugins: [vue()],
@@ -13,7 +14,16 @@ export default defineConfig({
     },
     cssFileName: 'apex-ui',
     rollupOptions: {
-      external: ['vue'],
+      /* Read from package.json rather than listed here. AF2-279 exported the
+         editor core and the bundle silently grew by 216KB: `external` named
+         only `vue`, so every prosemirror package was INLINED despite being
+         declared a peer. That is the one failure the engine cannot survive —
+         a consumer with its own copy then has two `Node` classes and every
+         instanceof across the boundary is false, with nothing thrown. A
+         literal list would drift from the peers the next time one is added;
+         derived, it cannot. */
+      external: (id) => id === 'vue'
+        || Object.keys(pkg.peerDependencies).some((p) => id === p || id.startsWith(`${p}/`)),
       output: { globals: { vue: 'Vue' } },
     },
   },

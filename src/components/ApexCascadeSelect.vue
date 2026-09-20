@@ -7,6 +7,7 @@
  *                      show-path :footer-action="{ label:'Add new', icon:'add' }" @action="…" />
  */
 import { computed, nextTick, ref, watch, onBeforeUnmount } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
 import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { pickFieldProps } from '../core/utils';
@@ -191,7 +192,7 @@ watch(open, (v) => {
 onBeforeUnmount(() => {
   if (typeof document !== 'undefined') document.removeEventListener('mousedown', onDocClick);
 });
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 </script>
 
 <template>

@@ -34,7 +34,7 @@ const ApexTreeNode = defineComponent({
   setup(props, { emit }) {
     /** Depth-proportional inset, so a level's width is one variable to change. */
     const inset = (depth: number) =>
-      `calc(8px + var(--apex-tree-indent, 18px) * ${depth})`;
+      `calc(8px + var(--apex-treesel-indent, 18px) * ${depth})`;
 
     return () => {
       const n = props.node;

@@ -304,8 +304,8 @@ describe('both controls take the ui class map', () => {
   it('the appearance props reach the element as CSS variables', async () => {
     const w = tree({ nodeSelectedBackground: '#123456', indent: '30px' });
     const style = w.find('.apex-ctl--trigger').element.parentElement!.getAttribute('style') || '';
-    expect(style).toContain('--apex-tree-row-selected-bg: #123456');
-    expect(style).toContain('--apex-tree-indent: 30px');
+    expect(style).toContain('--apex-treesel-row-selected-bg: #123456');
+    expect(style).toContain('--apex-treesel-indent: 30px');
 
     const o = order({ rowSelectedColor: '#abcdef', moveButtonSize: '44px' });
     const os = o.find('.apex-order').attributes('style') || '';

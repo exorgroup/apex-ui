@@ -1,7 +1,7 @@
 <template>
   <Teleport to="body">
     <div
-      v-if="state.open && !state.target && mine"
+      v-if="showing && !state.target && mine"
       class="apex-alert-overlay"
       :class="ui?.overlay"
       :style="overlayStyle"
@@ -10,7 +10,7 @@
       <!-- The whole panel, for a caller who wants the service's sequencing and
            none of its chrome. Everything it needs is handed down. -->
       <slot
-        v-if="$slots.container"
+        v-if="$slots.container && state.open"
         name="container"
         :state="state"
         :buttons="buttons"
@@ -18,11 +18,29 @@
         :close="close"
       />
 
+      <!-- `appear` is not optional here — AF2-339.
+
+           Vue skips the enter transition on a Transition's FIRST render,
+           and this one lives inside the overlay, which is itself `v-if`ed
+           on the same open. So overlay and panel arrive together, the
+           Transition mounts fresh each time, and without `appear` the
+           entrance never runs. ApexForm neither needs it nor may have it:
+           its shell is always in the DOM so the panel appearing is an
+           update, and in the PAGE shell the panel is permanent — `appear`
+           there would animate a plain form on every page load.
+
+           This regressed in AF2-331, when the panel's own
+           `animation: apex-alert-pop` moved onto the transition: alerts
+           have had no entrance since, and the exit working is what made it
+           visible. -->
+      <Transition v-bind="panelTransition" appear @after-leave="showing = false">
+      <!-- Standalone conditions, not a v-if/v-else pair: the <Transition>
+           sits between them and breaks the adjacency Vue requires. -->
       <div
-        v-else
+        v-if="!$slots.container && state.open"
         ref="alertEl"
         class="apex-alert"
-        :class="[state.enterClass, transitionClass, ui?.panel]"
+        :class="[transitionClass, ui?.panel]"
         :style="panelStyle"
         :data-tone="state.stage === 'progress' ? 'info' : state.tone"
         :data-icon-pos="iconPosition"
@@ -45,8 +63,22 @@
              needs, for the same reason. -->
         <div :key="figureKey" class="apex-alert-figure" :class="ui?.figure" :style="figureStyle">
           <slot name="icon" :state="state">
+            <!-- An icon at the progress stage replaces the ring and spins,
+                 so a caller can say what KIND of work is running — gears for
+                 a save, a ring for anything unspecified. `spin` is right here
+                 and nowhere else in this component: every other stage is a
+                 report, and a spinning report says it is still going. -->
+            <ApexIcon
+              v-if="state.stage === 'progress' && icon"
+              class="apex-alert-icon"
+              :name="icon"
+              :size="64"
+              spin
+              :style="{ color: state.iconColor || 'var(--apex-alert-ring)' }"
+            />
+
             <ApexProgressSpinner
-              v-if="state.stage === 'progress'"
+              v-else-if="state.stage === 'progress'"
               :size="88"
               :stroke-width="6"
               color="var(--apex-alert-ring)"
@@ -136,6 +168,7 @@
               <ApexButton
                 v-for="(b, i) in buttons"
                 :key="i"
+                v-apex-ripple="rippleOn"
                 :severity="b.severity"
                 :variant="b.variant"
                 :icon="b.icon"
@@ -144,6 +177,7 @@
 
               <ApexButton
                 v-if="state.copyText"
+                v-apex-ripple="rippleOn"
                 severity="success"
                 :icon="copied ? 'check' : 'content_copy'"
                 @click="onCopy"
@@ -156,6 +190,7 @@
           <div v-if="showTimer" class="apex-alert-timer" :class="ui?.timer" :style="{ '--apex-alert-life': `${state.autoClose}ms` }"></div>
         </div>
       </div>
+      </Transition>
     </div>
   </Teleport>
 </template>
@@ -174,12 +209,15 @@
  * version worth keeping, so it is the default; `icon` and `image` replace it
  * for the cases that need a particular picture.
  */
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, watch, inject } from 'vue';
 import { useApexAlert } from '../core/alert';
 import { useAlertButtons } from '../core/alertButtons';
-import type { ApexAlertClasses } from '../types';
+import type { ApexAlertClasses, ApexUiOptions, ApexOverlayTransition } from '../types';
 import { useApexI18n } from '../core/i18n';
 import ApexButton from './ApexButton.vue';
+import { apexRipple as vApexRipple } from '../core/ripple';
+import { APEX_UI_OPTIONS } from '../core/symbols';
+import { useOverlayTransition } from '../core/overlayTransition';
 import ApexIcon from './ApexIcon.vue';
 import ApexProgressSpinner from './ApexProgressSpinner.vue';
 
@@ -188,7 +226,7 @@ import ApexProgressSpinner from './ApexProgressSpinner.vue';
  * knows what this particular alert is about; the host only knows the house
  * style.
  */
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexOverlayTransition & {
   /** Only render requests carrying this group, for a per-kind host. */
   group?: string;
   /** Default title, when a call gives none. */
@@ -202,14 +240,59 @@ const props = withDefaults(defineProps<{
   acceptLabel?: string;
   rejectLabel?: string;
   width?: string;
+  /** Ripple the answer buttons. Defaults to the plugin's `ripple` option. */
+  ripple?: boolean;
   /** Your own class on any part. See ApexAlertClasses. */
   ui?: ApexAlertClasses;
 }>(), {
   iconPosition: 'top',
   iconAnimation: 'none',
+  /* `undefined`, explicitly. Vue casts an ABSENT boolean prop to `false`,
+     not to undefined — so `props.ripple ?? option` would read `false ?? true`
+     and the app-wide option could never turn anything on. The tri-state
+     "unset / on / off" only survives if the default is spelled out. */
+  ripple: undefined,
 });
 
+/* Prop, then the app-wide plugin option, then OFF — a library that started
+   rippling on upgrade would be changing an app that never asked. AF2-324.
+   The directive is imported rather than assumed registered: this component
+   can be mounted without the plugin. */
+const uiOptions = inject<ApexUiOptions>(APEX_UI_OPTIONS, {});
+
 const { state, settle, press, close } = useApexAlert();
+
+/* Per call, then this host's prop, then the app-wide plugin option, then
+   OFF — the same order every other option on this component follows. */
+const rippleOn = computed(() => state.ripple ?? props.ripple ?? uiOptions.ripple ?? false);
+
+/* ── the panel's entry and exit ──────────────────────────────────────
+   `enterClass` and `leaveClass` were DECLARED on AlertOptions and applied
+   as static classes on the panel, with no <Transition> anywhere — so the
+   leave animation could never run: v-if removed the element outright.
+   AF2-331.
+
+   `showing` is what makes an exit possible at all. The panel lives inside
+   the overlay, so if both disappear on the same v-if there is no leave
+   phase to animate. The overlay now outlives the panel by exactly one
+   transition and closes itself on @after-leave.
+
+   Per call first, then this host's props, then the app-wide option — the
+   same order every other option on this component follows. */
+const showing = ref(false);
+watch(() => state.open, (open) => { if (open) showing.value = true; });
+
+/* Getters, not a snapshot: the composable reads these inside its own
+   computed, so a plain object of getters tracks `state` and stays live.
+   `computed(...).value` would have frozen whatever the first alert asked
+   for and applied it to every one after. */
+const panelTransition = useOverlayTransition({
+  get transition() { return state.transition ?? props.transition; },
+  get enterClass() { return state.enterClass ?? props.enterClass; },
+  get leaveClass() { return state.leaveClass ?? props.leaveClass; },
+  get enterDuration() { return state.enterDuration ?? props.enterDuration; },
+  get leaveDuration() { return state.leaveDuration ?? props.leaveDuration; },
+}, 'apex-alert');
 const t = useApexI18n();
 
 const alertEl = ref<HTMLElement | null>(null);
@@ -312,8 +395,10 @@ const figureStyle = computed(() => ({
   color: state.iconColor ?? props.iconColor,
 }));
 
-const transitionClass = computed(() =>
-  (state.transition && state.transition !== 'scale' ? `apex-alert--${state.transition}` : ''));
+/* The panel's animation is the transition's job now (AF2-331), so there is
+   no per-tone class left to add here. Kept as an empty computed rather than
+   ripping the binding out of four places in the template. */
+const transitionClass = computed(() => '');
 
 /* ── stage animation ────────────────────────────────────────── */
 

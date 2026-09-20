@@ -10,8 +10,11 @@
  * where it is in a sequence instead of converting that to a number itself.
  */
 import { computed } from 'vue';
+import type { ApexProgressBarClasses } from '../types';
 
 const props = withDefaults(defineProps<{
+  /** Your own class on any part. See ApexProgressBarClasses. */
+  ui?: ApexProgressBarClasses;
   value?: number;
   max?: number;
   /** `indeterminate` sweeps for work of unknown length; `value` is ignored. */
@@ -68,15 +71,15 @@ const tone = computed(() => {
 });
 const rootStyle = computed(() => {
   const s: Record<string, string> = {
-    '--pb-h': typeof props.height === 'number' ? props.height + 'px' : props.height,
+    '--apex-pb-h': typeof props.height === 'number' ? props.height + 'px' : props.height,
   };
-  if (props.color) s['--pb-fill'] = props.color;
-  if (props.trackColor) s['--pb-track'] = props.trackColor;
-  if (props.radius) s['--pb-radius'] = props.radius;
-  if (props.fillRadius) s['--pb-fill-radius'] = props.fillRadius;
-  if (props.valueColor) s['--pb-value-fg'] = props.valueColor;
-  if (props.valueSize) s['--pb-value-fs'] = props.valueSize;
-  if (props.sweepDuration) s['--pb-sweep'] = props.sweepDuration;
+  if (props.color) s['--apex-pb-fill'] = props.color;
+  if (props.trackColor) s['--apex-pb-track'] = props.trackColor;
+  if (props.radius) s['--apex-pb-radius'] = props.radius;
+  if (props.fillRadius) s['--apex-pb-fill-radius'] = props.fillRadius;
+  if (props.valueColor) s['--apex-pb-value-fg'] = props.valueColor;
+  if (props.valueSize) s['--apex-pb-value-fs'] = props.valueSize;
+  if (props.sweepDuration) s['--apex-pb-sweep'] = props.sweepDuration;
   return s;
 });
 const readout = computed(() => Math.round(pct.value) + '%');
@@ -93,30 +96,30 @@ defineSlots<{
 </script>
 
 <template>
-  <div class="apex-pb" :style="rootStyle" :data-tone="tone"
+  <div class="apex-pb" :class="ui?.root" :style="rootStyle" :data-tone="tone"
        :data-value-pos="showValue ? valuePosition : undefined"
        :data-striped="striped ? 'true' : 'false'"
        :data-stripe-anim="animatedStripes ? 'true' : 'false'"
        :data-stacked="(stepList.length && showStepLabel) || $slots.label ? 'true' : 'false'">
-    <div v-if="$slots.label || (stepList.length && showStepLabel)" class="apex-pb__label">
+    <div v-if="$slots.label || (stepList.length && showStepLabel)" class="apex-pb__label" :class="ui?.label">
       <slot name="label" :value="value" :percent="pct" :formatted="readout" :step="stepLabel">
         <span>{{ stepLabel }}</span>
       </slot>
     </div>
-    <div class="apex-pb__row">
-      <div class="apex-pb__track" role="progressbar" :aria-label="label || stepLabel || undefined"
+    <div class="apex-pb__row" :class="ui?.row">
+      <div class="apex-pb__track" :class="ui?.track" role="progressbar" :aria-label="label || stepLabel || undefined"
            :aria-valuemin="isIndeterminate ? undefined : 0"
            :aria-valuemax="isIndeterminate ? undefined : max"
            :aria-valuenow="isIndeterminate ? undefined : value"
            :aria-valuetext="isIndeterminate ? undefined : readout">
-        <div class="apex-pb__fill" :data-indeterminate="isIndeterminate ? 'true' : 'false'"
+        <div class="apex-pb__fill" :class="ui?.fill" :data-indeterminate="isIndeterminate ? 'true' : 'false'"
              :style="isIndeterminate ? undefined : { inlineSize: pct + '%' }">
-          <span v-if="inside" class="apex-pb__inside">
+          <span v-if="inside" class="apex-pb__inside" :class="ui?.inside">
             <slot name="value" :value="value" :percent="pct" :formatted="readout">{{ readout }}</slot>
           </span>
         </div>
       </div>
-      <span v-if="beside" class="apex-pb__readout">
+      <span v-if="beside" class="apex-pb__readout" :class="ui?.readout">
         <slot name="value" :value="value" :percent="pct" :formatted="readout">{{ readout }}</slot>
       </span>
     </div>

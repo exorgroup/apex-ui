@@ -140,7 +140,31 @@ const slots = defineSlots<{
   start?: () => unknown;
   end?: () => unknown;
   item?: (props: { item: MenuItem; depth: number; branch: boolean }) => unknown;
+  /**
+   * A submenu whose content is a CONTROL rather than rows — a table size
+   * grid, a colour palette. The item carries `custom: '<name>'` and this slot
+   * decides what to draw for it.
+   */
+  panel?: (props: { item: MenuItem; depth: number; close: () => void }) => unknown;
 }>();
+
+/* `close` is injected because a control does not go through the menu's pick
+   path, so nothing would otherwise dismiss the menu once it had acted.
+   AF2-286: ApexEditorMenubar is the first consumer — its Insert ▸ Table row
+   is a size grid, and without this it opened an empty submenu. */
+/* Hoisted out of the template for the same reason the panel renderer is:
+   a type annotation written inside an attribute expression parses as a value
+   and takes the whole file down with it — seven TS1005s and a typecheck that
+   stops where it stood. */
+const itemRenderFn = computed(() => (slots.item
+  ? (ctx: { item: MenuItem; depth: number; branch: boolean }) => slots.item!(ctx)
+  : undefined));
+
+const panelRenderFn = computed(() => (slots.panel
+  ? (ctx: { item: MenuItem; depth: number }) => slots.panel!({
+    ...ctx, close: () => { openIndex.value = -1; },
+  })
+  : undefined));
 
 defineExpose({ close: () => { openIndex.value = -1; }, openIndex });
 </script>
@@ -168,7 +192,8 @@ defineExpose({ close: () => { openIndex.value = -1; }, openIndex });
         <ul v-if="hasMenu(item) && openIndex === i" class="apex-mbar__panel apex-menu"
             :data-side="side" :style="{ zIndex: String(zIndex) }" role="menu">
           <ApexMenuItem v-for="(child, ci) in item.items" :key="ci" :item="child"
-                        :item-render="slots.item ? (ctx) => slots.item!(ctx) : undefined"
+                        :item-render="itemRenderFn"
+                        :panel-render="panelRenderFn"
                         @pick="onPick" />
         </ul>
       </li>

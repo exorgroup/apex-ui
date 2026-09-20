@@ -10,7 +10,9 @@
  * `modelType` decides what v-model holds: 'date' (default) or 'string'
  * formatted with `dateFormat`.
  */
-import { computed, nextTick, ref, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
+import { useAnchoredOverlay } from '../core/anchoredOverlay';
 import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { pickFieldProps } from '../core/utils';
@@ -56,7 +58,7 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   /** Show the week's ISO number down the side. */
   showWeek?: boolean;
 
-  /* The calendar's appearance. These are sugar over --apex-cal-*: the popover
+  /* The calendar's appearance. These are sugar over --apex-dp-*: the popover
      itself, and every state a day can be in. The rest of the calendar — title
      and nav, the month/year grids, the time spinners, the meridiem toggle, the
      button bar — is reachable through the remaining variables and the `ui`
@@ -94,6 +96,24 @@ const emit = defineEmits<{
 const loc = computed<ApexDateLocale>(() => ({ ...EN_LOCALE, ...(props.locale || {}) }));
 const focused = ref(false);
 const open = ref(false);
+
+/* AF2-322. `.apex-cal` was absolute, so any `overflow: auto` ancestor cut
+   the calendar off. `minWidth` rather than `matchWidth`: the CSS said
+   `min-inline-size: 100%` with `inline-size: max-content`, meaning "at
+   least as wide as the field, wider if the calendar needs it" — and under
+   `fixed` that 100% would have resolved against the viewport.
+
+   Anchored to the control BOX, not `root`: root also contains the open
+   calendar, so its bottom edge would move as the panel appeared. */
+const box = ref<HTMLElement | null>(null);
+const cal = ref<HTMLElement | null>(null);
+const { style: calPopStyle } = useAnchoredOverlay({
+  open, anchor: box, panel: cal, minWidth: true, zIndex: 1150,
+});
+
+/* Inline stays in FLOW. `.apex-cal--inline` sets `position: static`, and an
+   inline style would outrank it and rip the calendar out of the page. */
+const calAnchorStyle = computed(() => (props.inline ? undefined : calPopStyle.value));
 const root = ref<HTMLElement | null>(null);
 const inputEl = ref<HTMLInputElement | null>(null);
 const typed = ref<string | null>(null);
@@ -108,18 +128,18 @@ const fieldProps = computed(() => pickFieldProps(props as unknown as Record<stri
 const calStyle = computed(() => {
   const out: Record<string, string> = { position: 'relative' };
   const map: Array<[string | undefined, string]> = [
-    [props.calendarBackground, '--apex-cal-bg'],
-    [props.calendarBorderColor, '--apex-cal-border'],
-    [props.calendarRadius, '--apex-cal-radius'],
-    [props.calendarShadow, '--apex-cal-shadow'],
-    [props.dayColor, '--apex-cal-day-fg'],
-    [props.dayRadius, '--apex-cal-day-radius'],
-    [props.dayHoverBackground, '--apex-cal-day-hover-bg'],
-    [props.daySelectedBackground, '--apex-cal-day-selected-bg'],
-    [props.daySelectedColor, '--apex-cal-day-selected-fg'],
-    [props.dayTodayRing, '--apex-cal-day-today-ring'],
-    [props.dayOutsideColor, '--apex-cal-day-outside-fg'],
-    [props.dayRangeBackground, '--apex-cal-day-range-bg'],
+    [props.calendarBackground, '--apex-dp-bg'],
+    [props.calendarBorderColor, '--apex-dp-border'],
+    [props.calendarRadius, '--apex-dp-radius'],
+    [props.calendarShadow, '--apex-dp-shadow'],
+    [props.dayColor, '--apex-dp-day-fg'],
+    [props.dayRadius, '--apex-dp-day-radius'],
+    [props.dayHoverBackground, '--apex-dp-day-hover-bg'],
+    [props.daySelectedBackground, '--apex-dp-day-selected-bg'],
+    [props.daySelectedColor, '--apex-dp-day-selected-fg'],
+    [props.dayTodayRing, '--apex-dp-day-today-ring'],
+    [props.dayOutsideColor, '--apex-dp-day-outside-fg'],
+    [props.dayRangeBackground, '--apex-dp-day-range-bg'],
   ];
   map.forEach(([v, name]) => { if (v) out[name] = v; });
   return out;
@@ -298,14 +318,21 @@ const hourText = computed(() => {
 const minuteText = computed(() => String((single.value || new Date()).getMinutes()).padStart(2, '0'));
 const secondText = computed(() => String((single.value || new Date()).getSeconds()).padStart(2, '0'));
 const meridiem = computed(() => ((single.value || new Date()).getHours() < 12 ? loc.value.am : loc.value.pm));
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 </script>
 
 <template>
-  <ApexField v-bind="fieldProps" :value="modelValue" :filled="filled || (isFloat && !!placeholder)" :focused="focused || open"
+  <!-- `placeholder || dateFormat` is what the input RENDERS (below), so it
+       is what `filled` has to ask about. Asking only about the `placeholder`
+       prop was the bug: with none given, the label stayed down while the
+       input still drew `dd/mm/yy`, and the two printed over each other —
+       reported from the blog screen, and visible on any date field that
+       does not pass a placeholder of its own. AF2-374 fixed this for
+       ApexInput; the format fallback here was never counted. -->
+  <ApexField v-bind="fieldProps" :value="modelValue" :filled="filled || (isFloat && !!(placeholder || dateFormat))" :focused="focused || open"
              v-slot="{ id, describedBy, invalid, statusGlyph, ui }">
     <div ref="root" :style="calStyle">
-      <div v-if="!inline" class="apex-ctl" :class="ui.control" :data-focused="(focused || open) ? 'true' : 'false'"
+      <div v-if="!inline" ref="box" class="apex-ctl" :class="ui.control" :data-focused="(focused || open) ? 'true' : 'false'"
            :data-disabled="disabled ? 'true' : 'false'">
         <ApexIcon v-if="!showIcon" :name="icon" class="apex-ctl__icon" :class="ui.icon" />
         <input ref="inputEl" class="apex-ctl__input" :class="ui.input" :id="id" :name="name || id" type="text"
@@ -326,7 +353,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
         </button>
       </div>
 
-      <div v-if="inline || open" class="apex-cal"
+      <div v-if="inline || open" ref="cal" class="apex-cal" :style="calAnchorStyle"
            :class="[{ 'apex-cal--inline': inline }, ui.calendar]" role="dialog">
         <!-- time only -->
         <template v-if="!timeOnly">

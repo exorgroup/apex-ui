@@ -7,13 +7,15 @@
  * ApexConfirmDialog builds on it rather than reimplementing any of this.
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useOverlayTransition } from '../core/overlayTransition';
+import type { ApexOverlayTransition } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
 export type DialogPosition =
   | 'center' | 'top' | 'bottom' | 'left' | 'right'
   | 'topleft' | 'topright' | 'bottomleft' | 'bottomright';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexOverlayTransition & {
   /** Bindable open state. */
   visible?: boolean;
   header?: string;
@@ -44,11 +46,6 @@ const props = withDefaults(defineProps<{
   maskColor?: string;
   /** Blur the page behind the mask. */
   maskBlur?: boolean;
-  /** scale | slide | fade | none, or a pair of custom class names. */
-  transition?: 'scale' | 'slide' | 'fade' | 'none';
-  /** Own transition classes, e.g. from Animate.css. */
-  enterClass?: string;
-  leaveClass?: string;
   /** Stack order, for a dialog opened over another. */
   zIndex?: number;
   contentClass?: string;
@@ -186,10 +183,9 @@ const panelStyle = computed(() => {
   if (offset.value) s.transform = `translate(${offset.value.x}px, ${offset.value.y}px)`;
   return s;
 });
-/** Custom classes win over the built-in named transitions. */
-const transitionProps = computed(() => (props.enterClass || props.leaveClass
-  ? { enterActiveClass: props.enterClass, leaveActiveClass: props.leaveClass }
-  : { name: `apex-dlg-${props.transition}` }));
+/* Was the only component that had this right; now it shares the resolver
+   so it picks up the durations and the app-wide default too. AF2-332. */
+const transitionProps = useOverlayTransition(props, 'apex-dlg');
 
 defineExpose({ close, panel });
 </script>

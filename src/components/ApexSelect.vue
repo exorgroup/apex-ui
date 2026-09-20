@@ -5,6 +5,8 @@
  * real <select> — right for dense mobile forms and plain non-JS form posts.
  */
 import { computed, nextTick, ref, watch, onBeforeUnmount } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
+import { useAnchoredOverlay } from '../core/anchoredOverlay';
 import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { normaliseOptions, pickFieldProps } from '../core/utils';
@@ -62,6 +64,17 @@ const open = ref(false);
 const active = ref(-1);
 const root = ref<HTMLElement | null>(null);
 const trigger = ref<HTMLElement | null>(null);
+/* AF2-322. The panel was `position: absolute` under a `position: relative`
+   wrapper, which any `overflow: auto` ancestor clips — a scrollable form, a
+   drawer, an accordion, a table cell. Fixed positioning escapes the clip and
+   the node stays where it was in the DOM. `matchWidth` is not cosmetic: the
+   old CSS used `inset-inline: 0` to take the field's width, and under `fixed`
+   that would resolve against the viewport. */
+const pop = ref<HTMLElement | null>(null);
+const { style: popStyle } = useAnchoredOverlay({
+  open, anchor: trigger, panel: pop, matchWidth: true, zIndex: 1150,
+});
+
 
 const allOpts = computed(() => normaliseOptions(props.options));
 const query = ref('');
@@ -138,7 +151,7 @@ watch(open, (v) => {
 onBeforeUnmount(() => {
   if (typeof document !== 'undefined') document.removeEventListener('mousedown', onDocClick);
 });
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 </script>
 
 <template>
@@ -184,7 +197,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
         <ApexIcon v-if="statusGlyph" :name="statusGlyph" class="apex-ctl__status" :size="18" />
         <ApexIcon name="keyboard_arrow_down" class="apex-ctl__icon apex-ctl__chev" :class="ui.chevron" :size="19" :data-open="open" />
       </div>
-      <div v-if="open" class="apex-pop" :class="ui.popover" :id="listId" role="listbox"
+      <div v-if="open" ref="pop" class="apex-pop" :class="ui.popover" :style="popStyle" :id="listId" role="listbox"
            :aria-activedescendant="active >= 0 ? listId + '-' + active : undefined">
         <div v-if="showFilter" class="apex-pop__filter" :class="ui?.filter">
           <ApexIcon name="search" />

@@ -168,3 +168,52 @@ describe('the changes diff', () => {
     __alertSettle('confirm'); await p;
   });
 });
+
+describe('the progress figure', () => {
+  /* AF2-308: the progress stage drew one ring and nothing could change it,
+     so every kind of work looked the same. An icon now replaces it. */
+
+  async function running(progress?: Record<string, unknown>) {
+    let release!: () => void;
+    const held = new Promise<void>((r) => { release = r; });
+    const done = alert.run({ progress, action: () => held });
+    await wrapper.vm.$nextTick();
+    return { done, release };
+  }
+
+  it('draws the ring when the caller names no icon', async () => {
+    const { done, release } = await running();
+    expect(document.querySelector('.apex-psp'), 'no ring drawn').toBeTruthy();
+    expect(document.querySelector('.apex-alert-icon')).toBeNull();
+
+    release();
+    await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick();
+    __alertSettle('confirm'); await done;
+  });
+
+  it('draws the named icon instead, and spins it', async () => {
+    const { done, release } = await running({ icon: 'settings' });
+    const icon = document.querySelector('.apex-alert-icon');
+    expect(icon, 'the progress stage ignored the icon').toBeTruthy();
+    expect(icon!.textContent).toBe('settings');
+    /* Spinning is the whole difference between "working" and "finished".
+       Without it the gears sit there and the alert looks hung. */
+    expect(icon!.getAttribute('data-spin')).toBe('true');
+
+    release();
+    await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick();
+    __alertSettle('confirm'); await done;
+  });
+
+  it('and the result stage that follows does NOT spin', async () => {
+    const { done, release } = await running({ icon: 'settings' });
+    release();
+    await wrapper.vm.$nextTick(); await wrapper.vm.$nextTick();
+
+    expect(__alertState.stage).toBe('result');
+    const spinning = [...document.querySelectorAll('[data-spin="true"]')];
+    expect(spinning, 'a finished act was still reporting itself as working').toHaveLength(0);
+
+    __alertSettle('confirm'); await done;
+  });
+});

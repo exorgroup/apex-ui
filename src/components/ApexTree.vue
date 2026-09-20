@@ -9,6 +9,7 @@
  */
 import { computed, ref, watch } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import type { ApexTreeClasses } from '../types';
 import { useApexI18n } from '../core/i18n';
 import {
   allLeafKeys, branchKeys, cascadeChecks, filterTree, flattenTree, moveNode,
@@ -18,6 +19,8 @@ import {
 export type { TreeNode };
 
 const props = withDefaults(defineProps<{
+  /** Your own class on any part. See ApexTreeClasses. */
+  ui?: ApexTreeClasses;
   value?: TreeNode[];
   /** Keys mapped to true are expanded. Bindable. */
   expandedKeys?: Record<string, boolean>;
@@ -307,22 +310,22 @@ function onDragEnd(row: FlatNode, e: DragEvent) {
 }
 
 const rootStyle = computed(() => {
-  const s: Record<string, string> = { '--tr-indent': props.indent + 'px' };
-  if (props.scrollHeight) s['--tr-h'] = props.scrollHeight + 'px';
-  if (props.hoverBackground) s['--tr-hover'] = props.hoverBackground;
-  if (props.selectedBackground) s['--tr-sel-bg'] = props.selectedBackground;
-  if (props.selectedColor) s['--tr-sel-fg'] = props.selectedColor;
-  if (props.iconColor) s['--tr-icon'] = props.iconColor;
-  if (props.rowRadius) s['--tr-radius'] = props.rowRadius;
+  const s: Record<string, string> = { '--apex-tree-indent': props.indent + 'px' };
+  if (props.scrollHeight) s['--apex-tree-h'] = props.scrollHeight + 'px';
+  if (props.hoverBackground) s['--apex-tree-hover'] = props.hoverBackground;
+  if (props.selectedBackground) s['--apex-tree-sel-bg'] = props.selectedBackground;
+  if (props.selectedColor) s['--apex-tree-sel-fg'] = props.selectedColor;
+  if (props.iconColor) s['--apex-tree-icon'] = props.iconColor;
+  if (props.rowRadius) s['--apex-tree-radius'] = props.rowRadius;
   return s;
 });
 defineExpose({ focusRow, toggle, select });
 </script>
 
 <template>
-  <div class="apex-tr" :style="rootStyle" :data-bordered="bordered ? 'true' : 'false'"
+  <div class="apex-tr" :class="ui?.root" :style="rootStyle" :data-bordered="bordered ? 'true' : 'false'"
        :data-loading="loading ? 'true' : 'false'">
-    <div v-if="filter || showSelectAll || $slots.header" class="apex-tr__head">
+    <div v-if="filter || showSelectAll || $slots.header" class="apex-tr__head" :class="ui?.head">
       <slot name="header">
         <button v-if="showSelectAll && selectionMode" type="button" class="apex-cb__box"
                 :data-on="allChecked" :data-partial="someChecked" role="checkbox"
@@ -331,7 +334,7 @@ defineExpose({ focusRow, toggle, select });
           <ApexIcon v-if="allChecked" name="check" :size="14" />
           <ApexIcon v-else-if="someChecked" name="remove" :size="14" />
         </button>
-        <div v-if="filter" class="apex-pop__filter apex-tr__filter">
+        <div v-if="filter" class="apex-pop__filter apex-tr__filter" :class="ui?.filter">
           <ApexIcon name="search" />
           <input type="text" :value="query" :placeholder="filterPlaceholder || t('apexui.search')"
                  :aria-label="t('apexui.search')" autocomplete="off"
@@ -342,21 +345,21 @@ defineExpose({ focusRow, toggle, select });
       </slot>
     </div>
 
-    <div class="apex-tr__main">
-      <ul v-if="loading && loadingMode === 'skeleton'" class="apex-tr__list" :style="{ maxHeight: scrollHeight ? scrollHeight + 'px' : undefined }">
-        <li v-for="n in skeletonRows" :key="'sk' + n" class="apex-tr__row apex-tr__row--skel"
+    <div class="apex-tr__main" :class="ui?.main">
+      <ul v-if="loading && loadingMode === 'skeleton'" class="apex-tr__list" :class="ui?.list" :style="{ maxHeight: scrollHeight ? scrollHeight + 'px' : undefined }">
+        <li v-for="n in skeletonRows" :key="'sk' + n" class="apex-tr__row apex-tr__row--skel" :class="ui?.row"
             :style="{ paddingInlineStart: (8 + ((n % 3) * indent)) + 'px' }">
           <span class="apex-skel" style="width:18px;height:18px;border-radius:4px"></span>
           <span class="apex-skel" :style="{ width: (40 + ((n * 13) % 40)) + '%' }"></span>
         </li>
       </ul>
 
-      <ul v-else-if="rows.length" ref="listEl" class="apex-tr__list" role="tree"
+      <ul v-else-if="rows.length" ref="listEl" class="apex-tr__list" :class="ui?.list" role="tree"
           :aria-multiselectable="selectionMode === 'multiple' || isCheckbox || undefined"
           :style="{ maxHeight: scrollHeight ? scrollHeight + 'px' : undefined }"
           @dragover.prevent @drop="onDropEmpty">
         <li v-for="(row, i) in rows" :key="row.node.key" class="apex-tr__row" role="treeitem"
-            :class="row.node.styleClass"
+            :class="[row.node.styleClass, ui?.row]"
             :data-row="i" :data-depth="row.depth" :data-state="stateOf(row.node)"
             :data-drop="dropTarget && dropTarget.index === i ? dropTarget.position : undefined"
             :aria-expanded="row.hasChildren ? !!expanded[row.node.key] : undefined"
@@ -369,7 +372,7 @@ defineExpose({ focusRow, toggle, select });
             @focus="focusIndex = i"
             @dragstart="onDragStart(row, $event)" @dragover="onDragOver(i, $event)"
             @drop.stop="onDrop(i, $event)" @dragend="onDragEnd(row, $event)">
-          <button v-if="row.hasChildren" type="button" class="apex-tr__toggle"
+          <button v-if="row.hasChildren" type="button" class="apex-tr__toggle" :class="ui?.toggle"
                   :aria-label="expanded[row.node.key] ? 'Collapse' : 'Expand'"
                   @click.stop="toggle(row.node)">
             <slot name="nodetoggleicon" :node="row.node" :expanded="!!expanded[row.node.key]">
@@ -377,9 +380,9 @@ defineExpose({ focusRow, toggle, select });
               <ApexIcon v-else :name="expanded[row.node.key] ? 'keyboard_arrow_down' : 'chevron_right'" :size="18" />
             </slot>
           </button>
-          <span v-else class="apex-tr__spacer"></span>
+          <span v-else class="apex-tr__spacer" :class="ui?.spacer"></span>
 
-          <span v-if="selectionMode" class="apex-cb__box apex-tr__box"
+          <span v-if="selectionMode" class="apex-cb__box apex-tr__box" :class="ui?.checkbox"
                 :data-on="stateOf(row.node) === 'on'" :data-partial="stateOf(row.node) === 'partial'"
                 aria-hidden="true">
             <ApexIcon v-if="stateOf(row.node) === 'on'" name="check" :size="14" />
@@ -387,10 +390,10 @@ defineExpose({ focusRow, toggle, select });
           </span>
 
           <slot name="nodeicon" :node="row.node" :expanded="!!expanded[row.node.key]" :has-children="row.hasChildren">
-            <ApexIcon v-if="row.node.icon" :name="row.node.icon" class="apex-tr__icon" :size="18" />
+            <ApexIcon v-if="row.node.icon" :name="row.node.icon" class="apex-tr__icon" :class="ui?.icon" :size="18" />
           </slot>
 
-          <span class="apex-tr__label">
+          <span class="apex-tr__label" :class="ui?.label">
             <slot name="node" :node="row.node" :expanded="!!expanded[row.node.key]" :index="i">
               <slot :node="row.node" :index="i">{{ row.node.label }}</slot>
             </slot>
@@ -398,14 +401,14 @@ defineExpose({ focusRow, toggle, select });
         </li>
       </ul>
 
-      <div v-else class="apex-tr__empty" @dragover.prevent @drop="onDropEmpty">
+      <div v-else class="apex-tr__empty" :class="ui?.empty" @dragover.prevent @drop="onDropEmpty">
         <slot name="empty">
           <ApexIcon name="folder_open" :size="24" />
           <span>{{ query ? t('apexui.noResults') : (emptyMessage || 'No nodes') }}</span>
         </slot>
       </div>
 
-      <div v-if="loading && loadingMode === 'overlay'" class="apex-tr__overlay">
+      <div v-if="loading && loadingMode === 'overlay'" class="apex-tr__overlay" :class="ui?.overlay">
         <slot name="loading"><ApexIcon name="progress_activity" spin :size="28" /></slot>
       </div>
     </div>

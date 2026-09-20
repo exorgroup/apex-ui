@@ -460,6 +460,7 @@ export {
 export {
   mediaNodes, EMBED_PROVIDERS, matchEmbed, embedSrc, isImageFile, embedNodeView,
   uploadPlaceholderPlugin, placeholderPos, setMediaAttr, buildMediaCommands,
+  imageNodeView, dragWidth, MIN_IMAGE_WIDTH,
 } from './core/editor/media';
 export type { EmbedProvider, UploadRequest, UploadHandler } from './core/editor/media';
 export {

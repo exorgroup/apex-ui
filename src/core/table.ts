@@ -214,6 +214,25 @@ export function matches(value: unknown, filter: unknown, mode: FilterMatchMode):
     case 'gte': return Number(value) >= Number(filter);
     case 'between': {
       const [lo, hi] = Array.isArray(filter) ? filter : [null, null];
+
+      /* Numbers OR dates. It was `Number(value)` alone, which turns "2026-09-20" into NaN and
+         makes every comparison false — so a date range silently matched everything instead of
+         filtering. A range is the commonest thing to want from a date column, so it has to be
+         one of the two shapes this understands.
+
+         The bounds decide which: if either one parses as a date and does NOT parse as a
+         number, both sides are compared as whole DAYS. That keeps `2026-09-20` inclusive at
+         both ends, which is what somebody typing two dates means. */
+      const dateish = (v: unknown) => v != null && v !== '' && Number.isNaN(Number(v)) && day(v) != null;
+
+      if (dateish(lo) || dateish(hi)) {
+        const v = day(value);
+        if (v == null) return false;
+        if (lo != null && lo !== '' && day(lo) != null && v < (day(lo) as number)) return false;
+        if (hi != null && hi !== '' && day(hi) != null && v > (day(hi) as number)) return false;
+        return true;
+      }
+
       const n = Number(value);
       if (lo != null && lo !== '' && n < Number(lo)) return false;
       if (hi != null && hi !== '' && n > Number(hi)) return false;

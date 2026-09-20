@@ -48,10 +48,10 @@ describe('ApexDatePicker — appearance props', () => {
   it('each of the twelve reaches its variable', () => {
     const w = mount(ApexDatePicker, { props: { label: 'When', inline: true, ...PROPS } });
     const style = w.find('.apex-cal').element.parentElement!.getAttribute('style') || '';
-    for (const v of ['--apex-cal-bg', '--apex-cal-border', '--apex-cal-radius', '--apex-cal-shadow',
-      '--apex-cal-day-fg', '--apex-cal-day-radius', '--apex-cal-day-hover-bg',
-      '--apex-cal-day-selected-bg', '--apex-cal-day-selected-fg', '--apex-cal-day-today-ring',
-      '--apex-cal-day-outside-fg', '--apex-cal-day-range-bg']) {
+    for (const v of ['--apex-dp-bg', '--apex-dp-border', '--apex-dp-radius', '--apex-dp-shadow',
+      '--apex-dp-day-fg', '--apex-dp-day-radius', '--apex-dp-day-hover-bg',
+      '--apex-dp-day-selected-bg', '--apex-dp-day-selected-fg', '--apex-dp-day-today-ring',
+      '--apex-dp-day-outside-fg', '--apex-dp-day-range-bg']) {
       expect(style, v).toContain(v);
     }
   });
@@ -61,7 +61,7 @@ describe('ApexDatePicker — appearance props', () => {
       props: { label: 'When', inline: true, daySelectedBackground: '#7AA2F7' },
     });
     const wrap = w.find('.apex-cal').element.parentElement!;
-    expect(wrap.getAttribute('style')).toContain('--apex-cal-day-selected-bg');
+    expect(wrap.getAttribute('style')).toContain('--apex-dp-day-selected-bg');
   });
 
   it('positioning survives — the popover still anchors to the box', () => {

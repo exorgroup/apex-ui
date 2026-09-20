@@ -5,6 +5,7 @@
  * expand/collapse, and parent-child propagation with a partial state.
  */
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
 import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import ApexTreeNode, { type TreeNode, type TreeState } from './ApexTreeNode';
@@ -51,7 +52,7 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   /** Overrides the resolver. Set it and no resolver is consulted. */
   canAddNew?: boolean;
 
-  /* The tree's appearance. Sugar over --apex-tree-*; the rest of the overlay
+  /* The tree's appearance. Sugar over --apex-treesel-*; the rest of the overlay
      is the shared --apex-pop-* layer, listed on the ApexField page. */
   /** A node's row: its text, corner, and the tint under the pointer. */
   nodeColor?: string;
@@ -116,13 +117,13 @@ function pickAddNew(path: TreeNode[]) {
 const treeStyle = computed(() => {
   const out: Record<string, string> = { position: 'relative' };
   const map: Array<[string | undefined, string]> = [
-    [props.nodeColor, '--apex-tree-row-fg'],
-    [props.nodeRadius, '--apex-tree-row-radius'],
-    [props.nodeHoverBackground, '--apex-tree-row-hover-bg'],
-    [props.nodeSelectedBackground, '--apex-tree-row-selected-bg'],
-    [props.nodeSelectedColor, '--apex-tree-row-selected-fg'],
-    [props.twistyColor, '--apex-tree-twisty-fg'],
-    [props.indent, '--apex-tree-indent'],
+    [props.nodeColor, '--apex-treesel-row-fg'],
+    [props.nodeRadius, '--apex-treesel-row-radius'],
+    [props.nodeHoverBackground, '--apex-treesel-row-hover-bg'],
+    [props.nodeSelectedBackground, '--apex-treesel-row-selected-bg'],
+    [props.nodeSelectedColor, '--apex-treesel-row-selected-fg'],
+    [props.twistyColor, '--apex-treesel-twisty-fg'],
+    [props.indent, '--apex-treesel-indent'],
   ];
   map.forEach(([v, name]) => { if (v) out[name] = v; });
   return out;
@@ -233,7 +234,7 @@ watch(open, (v) => {
 onBeforeUnmount(() => {
   if (typeof document !== 'undefined') document.removeEventListener('mousedown', onDocClick);
 });
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 </script>
 
 <template>

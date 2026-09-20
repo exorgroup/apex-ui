@@ -10,11 +10,14 @@
 import { computed, ref, watch } from 'vue';
 import ApexIcon from './ApexIcon.vue';
 import { getField } from '../core/table';
+import type { ApexPickListClasses } from '../types';
 
 type Item = Record<string, unknown>;
 type Side = 0 | 1;
 
 const props = withDefaults(defineProps<{
+  /** Your own class on any part. See ApexPickListClasses. */
+  ui?: ApexPickListClasses;
   /** [source, target] */
   modelValue?: [Item[], Item[]] | Item[][];
   dataKey?: string;
@@ -203,17 +206,17 @@ function onDrop(side: Side, index: number) {
 
 const rootStyle = computed(() => {
   const s: Record<string, string> = {};
-  if (props.borderColor) s['--pl-border'] = props.borderColor;
-  if (props.borderWidth != null) s['--pl-border-w'] = props.borderWidth + 'px';
-  if (props.radius) s['--pl-radius'] = props.radius;
-  if (props.headerBackground) s['--pl-head-bg'] = props.headerBackground;
-  if (props.headerColor) s['--pl-head-fg'] = props.headerColor;
-  if (props.listBackground) s['--pl-list-bg'] = props.listBackground;
-  if (props.itemColor) s['--pl-item-fg'] = props.itemColor;
-  if (props.selectedBackground) s['--pl-sel-bg'] = props.selectedBackground;
-  if (props.selectedColor) s['--pl-sel-fg'] = props.selectedColor;
-  if (props.selectedBorderColor) s['--pl-sel-border'] = props.selectedBorderColor;
-  if (props.gap) s['--pl-gap'] = props.gap;
+  if (props.borderColor) s['--apex-pl-border'] = props.borderColor;
+  if (props.borderWidth != null) s['--apex-pl-border-w'] = props.borderWidth + 'px';
+  if (props.radius) s['--apex-pl-radius'] = props.radius;
+  if (props.headerBackground) s['--apex-pl-head-bg'] = props.headerBackground;
+  if (props.headerColor) s['--apex-pl-head-fg'] = props.headerColor;
+  if (props.listBackground) s['--apex-pl-list-bg'] = props.listBackground;
+  if (props.itemColor) s['--apex-pl-item-fg'] = props.itemColor;
+  if (props.selectedBackground) s['--apex-pl-sel-bg'] = props.selectedBackground;
+  if (props.selectedColor) s['--apex-pl-sel-fg'] = props.selectedColor;
+  if (props.selectedBorderColor) s['--apex-pl-sel-border'] = props.selectedBorderColor;
+  if (props.gap) s['--apex-pl-gap'] = props.gap;
   return s;
 });
 
@@ -229,11 +232,11 @@ const sides: Side[] = [0, 1];
 </script>
 
 <template>
-  <div class="apex-pl" :style="rootStyle" :data-stacked="stacked ? 'true' : 'false'"
+  <div class="apex-pl" :class="ui?.root" :style="rootStyle" :data-stacked="stacked ? 'true' : 'false'"
        :data-transfer="transferPosition" :data-controls="controlsPosition"
        :data-disabled="disabled ? 'true' : 'false'">
     <template v-for="side in sides" :key="side">
-      <div v-if="showControls(side)" class="apex-pl__ctrls" :style="{ order: ctrlOrder(side) }"
+      <div v-if="showControls(side)" class="apex-pl__ctrls" :class="ui?.controls" :style="{ order: ctrlOrder(side) }"
            role="group" :aria-label="`Reorder ${headerText(side)}`">
         <button type="button" :disabled="disabled || !picked[side].length" aria-label="Move to top"
                 @click="shift(side, -1, true)"><ApexIcon name="keyboard_double_arrow_up" :size="18" /></button>
@@ -245,13 +248,13 @@ const sides: Side[] = [0, 1];
                 @click="shift(side, 1, true)"><ApexIcon name="keyboard_double_arrow_down" :size="18" /></button>
       </div>
 
-      <div class="apex-pl__panel" :style="{ order: panelOrder(side) }" :data-side="side">
-        <div class="apex-pl__head">
+      <div class="apex-pl__panel" :class="ui?.panel" :style="{ order: panelOrder(side) }" :data-side="side">
+        <div class="apex-pl__head" :class="ui?.head">
           <slot :name="side === 0 ? 'sourceheader' : 'targetheader'">
-            <span class="apex-pl__title">{{ headerText(side) }}</span>
-            <span class="apex-pl__count">{{ lists[side].length }}</span>
+            <span class="apex-pl__title" :class="ui?.title">{{ headerText(side) }}</span>
+            <span class="apex-pl__count" :class="ui?.count">{{ lists[side].length }}</span>
           </slot>
-          <button v-if="checkbox" type="button" class="apex-cb__box apex-pl__all"
+          <button v-if="checkbox" type="button" class="apex-cb__box apex-pl__all" :class="ui?.all"
                   :data-on="allPicked(side)" role="checkbox" :aria-checked="allPicked(side)"
                   :aria-label="`Select all in ${headerText(side)}`" :disabled="disabled"
                   @click="toggleAll(side)">
@@ -259,7 +262,7 @@ const sides: Side[] = [0, 1];
           </button>
         </div>
 
-        <div v-if="filter" class="apex-pop__filter apex-pl__filter">
+        <div v-if="filter" class="apex-pop__filter apex-pl__filter" :class="ui?.filter">
           <ApexIcon name="search" />
           <input type="text" :value="query[side]" :placeholder="filterPlaceholder || 'Search'"
                  :aria-label="`Search ${headerText(side)}`" autocomplete="off" :disabled="disabled"
@@ -268,10 +271,10 @@ const sides: Side[] = [0, 1];
                   @click="query[side] = ''"><ApexIcon name="close" :size="16" /></button>
         </div>
 
-        <ul class="apex-pl__list" :style="{ maxHeight: scrollHeight + 'px' }" role="listbox"
+        <ul class="apex-pl__list" :class="ui?.list" :style="{ maxHeight: scrollHeight + 'px' }" role="listbox"
             :aria-multiselectable="checkbox || undefined" :aria-label="headerText(side)"
             @dragover.prevent @drop="onDrop(side, lists[side].length)">
-          <li v-for="(item, i) in visible(side)" :key="keyOf(item, i)" class="apex-pl__item"
+          <li v-for="(item, i) in visible(side)" :key="keyOf(item, i)" class="apex-pl__item" :class="ui?.item"
               role="option" :aria-selected="isPicked(side, item)"
               :data-selected="isPicked(side, item) ? 'true' : 'false'"
               :data-over="over && over.side === side && over.index === i ? 'true' : 'false'"
@@ -286,12 +289,12 @@ const sides: Side[] = [0, 1];
             <span v-if="checkbox" class="apex-cb__box" :data-on="isPicked(side, item)" aria-hidden="true">
               <ApexIcon v-if="isPicked(side, item)" name="check" :size="14" />
             </span>
-            <ApexIcon v-if="!noDrag && !checkbox" name="drag_indicator" class="apex-pl__grip" :size="18" />
-            <span class="apex-pl__body">
+            <ApexIcon v-if="!noDrag && !checkbox" name="drag_indicator" class="apex-pl__grip" :class="ui?.grip" :size="18" />
+            <span class="apex-pl__body" :class="ui?.body">
               <slot name="option" :item="item" :index="i" :side="side">{{ item.label ?? item.name }}</slot>
             </span>
           </li>
-          <li v-if="!visible(side).length" class="apex-pl__empty">
+          <li v-if="!visible(side).length" class="apex-pl__empty" :class="ui?.empty">
             {{ query[side] ? 'No matches' : (emptyMessage || 'No items') }}
           </li>
         </ul>
@@ -299,7 +302,7 @@ const sides: Side[] = [0, 1];
     </template>
 
     <!-- one transfer group; CSS order puts it between the panels or after both -->
-    <div class="apex-pl__transfer" :style="{ order: transferPosition === 'end' ? 9 : 3 }"
+    <div class="apex-pl__transfer" :class="ui?.transfer" :style="{ order: transferPosition === 'end' ? 9 : 3 }"
          role="group" aria-label="Move items between lists">
 <button type="button" :disabled="disabled || !lists[0].length" aria-label="Move all to target"
               @click="move(0, true)"><ApexIcon name="keyboard_double_arrow_right" :size="19" /></button>

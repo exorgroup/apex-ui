@@ -90,3 +90,64 @@ export function anchorPosition(
 
   return { x, y, side, arrow };
 }
+
+/* ── RTL-aware pointer geometry ────────────────────────────────
+   Ported at AF2-267a. In the reference library these sit at the end of
+   `core/i18n.ts`, because direction is locale-driven — but what they do is
+   measure and place, which is this file's job. ApexScheduler and ApexCalendar
+   are the callers: a timeline that reads `clientX - rect.left` is correct in
+   LTR and silently mirrored in RTL. */
+
+/**
+ * Distance from an element's INLINE-START edge to a pointer.
+ *
+ * Every timeline that maps x to time needs this, and `clientX - rect.left` is
+ * only correct in LTR: in RTL the inline axis runs the other way, so the time
+ * origin sits at `rect.right` and a left-based measurement returns a MIRRORED
+ * time. The stylesheet is logical-property throughout and flips correctly, which
+ * makes the bug worse rather than better — the layout looks right and the
+ * arithmetic is wrong.
+ *
+ * The direction is read from the RENDERED element rather than from a locale prop,
+ * because `dir` is inherited: a host can flip a component by setting `dir="rtl"`
+ * on any ancestor, without the component ever being told.
+ */
+export function inlineOffset(el: Element, clientX: number): number {
+  const rect = el.getBoundingClientRect();
+  return isRtlElement(el) ? rect.right - clientX : clientX - rect.left;
+}
+
+/** Distance from the pointer to an element's inline-END edge. */
+export function inlineEndDistance(el: Element, clientX: number): number {
+  const rect = el.getBoundingClientRect();
+  return isRtlElement(el) ? clientX - rect.left : rect.right - clientX;
+}
+
+/**
+ * An overlay anchored AT the pointer, pulled in only to stay on screen.
+ *
+ * Three call sites had three sets of hardcoded constants, and one of them
+ * (`Math.min(x, 320)`) was a pin rather than a clamp: it fired for any drop past
+ * x=320 and put the dialog 440px left of the booking it was asking about. The
+ * rule is one expression — the pointer, bounded by the viewport.
+ *
+ * Returns an `inset-inline-start` offset, so it is measured from the RIGHT edge
+ * in RTL. The previous per-site clamps returned a physical x and mirrored every
+ * overlay in an RTL page.
+ */
+export function pointerAnchor(
+  x: number, y: number, width: number, height: number, gap = 8,
+): { insetInlineStart: string; insetBlockStart: string } {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const fromInlineStart = isRtlElement(document.body) ? vw - x : x;
+  const clamp = (v: number, max: number) => Math.max(gap, Math.min(v, Math.max(gap, max)));
+  return {
+    insetInlineStart: `${clamp(fromInlineStart, vw - width - gap)}px`,
+    insetBlockStart: `${clamp(y, vh - height - gap)}px`,
+  };
+}
+
+export function isRtlElement(el: Element): boolean {
+  return getComputedStyle(el).direction === 'rtl';
+}

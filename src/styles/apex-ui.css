@@ -845,7 +845,7 @@ opacity:0;transform:scale(.96);transition:opacity var(--dur-fast) var(--ease-out
   box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .apex-ic__zbtn,.apex-ic__zval{display:flex;align-items:center;justify-content:center;
   block-size:26px;border:0;border-radius:6px;background:transparent;
-  color:var(--text-default);cursor:pointer;font:inherit}
+  color:var(--fg-default);cursor:pointer;font:inherit}
 .apex-ic__zbtn{inline-size:26px}
 .apex-ic__zval{min-inline-size:48px;padding:0 4px;font-size:.75rem;font-variant-numeric:tabular-nums}
 .apex-ic__zbtn:hover:not(:disabled),.apex-ic__zval:hover{background:var(--surface-hover,rgba(0,0,0,.06))}
@@ -3039,6 +3039,9 @@ display:flex;flex-direction:column;gap:0;font-family:var(--font-sans);color:var(
 .apex-dtf__pop{position:absolute;z-index:40;inset-block-start:calc(100% + 6px);inset-inline-start:0;inline-size:270px;background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--r-md);box-shadow:var(--shadow-md);padding:12px;display:flex;flex-direction:column;gap:8px;text-transform:none;letter-spacing:0;font-weight:400}
 .apex-dtf__rule{display:flex;flex-direction:column;gap:5px}
 .apex-dtf__rule .apex-dtf__x{align-self:flex-end;margin-block-start:-26px;margin-inline-end:2px}
+/* The date-range picker in a filter row: it has to behave like the other row controls, which
+   means filling the cell rather than sizing to its own placeholder. */
+.apex-dtf__range{flex:1 1 auto;min-inline-size:0}
 .apex-dtf__pair{display:grid;grid-template-columns:1fr 1fr;gap:5px}
 .apex-dtf__op{align-self:flex-start;font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:.05em;padding:3px 7px;border:1px solid var(--border-default);border-radius:var(--r-sm);background:var(--bg-subtle);color:var(--fg-muted);outline:none}
 .apex-dtf__add{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-primary);cursor:pointer;padding:2px 0}
@@ -3108,6 +3111,25 @@ td[data-numeric="true"] .apex-dte__ctl{font-family:var(--font-mono);text-align:e
 .apex-dt__table thead th[data-frozen]{z-index:4;background:var(--apex-dt-head-bg)}
 .apex-dt__table td[data-frozen="start"]::after,.apex-dt__table th[data-frozen="start"]::after{content:"";position:absolute;inset-block:0;inset-inline-end:0;inline-size:1px;background:var(--apex-dt-border)}
 .apex-dt__table td[data-frozen="end"]::before,.apex-dt__table th[data-frozen="end"]::before{content:"";position:absolute;inset-block:0;inset-inline-start:0;inline-size:1px;background:var(--apex-dt-border)}
+
+/* A frozen cell stays STICKY whatever else claims its position.
+   Two rules in this file set `position:relative` on body cells and both
+   outrank the one above, which is scoped only to `td[data-frozen]`:
+
+     .apex-dt[data-row-ripple="true"] ... tbody td   (0,3,2)
+     .apex-dt__table tbody td[data-editable="true"]  (0,2,2)
+     .apex-dt__table td[data-frozen]                 (0,2,1)  <- loses
+
+   With the row ripple on - which is most tables here - every BODY cell
+   became relative and scrolled away, while the header, a `th` and so
+   unmatched by the ripple rule, went on sticking. The column looked
+   frozen and was not: reported as "the title is frozen but not the
+   other rows".
+
+   Sticky is a positioned value, so the ripple's absolutely positioned
+   layer is still contained by the cell and the wave is unaffected. */
+.apex-dt[data-row-ripple="true"] .apex-dt__table tbody td[data-frozen],
+.apex-dt__table tbody td[data-frozen][data-editable="true"]{position:sticky}
 
 /* frozen rows */
 /* Frozen rows sit under the sticky header and above the scrolling body, so every
@@ -4235,7 +4257,7 @@ border-block-end-color:var(--accent-primary)}
 font-family:var(--font-sans);font-size:12px;color:var(--fg-muted)}
 
 .apex-edimg__input{padding:7px 9px;border:1px solid var(--border-default);
-border-radius:var(--r-sm);background:var(--bg-default);color:var(--fg-default);
+border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);
 font:inherit;font-size:13px}
 
 .apex-edimg__input:focus{outline:2px solid var(--accent-primary);outline-offset:-1px}
@@ -4249,7 +4271,7 @@ font-size:12.5px;color:var(--fg-muted)}
 
 .apex-edimg__lock{display:grid;place-items:center;width:32px;height:32px;
 border:1px solid var(--border-default);border-radius:var(--r-sm);
-background:var(--bg-default);color:var(--fg-subtle);cursor:pointer}
+background:var(--bg-surface);color:var(--fg-subtle);cursor:pointer}
 
 .apex-edimg__lock[data-on="true"]{border-color:var(--accent-primary);
 color:var(--accent-primary)}
@@ -4265,7 +4287,7 @@ background:color-mix(in oklch,var(--accent-primary) 8%,var(--bg-subtle))}
 color:var(--fg-muted)}
 
 .apex-edimg__browse{padding:7px 13px;border:1px solid var(--border-default);
-border-radius:var(--r-sm);background:var(--bg-default);color:var(--fg-default);
+border-radius:var(--r-sm);background:var(--bg-surface);color:var(--fg-default);
 font:inherit;font-size:12.5px;font-weight:550;cursor:pointer}
 
 .apex-edimg__browse:hover{background:var(--bg-muted)}
@@ -4315,7 +4337,7 @@ box-shadow:0 12px 30px -14px rgb(0 0 0/.4)}
 
 .apex-edgrid__cell{inline-size:15px;block-size:15px;padding:0;
 border:1px solid var(--border-default);border-radius:2px;
-background:var(--bg-default);cursor:pointer}
+background:var(--bg-surface);cursor:pointer}
 
 .apex-edgrid__cell[data-on="true"]{border-color:var(--accent-primary);
 background:color-mix(in oklch,var(--accent-primary) 45%,transparent)}
@@ -4353,9 +4375,14 @@ color:var(--fg-default);font:inherit;font-size:13px;text-align:start;cursor:poin
 .apex-ed__host .ProseMirror table{width:100%;margin:0;table-layout:fixed;
 border-collapse:collapse;overflow:hidden}
 
+/* The width and the colour come from the TABLE, as custom properties its
+   own `style` carries - a border set on the table has to be drawn by the
+   cells, since `border-collapse` leaves the table element nothing to draw.
+   The fallbacks are what an untouched table has always looked like. N/048. */
 .apex-ed__host .ProseMirror td,.apex-ed__host .ProseMirror th{
 position:relative;min-inline-size:48px;padding:7px 9px;vertical-align:top;
-border:1px solid var(--border-default);box-sizing:border-box}
+border-style:solid;border-width:var(--apex-tbl-bw,1px);
+border-color:var(--apex-tbl-bc,var(--border-default));box-sizing:border-box}
 
 .apex-ed__host .ProseMirror th{background:var(--bg-subtle);font-weight:650;text-align:start}
 
@@ -4503,7 +4530,13 @@ background:color-mix(in oklch,var(--accent-primary) 5%,var(--bg-subtle))}
    room, so it never covers what it acts on. Inside the shell the border and
    background of the contents are dropped: the shell owns them, and two nested
    panels read as a rendering fault. */
-.apex-objbar{z-index:700;max-width:min(92vw,720px);border-radius:var(--r-md);
+/* 1100, the band every other floating surface in the kit uses - menus
+   and popovers both. It was 700, which is BELOW `.apex-form`'s 900, so
+   the object bar could never appear over a modal: it was in the DOM,
+   positioned, opaque and painted behind the dialog. The editor lives
+   inside a dialog on most screens here, which made this the normal
+   case rather than an edge one. */
+.apex-objbar{z-index:1100;max-width:min(92vw,720px);border-radius:var(--r-md);
 border:1px solid var(--border-default);background:var(--bg-surface);
 box-shadow:0 10px 28px -12px rgb(0 0 0/.35),0 2px 6px -2px rgb(0 0 0/.2)}
 
@@ -4519,6 +4552,27 @@ font-size:11.5px;font-weight:650;color:var(--fg-muted);white-space:nowrap}
 
 .apex-tbl-tools__sep{inline-size:1px;align-self:stretch;margin-inline:3px;
 background:var(--border-default)}
+
+/* The border width box and the colour picker - N/048. Sized like the
+   image bar's W/H boxes, because they are the same kind of control in the
+   same kind of bar and an author should not have to learn two. */
+.apex-tbl-tools__field{display:inline-flex;align-items:center;gap:4px;
+font-family:var(--font-sans);font-size:11px;color:var(--fg-subtle)}
+
+.apex-tbl-tools__field input{inline-size:44px;padding:3px 5px;
+font:inherit;color:var(--fg-default);background:var(--bg-surface,#fff);
+border:1px solid var(--border-default);border-radius:var(--r-sm);text-align:center}
+
+.apex-tbl-tools__field input:disabled{opacity:.55;cursor:not-allowed}
+
+/* A swatch, not a field. The picker's trigger is a swatch plus a hex box -
+   right in a form, and 200px of a toolbar that already carries fifteen
+   buttons. The hex box inside the popover is untouched. */
+.apex-tbl-tools__colour .apex-ctl{border:0;background:none;padding:0;min-inline-size:0}
+
+.apex-tbl-tools__colour .apex-ctl__input{display:none}
+
+.apex-tbl-tools__colour .apex-swatch{inline-size:26px;block-size:26px}
 
 .apex-tbl-tools__btn{display:grid;place-items:center;inline-size:26px;block-size:26px;
 border:0;border-radius:var(--r-sm);background:transparent;color:var(--fg-muted);cursor:pointer}
@@ -4590,12 +4644,167 @@ border-block-end-color:color-mix(in oklch,var(--fg-subtle) 60%,transparent)}
    following paragraph would drift away from it on any reorder. */
 .apex-ed__host .ProseMirror figure{margin:0;display:flex;flex-direction:column;gap:6px}
 
+/* `max-inline-size` is the guard that makes a pixel width safe: a 900px
+   picture becomes 900px of intent and the column's width in fact, so a
+   phone shows it whole instead of scrolling sideways. `inline-size`
+   defaults to auto now rather than 100%, because a picture with no
+   stated width should be its own size, not the column's. */
 .apex-ed__host .ProseMirror figure img{display:block;max-inline-size:100%;
-inline-size:var(--apex-ed-fig-w,100%);block-size:auto;border-radius:var(--r-md)}
+inline-size:var(--apex-ed-fig-w,auto);block-size:var(--apex-ed-fig-h,auto);
+border-radius:var(--r-md)}
 
+/* ── text wrapping ── */
+/* Four modes, and every one of them is something CSS does honestly.
+   `inline` puts the figure in the line box; `left`/`right` float it and
+   the text runs down the other side; `block` is the default, a picture
+   on its own lines. Behind Text and In Front of Text are deliberately
+   absent - see the note in media.ts. */
+.apex-ed__host .ProseMirror figure[data-wrap="inline"]{display:inline-block;
+vertical-align:middle;margin-inline:4px}
+
+/* `float: left` first and `inline-start` after it: the logical value is
+   what makes wrapping correct in a right-to-left document, and a
+   browser that does not know it keeps the physical one rather than no
+   float at all. */
+.apex-ed__host .ProseMirror figure[data-wrap="left"]{float:left;float:inline-start;
+margin:4px 16px 8px 0;max-inline-size:60%}
+
+.apex-ed__host .ProseMirror figure[data-wrap="right"]{float:right;float:inline-end;
+margin:4px 0 8px 16px;max-inline-size:60%}
+
+.apex-ed__host .ProseMirror figure[data-wrap="block"]{float:none;display:flex}
+
+/* ── the picture that lives in a line of text ── */
+/* `<span>`, not `<figure>`: a figure inside a paragraph is invalid and
+   the browser closes the paragraph around it. Floating this one wraps
+   the text FROM THE POINT IT SITS AT, which is the whole reason it
+   exists - a float before a paragraph can only wrap the whole thing. */
+.apex-ed__host .ProseMirror .apex-ed__img-inline{display:inline-block;
+position:relative;vertical-align:middle;max-inline-size:100%}
+
+.apex-ed__host .ProseMirror .apex-ed__img-inline img{display:block;
+inline-size:var(--apex-ed-fig-w,auto);block-size:var(--apex-ed-fig-h,auto);
+max-inline-size:100%;border-radius:var(--r-md)}
+
+.apex-ed__host .ProseMirror .apex-ed__img-inline[data-wrap="left"]{float:left;
+float:inline-start;margin:4px 16px 8px 0}
+
+.apex-ed__host .ProseMirror .apex-ed__img-inline[data-wrap="right"]{float:right;
+float:inline-end;margin:4px 0 8px 16px}
+
+/* The float is CONTAINED by the editor rather than cleared by every
+   block after it.
+ *
+   The first version of this cleared `> *:not(figure)`, which stopped
+   the next paragraph climbing up beside the picture - and climbing up
+   beside the picture is precisely what wrapping IS. Square wrapping
+   looked identical to Top and Bottom, which is how it was reported.
+   What actually needs solving is narrower: a float has no height in
+   its parent, so an editor ending on one would collapse. A clearfix on
+   the ROOT holds the box open and leaves the text alone. */
+.apex-ed__host .ProseMirror::after{content:"";display:block;clear:both}
+
+/* The two the width commands set. Any OTHER percentage - every value a
+   drag can produce - arrives as an inline custom property from the node
+   view, because a stylesheet cannot carry a rule for each of ninety
+   values. These two stay for a document rendered WITHOUT the node view:
+   a saved post, a preview, an export. */
 .apex-ed__host .ProseMirror figure[data-width="50%"]{--apex-ed-fig-w:50%}
 
 .apex-ed__host .ProseMirror figure[data-width="33%"]{--apex-ed-fig-w:33%}
+
+/* ── the image bar's own fields ── */
+.apex-objtools__altinput{border:0;background:transparent;color:inherit;font:inherit;
+inline-size:min(28ch,22vw);min-inline-size:8ch;padding:2px 0;outline:none}
+
+.apex-objtools__altinput::placeholder{color:var(--fg-muted)}
+
+.apex-objtools__size{display:inline-flex;align-items:center;gap:6px}
+
+.apex-objtools__field{display:inline-flex;align-items:center;gap:4px;
+font-size:11.5px;color:var(--fg-subtle);letter-spacing:.04em}
+
+.apex-objtools__field input{inline-size:5.5ch;padding:3px 4px;text-align:end;
+border:1px solid var(--border-default);border-radius:var(--r-sm);
+background:var(--bg-surface,#fff);color:var(--fg-default);font:inherit;font-size:12px}
+
+/* The spinners take a third of a five-character box and the number is
+   the point of it. */
+.apex-objtools__field input::-webkit-outer-spin-button,
+.apex-objtools__field input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+.apex-objtools__field input[type="number"]{-moz-appearance:textfield;appearance:textfield}
+
+/* ── resize handles ── */
+/* Shown on the selected image only: four grips around every picture in a
+   long article is noise, and the selection is how the author says which
+   one they mean. */
+.apex-ed__host .ProseMirror figure{position:relative}
+
+.apex-ed__img-handles{position:absolute;inset:0;pointer-events:none;
+inline-size:var(--apex-ed-fig-w,100%);block-size:100%}
+
+.apex-ed__host .ProseMirror figure[data-align="center"] .apex-ed__img-handles{
+margin-inline:auto}
+
+.apex-ed__host .ProseMirror figure[data-align="right"] .apex-ed__img-handles{
+margin-inline-start:auto}
+
+/* The token names are `--bg-surface` and `--accent-primary`. The first
+   draft named `--surface-1` and `--accent`, which do not exist here - and
+   an invalid var() makes the WHOLE declaration invalid at computed-value
+   time, so the grips drew with no background and no border: a 12px
+   transparent box, present in the DOM, reported by every test as
+   visible, and invisible on screen. The literal fallbacks are the
+   belt: a grip that cannot be seen is the same as no grip at all. */
+.apex-ed__img-handle{position:absolute;inline-size:12px;block-size:12px;
+border-radius:3px;background:var(--bg-surface,#fff);
+border:2px solid var(--accent-primary,#2563eb);
+box-shadow:0 1px 3px rgb(0 0 0 / .35);
+opacity:0;pointer-events:none;transition:opacity .12s ease}
+
+/* The grip is 12px and a finger is not. The hit box is padded out to 28px
+   with a pseudo-element rather than by growing the visible square, which
+   would be a clumsy-looking control on a mouse. */
+.apex-ed__img-handle::after{content:"";position:absolute;inset:-8px}
+
+figure[data-selected="true"] .apex-ed__img-handle,
+figure[data-resizing] .apex-ed__img-handle,
+.apex-ed__img-inline[data-selected="true"] .apex-ed__img-handle,
+.apex-ed__img-inline[data-resizing] .apex-ed__img-handle{opacity:1;pointer-events:auto}
+
+/* And on hover, where there is a pointer to hover with. Selection alone
+   is correct and undiscoverable: nothing about a picture says "click me
+   and grips will appear". Not on touch, where :hover sticks after a tap
+   and would leave grips on the last image the reader touched. */
+@media (hover:hover) and (pointer:fine){
+.apex-ed__host .ProseMirror figure:hover .apex-ed__img-handle,
+.apex-ed__host .ProseMirror .apex-ed__img-inline:hover .apex-ed__img-handle{opacity:1;pointer-events:auto}
+}
+
+.apex-ed__img-handle[data-corner="nw"]{inset-block-start:-6px;inset-inline-start:-6px;
+cursor:nwse-resize}
+
+.apex-ed__img-handle[data-corner="ne"]{inset-block-start:-6px;inset-inline-end:-6px;
+cursor:nesw-resize}
+
+.apex-ed__img-handle[data-corner="sw"]{inset-block-end:-6px;inset-inline-start:-6px;
+cursor:nesw-resize}
+
+.apex-ed__img-handle[data-corner="se"]{inset-block-end:-6px;inset-inline-end:-6px;
+cursor:nwse-resize}
+
+/* The width, live, while the pointer is down - the one thing a percentage
+   resize cannot be guessed from, since the image itself is still moving. */
+figure[data-resizing]::after{content:attr(data-resizing) "%";position:absolute;
+inset-block-start:8px;inset-inline-start:8px;padding:2px 6px;border-radius:var(--r-sm,4px);
+background:var(--fg-default,#111);color:var(--bg-surface,#fff);
+font-size:11px;font-variant-numeric:tabular-nums}
+
+/* A readonly editor renders the node view too, and a grip that cannot be
+   dragged is a lie. */
+.apex-ed[data-readonly="true"] .apex-ed__img-handles,
+.apex-ed[data-disabled="true"] .apex-ed__img-handles{display:none}
 
 /* margin-inline auto rather than text-align, because the img is a block and
    text-align would only move an inline box */
@@ -4614,8 +4823,9 @@ line-height:1.5;text-wrap:pretty;letter-spacing:normal;text-transform:none}
    Styled from --fg-muted at full opacity, matching .apex-ed__placeholder: both
    are placeholders, so they should agree — and stacking an opacity multiplier
    on the already-dim --fg-subtle put this one under AA. */
-.apex-ed__host .ProseMirror figcaption:has(> br.ProseMirror-trailingBreak:only-child)::before{
-content:"Add a caption\2026";color:var(--fg-muted)}
+/* No prompt under an uncaptioned picture any more: the caption is an
+   attribute, written in the image's own menu, and a figcaption is
+   rendered only when there is one to render. N/033. */
 
 .apex-ed__host .ProseMirror figure.ProseMirror-selectednode img{outline:2px solid var(--accent-primary);
 outline-offset:2px}
@@ -4690,7 +4900,7 @@ padding:3px 7px;border:0;border-radius:var(--r-sm);background:transparent;
 color:var(--fg-muted);font-family:var(--font-sans);font-size:12px;cursor:pointer}
 .apex-objtools__alt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .apex-objtools__alt:hover{background:var(--bg-muted);color:var(--fg-default)}
-.apex-objtools__alt[data-warn="true"]{color:var(--accent-warn)}
+.apex-objtools__alt[data-warn="true"]{color:var(--accent-warning)}
 
 /* ────────────────────────────────────────────────────────────────────────
    ApexForm — AF2-292.

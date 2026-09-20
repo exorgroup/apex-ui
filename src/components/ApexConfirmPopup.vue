@@ -13,13 +13,15 @@
  * the alert.
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useOverlayTransition } from '../core/overlayTransition';
+import type { ApexOverlayClasses } from '../types';
 import ApexButton from './ApexButton.vue';
 import ApexIcon from './ApexIcon.vue';
 import { anchorPosition, resolveTarget, type AnchorSide } from '../core/anchor';
 import { useApexAlert, type AlertButton } from '../core/alert';
 import { useAlertButtons } from '../core/alertButtons';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexOverlayClasses & {
   group?: string;
   /* declarative defaults — a value on the confirm() call wins */
   message?: string;
@@ -38,6 +40,10 @@ const props = withDefaults(defineProps<{
   side: 'bottom', align: 'center', gap: 10, showArrow: true,
   acceptLabel: 'Yes', rejectLabel: 'Cancel', zIndex: 1100,
 });
+
+/* Four transition props, no `transition` preset — this popup has one
+   animation and no choice between any. AF2-332. */
+const transitionProps = useOverlayTransition(props, () => 'apex-pop-fade');
 
 const confirm = useApexAlert();
 /* The alert state is flat, so `o` is the state itself. Kept under the old name
@@ -147,7 +153,7 @@ const panelStyle = computed(() => {
 
 <template>
   <Teleport to="body">
-    <Transition name="apex-pop-fade">
+    <Transition v-bind="transitionProps">
       <div v-if="open" ref="panel" class="apex-cpop" :style="panelStyle" :data-side="pos.side"
            :data-arrow="showArrow ? 'true' : 'false'" role="dialog" :aria-label="message">
         <slot name="container" :options="o" :press="confirm.press"

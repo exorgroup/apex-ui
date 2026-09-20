@@ -6,8 +6,11 @@
  */
 import { computed } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import type { ApexPaginatorClasses } from '../types';
 
 const props = withDefaults(defineProps<{
+  /** Your own class on any part. See ApexPaginatorClasses. */
+  ui?: ApexPaginatorClasses;
   first?: number;
   rows?: number;
   totalRecords?: number;
@@ -60,25 +63,25 @@ function setRows(n: number) {
 </script>
 
 <template>
-  <div class="apex-pager" :data-disabled="disabled ? 'true' : 'false'">
-    <p class="apex-pager__summary">{{ summary }}</p>
+  <div class="apex-pager" :class="ui?.root" :data-disabled="disabled ? 'true' : 'false'">
+    <p class="apex-pager__summary" :class="ui?.summary">{{ summary }}</p>
 
-    <div class="apex-pager__nav" role="group" aria-label="Pagination">
-      <button type="button" class="apex-pager__btn" :disabled="disabled || page === 0"
+    <div class="apex-pager__nav" :class="ui?.nav" role="group" aria-label="Pagination">
+      <button type="button" class="apex-pager__btn" :class="ui?.button" :disabled="disabled || page === 0"
               aria-label="First page" @click="goTo(0)"><ApexIcon name="first_page" :size="19" /></button>
-      <button type="button" class="apex-pager__btn" :disabled="disabled || page === 0"
+      <button type="button" class="apex-pager__btn" :class="ui?.button" :disabled="disabled || page === 0"
               aria-label="Previous page" @click="goTo(page - 1)"><ApexIcon name="chevron_left" :size="19" /></button>
-      <button v-for="p in links" :key="p" type="button" class="apex-pager__btn apex-pager__btn--page"
+      <button v-for="p in links" :key="p" type="button" class="apex-pager__btn apex-pager__btn--page" :class="[ui?.button, ui?.page]"
               :data-current="p === page ? 'true' : 'false'" :disabled="disabled"
               :aria-current="p === page ? 'page' : undefined" :aria-label="`Page ${p + 1}`"
               @click="goTo(p)">{{ p + 1 }}</button>
-      <button type="button" class="apex-pager__btn" :disabled="disabled || page >= pageCount - 1"
+      <button type="button" class="apex-pager__btn" :class="ui?.button" :disabled="disabled || page >= pageCount - 1"
               aria-label="Next page" @click="goTo(page + 1)"><ApexIcon name="chevron_right" :size="19" /></button>
-      <button type="button" class="apex-pager__btn" :disabled="disabled || page >= pageCount - 1"
+      <button type="button" class="apex-pager__btn" :class="ui?.button" :disabled="disabled || page >= pageCount - 1"
               aria-label="Last page" @click="goTo(pageCount - 1)"><ApexIcon name="last_page" :size="19" /></button>
     </div>
 
-    <label v-if="rowsPerPageOptions && rowsPerPageOptions.length" class="apex-pager__size">
+    <label v-if="rowsPerPageOptions && rowsPerPageOptions.length" class="apex-pager__size" :class="ui?.size">
       <span>Rows</span>
       <select :value="rows" :disabled="disabled" aria-label="Rows per page"
               @change="setRows(Number(($event.target as HTMLSelectElement).value))">

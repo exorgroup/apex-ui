@@ -119,7 +119,16 @@ export interface AlertOptions {
   autoClose?: number;
   /** A bar counting the autoClose down. */
   showTimer?: boolean;
+  /**
+   * Ripple the answer buttons for THIS request. Follows the same rule as
+   * every other option here: the call wins, then the host's prop, then the
+   * plugin's app-wide setting, then off. AF2-324.
+   */
+  ripple?: boolean;
   transition?: 'scale' | 'slide' | 'fade' | 'none';
+  /** How long the panel takes to arrive / to leave. Any CSS time. */
+  enterDuration?: string;
+  leaveDuration?: string;
   enterClass?: string;
   leaveClass?: string;
 
@@ -165,6 +174,22 @@ export interface AlertRunOptions {
   confirm?: AlertOptions | null;
   /** Shown while the action runs. */
   progressTitle?: string;
+  /**
+   * The progress stage, for callers who want more than a title — most often
+   * `icon`, which replaces the ring with that glyph, spinning.
+   *
+   * `progressTitle` still works and wins, because it was the only way to set
+   * a title and a caller passing both means the shorthand.
+   */
+  progress?: AlertOptions;
+  /**
+   * The result stage's settings, UNDERNEATH the outcome.
+   *
+   * The outcome still decides tone, title and message — that judgement is the
+   * whole point of AlertRunResult. This is for the presentation the action
+   * cannot know about: `autoClose`, `showTimer`, the label on the button.
+   */
+  result?: AlertOptions;
   /** The work. Resolve on completion, reject on failure. */
   action: () => Promise<AlertRunResult | void> | AlertRunResult | void;
   /** Reads this call's outcome, overriding any registered interpreter. */
@@ -219,7 +244,10 @@ const BLANK: AlertOptions = {
   dismissableMask: undefined,
   autoClose: undefined,
   showTimer: undefined,
+  ripple: undefined,
   transition: undefined,
+  enterDuration: undefined,
+  leaveDuration: undefined,
   enterClass: undefined,
   leaveClass: undefined,
   target: undefined,
@@ -328,8 +356,15 @@ async function run(options: AlertRunOptions): Promise<boolean> {
   }
 
   /* No buttons here: the work is under way and there is nothing to decide.
-     Leaving a Cancel would promise an abort the caller never asked for. */
-  setStage('progress', { tone: 'info', title: progressTitle });
+     Leaving a Cancel would promise an abort the caller never asked for — so
+     a caller's `buttons`, `confirmText` and `cancelText` are dropped rather
+     than merged, whatever the progress bag says. */
+  const { buttons: _b, confirmText: _c, cancelText: _x, ...progressOpts } = options.progress ?? {};
+  setStage('progress', {
+    tone: 'info',
+    ...progressOpts,
+    title: progressTitle ?? progressOpts.title,
+  });
 
   let outcome: AlertRunResult;
   try {
@@ -344,10 +379,15 @@ async function run(options: AlertRunOptions): Promise<boolean> {
     outcome = { ok: false };
   }
 
+  /* The caller's presentation first, the outcome's judgement over it. A
+     result bag carrying a title would otherwise silence the one thing the
+     action actually learned. */
+  const resultOpts = options.result ?? {};
   setStage('result', {
+    ...resultOpts,
     tone: outcome.tone ?? (outcome.ok ? 'success' : 'warn'),
-    title: outcome.title,
-    message: outcome.message ?? '',
+    title: outcome.title ?? resultOpts.title,
+    message: outcome.message ?? resultOpts.message ?? '',
   });
 
   await wait();

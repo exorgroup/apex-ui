@@ -8,11 +8,13 @@
  * covers the viewport; `responsiveSize` widens it below a breakpoint.
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useOverlayTransition } from '../core/overlayTransition';
+import type { ApexOverlayClasses } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
 export type DrawerPosition = 'left' | 'right' | 'top' | 'bottom' | 'full';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexOverlayClasses & {
   /** Bindable open state. */
   visible?: boolean;
   header?: string;
@@ -59,6 +61,9 @@ const emit = defineEmits<{
   (e: 'update:visible', v: boolean): void;
   (e: 'show' | 'hide' | 'after-hide'): void;
 }>();
+
+/* Four transition props, no `transition` preset — a drawer animates by its POSITION, so there is no preset to choose. AF2-332. */
+const transitionProps = useOverlayTransition(props, () => `apex-drw-${props.position === 'full' ? 'full' : props.position}`);
 
 const open = ref(!!props.visible);
 watch(() => props.visible, (v) => { open.value = !!v; });
@@ -153,7 +158,7 @@ defineExpose({ close, panel });
 
 <template>
   <Teleport to="body">
-    <Transition :name="`apex-drw-${position === 'full' ? 'full' : position}`" @after-leave="emit('after-hide')">
+    <Transition v-bind="transitionProps" @after-leave="emit('after-hide')">
       <div v-if="open" class="apex-drw" :style="rootStyle" :data-position="position" :data-axis="axis"
            :data-modal="modal ? 'true' : 'false'" :data-blur="maskBlur ? 'true' : 'false'"
            @click.self="dismissableMask && closable && close()">

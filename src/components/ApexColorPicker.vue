@@ -8,6 +8,7 @@
  * exported separately for programmatic work.
  */
 import { computed, nextTick, ref, watch, onBeforeUnmount } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
 import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { pickFieldProps } from '../core/utils';
@@ -173,7 +174,7 @@ onBeforeUnmount(() => {
   if (typeof document !== 'undefined') document.removeEventListener('mousedown', onDocClick);
 });
 
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 defineExpose({ color });
 </script>
 

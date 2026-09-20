@@ -30,7 +30,17 @@ const CSS = readFileSync(resolve(__dirname, '../src/styles/apex-ui.css'), 'utf8'
 const marker = '/* ─── alert';
 const at = CSS.indexOf(marker);
 if (at < 0) throw new Error('alert block not found — the marker moved');
-const ALERT_CSS = CSS.slice(at);
+/* Bounded, not to the end of the file. This read `CSS.slice(at)`, which was
+   the same thing only while the alert block happened to be last — AF2-268
+   appended the scheduler and calendar after it and this spec began reporting
+   their variables as alert defects. A guard that silently widens when the file
+   grows is measuring something other than what it names.
+   The bound is the next CONTROL, not the next marker: the alert block carries
+   a "the figure" sub-heading in the same marker style, so stopping at the next
+   marker cuts the block in half and loses the per-tone rings. */
+const endMarker = '/* ─── scheduler';
+const end = CSS.indexOf(endMarker, at);
+const ALERT_CSS = end < 0 ? CSS.slice(at) : CSS.slice(at, end);
 
 const alert = useApexAlert();
 let wrapper: ReturnType<typeof mount>;

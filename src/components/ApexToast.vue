@@ -12,6 +12,8 @@
  * toast that vanishes under the cursor is a toast you were about to read.
  */
 import { computed, onBeforeUnmount, ref, Teleport, watch } from 'vue';
+import { useOverlayTransition } from '../core/overlayTransition';
+import type { ApexOverlayClasses } from '../types';
 import ApexMessage from './ApexMessage.vue';
 import { __toastState, useApexToast, type ToastMessage } from '../core/toast';
 
@@ -19,7 +21,7 @@ export type ToastPosition =
   | 'top-left' | 'top-center' | 'top-right'
   | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexOverlayClasses & {
   position?: ToastPosition;
   /** 'stacked' collapses the pile and fans it on hover; 'expanded' always shows the column. */
   mode?: 'stacked' | 'expanded';
@@ -49,6 +51,10 @@ const emit = defineEmits<{
 
 const toast = useApexToast();
 const hovering = ref(false);
+
+/* Four transition props, no `transition` preset — a toast has one
+   animation and no choice between any. AF2-333. */
+const transitionProps = useOverlayTransition(props, () => 'apex-toast-item');
 
 const queue = computed(() => {
   const all = __toastState.messages.filter((m) => (props.group ? m.group === props.group : !m.group));
@@ -148,7 +154,13 @@ const slots = defineSlots<{
     <div class="apex-toast" :style="rootStyle" :data-position="position" :data-mode="mode"
          :data-fanned="fanned ? 'true' : 'false'" role="log" aria-live="polite"
          @pointerenter="hovering = true" @pointerleave="hovering = false">
-      <TransitionGroup name="apex-toast-item">
+      <!-- `move-class` is pinned to the built-in whatever the enter and
+           leave classes are. Moving is a different question from arriving
+           and departing: when one toast goes, the others slide up, and that
+           should not change because someone chose an animate.css entrance.
+           There is no `.apex-toast-item-move` rule today, so they jump —
+           unchanged by this, and a separate decision. AF2-333. -->
+      <TransitionGroup v-bind="transitionProps" move-class="apex-toast-item-move">
         <div v-for="(m, i) in queue" :key="m.id" class="apex-toast__item" :style="stackStyle(i)">
           <slot v-if="slots.message" name="message" :message="m" :close="() => close(m)" :index="i" />
           <ApexMessage v-else :severity="m.severity || 'info'" :variant="variant" :size="size"

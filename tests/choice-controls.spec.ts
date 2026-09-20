@@ -191,6 +191,33 @@ describe('ApexSwitch — the labels that used to do nothing', () => {
     expect(w.find('button').attributes('role')).toBe('switch');
     expect(w.find('button').attributes('aria-checked')).toBe('true');
   });
+
+  /* AF2-313. `readonly` refused the toggle and then said nothing about
+     itself — no attribute, no cursor. A switch that looks pressable and
+     silently does nothing is worse than one that is plainly disabled, and a
+     screen reader was told it was an ordinary switch. Matching ApexRating,
+     which had already solved this. */
+  it('readonly refuses the toggle', async () => {
+    const w = mount(ApexSwitch, { props: { modelValue: false, readonly: true } });
+    await w.find('button').trigger('click');
+    await w.find('button').trigger('keydown.space');
+    expect(w.emitted('update:modelValue')).toBeFalsy();
+  });
+
+  it('and SAYS so, to the stylesheet and to a screen reader', () => {
+    const w = mount(ApexSwitch, { props: { modelValue: true, readonly: true } });
+    expect(w.find('button').attributes('data-readonly')).toBe('true');
+    expect(w.find('button').attributes('aria-readonly')).toBe('true');
+    /* Not disabled: it stays legible and stays in the tab order, which is
+       the whole difference between "not yours to change" and "unavailable". */
+    expect(w.find('button').attributes('disabled')).toBeUndefined();
+  });
+
+  it('an ordinary switch carries no aria-readonly at all', () => {
+    const w = mount(ApexSwitch, { props: { modelValue: true } });
+    expect(w.find('button').attributes('aria-readonly')).toBeUndefined();
+    expect(w.find('button').attributes('data-readonly')).toBe('false');
+  });
 });
 
 describe('ApexRating', () => {

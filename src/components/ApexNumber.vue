@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** ApexNumber — numeric input with unit suffix, currency prefix and min/max clamping on blur. */
 import { computed, ref } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
 import ApexField from './ApexField.vue';
 import { pickFieldProps } from '../core/utils';
 import ApexIcon from './ApexIcon.vue';
@@ -39,7 +40,7 @@ function onBlur() {
   if (n !== Number(props.modelValue)) emit('update:modelValue', n);
 }
 const fieldProps = computed(() => pickFieldProps(props as unknown as Record<string, unknown>));
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 </script>
 
 <template>

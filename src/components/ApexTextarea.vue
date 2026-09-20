@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** ApexTextarea — auto-grow optional, character counter optional. */
 import { computed, ref, watch, nextTick } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
 import ApexField from './ApexField.vue';
 import { pickFieldProps } from '../core/utils';
 import { guardKeydown, guardPaste, type KeyFilter } from '../core/keyFilter';
@@ -35,7 +36,7 @@ function grow() {
 }
 watch(() => props.modelValue, () => nextTick(grow));
 const fieldProps = computed(() => pickFieldProps(props as unknown as Record<string, unknown>));
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 function onKey(e: KeyboardEvent) { guardKeydown(e, props.keyFilter); }
 function onPaste(e: ClipboardEvent) {
   const next = guardPaste(e, props.keyFilter);

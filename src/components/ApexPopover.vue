@@ -11,9 +11,11 @@
  * ApexConfirmPopup and ApexTooltip.
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { useOverlayTransition } from '../core/overlayTransition';
+import type { ApexOverlayClasses } from '../types';
 import { anchorPosition, resolveTarget, type AnchorAlign, type AnchorSide } from '../core/anchor';
 
-const props = withDefaults(defineProps<{
+const props = withDefaults(defineProps<ApexOverlayClasses & {
   /** Bindable open state, for a controlled popover. */
   visible?: boolean;
   /** A default anchor, when no event is passed to show(). */
@@ -50,6 +52,9 @@ const emit = defineEmits<{
   (e: 'update:visible', v: boolean): void;
   (e: 'show' | 'hide'): void;
 }>();
+
+/* Four transition props, no `transition` preset — one animation, no choice. AF2-332. */
+const transitionProps = useOverlayTransition(props, () => 'apex-pov');
 
 const open = ref(!!props.visible);
 watch(() => props.visible, (v) => { if (!!v !== open.value) { open.value = !!v; } });
@@ -167,7 +172,7 @@ defineExpose({ show, hide, toggle, reposition, visible: open, panel });
 
 <template>
   <Teleport to="body">
-    <Transition name="apex-pov">
+    <Transition v-bind="transitionProps">
       <div v-if="open" ref="panel" class="apex-pov" :class="contentClass" :style="panelStyle"
            :data-side="pos.side" :data-arrow="showArrow ? 'true' : 'false'" role="dialog" tabindex="-1">
         <div class="apex-pov__content"><slot :hide="hide" /></div>

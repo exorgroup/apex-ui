@@ -568,6 +568,694 @@ export interface ApexBoardProps {
   ui?: ApexBoardClasses;
 }
 
+/* ------------------------------------------------------------------ *
+ * The data controls' class maps.
+ *
+ * One interface per control rather than a shared ApexDataClasses. The nine
+ * have almost no parts in common — a paginator's page button and a pick list's
+ * transfer column are not the same thing under two names — and a shared map
+ * would be a forty-key grab-bag where every control ignores most of it. The
+ * display family shares one because those nine really do share `root` and
+ * `label`; these do not.
+ *
+ * Every key below is a part the control actually renders. A key naming a part
+ * that does not exist is a lie a consumer only discovers by their class not
+ * appearing, which is why the names are taken from the templates rather than
+ * invented.
+ * ------------------------------------------------------------------ */
+
+/** ApexPaginator. Its root is `.apex-pager`, not `.apex-pg`. */
+export interface ApexPaginatorClasses {
+  root?: string;
+  /** The row of page controls. */
+  nav?: string;
+  /** Any button in the nav — first, previous, next, last and the page numbers. */
+  button?: string;
+  /** Only the numbered page buttons, `.apex-pager__btn--page`. */
+  page?: string;
+  /** The rows-per-page selector, shown when `rowsPerPageOptions` is set. */
+  size?: string;
+  /** The "Showing 1–10 of 84" line. */
+  summary?: string;
+}
+
+export interface ApexProgressBarClasses {
+  root?: string;
+  /** The bar and its readout side by side, when the value sits outside. */
+  row?: string;
+  /** The groove, and the filled portion of it. */
+  track?: string;
+  fill?: string;
+  /** The value text — `readout` outside the bar, `inside` within the fill. */
+  readout?: string;
+  inside?: string;
+  /** The step caption under the bar, in step mode. */
+  label?: string;
+}
+
+export interface ApexTimelineClasses {
+  root?: string;
+  /** One entry, and the line joining it to the next. */
+  event?: string;
+  connector?: string;
+  /** The dot or icon on the line. */
+  marker?: string;
+  /** The two sides: the card, and the text opposite it. */
+  content?: string;
+  opposite?: string;
+  /** The rule drawn between events where the layout calls for one. */
+  separator?: string;
+}
+
+/** ApexOrgChart. Most parts are rendered by ApexOrgNode, one per node. */
+export interface ApexOrgChartClasses {
+  root?: string;
+  /** The single top node's wrapper. */
+  top?: string;
+  /** A subtree, and the row of children under a node. */
+  branch?: string;
+  children?: string;
+  /** One node: its positioning wrapper and the box that gets the border. */
+  nodeWrap?: string;
+  node?: string;
+  /** Inside the box — the icon or image, and the two lines of text. */
+  icon?: string;
+  image?: string;
+  text?: string;
+  label?: string;
+  sub?: string;
+  /** The collapse/expand control, when `collapsible`. */
+  toggle?: string;
+}
+
+export interface ApexDataViewClasses {
+  root?: string;
+  /** The toolbar above the items, and the two things in it. */
+  bar?: string;
+  sort?: string;
+  /** The list/grid switcher, shown when `showLayoutSwitcher`. */
+  layoutSwitch?: string;
+  /** The region below the bar, the item container, and one item. */
+  main?: string;
+  items?: string;
+  item?: string;
+  /** The caption line, the empty note, and the loading veil. */
+  caption?: string;
+  empty?: string;
+  overlay?: string;
+}
+
+/**
+ * ApexDataTable, and the column filter it renders.
+ *
+ * The table names a lot of elements. These are the ones worth reaching from
+ * outside: the toolbar, the scroll frame, the header controls, the row
+ * decorations, the grouping and detail rows, and the three states. The inline
+ * editor's own internals (`.apex-dte*`) are deliberately absent — an edit box
+ * is a control in its own right and giving it keys here would document a
+ * seam that does not exist yet.
+ *
+ * The `filter*` keys belong to ApexColumnFilter, which the table renders once
+ * per filterable column and hands this same map to — the arrangement
+ * ApexOrgChart and ApexOrgNode already use. A separate interface would make a
+ * consumer import two types to style one table.
+ */
+export interface ApexDataTableClasses {
+  root?: string;
+  /** The toolbar above the table: the frame, the caption, the global search,
+      the clear-all button and the selected-row count. */
+  bar?: string;
+  caption?: string;
+  search?: string;
+  clearAll?: string;
+  count?: string;
+  /** The scroll container, the viewport inside it, and the table element. */
+  main?: string;
+  viewport?: string;
+  table?: string;
+  /** The header: the row of per-column filters, the sort button in a heading,
+      and the direction arrow it draws. */
+  filterRow?: string;
+  sort?: string;
+  arrow?: string;
+  /** Fixed leading columns — the drag gutter, the row-number cell, the
+      expander cell and its button, the lock cell and its button, and the edit
+      cell. */
+  gutter?: string;
+  rank?: string;
+  expandCol?: string;
+  expand?: string;
+  lockCol?: string;
+  lock?: string;
+  editCol?: string;
+  /** Grouping: the group header row, its label and count, and the group
+      footer that carries the aggregates. */
+  group?: string;
+  groupLabel?: string;
+  groupCount?: string;
+  groupFoot?: string;
+  /** An expanded row's detail area, and the grid inside it. */
+  detail?: string;
+  detailGrid?: string;
+  /** Cell decorations: a formatted badge, an image cell, a secondary line,
+      a stacked pair, and a per-row action button. */
+  badge?: string;
+  media?: string;
+  sub?: string;
+  stack?: string;
+  rowButton?: string;
+  /** The label beside a column footer's aggregate. */
+  footLabel?: string;
+  /** The pinned rows drawn above the scrolling body. */
+  frozenRows?: string;
+  /* ── column layout (AF2-262a) ─────────────────────────────── */
+  /** The drag grip on a column boundary, when `resizableColumns`. */
+  resizer?: string;
+  /** The header-group row above the columns, when `columnGroups` is set. */
+  groupRow?: string;
+  /** The show/hide picker: its wrapper, the button, the count beside it, the
+      menu, one row in it, and the reset button. */
+  columnPick?: string;
+  columnButton?: string;
+  columnCount?: string;
+  columnMenu?: string;
+  columnRow?: string;
+  columnReset?: string;
+  /** The empty note, the loading veil, and one skeleton placeholder. */
+  empty?: string;
+  overlay?: string;
+  skeleton?: string;
+
+  /* ── ApexColumnFilter ─────────────────────────────────────── */
+  /** The filter root, the button that opens it, and the badge counting the
+      rules in force. */
+  filter?: string;
+  filterTrigger?: string;
+  filterBadge?: string;
+  /** The popup, and the list of rules in it. */
+  filterPop?: string;
+  filterMenu?: string;
+  /** One rule: the row, its operator select, and the value control. */
+  filterRule?: string;
+  filterOp?: string;
+  filterControl?: string;
+  /** The two-value row a `between` operator needs. */
+  filterPair?: string;
+  /** The footer, its add-a-rule button, and the remove control on a rule. */
+  filterActions?: string;
+  filterAdd?: string;
+  filterRemove?: string;
+}
+
+/**
+ * ApexScheduler — a resource timeline, and the largest part map in the library.
+ *
+ * Named for what the reader sees rather than for the abbreviations the class
+ * names use: `rowSub` is the row header's subtitle, `groupChip` a chip on a
+ * grouping row, `popoverRecurrence` the recurrence line in the popover. The
+ * abbreviations stay in the markup, where they are already load-bearing, and
+ * do not leak into the API.
+ */
+export interface ApexSchedulerClasses {
+  root?: string;
+  toolbar?: string;
+  nav?: string;
+  range?: string;
+  arrow?: string;
+  legend?: string;
+  swatch?: string;
+  grouping?: string;
+  treeButtons?: string;
+  header?: string;
+  corner?: string;
+  weekday?: string;
+  tier?: string;
+  axis?: string;
+  now?: string;
+  canvas?: string;
+  scroll?: string;
+  grid?: string;
+  rows?: string;
+  row?: string;
+  rowHead?: string;
+  rowIcon?: string;
+  rowName?: string;
+  rowSub?: string;
+  rowCount?: string;
+  rowBody?: string;
+  twirl?: string;
+  order?: string;
+  spacer?: string;
+  cell?: string;
+  cellRow?: string;
+  track?: string;
+  event?: string;
+  eventMain?: string;
+  eventRow?: string;
+  eventThumb?: string;
+  eventTitle?: string;
+  eventTime?: string;
+  ghost?: string;
+  more?: string;
+  chip?: string;
+  chipMain?: string;
+  chipRow?: string;
+  chipThumb?: string;
+  groupChip?: string;
+  groupFixed?: string;
+  groupLabel?: string;
+  popover?: string;
+  popoverBar?: string;
+  popoverBody?: string;
+  popoverMeta?: string;
+  popoverFoot?: string;
+  popoverRecurrence?: string;
+  catcher?: string;
+  menu?: string;
+  menuItem?: string;
+  menuTime?: string;
+  createTime?: string;
+  createTitle?: string;
+}
+
+/**
+ * ApexCalendar — month, week, day, list and year in one control.
+ *
+ * The map spans all five views: `grid`/`cell`/`num` are the month matrix,
+ * `timeGrid`/`slots`/`lanes` the week and day columns, `list*` the agenda,
+ * `year`/`mini` the year overview. A key belonging to a view the caller never
+ * shows is simply unused.
+ */
+/**
+ * ApexEditor's class map — AF2-284.
+ *
+ * ONE map for the editor and the ten surfaces it ships with, on the
+ * ApexOrgChart/ApexOrgNode precedent: a host styling an editor is styling one
+ * thing, and eleven maps to import would make `ui` more work than writing the
+ * CSS. The keys are prefixed by surface where a bare name would collide —
+ * `imageFoot` and `dialogFoot` are different feet.
+ */
+/**
+ * ApexForm's class map — AF2-293.
+ *
+ * The form is chrome around other controls, so this map covers the SHELL —
+ * panel, layouts, grid, action bar — and each field's own control carries
+ * its own map through the schema's `props`. Two maps meeting at a field
+ * rather than one map trying to reach through it.
+ */
+export interface ApexFormClasses {
+  /** `.apex-form` */
+  root?: string;
+  /* the modal shell */
+  /** `.apex-form__scrim` */
+  scrim?: string;
+  /** `.apex-form__panel` */
+  panel?: string;
+  /** `.apex-form__head` */
+  head?: string;
+  /** `.apex-form__titles` */
+  titles?: string;
+  /** `.apex-form__dirty` — shown only after a change */
+  dirty?: string;
+  /** `.apex-form__validating` — shown while a Precognition round trip is in flight */
+  validating?: string;
+  /** `.apex-form__body` */
+  body?: string;
+  /* the section nav, in both orientations */
+  /** `.apex-form__side` */
+  side?: string;
+  /** `.apex-form__tabs` */
+  tabs?: string;
+  /** `.apex-form__badge` — a section's error count */
+  badge?: string;
+  /** `.apex-form__tiperr` */
+  tabTip?: string;
+  /* the content */
+  /** `.apex-form__main` — the container query's container */
+  main?: string;
+  /** `.apex-form__section` */
+  section?: string;
+  /** `.apex-form__sectionhead` */
+  sectionHead?: string;
+  /** `.apex-form__grid` */
+  grid?: string;
+  /** `.apex-form__cell` */
+  cell?: string;
+  /** `.apex-form__table` */
+  table?: string;
+  /** `.apex-form__pass` */
+  fieldsetPass?: string;
+  /* read-only, which is TEXT rather than a disabled control */
+  /** `.apex-form__ro` */
+  readonly?: string;
+  /** `.apex-form__rolabel` */
+  readonlyLabel?: string;
+  /** `.apex-form__rovalue` */
+  readonlyValue?: string;
+  /* the action bar */
+  /** `.apex-form__spacer` */
+  spacer?: string;
+  /** `.apex-form__foot` */
+  foot?: string;
+}
+
+export interface ApexEditorClasses {
+  /* ApexEditor */
+  /** `.apex-ed` */
+  root?: string;
+  /** `.apex-ed__frame` */
+  frame?: string;
+  /** `.apex-ed__host` */
+  host?: string;
+  /** `.apex-ed__loading` */
+  loading?: string;
+  /** `.apex-ed__placeholder` */
+  placeholder?: string;
+  /** `.apex-ed__error` */
+  error?: string;
+  /** `.apex-ed__source` */
+  source?: string;
+  /** `.apex-ed__source-error` */
+  sourceError?: string;
+  /* ApexEditorToolbar */
+  /** `.apex-edbar` */
+  toolbar?: string;
+  /** `.apex-edbar__btn` */
+  toolbarButton?: string;
+  /** `.apex-edbar__select` */
+  toolbarSelect?: string;
+  /** `.apex-edbar__sep` */
+  toolbarSep?: string;
+  /* ApexEditorMenubar */
+  /** `.apex-ed__menubar` */
+  menubar?: string;
+  /* ApexEditorBubble */
+  /** `.apex-edbub` */
+  bubble?: string;
+  /* ApexEditorSlash */
+  /** `.apex-edslash` */
+  slash?: string;
+  /** `.apex-edslash__group` */
+  slashGroup?: string;
+  /** `.apex-edslash__item` */
+  slashItem?: string;
+  /** `.apex-edslash__label` */
+  slashLabel?: string;
+  /* ApexEditorImage */
+  /** `.apex-edimg` */
+  image?: string;
+  /** `.apex-edimg__scrim` */
+  imageScrim?: string;
+  /** `.apex-edimg__head` */
+  imageHead?: string;
+  /** `.apex-edimg__title` */
+  imageTitle?: string;
+  /** `.apex-edimg__x` */
+  imageClose?: string;
+  /** `.apex-edimg__tabs` */
+  imageTabs?: string;
+  /** `.apex-edimg__tab` */
+  imageTab?: string;
+  /** `.apex-edimg__pane` */
+  imagePane?: string;
+  /** `.apex-edimg__field` */
+  imageField?: string;
+  /** `.apex-edimg__input` */
+  imageInput?: string;
+  /** `.apex-edimg__dims` */
+  imageDims?: string;
+  /** `.apex-edimg__lock` */
+  imageLock?: string;
+  /** `.apex-edimg__drop` */
+  imageDrop?: string;
+  /** `.apex-edimg__dropmsg` */
+  imageDropMessage?: string;
+  /** `.apex-edimg__browse` */
+  imageBrowse?: string;
+  /** `.apex-edimg__file` */
+  imageFile?: string;
+  /** `.apex-edimg__preview` */
+  imagePreview?: string;
+  /** `.apex-edimg__note` */
+  imageNote?: string;
+  /** `.apex-edimg__err` */
+  imageError?: string;
+  /** `.apex-edimg__foot` */
+  imageFoot?: string;
+  /** `.apex-edimg__save` */
+  imageSave?: string;
+  /** `.apex-edimg__cancel` */
+  imageCancel?: string;
+  /** `.apex-edimg__check` */
+  imageCheck?: string;
+  /* ApexEditorLink */
+  /** `.apex-edlink` */
+  link?: string;
+  /** `.apex-edlink__pop` */
+  linkPopover?: string;
+  /** `.apex-edlink__row` */
+  linkRow?: string;
+  /** `.apex-edlink__input` */
+  linkInput?: string;
+  /** `.apex-edlink__go` */
+  linkGo?: string;
+  /** `.apex-edlink__rm` */
+  linkRemove?: string;
+  /** `.apex-edlink__cancel` */
+  linkCancel?: string;
+  /** `.apex-edlink__check` */
+  linkCheck?: string;
+  /* ApexEditorWordCount */
+  /** `.apex-eddlg` */
+  dialog?: string;
+  /** `.apex-eddlg__scrim` */
+  dialogScrim?: string;
+  /** `.apex-eddlg__head` */
+  dialogHead?: string;
+  /** `.apex-eddlg__title` */
+  dialogTitle?: string;
+  /** `.apex-eddlg__close` */
+  dialogClose?: string;
+  /** `.apex-eddlg__x` */
+  dialogX?: string;
+  /** `.apex-eddlg__note` */
+  dialogNote?: string;
+  /** `.apex-eddlg__foot` */
+  dialogFoot?: string;
+  /** `.apex-edwc` */
+  wordCount?: string;
+  /* ApexEditorTableGrid */
+  /** `.apex-edgrid` */
+  grid?: string;
+  /** `.apex-edgrid__pop` */
+  gridPopover?: string;
+  /** `.apex-edgrid__grid` */
+  gridBody?: string;
+  /** `.apex-edgrid__cell` */
+  gridCell?: string;
+  /** `.apex-edgrid__readout` */
+  gridReadout?: string;
+  /* ApexEditorTableTools */
+  /** `.apex-tbl-tools` */
+  tableTools?: string;
+  /** `.apex-tbl-tools__btn` */
+  tableToolsButton?: string;
+  /** `.apex-tbl-tools__scope` */
+  tableToolsScope?: string;
+  /** `.apex-tbl-tools__sep` */
+  tableToolsSep?: string;
+  /** `.apex-tbl-tools__field` — the border width box (N/048) */
+  tableToolsField?: string;
+  /** `.apex-tbl-tools__colour` — the border colour picker (N/048) */
+  tableToolsColour?: string;
+  /* ApexEditorImageTools — AF2-286 */
+  /** `.apex-objtools` */
+  imageTools?: string;
+  /** `.apex-objtools__alt` */
+  imageToolsAlt?: string;
+  /** `.apex-objtools__alt` — the caption field (N/037) */
+  imageToolsCaption?: string;
+  /** `.apex-objtools__sep` */
+  imageToolsSep?: string;
+  /** The width/height pair on the image bar - N/034. */
+  imageToolsSize?: string;
+  /** `.apex-objtools__group` */
+  imageToolsGroup?: string;
+  /** `.apex-objtools__btn` */
+  imageToolsButton?: string;
+  /** `.apex-objtools__select` */
+  imageToolsSelect?: string;
+  /* ApexEditorObjectBar */
+  /** `.apex-objbar` */
+  objectBar?: string;
+}
+
+/**
+ * ApexHTMLEditor's class map — AF2-284.
+ *
+ * Separate from ApexEditorClasses because the page editor is a separate
+ * control with its own page and its own parts. `source` and `sourceError`
+ * are the two it shares, and they keep the same names there.
+ */
+export interface ApexHTMLEditorClasses {
+  /** `.apex-hed` */
+  root?: string;
+  /** `.apex-hed__frame` */
+  frame?: string;
+  /** `.apex-hed__loading` */
+  loading?: string;
+  /** `.apex-hed__error` */
+  error?: string;
+  /** `.apex-hed__path` */
+  path?: string;
+  /** `.apex-hed__crumb` */
+  crumb?: string;
+  /** `.apex-hed__status` */
+  status?: string;
+  /** `.apex-hed__words` */
+  words?: string;
+  /** `.apex-ed__source` */
+  source?: string;
+  /** `.apex-ed__source-error` */
+  sourceError?: string;
+}
+
+export interface ApexCalendarClasses {
+  root?: string;
+  head?: string;
+  title?: string;
+  nav?: string;
+  views?: string;
+  zone?: string;
+  grid?: string;
+  row?: string;
+  cell?: string;
+  cells?: string;
+  num?: string;
+  nums?: string;
+  weekday?: string;
+  weekNumber?: string;
+  more?: string;
+  mores?: string;
+  dot?: string;
+  empty?: string;
+  bar?: string;
+  barEvent?: string;
+  timeGrid?: string;
+  timeGridBg?: string;
+  axis?: string;
+  tick?: string;
+  time?: string;
+  slots?: string;
+  column?: string;
+  lanes?: string;
+  block?: string;
+  now?: string;
+  spacer?: string;
+  dayHead?: string;
+  dayBar?: string;
+  allDay?: string;
+  allDayRow?: string;
+  allDayCell?: string;
+  allDayLabel?: string;
+  background?: string;
+  backgroundSpan?: string;
+  list?: string;
+  listItem?: string;
+  listDay?: string;
+  listDot?: string;
+  listTime?: string;
+  listTitle?: string;
+  year?: string;
+  mini?: string;
+  miniHead?: string;
+  body?: string;
+  eventTitle?: string;
+  popover?: string;
+  refusal?: string;
+}
+
+/** ApexTree. Its root is `.apex-tr`; `.apex-tree` belongs to ApexTreeSelect. */
+export interface ApexTreeClasses {
+  root?: string;
+  /** The header strip, and the filter field in it. */
+  head?: string;
+  filter?: string;
+  /** The scrolling region and the list of rows inside it. */
+  main?: string;
+  list?: string;
+  /** One node row. The skeleton placeholders carry this too, as they should:
+      the library styles them as rows. */
+  row?: string;
+  /** The expand/collapse control, and the spacer that keeps leaves in line. */
+  toggle?: string;
+  spacer?: string;
+  /** The selection box, when `selectionMode` is checkbox. */
+  checkbox?: string;
+  /** Inside a row: the node icon and its text. */
+  icon?: string;
+  label?: string;
+  /** The empty note, and the veil drawn over the list while loading. */
+  empty?: string;
+  overlay?: string;
+}
+
+/**
+ * ApexTreeTable.
+ *
+ * Most of what it renders is ApexDataTable's chrome — the bar, the viewport,
+ * the table, the filter row — because it IS a table with an expander column.
+ * Only `root`, `cell` and `label` are its own; `toggle` comes from ApexTree.
+ * The keys are named for what the reader sees, not for which file the class
+ * came from.
+ */
+export interface ApexTreeTableClasses {
+  root?: string;
+  /** The toolbar above the table, and the caption line in it. */
+  bar?: string;
+  caption?: string;
+  /** The scroll container, the viewport inside it, and the table element. */
+  main?: string;
+  viewport?: string;
+  table?: string;
+  /** The row of per-column filters, shown when a column sets `filter`. */
+  filterRow?: string;
+  /** One body row, and one cell in it. A node's own `styleClass` is applied
+      alongside this, not instead of it. */
+  row?: string;
+  /** One body cell, and the label inside the expander cell. */
+  cell?: string;
+  label?: string;
+  /** The expand/collapse control on a branch row. */
+  toggle?: string;
+  /** The empty note, and the veil drawn over the table while loading. */
+  empty?: string;
+  overlay?: string;
+}
+
+export interface ApexPickListClasses {
+  root?: string;
+  /** One of the two sides. Both get this — target the pair with `:nth-child`. */
+  panel?: string;
+  /** A panel's header row, its title, and its count. */
+  head?: string;
+  title?: string;
+  count?: string;
+  /** The select-all box and the filter field in a panel header. */
+  all?: string;
+  filter?: string;
+  /** The scrolling area, the list inside it, and one row. */
+  body?: string;
+  list?: string;
+  item?: string;
+  /** The drag handle on a row, and the note shown when a side is empty. */
+  grip?: string;
+  empty?: string;
+  /** The reorder buttons beside a list, and the move-across column. */
+  controls?: string;
+  transfer?: string;
+}
+
 /**
  * ApexChart, and the family renderers it hands the map to.
  *
@@ -720,6 +1408,34 @@ export interface ApexValidationAdapter {
   touch?(name: string): void;
 }
 
+export type OverlayTransitionName = 'scale' | 'slide' | 'fade' | 'none';
+
+/**
+ * The four every overlay has.
+ *
+ * Split from the named presets on purpose: a drawer's built-in animation is
+ * its POSITION and a popover has exactly one, so neither has a scale /
+ * slide / fade to choose between. Declaring `transition` on them would be
+ * another prop that exists and does nothing — the defect this whole pass
+ * started from. AF2-332.
+ */
+export interface ApexOverlayClasses {
+  /** Your own enter classes, e.g. 'animate__animated animate__fadeInDown'. */
+  enterClass?: string;
+  /** Your own leave classes. */
+  leaveClass?: string;
+  /** Any CSS time, e.g. '300ms'. Applies to the enter phase only. */
+  enterDuration?: string;
+  /** Any CSS time. Applies to the leave phase only. */
+  leaveDuration?: string;
+}
+
+/** Those four plus a choice of built-in preset — dialog, form, alert. */
+export interface ApexOverlayTransition extends ApexOverlayClasses {
+  /** A built-in preset, used when no classes are given. */
+  transition?: OverlayTransitionName;
+}
+
 export interface ApexUiOptions {
   /** Component name prefix. Default 'Apex'. */
   prefix?: string;
@@ -727,6 +1443,40 @@ export interface ApexUiOptions {
   size?: ApexSize;
   /** Default label placement. Default 'top'. */
   labelPlacement?: ApexLabelPlacement;
+  /**
+   * App-wide default for every overlay's entry and exit — a form's modal, an
+   * alert, a dialog, a drawer, a popover, a toast.
+   *
+   * Set it once here and the whole app animates the same way; any overlay's
+   * own prop overrides it. This is where animate.css belongs: the library
+   * never references it, so `{ enterClass: 'animate__animated
+   * animate__fadeInDown' }` is just a string the app chose. AF2-330.
+   */
+  overlayTransition?: ApexOverlayTransition;
+  /**
+   * Ripple the buttons the kit renders for itself — a form's Save and
+   * Cancel, an alert's answer row — so they behave like the ones the app
+   * writes with `v-apex-ripple`.
+   *
+   * Off by default, and deliberately: a component cannot know that an app
+   * uses ripples at all, and turning them on for every existing consumer
+   * would be a visual change nobody asked for. Register it once here and
+   * the whole app matches; a `ripple` prop on the component overrides it
+   * either way. AF2-324.
+   */
+  ripple?: boolean;
+  /**
+   * The space between fields in every ApexForm — AF2-394.
+   *
+   * One CSS gap value: `16` (read as px), `'16px'`, or `'8px 24px'` for
+   * rows and columns separately. A section may override it with its own
+   * `gap`; unset, forms keep the built-in `18px 20px`.
+   *
+   * A dense settings pane and a spacious create dialog want different
+   * gutters, and until now neither could have one — the value was a
+   * literal in the stylesheet.
+   */
+  formGap?: string | number;
   /** Fallback strings, used when vue-i18n is not installed. */
   messages?: Partial<ApexStrings>;
   /** Global validation adapter. */

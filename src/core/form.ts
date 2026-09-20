@@ -112,7 +112,36 @@ export interface FormField {
   messages?: Record<string, string>;
   options?: unknown;
   props?: Record<string, unknown>;
+  /**
+   * How many of the SECTION's columns this field takes.
+   *
+   * Unchanged, and deliberately so: `span: 2` in a two-column section has
+   * meant "the whole row" since the first schema was written, and three
+   * live screens say it. Reinterpreting it as twelfths would have made
+   * every one of them a sixth wide, silently. AF2-393.
+   */
   span?: number;
+  /**
+   * How many TWELFTHS this field takes, ignoring the section's columns.
+   *
+   * The escape hatch for mixed granularity: a section of halves where one
+   * field is a third. Named for what it counts, because `cols` beside
+   * `columns` is a name nobody would read correctly twice.
+   *
+   * Only meaningful where the grid is twelve tracks wide — see
+   * `gridTracks()`. A section whose `columns` does not divide 12 keeps its
+   * own track count, and this is ignored with a warning rather than
+   * quietly laying out wrong.
+   */
+  span12?: number;
+  /**
+   * The twelfth this field STARTS at, 1–12.
+   *
+   * Placement rather than flow: it is what lets a field sit under another
+   * one in the same column while the row above is a different shape.
+   * Same rule as `span12` — twelve-track sections only.
+   */
+  start?: number;
   visibleIf?: unknown;
   hiddenIf?: unknown;
   disabled?: boolean;
@@ -206,7 +235,32 @@ export const LOCAL: Record<string, (v: unknown, a: string[], all?: unknown, fiel
   maxLength: (v, a) => String(v).length <= Number(a[0]),
   between: (v, a, all, field) => sizeOf(v, field) >= Number(a[0]) && sizeOf(v, field) <= Number(a[1]),
   in: (v, a) => a.map(String).indexOf(String(v)) > -1,
-  regex: (v, a) => new RegExp(a.join(',')).test(String(v)),
+  /* Laravel's `regex:` rule REQUIRES delimiters — `regex:/^\d+$/i` — and
+     JavaScript's RegExp constructor must not be given them: `new
+     RegExp('/^\d+$/')` matches the literal characters, slashes and all, so
+     the pattern matched NOTHING and every value was reported malformed.
+     Found on the payment screen, where `2.5`, `5%` and `0` all came back
+     "not in the expected format" while the server accepted them. L/015.
+
+     An undelimited pattern still works, because a rule written for this
+     library rather than pasted from a FormRequest has no reason to carry
+     them. A pattern that will not compile is left to the server rather
+     than thrown on a keystroke — the same treatment every rule the browser
+     cannot settle gets. */
+  regex: (v, a) => {
+    const src = a.join(',');
+    const delimited = /^\/(.*)\/([a-z]*)$/s.exec(src);
+
+    try {
+      const re = delimited ? new RegExp(delimited[1], delimited[2]) : new RegExp(src);
+
+      return re.test(String(v));
+    } catch {
+      console.warn('[ApexForm] regex rule ' + src + ' will not compile — left to the server');
+
+      return true;
+    }
+  },
   same: (v, a, all) => String(v) === String(getPath(all, a[0])),
   different: (v, a, all) => String(v) !== String(getPath(all, a[0])),
   confirmed: (v, a, all, field) => String(v) === String(getPath(all, (field?.key || '') + '_confirmation')),
@@ -232,6 +286,23 @@ function fill(template: string, label: string, args: string[]) {
  * Laravel behaves the same way.
  */
 export function validateField(field: FormField, value: unknown, all: unknown): string[] {
+  /* The ONE place read-only is decided. `validate()` — the submit path —
+     does not repeat it: it calls this function, so a copy there is a
+     branch no test can distinguish, which is how dead code gets written.
+     A mutation deleting the copy changed nothing, and that is what it was
+     telling us.
+
+     A field nobody can edit cannot be wrong, and an error on one is an
+     instruction the reader cannot follow. VIEW MODE is the case that
+     matters: a page whose fields are read-only (the settings screens, the
+     categories view dialog) put a red ring and a message on values the
+     server is perfectly happy with, as soon as anything blurred them.
+
+     `disabled` goes with it for the same reason. The server still decides
+     — nothing here is a relaxation of what may be saved, because a save
+     from a form of read-only fields changes nothing anyway. L/016. */
+  if (field.readonly || field.disabled) return [];
+
   const rules = normaliseRules(field.rules);
   if (field.required && !rules.some((r) => r.name === 'required')) rules.unshift({ name: 'required', args: [] });
   const label = field.label || 'This field';
@@ -482,6 +553,22 @@ export interface FormSection {
   fieldset?: boolean;
   legend?: string;
   toggleable?: boolean;
+  /**
+   * The space between this section's fields — one CSS gap value, or a
+   * number read as pixels. Overrides the app-wide `formGap` option;
+   * unset, the stylesheet's `18px 20px` stands. AF2-394.
+   */
+  gap?: string | number;
+  /**
+   * A class on THIS section's element, for a host that needs to style one
+   * group and not the others.
+   *
+   * Declared rather than left to the index signature below, for the same
+   * reason `items` is: the renderer reads it, and through
+   * `[key: string]: unknown` it arrives as `unknown`. The `ui` map cannot
+   * do this job — it is form-wide, so `ui.cell` is every cell in the form.
+   */
+  class?: string;
   [key: string]: unknown;
 }
 
@@ -509,6 +596,104 @@ export interface FormSchema {
   fields?: FormField[];
   columns?: number;
   rules?: unknown[];
+}
+
+/**
+ * How many tracks a section's grid actually has — AF2-393.
+ *
+ * TWELVE whenever the section's column count divides into it, which is
+ * every count a form has ever used (1, 2, 3, 4, 6, 12). Twelve tracks with
+ * every field spanning `12 / columns` lays out identically to `columns`
+ * tracks spanning one — same fractions, same gaps — and it is what makes
+ * `span12` and `start` possible: a section of halves can hold a field that
+ * is a third, which two tracks cannot express at all.
+ *
+ * A count that does NOT divide 12 keeps its own tracks. Scaling would need
+ * a fractional span, and a grid cannot have one; `columns: 5` renders as
+ * five tracks exactly as before, and the twelfths keys are refused there
+ * rather than being applied to a grid they do not describe.
+ */
+export function gridTracks(columns: number): number {
+  const n = Math.max(1, Math.floor(columns) || 1);
+
+  return 12 % n === 0 ? 12 : n;
+}
+
+/**
+ * One field's placement, in the tracks `gridTracks()` decided.
+ *
+ * Returns the span and, when asked for, the starting track. The caller
+ * writes them as CUSTOM PROPERTIES rather than as `grid-column`, so the
+ * stylesheet can override the whole lot when the container is too narrow
+ * to be a grid at all — an inline `grid-column` cannot be beaten by a
+ * media query, which is why a narrow form used to grow an implicit column
+ * instead of stacking.
+ */
+export function cellPlacement(
+  field: FormField,
+  section: Pick<FormSection, 'columns'>,
+  warn?: (message: string) => void,
+): { span: number; start?: number } {
+  const columns = Math.max(1, Math.floor(section.columns) || 1);
+  const tracks = gridTracks(columns);
+  const twelve = tracks === 12;
+
+  if (! twelve && (field.span12 || field.start) && warn) {
+    warn(`[ApexForm] span12/start need a grid of 12 tracks, and columns: ${columns} does not divide 12`
+      + ` — ignored on field "${field.key || field.label}".`);
+  }
+
+  const scaled = Math.min(Math.max(1, Math.floor(field.span || 1)), columns) * (tracks / columns);
+  const span = twelve && field.span12
+    ? Math.min(Math.max(1, Math.floor(field.span12)), 12)
+    : scaled;
+  const start = twelve && field.start
+    ? Math.min(Math.max(1, Math.floor(field.start)), 12)
+    : undefined;
+
+  /* A field placed at 9 that wants 6 would run off the end, and the grid
+     would answer by inventing tracks. Clamp to what is left. */
+  return { span: start ? Math.min(span, 13 - start) : span, start };
+}
+
+/** One or two CSS lengths, which is what the `gap` shorthand accepts. */
+const GAP = /^(0|-?\d*\.?\d+(px|rem|em|%|ch|vw|vh))(\s+(0|-?\d*\.?\d+(px|rem|em|%|ch|vw|vh)))?$/;
+
+/**
+ * The space between a section's fields — AF2-394.
+ *
+ * Resolved the way every other look-and-feel default in the kit is: the
+ * section wins, then the app-wide option, then nothing — and nothing means
+ * the stylesheet's own `18px 20px`, so a form that says neither is
+ * unchanged.
+ *
+ * A bare number is read as pixels, because `gap: 8` is what everyone
+ * writes first.
+ *
+ * VALIDATED, and that is not fussiness: the value lands in a custom
+ * property, and an invalid custom property makes the whole `gap`
+ * declaration invalid at computed-value time — so `'8x'` would not fall
+ * back to the default, it would collapse every field in the form onto its
+ * neighbour. A typo should not flatten a form silently.
+ */
+export function gridGap(
+  section: Pick<FormSection, 'gap'>,
+  option?: string | number,
+  warn?: (message: string) => void,
+): string | undefined {
+  const raw = section.gap ?? option;
+  if (raw == null || raw === '') return undefined;
+
+  const value = typeof raw === 'number' ? `${raw}px` : String(raw).trim();
+
+  if (!GAP.test(value)) {
+    if (warn) warn(`[ApexForm] gap "${value}" is not one or two CSS lengths — ignored, `
+      + 'because an invalid value would collapse the grid rather than fall back.');
+
+    return undefined;
+  }
+
+  return value;
 }
 
 export function normalise(schema?: FormSchema): NormalisedSchema {

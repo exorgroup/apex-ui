@@ -33,7 +33,9 @@ const fieldProps = computed(() => pickFieldProps(props as unknown as Record<stri
   <ApexField v-bind="fieldProps" :value="modelValue" v-slot="{ id, describedBy, size, ui }">
     <button type="button" class="apex-switch" :class="ui.control" role="switch" :id="id" :data-size="size"
             :data-on="on ? 'true' : 'false'" :data-labelled="hasText ? 'true' : 'false'"
+            :data-readonly="readonly ? 'true' : 'false'"
             :aria-checked="on" :aria-describedby="describedBy" :disabled="disabled"
+            :aria-readonly="readonly || undefined"
             :aria-label="label && labelPlacement === 'hidden' ? label : undefined"
             @click="toggle" @keydown.enter.prevent="toggle" @keydown.space.prevent="toggle">
       <!-- Both words, one grid cell: the track measures the wider of the two,

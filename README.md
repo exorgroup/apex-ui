@@ -31,6 +31,34 @@ Layout `<head>`:
 No build step? `php artisan apex-ui:install --published` copies the UMD bundle to
 `public/vendor/apex-ui` and `APEX_UI_MODE=published` makes `@apexUi` emit it.
 
+### Optional: animate.css
+
+Every overlay — a form's modal, an alert, a dialog, a drawer, a popover, a confirm
+popup, a toast — takes `enterClass`, `leaveClass`, `enterDuration` and `leaveDuration`.
+Those are plain class names: **this package bundles no animation library and never
+references one**, which is what keeps it free of runtime CSS dependencies.
+
+To use [animate.css](https://animate.style), install and import it yourself:
+
+```bash
+npm i animate.css
+```
+
+```js
+import 'animate.css';
+
+createApp(App).use(ApexUI, {
+  overlayTransition: {
+    enterClass: 'animate__animated animate__fadeInDown',
+    leaveClass: 'animate__animated animate__fadeOutUp',
+    enterDuration: '350ms',
+  },
+}).mount('#app');
+```
+
+It needs **both** its base class and the animation. Without it, the built-in
+`scale` / `slide` / `fade` presets are used, so nothing breaks if you skip this.
+
 ## Components
 
 `ApexField` `ApexInput` `ApexTextarea` `ApexNumber` `ApexStepper` `ApexSelect`

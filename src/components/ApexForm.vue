@@ -17,6 +17,7 @@ import type { ApexUiOptions, ApexOverlayTransition } from '../types';
 import { useOverlayTransition } from '../core/overlayTransition';
 import {
   bag, controlFor, isBlank, isDirectBindType, isDisabled, isUnvalidatedType, isVisible, knownProps,
+  cellPlacement, gridGap, gridTracks,
   makeDriver, normalise, validate, validateField as validateOneField,
   type FormDriver, type FormField, type FormSchema, type FormSection, type NormalisedSchema,
 } from '../core/form';
@@ -197,6 +198,7 @@ function reset() {
    while the user is still looking at it, and opening is also the moment a
    host may have swapped to a different record. */
 watch(() => isOpen(), (now, was) => { if (now && !was) reset(); });
+
 
 /* A different host form is a different record, even with the dialog left
    open — a master/detail screen switching rows never closes anything. */
@@ -396,6 +398,54 @@ function onBlur(field: FormField) {
 function visible(field: FormField) { return isVisible(field, model.value); }
 function shown(section: FormSection) { return section.fields.filter((f) => visible(f)); }
 
+/* Declared HERE, below `sections` and `visible`, and not beside the other
+   watchers: `watch` evaluates its source at setup, so the computed ran
+   before `sections` existed and every mount died with "Cannot access
+   'sections' before initialization". The same temporal-dead-zone trap as
+   AF2-331. */
+/**
+ * A form that cannot be edited any more — J/013.
+ *
+ * TRUE when the host sets `readonly`, and equally when every visible field
+ * carries its own `readonly`, because those are two spellings of the same
+ * state and a screen may not use the one you expect: the form-level prop
+ * renders values as prose, so a page that wants controls-that-refuse marks
+ * the FIELDS instead (AF2-313). A rule written against the prop alone would
+ * look finished and leave such a page behaving exactly as before.
+ *
+ * `length > 0` because `every` is true of nothing, and a form still waiting
+ * for its schema is not read-only.
+ */
+const uneditable = computed(() => {
+  if (props.readonly) return true;
+
+  const fields = sections.value.flatMap((s) => s.fields.filter((f) => visible(f)));
+
+  return fields.length > 0 && fields.every((f) => !!f.readonly);
+});
+
+/**
+ * Becoming uneditable — or editable again — ENDS THE EDITING SESSION.
+ *
+ * A modal gets this for free: it resets when it opens, which is the
+ * boundary between one visit and the next. A PAGE never opens, so without
+ * this there is no boundary at all for the life of the page, and what the
+ * browser decided about a value the user has since abandoned outlives it:
+ * a red field and its message in view mode, the section's error badge, and
+ * a footer claiming unsaved changes on a form that matches the server.
+ *
+ * Found on the settings screen — type an invalid email, press Cancel, and
+ * the complaint survives into a read-only page that offers no way to fix
+ * it.
+ *
+ * `reset()` clears only what THIS component decided: `localErrors`,
+ * `touched`, `submitted`, `dirty`. Server errors belong to the host's form
+ * and are left where they are, so a read-only form still shows why the last
+ * save was refused. That is the distinction — the browser's opinion of an
+ * abandoned session is stale, the server's answer is not.
+ */
+watch(uneditable, () => reset());
+
 function fieldBind(field: FormField, value: unknown) {
   const c = control(field);
   const comp = REGISTRY[c.tag];
@@ -419,8 +469,39 @@ function fieldBind(field: FormField, value: unknown) {
     override, not a default. Collapsing to one column is a media query rather
     than a JS breakpoint, so it survives a panel narrower than the viewport. */
 function cellStyle(field: FormField, section: FormSection) {
-  const span = Math.min(field.span || 1, section.columns);
-  return span > 1 ? { gridColumn: 'span ' + span } : null;
+  const { span, start } = cellPlacement(field, section, warnOnce);
+
+  /* CUSTOM PROPERTIES, not `grid-column` — AF2-393. An inline
+     `grid-column` cannot be overridden by a stylesheet, so the narrow
+     container query could not undo it: the grid dropped to one track while
+     a span-2 cell still asked for two, and CSS grid answered by inventing
+     an implicit column. The form did not stack, it went lopsided. The
+     variables let the query reset every cell to the full row. */
+  return start ? { '--cell-span': span, '--cell-start': start } : { '--cell-span': span };
+}
+
+/**
+ * The grid's own style: how many tracks, and how far apart — AF2-394.
+ *
+ * The gap variable is written ONLY when there is one to write, so a form
+ * that sets nothing inherits the stylesheet's default rather than an
+ * inline value that would beat a host's own rule.
+ */
+function gridStyle(section: FormSection) {
+  const gap = gridGap(section, uiOptions.formGap, warnOnce);
+
+  return gap
+    ? { '--form-cols': gridTracks(section.columns), '--apex-form-gap': gap }
+    : { '--form-cols': gridTracks(section.columns) };
+}
+
+/** Said once per message, like knownProps: a per-render warning is noise. */
+const WARNED_GRID: Record<string, boolean> = {};
+function warnOnce(message: string) {
+  if (WARNED_GRID[message]) return;
+  WARNED_GRID[message] = true;
+  // eslint-disable-next-line no-console
+  console.warn(message);
 }
 
 /** A read-only value as text, which is what makes a detail page and an edit page one schema. */
@@ -633,7 +714,13 @@ defineExpose({ submit, cancel, focusField, isOpen, reset });
         </nav>
 
         <div class="apex-form__main" :class="ui?.main">
-          <section v-for="pane in visibleSections" :key="pane.s.id" class="apex-form__section" :class="ui?.section"
+          <!-- `class` on a SECTION, so a host can style ONE group without a
+               hook that reaches every group. The `ui` map is form-wide by
+               design — `ui.cell` is every cell in the form — and a screen
+               that wants narrower boxes in one pane only had nothing to say
+               it with short of an id selector on a generated id. AF2-374. -->
+          <section v-for="pane in visibleSections" :key="pane.s.id" class="apex-form__section"
+                   :class="[ui?.section, pane.s.class]"
                    :role="tabbed ? 'tabpanel' : undefined" :id="tabbed ? panelId(pane.i) : undefined"
                    :aria-labelledby="tabbed ? tabId(pane.i) : undefined" :tabindex="tabbed ? 0 : undefined">
             <!-- The heading is for the LONG layout only: tabs and sidebar
@@ -668,7 +755,7 @@ defineExpose({ submit, cancel, focusField, isOpen, reset });
             <div v-if="pane.s.fieldset && pane.s.subtitle" class="apex-form__sectionhead" :class="ui?.sectionHead">
               <p>{{ pane.s.subtitle }}</p>
             </div>
-            <div class="apex-form__grid" :class="ui?.grid" :style="{ '--form-cols': pane.s.columns }">
+            <div class="apex-form__grid" :class="ui?.grid" :style="gridStyle(pane.s)">
               <div v-for="f in shown(pane.s)" :key="f.key || f.label" class="apex-form__cell" :class="ui?.cell"
                    :style="cellStyle(f, pane.s)" :data-type="f.type || 'text'">
                 <!-- A read-only field is TEXT, not a disabled control: a greyed

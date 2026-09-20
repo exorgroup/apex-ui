@@ -17,15 +17,39 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import ApexIcon from './ApexIcon.vue';
 import ApexPaginator from './ApexPaginator.vue';
 import ApexColumnFilter from './ApexColumnFilter.vue';
+import { rippleAt } from '../core/ripple';
+import type { ApexDataTableClasses } from '../types';
 import {
   aggregate, cellValue, filterRows, formatCell, getField, groupRows, nextOrder, setField, sortRows,
   type ColumnDef, type FilterMeta, type FilterModel, type RowGroup, type SortMeta, type SortOrder,
 } from '../core/table';
 
 export type { ColumnDef };
+
+/** A column's identity for layout purposes, and the layout itself. */
+export interface ColumnState {
+  /** Column keys in display order. Written out in full, never as a diff. */
+  order?: string[];
+  /** Key → pixel width. */
+  widths?: Record<string, number>;
+  /** Keys the reader has hidden. */
+  hidden?: string[];
+}
+
+export interface ColumnGroup {
+  header: string;
+  /** The column keys this group spans. */
+  columns: string[];
+  align?: 'start' | 'center' | 'end';
+}
+
+/** A column with the stable identity width, order and visibility hang off. */
+type KeyedColumn = ColumnDef & { __key: string };
 type Row = Record<string, unknown>;
 
 const props = withDefaults(defineProps<{
+  /** Your own class on any part. See ApexDataTableClasses. */
+  ui?: ApexDataTableClasses;
   /** The rows. */
   value?: Row[];
   columns?: ColumnDef[];
@@ -153,9 +177,41 @@ const props = withDefaults(defineProps<{
 
   /** Row hover highlight. */
   hoverable?: boolean;
+  /**
+   * Ripple a row from the point of contact.
+   *
+   * NOT wired to the plugin's app-wide `ripple` option, on purpose: that
+   * option is about the buttons the kit draws for itself, and a rippling
+   * table row is a far larger visual statement than a rippling button. An
+   * app that opted into one should not silently get the other. Per table,
+   * explicitly. AF2-325.
+   */
+  rowRipple?: boolean;
   locale?: string;
   caption?: string;
+
+  /* ── column layout ─────────────────────────────────────────
+     Width, order and visibility are the table's own, and `columnState` is
+     bindable for callers who want to persist or drive it. Table-owned is the
+     right default: a column layout is a view preference, not the
+     application's data. Ported from the gallery's browser mirror at AF2-262a,
+     where these had been implemented and had never reached a package build. */
+  /** Bindable `{ order, widths, hidden }`. Omit and the table keeps its own. */
+  columnState?: ColumnState;
+  resizableColumns?: boolean;
+  /** 'fit' takes the width from the next column; 'expand' widens the table. */
+  columnResizeMode?: 'fit' | 'expand';
+  reorderableColumns?: boolean;
+  /** Adds the show/hide picker to the toolbar. */
+  columnToggle?: boolean;
+  columnToggleLabel?: string;
+  /** Header groups above the columns: `{ header, columns: [field], align? }`. */
+  columnGroups?: ColumnGroup[];
+  /** Persist the layout under this key; omit and nothing is stored. */
+  stateKey?: string;
+  stateStorage?: 'local' | 'session';
 }>(), {
+  columnResizeMode: 'fit', columnToggleLabel: 'Columns', stateStorage: 'local',
   size: 'normal', gridLines: 'horizontal', gridLineSize: 1, striped: false,
   selectionMode: null, metaKeySelection: true, sortMode: 'single', removableSort: true,
   rows: 10, first: 0, footerMode: 'all', loadingMode: 'overlay', skeletonRows: 5,
@@ -168,6 +224,10 @@ const props = withDefaults(defineProps<{
 });
 
 const emit = defineEmits<{
+  (e: 'update:columnState', v: ColumnState): void;
+  (e: 'column-resize', payload: { field: string; width?: number }): void;
+  (e: 'column-reorder', payload: { field: string; fromIndex: number; toIndex: number }): void;
+  (e: 'column-toggle', payload: { field: string; hidden: boolean }): void;
   (e: 'update:selection', v: Row | Row[] | null): void;
   (e: 'update:first', v: number): void;
   (e: 'update:rows', v: number): void;
@@ -196,7 +256,184 @@ const emit = defineEmits<{
 }>();
 
 /* ── columns ────────────────────────────────────────────── */
-const cols = computed(() => (props.columns || []).filter((c) => !c.hidden));
+/* ── column layout: state, identity and order ──────────────────
+   One writer (`setColumnState`) so a change reaches the bound prop and the
+   local copy the same way and the two can never disagree. */
+const localColumnState = ref<ColumnState>({});
+const colState = computed<ColumnState>(() => props.columnState ?? localColumnState.value);
+
+/** A column needs a stable identity for width, order and visibility to survive
+    a re-render: the field, or its declared position when it has none — a
+    formula or action column. */
+const allCols = computed<KeyedColumn[]>(() => (props.columns || [])
+  .map((c, i) => ({ ...c, __key: c.field || 'col-' + i })));
+
+const cols = computed<KeyedColumn[]>(() => {
+  const hidden = new Set(colState.value.hidden ?? []);
+  const list = allCols.value.filter((c) => !c.hidden && !hidden.has(c.__key));
+  const order = colState.value.order ?? [];
+  if (!order.length) return list;
+  /* Ordered columns first, then anything the order does not mention — so a
+     column added after the order was saved appears rather than vanishing. */
+  const ranked = order.map((k) => list.find((c) => c.__key === k)).filter(Boolean) as KeyedColumn[];
+  const rest = list.filter((c) => !order.includes(c.__key));
+  return ranked.concat(rest);
+});
+
+/** Each group spans the run of its own columns in their CURRENT order, and a
+    column in no group gets a blank cell — so reordering cannot make a group
+    header span columns it does not own. */
+const headerGroups = computed(() => {
+  const groups = props.columnGroups ?? [];
+  if (!groups.length) return [];
+  const out: Array<{ key: string; span: number; header?: string; align?: string; blank?: boolean }> = [];
+  let i = 0;
+  while (i < cols.value.length) {
+    const col = cols.value[i];
+    const group = groups.find((g) => (g.columns || []).includes(col.__key));
+    if (!group) { out.push({ key: 'blank-' + i, span: 1, blank: true }); i += 1; continue; }
+    let span = 0;
+    while (i + span < cols.value.length
+      && (group.columns || []).includes(cols.value[i + span].__key)) span += 1;
+    out.push({ key: group.header + '-' + i, span, header: group.header, align: group.align });
+    /* Never advance by zero. `find` guarantees the group contains the column
+       at `i`, so span is at least 1 — but a loop whose only exit depends on an
+       invariant elsewhere wedges the tab if that invariant ever moves, and it
+       did exactly that under a mutation while this was being tested. */
+    i += Math.max(1, span);
+  }
+  return out;
+});
+
+/* ── column layout: the interactions ───────────────────────────── */
+const resizing = ref<{ key: string; nextKey: string | null; startX: number; startW: number; nextW: number | null } | null>(null);
+const headDrag = ref<{ key: string; from: number } | null>(null);
+const headOver = ref(-1);
+const togglerOpen = ref(false);
+
+function groupStyle(align?: string): Record<string, string> | undefined {
+  return align ? { textAlign: align } : undefined;
+}
+
+function colWidth(col: KeyedColumn) {
+  const w = colState.value.widths?.[col.__key];
+  return w ? w + 'px' : col.width;
+}
+
+function setColumnState(patch: Partial<ColumnState>) {
+  const next: ColumnState = {
+    order: (colState.value.order ?? []).slice(),
+    widths: { ...(colState.value.widths ?? {}) },
+    hidden: (colState.value.hidden ?? []).slice(),
+    ...patch,
+  };
+  localColumnState.value = next;
+  emit('update:columnState', next);
+  if (props.stateKey) saveColumnState(next);
+}
+
+function store() {
+  return props.stateStorage === 'session' ? sessionStorage : localStorage;
+}
+function saveColumnState(state: ColumnState) {
+  try {
+    store().setItem('apex-dt-cols:' + props.stateKey, JSON.stringify(state));
+  } catch { /* storage can be denied; a lost preference is not an error */ }
+}
+function restoreColumnState() {
+  if (!props.stateKey) return;
+  try {
+    const raw = store().getItem('apex-dt-cols:' + props.stateKey);
+    if (raw) localColumnState.value = JSON.parse(raw) as ColumnState;
+  } catch { /* ignore malformed or blocked storage */ }
+}
+
+/* ── resize ── */
+function onResizeStart(e: PointerEvent, col: KeyedColumn, index: number) {
+  if (!props.resizableColumns) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const th = (e.currentTarget as HTMLElement).closest('th');
+  const next = cols.value[index + 1];
+  resizing.value = {
+    key: col.__key,
+    nextKey: next ? next.__key : null,
+    startX: e.clientX,
+    startW: th ? th.getBoundingClientRect().width : 120,
+    nextW: null,
+  };
+  if (props.columnResizeMode === 'fit' && next) {
+    const ths = tableEl.value?.querySelectorAll('thead tr:last-child th');
+    const nextTh = ths?.[index + 1 + leading.value] as HTMLElement | undefined;
+    resizing.value.nextW = nextTh ? nextTh.getBoundingClientRect().width : null;
+  }
+  window.addEventListener('pointermove', onResizeMove);
+  window.addEventListener('pointerup', onResizeEnd);
+}
+function onResizeMove(e: PointerEvent) {
+  const r = resizing.value;
+  if (!r) return;
+  const width = Math.max(48, Math.round(r.startW + (e.clientX - r.startX)));
+  const widths = { ...(colState.value.widths ?? {}) };
+  widths[r.key] = width;
+  /* 'fit' takes the difference from the next column, so the table's total
+     width never changes and no horizontal scrollbar appears mid-drag;
+     'expand' lets the table grow instead. */
+  if (props.columnResizeMode === 'fit' && r.nextKey && r.nextW !== null) {
+    widths[r.nextKey] = Math.max(48, Math.round(r.nextW - (width - r.startW)));
+  }
+  setColumnState({ widths });
+}
+function onResizeEnd() {
+  const r = resizing.value;
+  resizing.value = null;
+  window.removeEventListener('pointermove', onResizeMove);
+  window.removeEventListener('pointerup', onResizeEnd);
+  if (r) emit('column-resize', { field: r.key, width: colState.value.widths?.[r.key] });
+}
+
+/* ── reorder ── */
+function onHeadDown(e: PointerEvent, col: KeyedColumn, index: number) {
+  if (!props.reorderableColumns) return;
+  if ((e.target as HTMLElement).closest('button,.apex-dt__resizer,.apex-dtf')) return;
+  headDrag.value = { key: col.__key, from: index };
+  headOver.value = -1;
+  window.addEventListener('pointermove', onHeadMove);
+  window.addEventListener('pointerup', onHeadUp);
+}
+function onHeadMove(e: PointerEvent) {
+  /* happy-dom has no elementsFromPoint; a drag is a browser interaction and
+     the pickup is what the tests cover. See lesson §11.7. */
+  const from = document.elementsFromPoint?.(e.clientX, e.clientY) ?? [];
+  const th = Array.from(from).find((el) => (el as HTMLElement).dataset?.dtHead !== undefined);
+  headOver.value = th ? Number((th as HTMLElement).dataset.dtHead) : -1;
+}
+function onHeadUp() {
+  const drag = headDrag.value;
+  const to = headOver.value;
+  headDrag.value = null;
+  headOver.value = -1;
+  window.removeEventListener('pointermove', onHeadMove);
+  window.removeEventListener('pointerup', onHeadUp);
+  if (!drag || to < 0 || to === drag.from) return;
+  /* The order is written out in full rather than as a diff: a partial order
+     would leave later columns unranked and drifting. */
+  const keys = cols.value.map((c) => c.__key);
+  keys.splice(to, 0, keys.splice(drag.from, 1)[0]);
+  setColumnState({ order: keys });
+  emit('column-reorder', { field: drag.key, fromIndex: drag.from, toIndex: to });
+}
+
+/* ── visibility ── */
+function isColHidden(col: KeyedColumn) { return (colState.value.hidden ?? []).includes(col.__key); }
+function toggleColumn(col: KeyedColumn) {
+  const hidden = (colState.value.hidden ?? []).slice();
+  const i = hidden.indexOf(col.__key);
+  if (i > -1) hidden.splice(i, 1); else hidden.push(col.__key);
+  setColumnState({ hidden });
+  emit('column-toggle', { field: col.__key, hidden: i === -1 });
+}
+function resetColumns() { setColumnState({ order: [], widths: {}, hidden: [] }); }
 const dataCols = computed(() => cols.value.filter((c) => (c.type ?? 'data') === 'data'));
 const hasCheckbox = computed(() => props.selectionMode === 'checkbox');
 const hasRadio = computed(() => props.selectionMode === 'radio');
@@ -221,7 +458,13 @@ const frozenRowTop = ref<string[]>([]);
 function measureFrozen() {
   const table = tableEl.value;
   if (!table) return;
-  const head = table.tHead?.rows[0];
+  /* `rows` is guarded as well as `tHead`. The next line already treats a
+     missing header row as "no cells", so the intent was always that — but the
+     optional chain stopped one step short, and indexing `.rows` on a tHead
+     that has none threw before it. It also meant ApexDataTable could not be
+     mounted under happy-dom at all, which is why it reached AF2-261 with no
+     tests of its own. */
+  const head = table.tHead?.rows?.[0];
   const cells = head ? Array.from(head.cells) : [];
   const startMap: Record<number, string> = {};
   const endMap: Record<number, string> = {};
@@ -262,6 +505,9 @@ function measureFrozen() {
 
 const scheduleMeasure = () => nextTick(measureFrozen);
 onMounted(() => {
+  /* Before anything measures: a restored width should be the first thing the
+     table lays out to, not a second pass the reader can see. */
+  restoreColumnState();
   measureFrozen();
   if (typeof window !== 'undefined') window.addEventListener('resize', scheduleMeasure);
 });
@@ -346,6 +592,23 @@ const anyFilter = computed(() => Object.values(activeFilters.value).some((m) => 
   return m.value != null && m.value !== '' && !(Array.isArray(m.value) && !m.value.length);
 }));
 const filterCols = computed(() => cols.value.filter((col) => col.filter));
+
+/* The row's identity. Hoisted above the freeze block, which reads it: this
+   file has a standing declaration-order hazard — `frozen` sat below `sorted`
+   until AF2-263, and moving it up put it above `keyOf` instead, trading one
+   temporal-dead-zone crash for another. Both are now above their first use. */
+const keyOf = (row: Row) => (props.dataKey ? String(getField(row, props.dataKey)) : '');
+
+/* ── row freezing ───────────────────────────────────────── */
+/* Declared ABOVE `sorted`, which reads `frozen` to keep an interactively
+   frozen row out of the body. It used to sit two hundred lines below, and
+   evaluating `sorted` while `rowFreeze` was on threw "Cannot access 'frozen'
+   before initialization" — the temporal-dead-zone class of lesson §11.9. It
+   never fired because no docs page had ever mounted the table with
+   `rowFreeze` set; AF2-263's "Freeze rows on demand" section is the first. */
+const frozen = computed(() => props.frozenValue || []);
+const frozenKeys = computed(() => new Set(frozen.value.map(keyOf)));
+const isFrozen = (row: Row) => (props.dataKey ? frozenKeys.value.has(keyOf(row)) : frozen.value.includes(row));
 
 const sorted = computed(() => {
   // grouping needs its field contiguous, so it leads the sort
@@ -445,7 +708,6 @@ const selected = computed<Row[]>(() => {
   if (!s) return [];
   return Array.isArray(s) ? s : [s];
 });
-const keyOf = (row: Row) => (props.dataKey ? String(getField(row, props.dataKey)) : '');
 const selectedKeys = computed(() => new Set(selected.value.map(keyOf)));
 const isSelected = (row: Row) => (props.dataKey
   ? selectedKeys.value.has(keyOf(row))
@@ -486,11 +748,6 @@ function toggleAllOnPage() {
     emit('update:selection', merged);
   }
 }
-
-/* ── row freezing ───────────────────────────────────────── */
-const frozen = computed(() => props.frozenValue || []);
-const frozenKeys = computed(() => new Set(frozen.value.map(keyOf)));
-const isFrozen = (row: Row) => (props.dataKey ? frozenKeys.value.has(keyOf(row)) : frozen.value.includes(row));
 
 function toggleFreeze(row: Row) {
   const on = isFrozen(row);
@@ -631,6 +888,28 @@ function focusRow(i: number) {
   focusIndex.value = Math.min(Math.max(0, i), n - 1);
   bodyEl.value?.querySelector<HTMLElement>(`[data-row="${focusIndex.value}"]`)?.focus();
 }
+/**
+ * Ripple a row — AF2-326.
+ *
+ * The obvious way, `v-apex-ripple` on the <tr>, appends the directive's
+ * layer as a child of the row. A `<span>` is NOT a legal child of `<tr>`,
+ * and a browser is free to wrap it in an anonymous cell or drop it. It also
+ * made the frozen column paint over the wave, since those cells are sticky
+ * at z-index 2 with an opaque background.
+ *
+ * So the cells host it instead, which is legal, and each one is told to
+ * size its wave to the ROW. Every slice then belongs to the same circle and
+ * the union reads as one wave crossing the row — including through the
+ * frozen column, whose own layer travels with it as it sticks.
+ */
+function onRowPointerDown(e: PointerEvent) {
+  if (!props.rowRipple) return;
+  const row = e.currentTarget as HTMLElement;
+  for (const cell of Array.from(row.children) as HTMLElement[]) {
+    rippleAt(cell, {}, e.clientX, e.clientY, row);
+  }
+}
+
 function onRowClick(row: Row, ri: number, event: MouseEvent) {
   emit('row-click', { data: row, index: ri, event });
   if (props.rowExpansion && props.expandOnRowClick) toggleExpand(row);
@@ -682,19 +961,22 @@ const wantsFooter = computed(() => props.showFooter ?? cols.value.some((c) => c.
 
 /* ── presentation helpers ───────────────────────────────── */
 const rootStyle = computed(() => {
-  const s: Record<string, string> = { '--dt-grid-size': props.gridLineSize + 'px' };
-  if (props.gridLineColor) s['--dt-grid'] = props.gridLineColor;
-  if (props.borderColor) s['--dt-border'] = props.borderColor;
-  if (props.stripeColor) s['--dt-stripe'] = props.stripeColor;
-  if (props.selectionColor) s['--dt-sel'] = props.selectionColor;
-  if (props.headerBackground) s['--dt-head-bg'] = props.headerBackground;
-  if (props.scrollHeight) s['--dt-scroll-h'] = props.scrollHeight;
-  if (props.tableMinWidth) s['--dt-min-w'] = props.tableMinWidth;
+  const s: Record<string, string> = { '--apex-dt-grid-size': props.gridLineSize + 'px' };
+  if (props.gridLineColor) s['--apex-dt-grid'] = props.gridLineColor;
+  if (props.borderColor) s['--apex-dt-border'] = props.borderColor;
+  if (props.stripeColor) s['--apex-dt-stripe'] = props.stripeColor;
+  if (props.selectionColor) s['--apex-dt-sel'] = props.selectionColor;
+  if (props.headerBackground) s['--apex-dt-head-bg'] = props.headerBackground;
+  if (props.scrollHeight) s['--apex-dt-scroll-h'] = props.scrollHeight;
+  if (props.tableMinWidth) s['--apex-dt-min-w'] = props.tableMinWidth;
   return s;
 });
 function cellStyle(col: ColumnDef, index: number, header = false) {
   const s: Record<string, string> = {};
-  if (col.width) { s.width = col.width; s.minWidth = col.width; }
+  /* A width the reader dragged wins over the declared one; `colWidth` falls
+     back to `col.width` when nothing has been dragged. */
+  const w = (col as KeyedColumn).__key ? colWidth(col as KeyedColumn) : col.width;
+  if (w) { s.width = w; s.minWidth = w; }
   else if (col.minWidth) s.minWidth = col.minWidth;
   if (col.align) s.textAlign = col.align === 'start' ? 'start' : col.align === 'end' ? 'end' : 'center';
   if (col.color && !header) s.color = col.color;
@@ -730,14 +1012,37 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
 </script>
 
 <template>
-  <div class="apex-dt" :style="rootStyle" :data-size="size" :data-grid="gridLines"
+  <div class="apex-dt" :class="ui?.root" :style="rootStyle" :data-size="size" :data-grid="gridLines"
        :data-striped="striped ? 'true' : 'false'" :data-hover="hoverable ? 'true' : 'false'"
+       :data-row-ripple="rowRipple ? 'true' : 'false'"
        :data-bordered="bordered ? 'true' : 'false'" :data-flexible="flexible ? 'true' : 'false'"
        :data-loading="loading ? 'true' : 'false'">
-    <div v-if="caption || showSelectionCount || showGlobalFilter || $slots.header" class="apex-dt__bar">
+    <div v-if="caption || showSelectionCount || showGlobalFilter || columnToggle || $slots.header" class="apex-dt__bar" :class="ui?.bar">
       <slot name="header">
-        <p v-if="caption" class="apex-dt__caption">{{ caption }}</p>
-        <div v-if="showGlobalFilter" class="apex-dt__search">
+        <p v-if="caption" class="apex-dt__caption" :class="ui?.caption">{{ caption }}</p>
+        <!-- The picker lists every declared column, hidden ones included: a
+             list of what is showing cannot bring back what is not. -->
+        <div v-if="columnToggle" class="apex-dt__colpick" :class="ui?.columnPick">
+          <button type="button" class="apex-dt__colbtn" :class="ui?.columnButton"
+                  :data-open="togglerOpen ? 'true' : 'false'" @click="togglerOpen = !togglerOpen">
+            <ApexIcon name="view_column" :size="17" />{{ columnToggleLabel }}
+            <span class="apex-dt__colcount" :class="ui?.columnCount">{{ cols.length }}/{{ allCols.length }}</span>
+          </button>
+          <div v-if="togglerOpen" class="apex-dt__colmenu" :class="ui?.columnMenu">
+            <label v-for="c in allCols" :key="c.__key" class="apex-dt__colrow" :class="ui?.columnRow">
+              <input type="checkbox" :checked="!isColHidden(c)" @change="toggleColumn(c)" />
+              <span>{{ c.header || c.__key }}</span>
+            </label>
+            <button type="button" class="apex-dt__colreset" :class="ui?.columnReset"
+                    @click="resetColumns(); togglerOpen = false">
+              <!-- Literal, as the mirror has it. This control has no i18n
+                   seam yet and inventing a key would have to widen the typed
+                   string table; logged rather than smuggled in here. -->
+              Reset columns
+            </button>
+          </div>
+        </div>
+        <div v-if="showGlobalFilter" class="apex-dt__search" :class="ui?.search">
           <ApexIcon name="search" :size="17" />
           <input type="text" :value="globalValue" :placeholder="globalFilterPlaceholder"
                  aria-label="Search all columns"
@@ -746,30 +1051,39 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
             <ApexIcon name="close" :size="16" />
           </button>
         </div>
-        <button v-if="anyFilter && filterDisplay" type="button" class="apex-dt__clearall" @click="clearAllFilters">
+        <button v-if="anyFilter && filterDisplay" type="button" class="apex-dt__clearall" :class="ui?.clearAll" @click="clearAllFilters">
           <ApexIcon name="filter_alt_off" :size="16" />Clear filters
         </button>
-        <span v-if="showSelectionCount && selected.length" class="apex-dt__count">
+        <span v-if="showSelectionCount && selected.length" class="apex-dt__count" :class="ui?.count">
           {{ selected.length }} selected
         </span>
       </slot>
     </div>
 
-    <div class="apex-dt__main">
-    <div class="apex-dt__viewport" :data-scrollable="scrollable ? 'true' : 'false'">
-      <table ref="tableEl" class="apex-dt__table" :data-frozen-head="scrollable ? 'true' : 'false'">
+    <div class="apex-dt__main" :class="ui?.main">
+    <div class="apex-dt__viewport" :class="ui?.viewport" :data-scrollable="scrollable ? 'true' : 'false'">
+      <table ref="tableEl" class="apex-dt__table" :class="ui?.table" :data-frozen-head="scrollable ? 'true' : 'false'">
         <thead>
+          <!-- Groups span the run of their own columns in the CURRENT order,
+               and a column in no group gets a blank cell, so reordering cannot
+               make a header span columns it does not own. -->
+          <tr v-if="headerGroups.length" class="apex-dt__grouprow" :class="ui?.groupRow">
+            <th v-for="n in leading" :key="'gg' + n" class="apex-dt__gutter" :class="ui?.gutter"></th>
+            <th v-for="g in headerGroups" :key="g.key" :colspan="g.span" scope="colgroup"
+                :data-blank="g.blank ? 'true' : 'false'"
+                :style="groupStyle(g.align)">{{ g.header }}</th>
+          </tr>
           <tr>
-            <th v-if="editorGutter" class="apex-dt__gutter apex-dt__editcol" scope="col">
+            <th v-if="editorGutter" class="apex-dt__gutter apex-dt__editcol" :class="[ui?.gutter, ui?.editCol]" scope="col">
               <span class="sr-only">Edit</span>
             </th>
-            <th v-if="expandGutter" class="apex-dt__gutter apex-dt__expcol" scope="col">
+            <th v-if="expandGutter" class="apex-dt__gutter apex-dt__expcol" :class="[ui?.gutter, ui?.expandCol]" scope="col">
               <span class="sr-only">Expand</span>
             </th>
-            <th v-if="lockGutter" class="apex-dt__gutter apex-dt__lockcol" scope="col">
+            <th v-if="lockGutter" class="apex-dt__gutter apex-dt__lockcol" :class="[ui?.gutter, ui?.lockCol]" scope="col">
               <ApexIcon name="lock" :size="16" :label="'Freeze row'" />
             </th>
-            <th v-if="gutter" class="apex-dt__gutter" scope="col">
+            <th v-if="gutter" class="apex-dt__gutter" :class="ui?.gutter" scope="col">
               <span v-if="hasCheckbox" class="apex-cb__box" :data-on="allOnPageSelected"
                     :data-partial="someOnPageSelected" role="checkbox"
                     :aria-checked="allOnPageSelected ? 'true' : someOnPageSelected ? 'mixed' : 'false'"
@@ -779,28 +1093,39 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
                 <ApexIcon v-else-if="someOnPageSelected" name="remove" :size="14" />
               </span>
             </th>
-            <th v-for="(col, ci) in cols" :key="ci" scope="col" :style="cellStyle(col, ci, true)"
+            <th v-for="(col, ci) in cols" :key="col.__key" scope="col" :style="cellStyle(col, ci, true)"
+                :data-dt-head="ci"
                 :data-frozen="col.frozen ? (col.alignFrozen === 'right' ? 'end' : 'start') : undefined"
                 :data-sortable="col.sortable ? 'true' : 'false'"
+                :data-reorderable="reorderableColumns ? 'true' : 'false'"
+                :data-dragging="headDrag && headDrag.key === col.__key ? 'true' : 'false'"
+                :data-dropping="headOver === ci && headDrag && headDrag.from !== ci ? 'true' : 'false'"
+                @pointerdown="onHeadDown($event, col, ci)"
                 :aria-sort="orderOf(col.field) === 1 ? 'ascending' : orderOf(col.field) === -1 ? 'descending' : undefined">
-              <button v-if="col.sortable" type="button" class="apex-dt__sort" @click="toggleSort(col, $event)">
+              <button v-if="col.sortable" type="button" class="apex-dt__sort" :class="ui?.sort" @click="toggleSort(col, $event)">
                 <slot :name="`header:${col.field}`" :column="col">{{ col.header }}</slot>
-                <ApexIcon class="apex-dt__arrow"
+                <ApexIcon class="apex-dt__arrow" :class="ui?.arrow"
                           :name="orderOf(col.field) === 1 ? 'arrow_upward' : orderOf(col.field) === -1 ? 'arrow_downward' : 'unfold_more'"
                           :size="15" :data-active="!!orderOf(col.field)" />
-                <span v-if="rankOf(col.field)" class="apex-dt__rank">{{ rankOf(col.field) }}</span>
+                <span v-if="rankOf(col.field)" class="apex-dt__rank" :class="ui?.rank">{{ rankOf(col.field) }}</span>
               </button>
               <slot v-else :name="`header:${col.field}`" :column="col">{{ col.header }}</slot>
-              <ApexColumnFilter v-if="filterDisplay === 'menu' && col.filter && col.field" mode="menu"
+              <ApexColumnFilter :ui="ui" v-if="filterDisplay === 'menu' && col.filter && col.field" mode="menu"
                                 :column="col" :meta="activeFilters[col.field]" :max-constraints="maxConstraints"
                                 @update="setFilter(col.field!, $event)" @clear="clearFilter(col.field!)" />
+              <!-- The grip sits on the boundary it moves, and the last column
+                   has none: there is nothing to its right to take width from. -->
+              <span v-if="resizableColumns && ci < cols.length - 1" class="apex-dt__resizer"
+                    :class="ui?.resizer"
+                    :data-active="resizing && resizing.key === col.__key ? 'true' : 'false'"
+                    @pointerdown="onResizeStart($event, col, ci)"></span>
             </th>
           </tr>
-          <tr v-if="filterDisplay === 'row' && filterCols.length" class="apex-dt__filterrow">
-            <th v-for="n in leading" :key="'fg' + n" class="apex-dt__gutter"></th>
+          <tr v-if="filterDisplay === 'row' && filterCols.length" class="apex-dt__filterrow" :class="ui?.filterRow">
+            <th v-for="n in leading" :key="'fg' + n" class="apex-dt__gutter" :class="ui?.gutter"></th>
             <th v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col, ci, true)"
                 :data-frozen="col.frozen ? (col.alignFrozen === 'right' ? 'end' : 'start') : undefined">
-              <ApexColumnFilter v-if="col.filter && col.field" mode="row" :column="col"
+              <ApexColumnFilter :ui="ui" v-if="col.filter && col.field" mode="row" :column="col"
                                 :meta="activeFilters[col.field]" :size="size"
                                 @update="setFilter(col.field!, $event)" @clear="clearFilter(col.field!)" />
             </th>
@@ -809,23 +1134,23 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
         </thead>
 
         <!-- frozen rows stay put while the body scrolls -->
-        <tbody v-if="frozen.length" ref="frozenBodyEl" class="apex-dt__frozen-rows">
+        <tbody v-if="frozen.length" ref="frozenBodyEl" class="apex-dt__frozen-rows" :class="ui?.frozenRows">
           <tr v-for="(row, ri) in frozen" :key="'f' + (dataKey ? keyOf(row) : ri)">
-            <td v-if="editorGutter" class="apex-dt__gutter" :style="{ insetBlockStart: frozenRowTop[ri] }"></td>
-            <td v-if="expandGutter" class="apex-dt__gutter" :style="{ insetBlockStart: frozenRowTop[ri] }"></td>
-            <td v-if="lockGutter" class="apex-dt__gutter apex-dt__lockcol" :style="{ insetBlockStart: frozenRowTop[ri] }">
-              <button type="button" class="apex-dt__lock" data-on="true" :aria-pressed="true"
+            <td v-if="editorGutter" class="apex-dt__gutter" :class="ui?.gutter" :style="{ insetBlockStart: frozenRowTop[ri] }"></td>
+            <td v-if="expandGutter" class="apex-dt__gutter" :class="ui?.gutter" :style="{ insetBlockStart: frozenRowTop[ri] }"></td>
+            <td v-if="lockGutter" class="apex-dt__gutter apex-dt__lockcol" :class="[ui?.gutter, ui?.lockCol]" :style="{ insetBlockStart: frozenRowTop[ri] }">
+              <button type="button" class="apex-dt__lock" :class="ui?.lock" data-on="true" :aria-pressed="true"
                       aria-label="Unfreeze this row" @click.stop="toggleFreeze(row)">
                 <ApexIcon :name="unfreezeIcon" :size="17" />
               </button>
             </td>
-            <td v-if="gutter" class="apex-dt__gutter" :style="{ insetBlockStart: frozenRowTop[ri] }"></td>
+            <td v-if="gutter" class="apex-dt__gutter" :class="ui?.gutter" :style="{ insetBlockStart: frozenRowTop[ri] }"></td>
             <td v-for="(col, ci) in cols" :key="ci"
                 :style="{ ...cellStyle(col, ci), insetBlockStart: frozenRowTop[ri] }" :class="cellClasses(col, row)"
                 :data-frozen="col.frozen ? (col.alignFrozen === 'right' ? 'end' : 'start') : undefined"
                 :data-numeric="col.format === 'number' || col.format === 'currency' || col.format === 'percent' || !!col.formula">
               <slot :name="`cell:${col.field}`" :row="row" :column="col" :value="cellValue(row, col)">
-                <span v-if="col.format === 'badge'" class="apex-dt__badge" :data-tone="badgeTone(row, col)">
+                <span v-if="col.format === 'badge'" class="apex-dt__badge" :class="ui?.badge" :data-tone="badgeTone(row, col)">
                   {{ display(row, col) }}
                 </span>
                 <ApexIcon v-else-if="col.format === 'boolean'"
@@ -839,11 +1164,11 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
 
         <tbody ref="bodyEl">
           <template v-if="loading && loadingMode === 'skeleton'">
-            <tr v-for="n in skeletonRows" :key="'s' + n" class="apex-dt__skeleton">
-              <td v-if="editorGutter" class="apex-dt__gutter"><span class="apex-skel" style="width:16px"></span></td>
-              <td v-if="expandGutter" class="apex-dt__gutter"><span class="apex-skel" style="width:14px"></span></td>
-              <td v-if="lockGutter" class="apex-dt__gutter"><span class="apex-skel" style="width:16px"></span></td>
-              <td v-if="gutter" class="apex-dt__gutter"><span class="apex-skel" style="width:18px"></span></td>
+            <tr v-for="n in skeletonRows" :key="'s' + n" class="apex-dt__skeleton" :class="ui?.skeleton">
+              <td v-if="editorGutter" class="apex-dt__gutter" :class="ui?.gutter"><span class="apex-skel" style="width:16px"></span></td>
+              <td v-if="expandGutter" class="apex-dt__gutter" :class="ui?.gutter"><span class="apex-skel" style="width:14px"></span></td>
+              <td v-if="lockGutter" class="apex-dt__gutter" :class="ui?.gutter"><span class="apex-skel" style="width:16px"></span></td>
+              <td v-if="gutter" class="apex-dt__gutter" :class="ui?.gutter"><span class="apex-skel" style="width:18px"></span></td>
               <td v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col, ci)">
                 <span class="apex-skel" :style="{ width: (45 + ((ci * 17) % 45)) + '%' }"></span>
               </td>
@@ -852,28 +1177,28 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
 
           <template v-else-if="renderItems.length">
             <template v-for="(item, ii) in renderItems" :key="ii">
-            <tr v-if="item.kind === 'group'" class="apex-dt__group">
+            <tr v-if="item.kind === 'group'" class="apex-dt__group" :class="ui?.group">
               <td :colspan="colCount">
-                <button v-if="expandableRowGroups" type="button" class="apex-dt__exp"
+                <button v-if="expandableRowGroups" type="button" class="apex-dt__exp" :class="ui?.expand"
                         :data-on="isGroupOpen(item.group.key)" :aria-expanded="isGroupOpen(item.group.key)"
                         :aria-label="isGroupOpen(item.group.key) ? 'Collapse group' : 'Expand group'"
                         @click="toggleGroup(item.group.key)">
                   <ApexIcon :name="isGroupOpen(item.group.key) ? collapseIcon : expandIcon" :size="19" />
                 </button>
                 <slot name="groupheader" :value="item.group.value" :rows="item.group.rows" :key="item.group.key">
-                  <span class="apex-dt__grouplabel">{{ item.group.value }}</span>
-                  <span class="apex-dt__groupcount">{{ item.group.rows.length }}</span>
+                  <span class="apex-dt__grouplabel" :class="ui?.groupLabel">{{ item.group.value }}</span>
+                  <span class="apex-dt__groupcount" :class="ui?.groupCount">{{ item.group.rows.length }}</span>
                 </slot>
               </td>
             </tr>
 
-            <tr v-else-if="item.kind === 'groupFooter'" class="apex-dt__groupfoot">
-              <td v-for="n in leading" :key="'ggf' + n" class="apex-dt__gutter"></td>
+            <tr v-else-if="item.kind === 'groupFooter'" class="apex-dt__groupfoot" :class="ui?.groupFoot">
+              <td v-for="n in leading" :key="'ggf' + n" class="apex-dt__gutter" :class="ui?.gutter"></td>
               <td v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col, ci)"
                   :data-frozen="col.frozen ? (col.alignFrozen === 'right' ? 'end' : 'start') : undefined"
                   :data-numeric="col.format === 'number' || col.format === 'currency' || col.format === 'percent' || !!col.formula">
                 <slot name="groupfooter" :value="item.group.value" :rows="item.group.rows" :column="col">
-                  <span v-if="ci === 0 && !(col.groupAggregate || col.aggregate)" class="apex-dt__footlabel">
+                  <span v-if="ci === 0 && !(col.groupAggregate || col.aggregate)" class="apex-dt__footlabel" :class="ui?.footLabel">
                     {{ item.group.value }}
                   </span>
                   <template v-else>{{ groupAgg(item.group, col) }}</template>
@@ -888,40 +1213,41 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
                 :tabindex="selectionMode ? 0 : -1"
                 :aria-selected="selectionMode ? isSelected(item.row) : undefined"
                 :data-expanded="rowExpansion && isExpanded(item.row) ? 'true' : undefined"
+                @pointerdown="onRowPointerDown($event)"
                 @click="onRowClick(item.row, item.index, $event)"
                 @keydown="onRowKey(item.index, item.row, $event)">
-              <td v-if="editorGutter" class="apex-dt__gutter apex-dt__editcol">
+              <td v-if="editorGutter" class="apex-dt__gutter apex-dt__editcol" :class="[ui?.gutter, ui?.editCol]">
                 <template v-if="isRowEditing(item.row)">
-                  <button type="button" class="apex-dt__rowbtn" data-tone="save" aria-label="Save row"
+                  <button type="button" class="apex-dt__rowbtn" :class="ui?.rowButton" data-tone="save" aria-label="Save row"
                           @click.stop="saveRowEdit(item.row, item.index)">
                     <ApexIcon name="check" :size="18" />
                   </button>
-                  <button type="button" class="apex-dt__rowbtn" data-tone="cancel" aria-label="Cancel edit"
+                  <button type="button" class="apex-dt__rowbtn" :class="ui?.rowButton" data-tone="cancel" aria-label="Cancel edit"
                           @click.stop="cancelRowEdit(item.row, item.index)">
                     <ApexIcon name="close" :size="18" />
                   </button>
                 </template>
-                <button v-else type="button" class="apex-dt__rowbtn" aria-label="Edit row"
+                <button v-else type="button" class="apex-dt__rowbtn" :class="ui?.rowButton" aria-label="Edit row"
                         @click.stop="startRowEdit(item.row, item.index)">
                   <ApexIcon name="edit" :size="17" />
                 </button>
               </td>
-              <td v-if="expandGutter" class="apex-dt__gutter apex-dt__expcol">
-                <button type="button" class="apex-dt__exp" :data-on="isExpanded(item.row)"
+              <td v-if="expandGutter" class="apex-dt__gutter apex-dt__expcol" :class="[ui?.gutter, ui?.expandCol]">
+                <button type="button" class="apex-dt__exp" :class="ui?.expand" :data-on="isExpanded(item.row)"
                         :aria-expanded="isExpanded(item.row)"
                         :aria-label="isExpanded(item.row) ? 'Collapse row' : 'Expand row'"
                         @click.stop="toggleExpand(item.row)">
                   <ApexIcon :name="isExpanded(item.row) ? collapseIcon : expandIcon" :size="19" />
                 </button>
               </td>
-              <td v-if="lockGutter" class="apex-dt__gutter apex-dt__lockcol">
-                <button type="button" class="apex-dt__lock" :data-on="isFrozen(item.row)"
+              <td v-if="lockGutter" class="apex-dt__gutter apex-dt__lockcol" :class="[ui?.gutter, ui?.lockCol]">
+                <button type="button" class="apex-dt__lock" :class="ui?.lock" :data-on="isFrozen(item.row)"
                         :aria-pressed="isFrozen(item.row)" :aria-label="isFrozen(item.row) ? 'Unfreeze this row' : 'Freeze this row'"
                         @click.stop="toggleFreeze(item.row)">
                   <ApexIcon :name="isFrozen(item.row) ? unfreezeIcon : freezeIcon" :size="17" />
                 </button>
               </td>
-              <td v-if="gutter" class="apex-dt__gutter">
+              <td v-if="gutter" class="apex-dt__gutter" :class="ui?.gutter">
                 <span v-if="hasCheckbox" class="apex-cb__box" :data-on="isSelected(item.row)" role="checkbox"
                       :aria-checked="isSelected(item.row)" :aria-label="`Select row ${item.index + 1}`"
                       @click.stop="selectRow(item.row, item.index)">
@@ -964,30 +1290,30 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
                 </div>
 
                 <slot v-else :name="`cell:${col.field}`" :row="item.row" :column="col" :value="cellValue(item.row, col)" :index="item.index">
-                  <span v-if="col.format === 'badge'" class="apex-dt__badge" :data-tone="badgeTone(item.row, col)">
+                  <span v-if="col.format === 'badge'" class="apex-dt__badge" :class="ui?.badge" :data-tone="badgeTone(item.row, col)">
                     {{ display(item.row, col) }}
                   </span>
                   <ApexIcon v-else-if="col.format === 'boolean'"
                             :name="cellValue(item.row, col) ? 'check_circle' : 'remove'" :size="18"
                             :style="{ color: cellValue(item.row, col) ? 'var(--accent-success)' : 'var(--fg-subtle)' }" />
-                  <span v-else-if="col.format === 'image'" class="apex-dt__media">
+                  <span v-else-if="col.format === 'image'" class="apex-dt__media" :class="ui?.media">
                     <img :src="String(cellValue(item.row, col) ?? '')" :alt="imageAlt(item.row, col)"
                          :style="{ width: (col.imageSize || 40) + 'px', height: (col.imageSize || 40) + 'px', borderRadius: col.imageRadius || 'var(--r-sm)' }" />
-                    <span v-if="col.subField" class="apex-dt__sub">{{ getField(item.row, col.subField) }}</span>
+                    <span v-if="col.subField" class="apex-dt__sub" :class="ui?.sub">{{ getField(item.row, col.subField) }}</span>
                   </span>
-                  <span v-else-if="col.subField" class="apex-dt__stack">
+                  <span v-else-if="col.subField" class="apex-dt__stack" :class="ui?.stack">
                     <span>{{ display(item.row, col) }}</span>
-                    <span class="apex-dt__sub">{{ getField(item.row, col.subField) }}</span>
+                    <span class="apex-dt__sub" :class="ui?.sub">{{ getField(item.row, col.subField) }}</span>
                   </span>
                   <template v-else>{{ display(item.row, col) }}</template>
                 </slot>
               </td>
             </tr>
             <tr v-if="item.kind === 'row' && rowExpansion && isExpanded(item.row)"
-                :key="(dataKey ? keyOf(item.row) : item.index) + '-detail'" class="apex-dt__detail">
+                :key="(dataKey ? keyOf(item.row) : item.index) + '-detail'" class="apex-dt__detail" :class="ui?.detail">
               <td :colspan="colCount">
                 <slot name="expansion" :row="item.row" :index="item.index">
-                  <dl class="apex-dt__detailgrid">
+                  <dl class="apex-dt__detailgrid" :class="ui?.detailGrid">
                     <template v-for="col in cols" :key="col.field || col.header">
                       <dt>{{ col.header }}</dt>
                       <dd>{{ display(item.row, col) || '—' }}</dd>
@@ -999,7 +1325,7 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
             </template>
           </template>
 
-          <tr v-else class="apex-dt__empty">
+          <tr v-else class="apex-dt__empty" :class="ui?.empty">
             <td :colspan="colCount">
               <slot name="empty">
                 <ApexIcon name="inbox" :size="26" />
@@ -1011,13 +1337,13 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
 
         <tfoot v-if="wantsFooter && renderItems.length">
           <tr v-for="f in footerRows" :key="f.label">
-            <td v-if="editorGutter" class="apex-dt__gutter"></td>
-            <td v-if="expandGutter" class="apex-dt__gutter"></td>
-            <td v-if="lockGutter" class="apex-dt__gutter"></td>
-            <td v-if="gutter" class="apex-dt__gutter"></td>
+            <td v-if="editorGutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
+            <td v-if="expandGutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
+            <td v-if="lockGutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
+            <td v-if="gutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
             <td v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col, ci)"
                 :data-frozen="col.frozen ? (col.alignFrozen === 'right' ? 'end' : 'start') : undefined">
-              <span v-if="ci === 0 && !col.aggregate" class="apex-dt__footlabel">{{ f.label }}</span>
+              <span v-if="ci === 0 && !col.aggregate" class="apex-dt__footlabel" :class="ui?.footLabel">{{ f.label }}</span>
               <template v-else-if="col.aggregate">
                 {{ formatCell(aggregate(f.rows, col), col, locale) }}
               </template>
@@ -1026,7 +1352,7 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
         </tfoot>
       </table>
       </div>
-      <div v-if="loading && loadingMode === 'overlay'" class="apex-dt__overlay">
+      <div v-if="loading && loadingMode === 'overlay'" class="apex-dt__overlay" :class="ui?.overlay">
         <slot name="loading">
           <ApexIcon name="progress_activity" spin :size="30" />
         </slot>

@@ -32,11 +32,51 @@
      zz-hidden-reset does — Vite stubs a CSS import to an empty string under
      vitest, which would make the guard pass by finding nothing. Excluded on
      the same grounds: Node types are not installed here. */
+  /* zz-docs-vars reads the stylesheets, the components and the docs registry
+     with `fs`, for the same reason again: it compares names across two repos,
+     and an import would give it either a stubbed empty string or the docs
+     repo's own errors. Excluded on the same grounds — Node types are not
+     installed here, so `__dirname` reads as TS2304, which is a fatal class. */
+  /* overlay-transition reads apex-ui.css to prove every overlay preset is
+     quieted under prefers-reduced-motion. Excluded for the usual reason. */
+  /* frozen-row-bg reads apex-ui.css to prove every row state publishes
+     --apex-dt-row-bg for the frozen column to wear. Excluded for the usual
+     reason: `fs` and `__dirname` with no Node types here. */
+  /* switch-width reads apex-ui.css to prove a labelled switch still
+     declares `align-self:start` — without it the switch stretches to the
+     width of any help text beside it, which is how one rendered at 506px
+     next to another at 84px. Excluded for the usual reason: `fs` and
+     `__dirname` with no Node types here. `import.meta.url` is not a way
+     round it — under vitest it is not a file URL and readFileSync refuses
+     it. */
+  /* button-size reads apex-ui.css with `fs` to prove the base rule READS the
+     sizing variables its size rules SET — the two had drifted apart and every
+     `size="sm"` button had been rendering at the md height since the component
+     was written. An import cannot see it: Vite stubs a CSS import to an empty
+     string under vitest. Excluded on the same grounds as the rest — no Node
+     types here, so `__dirname` reads as TS2304, which IS a fatal class, and
+     this guard caught itself. */
+  /* editor-engine reads node_modules to prove the ten prosemirror packages
+     resolved to one copy each. The Vite-glob form of that check was written
+     first precisely to avoid this exclusion, and it was inert: import.meta.glob
+     does not descend into node_modules, so it matched nothing and passed with a
+     duplicate planted. Excluded on the same grounds as the rest. */
+  /* form-modal-width reads apex-ui.css to prove the modal panel's width is a
+     variable a host can set rather than a literal. Excluded for the usual
+     reason: `fs` and `__dirname` with no Node types here. */
   "exclude": [
+    "tests/form-modal-width.spec.ts",
+    "tests/button-size.spec.ts",
+    "tests/overlay-transition.spec.ts",
+    "tests/frozen-row-bg.spec.ts",
+    "tests/editor-engine.spec.ts",
     "tests/zz-docs-pages.spec.ts",
     "tests/zz-docs-classes.spec.ts",
+    "tests/zz-docs-vars.spec.ts",
+    "tests/zz-var-families.spec.ts",
     "tests/zz-hidden-reset.spec.ts",
     "tests/service-stage.spec.ts",
-    "tests/alert-ui.spec.ts"
+    "tests/alert-ui.spec.ts",
+    "tests/switch-width.spec.ts"
   ]
 }

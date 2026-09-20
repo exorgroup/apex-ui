@@ -22,10 +22,48 @@ import path from 'node:path';
  */
 
 const DOCS = path.join(__dirname, '..', '..', 'apex-ui-docs', 'src');
-const app = fs.readFileSync(path.join(DOCS, 'App.vue'), 'utf8');
+
+/**
+ * App.vue AND every demo file.
+ *
+ * This read App.vue alone, which was right while every page lived in it. The
+ * stages have always been separate files, so their classes were never checked;
+ * AF2-250 made that a real hole rather than a small one, because the nine data
+ * controls put their stages and their example sections under demos/ by design.
+ * A guard that stops covering what moved out of the file it watches is worse
+ * than no guard, because the count still looks healthy.
+ */
+function vueFilesIn(dir: string, out: string[] = []): string[] {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) vueFilesIn(p, out);
+    else if (e.name.endsWith('.vue')) out.push(p);
+  }
+  return out;
+}
+
+const demoSources = vueFilesIn(path.join(DOCS, 'demos')).map((f) => fs.readFileSync(f, 'utf8'));
+
+const app = [
+  fs.readFileSync(path.join(DOCS, 'App.vue'), 'utf8'),
+  ...demoSources,
+].join('\n');
+
+/**
+ * A demo file may style itself.
+ *
+ * ContainerStage carries its own <style> block and defines cstage__pane there.
+ * Counting only the two stylesheets reported those as defined nowhere, which
+ * is a false finding — and a guard that cries wolf gets the file added to an
+ * ignore list, which is how a real one gets missed later.
+ */
+const styleBlocks = demoSources
+  .flatMap((s) => [...s.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]));
+
 const styles = [
   fs.readFileSync(path.join(DOCS, 'docs.css'), 'utf8'),
   fs.readFileSync(path.join(__dirname, '..', 'src', 'styles', 'apex-ui.css'), 'utf8'),
+  ...styleBlocks,
 ].join('\n');
 
 /**
@@ -36,6 +74,20 @@ const styles = [
  * left alone rather than reported as false findings; the static attributes are
  * where the demos actually live.
  */
+/**
+ * A code sample is text, not markup.
+ *
+ * The DataView "Building an item template" section shows the reader the HTML
+ * they would write, escaped inside <pre v-pre>. Those `class="product__body"`
+ * strings are never applied to an element, so requiring a rule for them is a
+ * false finding — and a guard that reports things that are not wrong is a
+ * guard someone adds an ignore list to. The <pre>'s OWN class is kept: that
+ * one really is on a rendered element.
+ */
+function stripCodeSamples(src: string): string {
+  return src.replace(/(<pre[^>]*>)[\s\S]*?<\/pre>/g, '$1</pre>');
+}
+
 function classesIn(src: string): Set<string> {
   const out = new Set<string>();
   for (const m of src.matchAll(/(?<![:@\w-])class="([^"{}]+)"/g)) {
@@ -45,7 +97,7 @@ function classesIn(src: string): Set<string> {
 }
 
 describe('every class the docs use is defined', () => {
-  const used = [...classesIn(app)].sort();
+  const used = [...classesIn(stripCodeSamples(app))].sort();
 
   it('found classes to check', () => {
     /* A regex that stopped matching would report zero undefined classes,

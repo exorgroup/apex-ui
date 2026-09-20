@@ -4,7 +4,9 @@
  * and an optional delimiter (a comma, say) adds as you type. Typeahead offers
  * suggestions from `options` through the same popover as the selects.
  */
-import { computed, nextTick, ref, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
+import { useAnchoredOverlay } from '../core/anchoredOverlay';
 import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { normaliseOptions, pickFieldProps } from '../core/utils';
@@ -44,6 +46,18 @@ const focused = ref(false);
 const open = ref(false);
 const active = ref(0);
 const root = ref<HTMLElement | null>(null);
+/* AF2-322 — see ApexSelect. Fixed positioning so an `overflow: auto`
+   ancestor cannot clip the suggestions; `matchWidth` because the old CSS
+   took the field's width from `inset-inline: 0`, which under `fixed` would
+   resolve against the viewport. Anchored to the control BOX, not the
+   wrapper: the wrapper grows to contain the open panel, so its bottom edge
+   would walk down the page as the list appeared. */
+const box = ref<HTMLElement | null>(null);
+const pop = ref<HTMLElement | null>(null);
+const { style: popStyle } = useAnchoredOverlay({
+  open, anchor: box, panel: pop, matchWidth: true, zIndex: 1150,
+});
+
 const inputEl = ref<HTMLInputElement | null>(null);
 
 const tags = computed(() => props.modelValue || []);
@@ -60,7 +74,7 @@ const suggestions = computed(() => {
     return !q || label.toLowerCase().includes(q);
   });
 });
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 
 function add(raw: string) {
   let v = props.trim ? raw.trim() : raw;
@@ -126,7 +140,7 @@ onBeforeUnmount(() => {
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="tags.length > 0 || (isFloat && !!placeholder)"
              :focused="focused" v-slot="{ id, describedBy, invalid, statusGlyph }">
     <div ref="root" style="position:relative">
-      <div class="apex-ctl apex-ctl--multi" :data-focused="focused ? 'true' : 'false'"
+      <div ref="box" class="apex-ctl apex-ctl--multi" :data-focused="focused ? 'true' : 'false'"
            :data-disabled="disabled ? 'true' : 'false'" @click="inputEl?.focus()">
         <ApexIcon v-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" />
         <span v-for="(tag, i) in tags" :key="tag + i" class="apex-chip" :class="ui?.chip">
@@ -151,7 +165,7 @@ onBeforeUnmount(() => {
         <ApexIcon v-if="statusGlyph" :name="statusGlyph" class="apex-ctl__status" :size="18" />
       </div>
 
-      <div v-if="typeahead && open && suggestions.length" class="apex-pop" :id="listId" role="listbox">
+      <div v-if="typeahead && open && suggestions.length" ref="pop" class="apex-pop" :style="popStyle" :id="listId" role="listbox">
         <button v-for="(o, i) in suggestions" :key="String(o.value)" type="button" class="apex-pop__opt"
                 role="option" :aria-selected="i === active" :data-active="i === active ? 'true' : 'false'"
                 @mouseenter="active = i" @mousedown.prevent @click="add(String(o.value))">

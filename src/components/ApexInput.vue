@@ -13,6 +13,8 @@
  *   async function search({ query }) { hits.value = await api.cities(query); }
  */
 import { computed, nextTick, ref, watch, onBeforeUnmount } from 'vue';
+import { useFloatLabel } from '../core/useFieldState';
+import { useAnchoredOverlay } from '../core/anchoredOverlay';
 import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { applyTransform, normaliseOptions, pickFieldProps } from '../core/utils';
@@ -75,6 +77,18 @@ const reveal = ref(false);
 const el = ref<HTMLInputElement | null>(null);
 const root = ref<HTMLElement | null>(null);
 const open = ref(false);
+/* AF2-322 — see ApexSelect. Fixed positioning so an `overflow: auto`
+   ancestor cannot clip the suggestions; `matchWidth` because the old CSS
+   took the field's width from `inset-inline: 0`, which under `fixed` would
+   resolve against the viewport. Anchored to the control BOX, not the
+   wrapper: the wrapper grows to contain the open panel, so its bottom edge
+   would walk down the page as the list appeared. */
+const box = ref<HTMLElement | null>(null);
+const pop = ref<HTMLElement | null>(null);
+const { style: popStyle } = useAnchoredOverlay({
+  open, anchor: box, panel: pop, matchWidth: true, zIndex: 1150,
+});
+
 const active = ref(-1);
 let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -180,14 +194,14 @@ onBeforeUnmount(() => {
 });
 
 defineExpose({ focus: () => el.value?.focus() });
-const isFloat = computed(() => String(props.labelPlacement || '').startsWith('float'));
+const isFloat = useFloatLabel(props);
 </script>
 
 <template>
   <ApexField v-bind="fieldProps" :value="modelValue" :filled="filled || (isFloat && !!placeholder)" :focused="focused"
              v-slot="{ id, describedBy, invalid, statusGlyph, ui }">
     <div ref="root" :style="typeahead ? 'position:relative' : undefined">
-      <div class="apex-ctl" :class="[{ 'apex-ctl--mono': mono }, ui.control]"
+      <div ref="box" class="apex-ctl" :class="[{ 'apex-ctl--mono': mono }, ui.control]"
            :data-focused="focused ? 'true' : 'false'" :data-disabled="disabled ? 'true' : 'false'">
         <slot name="leading">
           <ApexIcon v-if="leadingIcon" :name="leadingIcon" class="apex-ctl__icon" :class="ui.icon" />
@@ -228,7 +242,7 @@ const isFloat = computed(() => String(props.labelPlacement || '').startsWith('fl
         <slot name="trailing" />
       </div>
 
-      <div v-if="typeahead && open && (items.length || !loading)" class="apex-pop" :class="ui.popover" :id="listId" role="listbox">
+      <div v-if="typeahead && open && (items.length || !loading)" ref="pop" class="apex-pop" :class="ui.popover" :style="popStyle" :id="listId" role="listbox">
         <button v-for="(o, i) in items" :key="String(o.value)" :id="listId + '-' + i" type="button"
                 class="apex-pop__opt" :class="ui.option" role="option" :aria-selected="String(o.value) === String(modelValue)"
                 :data-active="i === active ? 'true' : 'false'" :disabled="o.disabled"

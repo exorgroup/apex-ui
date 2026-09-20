@@ -54,12 +54,19 @@ function declaredProps(name: string): Set<string> {
      it from ApexFieldProps rather than declaring it itself. */
   const inherited: string[] = [];
   const grab = (iface: string) => {
-    const body = (TYPES.match(new RegExp(`interface ${iface} \\{([\\s\\S]*?)\\n\\}`)) || [])[1] ?? '';
+    /* `extends` has to be tolerated, or an interface that inherits reads as
+       absent and every prop it carries looks undeclared — which is exactly
+       how ApexOverlayTransition broke this guard the day it appeared. */
+    const body = (TYPES.match(new RegExp(`interface ${iface} (?:extends [^{]*)?\\{([\\s\\S]*?)\\n\\}`)) || [])[1] ?? '';
     return [...body.matchAll(/^\s{2}([a-zA-Z][a-zA-Z0-9]*)\??:/gm)].map((m) => m[1]);
   };
   if (/ApexFieldProps/.test(block)) inherited.push(...grab('ApexFieldProps'));
   if (/ApexContainerProps/.test(block)) inherited.push(...grab('ApexContainerProps'));
   if (/ApexButtonProps|ApexButtonAppearance/.test(block)) inherited.push(...grab('ApexButtonAppearance'));
+  /* The overlay family — the four classes/durations, plus the named preset
+     for the three components that have one. AF2-332. */
+  if (/ApexOverlayTransition|ApexOverlayClasses/.test(block)) inherited.push(...grab('ApexOverlayClasses'));
+  if (/ApexOverlayTransition/.test(block)) inherited.push(...grab('ApexOverlayTransition'));
 
   return new Set([...own, ...inherited]);
 }
@@ -99,9 +106,31 @@ function declaredSlots(name: string): { fixed: Set<string>; templated: boolean }
  * read as an undeclared prop of ApexMegaMenu; the ones carrying a dot escaped
  * only because the name pattern happened to reject them.
  */
-const namesIn = (cell: string) =>
-  (cell.startsWith(' ') ? [] : cell.split('/'))
-    .map((s) => s.trim().replace(/\(.*\)$/, '').trim())
+/**
+ * A METHOD in the props table is not a prop either.
+ *
+ * AF2-285. The editor pages document `setHtml(html)`, `toggleSource()`,
+ * `structure(action, arg)` and four bare `indent / outdent / undo / redo`
+ * commands in the same table as the props, because that is where a reader
+ * looks for them. Stripping the parentheses and then testing the name turned
+ * every one into an undeclared prop: nine findings, none of them real.
+ *
+ * Two marks, and both are already in the row. A name WRITTEN with parens is
+ * a call; a row whose whole type cell reads `commands` or `ref method(s)` is
+ * a list of them. `sourceView / toggleSource() / isSourceOpen()` keeps its
+ * first name and loses the other two, which is exactly right.
+ */
+const CALLABLE = /^(?:ref methods?|commands?)$/i;
+
+const namesIn = (cell: string, type = '') =>
+  /* ' ' as an escape, never as the character. Rewriting this line in
+     AF2-285 flattened the em space to an ASCII one and two guards that had
+     been green for months started reporting ApexBreadcrumb's `to` and
+     ApexMegaMenu's `columns` and `panel` as undeclared props. An invisible
+     character that carries meaning should not be written invisibly. */
+  (cell.startsWith(' ') || CALLABLE.test(type.trim()) ? [] : cell.split('/'))
+    .map((s) => s.trim())
+    .filter((s) => !s.includes('('))
     .filter((s) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(s));
 
 const CONTROLS = ENTRIES.filter((e) => !('demo' in e && e.demo === 'field'));
@@ -122,7 +151,7 @@ describe('every prop the docs name is declared by the component', () => {
     if (entry.alsoDeclaredIn) {
       for (const f of interfaceFields(entry.alsoDeclaredIn)) declared.add(f);
     }
-    const claimed = entry.props.flatMap((row) => namesIn(row[0]));
+    const claimed = entry.props.flatMap((row) => namesIn(row[0], row[1]));
     const missing = claimed.filter((p) => !declared.has(p));
     expect(missing, `${name} documents props it does not declare`).toEqual([]);
   });

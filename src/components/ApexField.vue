@@ -17,10 +17,19 @@ import type { ApexFieldClasses, ApexFieldProps } from '../types';
 const props = withDefaults(defineProps<ApexFieldProps & {
   /** Current value — only used to evaluate `rules`. */
   value?: unknown;
+  /**
+   * Off for a COMPOSITE control, whose resolved id lands on a div.
+   *
+   * `for` may only point at a labelable element, so on a group it names
+   * nothing — the browser resolves it to no element at all. Such a control
+   * takes the `labelId` this slot hands out and uses `aria-labelledby`
+   * instead. AF2-280: ApexEditor is the first of ours to need it.
+   */
+  labelFor?: boolean;
   /** Set by controls so the floating label knows to lift. */
   filled?: boolean;
   focused?: boolean;
-}>(), { statusIcon: true });
+}>(), { statusIcon: true, labelFor: true });
 
 const valueRef = toRef(props, 'value');
 const st = useFieldState(props, valueRef);
@@ -88,7 +97,8 @@ defineExpose({ state: st });
        :data-size="st.size.value" :data-lp="st.labelPlacement.value" :data-tone="st.tone.value"
        :data-disabled="disabled ? 'true' : 'false'" :data-float="float ? 'true' : 'false'"
        :data-focused="focused ? 'true' : 'false'">
-    <label v-if="label" class="apex-field__label" :class="ui.label" :for="st.id.value">
+    <label v-if="label" class="apex-field__label" :class="ui.label" :id="`${st.id.value}-label`"
+           :for="labelFor ? st.id.value : undefined">
       <ApexIcon v-if="labelIcon" :name="labelIcon" :size="16" />
       <span>{{ label }}</span>
       <span v-if="required" class="apex-field__req" aria-hidden="true">*</span>
@@ -102,6 +112,7 @@ defineExpose({ state: st });
         size: st.size.value,
         disabled: !!disabled,
         statusGlyph,
+        labelId: label ? `${st.id.value}-label` : undefined,
         ui,
       }" />
       <p v-if="st.message.value" class="apex-field__msg" :class="ui.message"

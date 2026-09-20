@@ -1,4 +1,4 @@
-import { defineComponent, h, nextTick, ref, type PropType } from 'vue';
+import { defineComponent, h, nextTick, ref, type PropType, type VNode } from 'vue';
 import type { ApexButtonClasses, ApexPermission } from '../types';
 import ApexIcon from './ApexIcon.vue';
 
@@ -38,6 +38,12 @@ const ApexMenuItem = defineComponent({
      * custom template never has to reimplement the menu behaviour.
      */
     itemRender: { type: Function as PropType<(ctx: { item: MenuItem; depth: number; branch: boolean }) => unknown>, default: undefined },
+    /**
+     * Renders a CONTROL in place of a row — a table size grid, a colour
+     * palette. Supplied by ApexMenubar's `panel` slot and handed down through
+     * every level, so a grid three submenus deep still renders.
+     */
+    panelRender: { type: Function as PropType<(ctx: { item: MenuItem; depth: number }) => unknown>, default: undefined },
     /** Your own classes on the row, header, hint and separator. */
     ui: { type: Object as PropType<ApexButtonClasses>, default: undefined },
   },
@@ -67,8 +73,19 @@ const ApexMenuItem = defineComponent({
       else { side.value = 'end'; lift.value = 0; }
     }
 
-    return () => {
+    /* The return type is written out because this component renders itself
+       for submenus: without it the inferred type is circular, and adding the
+       custom-item branch at AF2-286 turned that from five reported errors
+       into six. */
+    return (): VNode => {
       const it = props.item;
+      /* A custom item IS a control, not a row: it carries no command and no
+         label, and the panel renderer draws it. Without a renderer it draws
+         nothing rather than an empty row — AF2-286. */
+      if (it.custom) {
+        return h('li', { class: 'apex-menu__custom', role: 'presentation' },
+          props.panelRender ? [props.panelRender({ item: it, depth: props.depth })] : []);
+      }
       if (it.separator) return h('li', { class: ['apex-menu__sep', props.ui?.menuSeparator], role: 'separator' });
       if (it.header) return h('li', { class: ['apex-menu__header', props.ui?.menuHeader], role: 'presentation' }, it.header);
 
@@ -110,7 +127,8 @@ const ApexMenuItem = defineComponent({
           style: lift.value ? { marginBlockStart: -lift.value + 'px' } : undefined,
         },
           (it.items || []).map((child, i) => h(ApexMenuItem, {
-            key: i, item: child, depth: props.depth + 1, itemRender: props.itemRender, ui: props.ui,
+            key: i, item: child, depth: props.depth + 1, itemRender: props.itemRender,
+            panelRender: props.panelRender, ui: props.ui,
             onPick: (x: MenuItem, e: MouseEvent) => emit('pick', x, e),
           })))
         : null;

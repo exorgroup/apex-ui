@@ -9,6 +9,7 @@
  */
 import { computed, ref, watch } from 'vue';
 import ApexIcon from './ApexIcon.vue';
+import type { ApexTreeTableClasses } from '../types';
 import ApexPaginator from './ApexPaginator.vue';
 import { useApexI18n } from '../core/i18n';
 import { cellValue, formatCell, nextOrder, type ColumnDef, type SortMeta, type SortOrder } from '../core/table';
@@ -22,6 +23,8 @@ export type { TreeNode };
 export type TreeColumn = ColumnDef & { expander?: boolean };
 
 const props = withDefaults(defineProps<{
+  /** Your own class on any part. See ApexTreeTableClasses. */
+  ui?: ApexTreeTableClasses;
   value?: TreeNode[];
   columns?: TreeColumn[];
   expandedKeys?: Record<string, boolean>;
@@ -300,9 +303,14 @@ function onKey(i: number, row: FlatNode, e: KeyboardEvent) {
 
 /* ── presentation ───────────────────────────────────────── */
 const rootStyle = computed(() => {
-  const s: Record<string, string> = { '--tt-indent': props.indent + 'px' };
-  if (props.scrollHeight) s['--dt-scroll-h'] = props.scrollHeight;
-  if (props.tableMinWidth) s['--dt-min-w'] = props.tableMinWidth;
+  /* No --apex-tt-indent here. It was declared on .apex-tt and written from
+     this line, and nothing ever read either: the rows are indented by an
+     inline style computed from the `indent` prop — `row.depth * indent` — so
+     overriding the variable moved nothing. Removed in AF2-257 rather than
+     documented as themable in AF2-258. `indent` is the real API. */
+  const s: Record<string, string> = {};
+  if (props.scrollHeight) s['--apex-dt-scroll-h'] = props.scrollHeight;
+  if (props.tableMinWidth) s['--apex-dt-min-w'] = props.tableMinWidth;
   return s;
 });
 function cellStyle(col: TreeColumn) {
@@ -328,12 +336,12 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
 </script>
 
 <template>
-  <div class="apex-dt apex-tt" :style="rootStyle" :data-size="size" :data-grid="gridLines"
+  <div class="apex-dt apex-tt" :class="ui?.root" :style="rootStyle" :data-size="size" :data-grid="gridLines"
        :data-striped="striped ? 'true' : 'false'" :data-bordered="bordered ? 'true' : 'false'"
        :data-hover="true" :data-loading="loading ? 'true' : 'false'">
-    <div v-if="caption || showGlobalFilter || $slots.header" class="apex-dt__bar">
+    <div v-if="caption || showGlobalFilter || $slots.header" class="apex-dt__bar" :class="ui?.bar">
       <slot name="header">
-        <p v-if="caption" class="apex-dt__caption">{{ caption }}</p>
+        <p v-if="caption" class="apex-dt__caption" :class="ui?.caption">{{ caption }}</p>
         <div v-if="showGlobalFilter" class="apex-pop__filter apex-dt__global">
           <ApexIcon name="search" />
           <input type="text" :value="(filterModel.global && filterModel.global.value) || ''"
@@ -346,9 +354,9 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
       </slot>
     </div>
 
-    <div class="apex-dt__main">
-      <div class="apex-dt__viewport" :data-scrollable="scrollable ? 'true' : 'false'">
-        <table class="apex-dt__table" :data-frozen-head="scrollable ? 'true' : 'false'">
+    <div class="apex-dt__main" :class="ui?.main">
+      <div class="apex-dt__viewport" :class="ui?.viewport" :data-scrollable="scrollable ? 'true' : 'false'">
+        <table class="apex-dt__table" :class="ui?.table" :data-frozen-head="scrollable ? 'true' : 'false'">
           <thead>
             <tr>
               <th v-if="gutter" class="apex-dt__gutter" scope="col"></th>
@@ -365,7 +373,7 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
                 <slot v-else :name="`header:${col.field}`" :column="col">{{ col.header }}</slot>
               </th>
             </tr>
-            <tr v-if="filterDisplay === 'row'" class="apex-dt__filterrow">
+            <tr v-if="filterDisplay === 'row'" class="apex-dt__filterrow" :class="ui?.filterRow">
               <th v-if="gutter" class="apex-dt__gutter"></th>
               <th v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col)">
                 <slot v-if="col.filter" :name="`filter:${col.field}`" :column="col">
@@ -398,7 +406,7 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
 
             <template v-else-if="flat.length">
               <tr v-for="(row, i) in flat" :key="row.node.key" :data-row="i"
-                  :class="row.node.styleClass" :data-selected="stateOf(row.node) === 'on' ? 'true' : 'false'"
+                  :class="[row.node.styleClass, ui?.row]" :data-selected="stateOf(row.node) === 'on' ? 'true' : 'false'"
                   :data-depth="row.depth"
                   :aria-expanded="row.hasChildren ? !!expanded[row.node.key] : undefined"
                   :aria-selected="selectionMode ? stateOf(row.node) === 'on' : undefined"
@@ -415,9 +423,9 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
                 </td>
                 <td v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col)"
                     :data-numeric="isNumeric(col)">
-                  <span v-if="ci === expanderIndex" class="apex-tt__cell"
+                  <span v-if="ci === expanderIndex" class="apex-tt__cell" :class="ui?.cell"
                         :style="{ paddingInlineStart: (row.depth * indent) + 'px' }">
-                    <button v-if="row.hasChildren" type="button" class="apex-tr__toggle"
+                    <button v-if="row.hasChildren" type="button" class="apex-tr__toggle" :class="ui?.toggle"
                             :aria-label="expanded[row.node.key] ? 'Collapse' : 'Expand'"
                             @click.stop="toggle(row.node)">
                       <ApexIcon v-if="row.node.loading" name="progress_activity" spin :size="17" />
@@ -427,7 +435,7 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
                     <ApexIcon v-if="row.node.icon" :name="row.node.icon" class="apex-tr__icon" :size="18" />
                     <slot :name="`cell:${col.field}`" :node="row.node" :column="col"
                           :value="cellValue(rowOf(row.node), col)" :index="i">
-                      <span class="apex-tt__label">{{ display(row.node, col) || row.node.label }}</span>
+                      <span class="apex-tt__label" :class="ui?.label">{{ display(row.node, col) || row.node.label }}</span>
                     </slot>
                   </span>
                   <slot v-else :name="`cell:${col.field}`" :node="row.node" :column="col"
@@ -444,7 +452,7 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
               </tr>
             </template>
 
-            <tr v-else class="apex-dt__empty">
+            <tr v-else class="apex-dt__empty" :class="ui?.empty">
               <td :colspan="colCount">
                 <slot name="empty">
                   <ApexIcon name="folder_open" :size="26" />
@@ -468,7 +476,7 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
         </table>
       </div>
 
-      <div v-if="loading && loadingMode === 'overlay'" class="apex-dt__overlay">
+      <div v-if="loading && loadingMode === 'overlay'" class="apex-dt__overlay" :class="ui?.overlay">
         <slot name="loading"><ApexIcon name="progress_activity" spin :size="30" /></slot>
       </div>
     </div>
