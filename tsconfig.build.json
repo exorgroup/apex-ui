@@ -1,0 +1,47 @@
+{
+  /* The DECLARATION build — the library, and nothing else.
+   *
+   * `tsconfig.json` is the development program: it takes `src` AND `tests`, with a long list of
+   * excluded specs that read files with `fs` or mount the docs app. That list is right for
+   * `npm run typecheck`, which is about keeping the working tree honest.
+   *
+   * It is the wrong program to EMIT from. Two reasons, and the second is what kept
+   * `dist/index.d.ts` from ever existing:
+   *
+   *   1. A test is not part of the package. Emitting from a program that contains `tests/**`
+   *      puts `.d.ts` files for specs into `dist`, next to the library's own.
+   *   2. Any spec that imports the docs app drags `../apex-ui-docs` into the program, and the
+   *      docs app imports `@exorgroup/apex-ui` — which has no declarations yet, because
+   *      generating them is the thing being attempted. `vue-tsc` reported the docs repo's
+   *      TS7016 and exited 1, so `npm run build` exited 1, so no declarations were ever
+   *      written. The base config's own comment calls this out and says "revisit once
+   *      dist/index.d.ts exists"; this is that revisit.
+   *
+   * `include: ["src"]` breaks the circle: the library's declarations are generated from the
+   * library's source, which depends on nothing outside itself.
+   */
+  "extends": "./tsconfig.json",
+
+  "compilerOptions": {
+    /* The emit is the point here, and only the emit — `vite build` produces the JavaScript. */
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
+
+    /* So `src/index.ts` lands at `dist/index.d.ts`, which is what `package.json`'s `types`
+       field names. Left implicit it is inferred from the common root of whatever files the
+       program happens to contain, which moves the moment one is added or removed. */
+    "rootDir": "src",
+
+    /* Test globals are not part of a consumer's world. `vite/client` stays: the library's
+       own source uses `import.meta.env`. */
+    "types": ["vite/client"],
+
+    /* An unused local is a lint failure, not a reason to ship no types. It is still enforced
+       by `npm run typecheck`, which is where it belongs. */
+    "noUnusedLocals": false
+  },
+
+  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "exclude": []
+}

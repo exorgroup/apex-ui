@@ -196,7 +196,10 @@ export interface AlertRunOptions {
   interpret?: (raw: AlertRunResult | void) => AlertRunResult;
 }
 
-interface AlertState extends AlertOptions {
+/* Exported because it is already part of the public surface: `components` in index.ts has
+   it in its inferred type, and a type that cannot be NAMED cannot be written into a
+   declaration file — TS4023, which blocked `dist/index.d.ts` from being emitted at all. */
+export interface AlertState extends AlertOptions {
   open: boolean;
   stage: AlertStage;
   /** Bumped per stage so the host can replay its entrance animation. */

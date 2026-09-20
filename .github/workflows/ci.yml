@@ -1,0 +1,57 @@
+# The check that makes a committed `dist/` safe.
+#
+# Committing build output buys consumers an install with no build step and no devDependencies.
+# What it costs is a failure mode that is silent: someone edits `src`, forgets to rebuild, and
+# the next project to install the tag serves the OLD components. Nothing errors. The bug looks
+# like it is in the consuming app.
+#
+# So the build is re-run here and the result compared against what was committed. If they differ,
+# the check goes red with the list of stale files. That turns "silent" into "loud", which was the
+# only real objection to committing dist in the first place.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # `npm ci` runs `prepare`, which is a no-op while dist is present and correct — exactly
+      # the path a consumer takes. If it ever starts building here, dist was incomplete in the
+      # commit and that is worth knowing on its own.
+      - run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      # Rebuild over the committed output. `build` exits 0 with known type errors reported; a
+      # FATAL one (declarations not written at all) still fails, which is the distinction
+      # scripts/build-types.mjs exists to make.
+      - name: Build
+        run: npm run build
+
+      - name: dist must match src
+        run: |
+          if ! git diff --quiet -- dist; then
+            echo "::error::dist/ is stale — it does not match what src builds to."
+            echo ""
+            echo "Files that differ:"
+            git diff --name-only -- dist
+            echo ""
+            echo "Run 'npm run build' and commit dist/, or use 'npm version <patch|minor|major>'"
+            echo "which rebuilds into the release commit for you."
+            exit 1
+          fi
+          echo "dist/ matches src."

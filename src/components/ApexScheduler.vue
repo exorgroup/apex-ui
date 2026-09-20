@@ -215,7 +215,8 @@ interface Block {
   compact: boolean; showTime: boolean;
 }
 interface Cell { key: number; today: boolean; shown: SchedulerInstance[]; more: number }
-interface RowModel {
+/* Exported for the same reason as AlertState — see core/alert.ts. */
+export interface RowModel {
   key: string; kind: 'group' | 'cont' | 'discrete'; id: string; depth: number; height: number;
   name: string; sub?: string; icon: string; count?: string; open?: boolean;
   resourceId?: string; blocks?: Block[]; cells?: Cell[];

@@ -1,4 +1,18 @@
 node_modules/
-dist/
+
+# dist/ is COMMITTED, deliberately.
+#
+# This package is distributed by GitHub TAG, not through a registry, and npm has no build or
+# publish step for a git dependency: it checks the tree out and reads package.json. Every entry
+# point here — main, module, types, exports — lives under dist/, so ignoring it shipped a
+# package whose every path pointed at a file that was not there.
+#
+# The alternative was a `prepare` script that builds on install, which drags vite, vitest and
+# the ProseMirror chain into every consuming project on every install. Committing the artifact
+# costs a noisy diff per release; the other costs minutes per install, per project, forever.
+#
+# The risk this takes on is dist drifting from src, which fails SILENTLY — a consumer deploys
+# and serves old components. Two things hold it: `npm version` rebuilds into the release commit,
+# and CI rebuilds and fails if the result differs from what is committed.
 *.local
 .DS_Store
