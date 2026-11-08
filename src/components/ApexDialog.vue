@@ -187,16 +187,36 @@ const panelStyle = computed(() => {
    so it picks up the durations and the app-wide default too. AF2-332. */
 const transitionProps = useOverlayTransition(props, 'apex-dlg');
 
+/* Custom classes animate the PANEL, never the mask — as ApexForm's modal does
+   (AF2-331). Bound to the mask they slid the whole dim page in and out with the
+   dialog (TBX, 2026-10-15). The presets keep their own choreography (mask fades,
+   panel scales / slides), so this applies only when classes were given.
+   `shown` keeps the mask mounted while the panel leaves; the mask's colour goes
+   the moment closing starts, so what is left is the panel alone, like ApexForm. */
+const custom = computed(() => !!(transitionProps.value.enterActiveClass || transitionProps.value.leaveActiveClass));
+const shown = ref(open.value);
+watch(open, (v) => { if (v) shown.value = true; });
+const maskTransition = computed(() => (custom.value ? { css: false } : transitionProps.value));
+const panelTransition = computed(() => (custom.value ? { ...transitionProps.value, appear: true } : { css: false }));
+function onMaskGone() { if (!custom.value) emit('after-hide'); }
+function onPanelGone() {
+  if (!custom.value) return;
+  shown.value = false;
+  emit('after-hide');
+}
+
 defineExpose({ close, panel });
 </script>
 
 <template>
   <Teleport to="body">
-    <Transition v-bind="transitionProps" @after-leave="emit('after-hide')">
-      <div v-if="open" ref="root" class="apex-dlg" :style="maskStyle" :data-position="position"
+    <Transition v-bind="maskTransition" @after-leave="onMaskGone">
+      <div v-if="custom ? shown : open" ref="root" class="apex-dlg" :style="maskStyle" :data-position="position"
            :data-modal="modal ? 'true' : 'false'" :data-blur="maskBlur ? 'true' : 'false'"
+           :data-closing="custom && !open ? 'true' : undefined"
            @click.self="dismissableMask && closable && close()">
-        <div ref="panel" class="apex-dlg__panel" :class="contentClass" :style="panelStyle"
+        <Transition v-bind="panelTransition" @after-leave="onPanelGone">
+        <div v-if="open" ref="panel" class="apex-dlg__panel" :class="contentClass" :style="panelStyle"
              role="dialog" :aria-modal="modal || undefined" :aria-label="header || undefined"
              tabindex="-1" @click.stop>
           <div v-if="header || icon || closable || $slots.header" class="apex-dlg__head"
@@ -222,6 +242,7 @@ defineExpose({ close, panel });
           <div v-if="autoClose && showTimer" class="apex-dlg__timer" aria-hidden="true"
                :style="{ transform: `scaleX(${timeLeft})` }"></div>
         </div>
+        </Transition>
       </div>
     </Transition>
   </Teleport>

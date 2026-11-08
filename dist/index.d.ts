@@ -397,6 +397,8 @@ export declare const components: {
         rows?: number;
         maxlength?: number;
         counter?: boolean;
+        meter?: boolean;
+        target?: number;
         autogrow?: boolean;
         mono?: boolean;
         keyFilter?: import(".").KeyFilter;
@@ -410,6 +412,8 @@ export declare const components: {
         rows?: number;
         maxlength?: number;
         counter?: boolean;
+        meter?: boolean;
+        target?: number;
         autogrow?: boolean;
         mono?: boolean;
         keyFilter?: import(".").KeyFilter;
@@ -453,8 +457,8 @@ export declare const components: {
         "onUpdate:modelValue"?: ((v: number | null) => any) | undefined;
     }>, {
         statusIcon: boolean;
-        clamp: boolean;
         align: "start" | "center" | "end";
+        clamp: boolean;
     }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
     Stepper: import("vue").DefineComponent<import("./types").ApexFieldProps & {
         modelValue?: number | null;
@@ -484,8 +488,8 @@ export declare const components: {
         "onUpdate:modelValue"?: ((v: number) => any) | undefined;
     }>, {
         statusIcon: boolean;
-        step: number;
         align: "start" | "center" | "end";
+        step: number;
         decrementIcon: string;
         incrementIcon: string;
     }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
@@ -1186,6 +1190,8 @@ export declare const components: {
             controlsAlign?: "start" | "center" | "end";
             extremes?: boolean;
             noDrag?: boolean;
+            handle?: boolean;
+            numbers?: boolean;
             emptyMessage?: string;
             addNew?: boolean;
             addNewLabel?: string;
@@ -1231,6 +1237,7 @@ export declare const components: {
             controls: "start" | "end" | "top" | "none";
             controlsAlign: "start" | "center" | "end";
             extremes: boolean;
+            numbers: boolean;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
             P: {};
             B: {};
@@ -1250,6 +1257,8 @@ export declare const components: {
             controlsAlign?: "start" | "center" | "end";
             extremes?: boolean;
             noDrag?: boolean;
+            handle?: boolean;
+            numbers?: boolean;
             emptyMessage?: string;
             addNew?: boolean;
             addNewLabel?: string;
@@ -1284,6 +1293,7 @@ export declare const components: {
             controls: "start" | "end" | "top" | "none";
             controlsAlign: "start" | "center" | "end";
             extremes: boolean;
+            numbers: boolean;
         }>;
         __isFragment?: never;
         __isTeleport?: never;
@@ -1300,6 +1310,8 @@ export declare const components: {
         controlsAlign?: "start" | "center" | "end";
         extremes?: boolean;
         noDrag?: boolean;
+        handle?: boolean;
+        numbers?: boolean;
         emptyMessage?: string;
         addNew?: boolean;
         addNewLabel?: string;
@@ -1345,6 +1357,7 @@ export declare const components: {
         controls: "start" | "end" | "top" | "none";
         controlsAlign: "start" | "center" | "end";
         extremes: boolean;
+        numbers: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
             item?: (props: {
@@ -2261,21 +2274,21 @@ export declare const components: {
         actionHoverBorderColor?: string;
         actionSize?: string;
     }> & Readonly<{
+        onShow?: (() => any) | undefined;
+        onHide?: (() => any) | undefined;
         "onUpdate:open"?: ((v: boolean) => any) | undefined;
         "onItem-click"?: ((payload: {
             item: import(".").SpeedDialItem;
             index: number;
             event: MouseEvent;
         }) => any) | undefined;
-        onShow?: (() => any) | undefined;
-        onHide?: (() => any) | undefined;
     }>, {
         size: import("./types").ApexSize;
         type: import(".").SpeedDialType;
         radius: number;
+        gap: number;
         position: "inline" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
         icon: string;
-        gap: number;
         severity: string;
         direction: import(".").SpeedDialDirection;
         transitionDelay: number;
@@ -2309,13 +2322,13 @@ export declare const components: {
             menuHintColor?: string;
             menuSeparatorColor?: string;
         }> & Readonly<{
+            onShow?: (() => any) | undefined;
+            onHide?: (() => any) | undefined;
             onClick?: ((event: MouseEvent) => any) | undefined;
             "onItem-click"?: ((payload: {
                 item: import(".").MenuItem;
                 event: MouseEvent;
             }) => any) | undefined;
-            onShow?: (() => any) | undefined;
-            onHide?: (() => any) | undefined;
         }>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
             click: (event: MouseEvent) => void;
             "item-click": (payload: {
@@ -2363,13 +2376,13 @@ export declare const components: {
             menuHintColor?: string;
             menuSeparatorColor?: string;
         }> & Readonly<{
+            onShow?: (() => any) | undefined;
+            onHide?: (() => any) | undefined;
             onClick?: ((event: MouseEvent) => any) | undefined;
             "onItem-click"?: ((payload: {
                 item: import(".").MenuItem;
                 event: MouseEvent;
             }) => any) | undefined;
-            onShow?: (() => any) | undefined;
-            onHide?: (() => any) | undefined;
         }>, {}, {}, {}, {}, {
             size: import("./types").ApexSize;
             variant: import(".").ApexButtonVariant;
@@ -2406,13 +2419,13 @@ export declare const components: {
         menuHintColor?: string;
         menuSeparatorColor?: string;
     }> & Readonly<{
+        onShow?: (() => any) | undefined;
+        onHide?: (() => any) | undefined;
         onClick?: ((event: MouseEvent) => any) | undefined;
         "onItem-click"?: ((payload: {
             item: import(".").MenuItem;
             event: MouseEvent;
         }) => any) | undefined;
-        onShow?: (() => any) | undefined;
-        onHide?: (() => any) | undefined;
     }>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
         click: (event: MouseEvent) => void;
         "item-click": (payload: {
@@ -2507,6 +2520,8 @@ export declare const components: {
             unfreezeIcon?: string;
             showFooter?: boolean;
             footerMode?: "all" | "selected" | "both";
+            footerValues?: Record<string, unknown> | null;
+            footerLabel?: string;
             loading?: boolean;
             loadingMode?: "overlay" | "skeleton";
             skeletonRows?: number;
@@ -2847,7 +2862,9 @@ export declare const components: {
             collapseIcon: string;
             freezeIcon: string;
             unfreezeIcon: string;
+            showFooter: boolean;
             footerMode: "all" | "selected" | "both";
+            footerValues: Record<string, unknown> | null;
             loadingMode: "overlay" | "skeleton";
             skeletonRows: number;
             hoverable: boolean;
@@ -2934,6 +2951,8 @@ export declare const components: {
             unfreezeIcon?: string;
             showFooter?: boolean;
             footerMode?: "all" | "selected" | "both";
+            footerValues?: Record<string, unknown> | null;
+            footerLabel?: string;
             loading?: boolean;
             loadingMode?: "overlay" | "skeleton";
             skeletonRows?: number;
@@ -3135,7 +3154,9 @@ export declare const components: {
             collapseIcon: string;
             freezeIcon: string;
             unfreezeIcon: string;
+            showFooter: boolean;
             footerMode: "all" | "selected" | "both";
+            footerValues: Record<string, unknown> | null;
             loadingMode: "overlay" | "skeleton";
             skeletonRows: number;
             hoverable: boolean;
@@ -3219,6 +3240,8 @@ export declare const components: {
         unfreezeIcon?: string;
         showFooter?: boolean;
         footerMode?: "all" | "selected" | "both";
+        footerValues?: Record<string, unknown> | null;
+        footerLabel?: string;
         loading?: boolean;
         loadingMode?: "overlay" | "skeleton";
         skeletonRows?: number;
@@ -3559,7 +3582,9 @@ export declare const components: {
         collapseIcon: string;
         freezeIcon: string;
         unfreezeIcon: string;
+        showFooter: boolean;
         footerMode: "all" | "selected" | "both";
+        footerValues: Record<string, unknown> | null;
         loadingMode: "overlay" | "skeleton";
         skeletonRows: number;
         hoverable: boolean;
@@ -3748,8 +3773,8 @@ export declare const components: {
             "update:sortOrder": (v: import(".").SortOrder) => any;
             "update:layout": (v: "list" | "grid") => any;
         }, import("vue").PublicProps, {
-            rows: number;
             gap: string;
+            rows: number;
             first: number;
             bordered: boolean;
             paginatorTemplate: string;
@@ -3812,8 +3837,8 @@ export declare const components: {
             "onUpdate:sortOrder"?: ((v: import(".").SortOrder) => any) | undefined;
             "onUpdate:layout"?: ((v: "list" | "grid") => any) | undefined;
         }>, {}, {}, {}, {}, {
-            rows: number;
             gap: string;
+            rows: number;
             first: number;
             bordered: boolean;
             paginatorTemplate: string;
@@ -3888,8 +3913,8 @@ export declare const components: {
         "update:sortOrder": (v: import(".").SortOrder) => any;
         "update:layout": (v: "list" | "grid") => any;
     }, string, {
-        rows: number;
         gap: string;
+        rows: number;
         first: number;
         bordered: boolean;
         paginatorTemplate: string;
@@ -5155,6 +5180,12 @@ export declare const components: {
                 index: number;
             }) => any) | undefined;
         } & {
+            [x: `footer:${string}`]: ((props: {
+                column: import(".").TreeColumn;
+                nodes: import(".").ApexTreeNode[];
+                value: number | null;
+            }) => any) | undefined;
+        } & {
             header?: (props: {}) => any;
         } & {
             empty?: (props: {}) => any;
@@ -5246,9 +5277,9 @@ export declare const components: {
             }) => any;
         }, import("vue").PublicProps, {
             anchor: Date;
+            mode: import(".").SchedulerMode;
             draggable: boolean;
             height: string;
-            mode: import(".").SchedulerMode;
             resizable: boolean;
             events: import(".").SchedulerEvent[];
             resources: import(".").SchedulerResource[];
@@ -5329,9 +5360,9 @@ export declare const components: {
             step: (dir: number) => void;
         }, {}, {}, {}, {
             anchor: Date;
+            mode: import(".").SchedulerMode;
             draggable: boolean;
             height: string;
-            mode: import(".").SchedulerMode;
             resizable: boolean;
             events: import(".").SchedulerEvent[];
             resources: import(".").SchedulerResource[];
@@ -5433,9 +5464,9 @@ export declare const components: {
         }) => any;
     }, string, {
         anchor: Date;
+        mode: import(".").SchedulerMode;
         draggable: boolean;
         height: string;
-        mode: import(".").SchedulerMode;
         resizable: boolean;
         events: import(".").SchedulerEvent[];
         resources: import(".").SchedulerResource[];
@@ -5477,7 +5508,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import(".").SchedulerMode;
                 time: string;
             }) => any;
@@ -5490,7 +5521,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import(".").SchedulerMode;
                 time: string;
             }) => any;
@@ -5531,7 +5562,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import(".").SchedulerMode;
                 time: string;
             }) => any;
@@ -5983,7 +6014,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import("./components/ApexCalendar.vue").CalendarView;
                 time: string;
             }) => any;
@@ -5995,7 +6026,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import("./components/ApexCalendar.vue").CalendarView;
                 time: string;
             }) => any;
@@ -6007,7 +6038,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import("./components/ApexCalendar.vue").CalendarView;
                 time: string;
             }) => any;
@@ -6019,7 +6050,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import("./components/ApexCalendar.vue").CalendarView;
                 time: string;
             }) => any;
@@ -6031,7 +6062,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import("./components/ApexCalendar.vue").CalendarView;
                 time: string;
             }) => any;
@@ -6044,7 +6075,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import("./components/ApexCalendar.vue").CalendarView;
                 time: string;
             }) => any;
@@ -6073,7 +6104,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import("./components/ApexCalendar.vue").CalendarView;
                 time: string;
             }) => any;
@@ -6193,7 +6224,7 @@ export declare const components: {
                     start: boolean;
                     end: boolean;
                 };
-                tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+                tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
                 view: import("./components/ApexCalendar.vue").CalendarView;
                 time: string;
             }) => any;
@@ -6241,8 +6272,8 @@ export declare const components: {
         }, import("vue").PublicProps, {
             form: Record<string, unknown> | null;
             readonly: boolean;
-            modelValue: Record<string, unknown>;
             open: boolean | null;
+            modelValue: Record<string, unknown>;
             actions: boolean;
             ripple: boolean;
             eager: boolean;
@@ -6284,8 +6315,8 @@ export declare const components: {
         }, {}, {}, {}, {
             form: Record<string, unknown> | null;
             readonly: boolean;
-            modelValue: Record<string, unknown>;
             open: boolean | null;
+            modelValue: Record<string, unknown>;
             actions: boolean;
             ripple: boolean;
             eager: boolean;
@@ -6334,13 +6365,17 @@ export declare const components: {
     }, string, {
         form: Record<string, unknown> | null;
         readonly: boolean;
-        modelValue: Record<string, unknown>;
         open: boolean | null;
+        modelValue: Record<string, unknown>;
         actions: boolean;
         ripple: boolean;
         eager: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
+            [x: string]: ((props: {
+                section: import(".").FormSection;
+            }) => any) | undefined;
+        } & {
             [x: string]: ((props: {
                 field: import(".").FormField;
                 value: unknown;
@@ -6349,7 +6384,17 @@ export declare const components: {
                 blur: () => void;
             }) => any) | undefined;
         } & {
-            'head-end'?: (props: {}) => any;
+            [x: string]: ((props: {
+                section: import(".").FormSection;
+            }) => any) | undefined;
+        } & {
+            'head-end'?: (props: {
+                update: (key: string, v: unknown) => void;
+            }) => any;
+        } & {
+            'rail-end'?: (props: {}) => any;
+        } & {
+            aside?: (props: {}) => any;
         } & {
             actions?: (props: {
                 submit: () => void;
@@ -6535,8 +6580,8 @@ export declare const components: {
             ready: () => void;
         }, import("vue").PublicProps, {
             size: "sm" | "md" | "lg";
-            paste: boolean | import(".").PasteOptions;
             placeholder: string;
+            paste: boolean | import(".").PasteOptions;
             suggestions: boolean;
             spellcheck: boolean;
             bordered: boolean;
@@ -6691,8 +6736,8 @@ export declare const components: {
             redo: () => boolean;
         }, {}, {}, {}, {
             size: "sm" | "md" | "lg";
-            paste: boolean | import(".").PasteOptions;
             placeholder: string;
+            paste: boolean | import(".").PasteOptions;
             suggestions: boolean;
             spellcheck: boolean;
             bordered: boolean;
@@ -6885,8 +6930,8 @@ export declare const components: {
         ready: () => void;
     }, string, {
         size: "sm" | "md" | "lg";
-        paste: boolean | import(".").PasteOptions;
         placeholder: string;
+        paste: boolean | import(".").PasteOptions;
         suggestions: boolean;
         spellcheck: boolean;
         bordered: boolean;
@@ -8749,11 +8794,11 @@ export declare const components: {
             gap?: string;
         }> & Readonly<{
             onClick?: ((ev: MouseEvent) => any) | undefined;
-            onRemove?: ((ev: KeyboardEvent | MouseEvent) => any) | undefined;
+            onRemove?: ((ev: MouseEvent | KeyboardEvent) => any) | undefined;
             "onUpdate:selected"?: ((v: boolean) => any) | undefined;
         }>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {} & {
             click: (ev: MouseEvent) => any;
-            remove: (ev: KeyboardEvent | MouseEvent) => any;
+            remove: (ev: MouseEvent | KeyboardEvent) => any;
             "update:selected": (v: boolean) => any;
         }, import("vue").PublicProps, {
             size: "sm" | "md" | "lg";
@@ -8794,7 +8839,7 @@ export declare const components: {
             gap?: string;
         }> & Readonly<{
             onClick?: ((ev: MouseEvent) => any) | undefined;
-            onRemove?: ((ev: KeyboardEvent | MouseEvent) => any) | undefined;
+            onRemove?: ((ev: MouseEvent | KeyboardEvent) => any) | undefined;
             "onUpdate:selected"?: ((v: boolean) => any) | undefined;
         }>, {}, {}, {}, {}, {
             size: "sm" | "md" | "lg";
@@ -8832,11 +8877,11 @@ export declare const components: {
         gap?: string;
     }> & Readonly<{
         onClick?: ((ev: MouseEvent) => any) | undefined;
-        onRemove?: ((ev: KeyboardEvent | MouseEvent) => any) | undefined;
+        onRemove?: ((ev: MouseEvent | KeyboardEvent) => any) | undefined;
         "onUpdate:selected"?: ((v: boolean) => any) | undefined;
     }>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {} & {
         click: (ev: MouseEvent) => any;
-        remove: (ev: KeyboardEvent | MouseEvent) => any;
+        remove: (ev: MouseEvent | KeyboardEvent) => any;
         "update:selected": (v: boolean) => any;
     }, string, {
         size: "sm" | "md" | "lg";
@@ -8873,21 +8918,21 @@ export declare const components: {
             contentBackground?: string;
             contentPadding?: string;
         }> & Readonly<{
-            onClose?: (() => any) | undefined;
             onOpen?: (() => any) | undefined;
+            onClose?: (() => any) | undefined;
             "onUpdate:active"?: ((v: boolean) => any) | undefined;
         }>, {
             open: () => void;
             close: () => void;
         }, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
             "update:active": (v: boolean) => void;
-            close: () => void;
             open: () => void;
+            close: () => void;
         }, import("vue").PublicProps, {
+            autoFocus: boolean;
             active: boolean;
             hoverable: boolean;
             closeIcon: string;
-            autoFocus: boolean;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
             P: {};
             B: {};
@@ -8917,17 +8962,17 @@ export declare const components: {
             contentBackground?: string;
             contentPadding?: string;
         }> & Readonly<{
-            onClose?: (() => any) | undefined;
             onOpen?: (() => any) | undefined;
+            onClose?: (() => any) | undefined;
             "onUpdate:active"?: ((v: boolean) => any) | undefined;
         }>, {
             open: () => void;
             close: () => void;
         }, {}, {}, {}, {
+            autoFocus: boolean;
             active: boolean;
             hoverable: boolean;
             closeIcon: string;
-            autoFocus: boolean;
         }>;
         __isFragment?: never;
         __isTeleport?: never;
@@ -8954,21 +8999,21 @@ export declare const components: {
         contentBackground?: string;
         contentPadding?: string;
     }> & Readonly<{
-        onClose?: (() => any) | undefined;
         onOpen?: (() => any) | undefined;
+        onClose?: (() => any) | undefined;
         "onUpdate:active"?: ((v: boolean) => any) | undefined;
     }>, {
         open: () => void;
         close: () => void;
     }, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
         "update:active": (v: boolean) => void;
-        close: () => void;
         open: () => void;
+        close: () => void;
     }, string, {
+        autoFocus: boolean;
         active: boolean;
         hoverable: boolean;
         closeIcon: string;
-        autoFocus: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
             display?: (props: {
@@ -10304,9 +10349,9 @@ export declare const components: {
             zIndex?: number;
             contentClass?: string;
         }> & Readonly<{
+            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             onShow?: (() => any) | undefined;
             onHide?: (() => any) | undefined;
-            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             "onAfter-hide"?: (() => any) | undefined;
         }>, {
             close: () => void;
@@ -10318,11 +10363,11 @@ export declare const components: {
             "after-hide": () => void;
         }, import("vue").PublicProps, {
             transition: import("./types").OverlayTransitionName;
-            position: import(".").DialogPosition;
+            closeOnEscape: boolean;
             zIndex: number;
+            position: import(".").DialogPosition;
             modal: boolean;
             closable: boolean;
-            closeOnEscape: boolean;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
             P: {};
             B: {};
@@ -10354,20 +10399,20 @@ export declare const components: {
             zIndex?: number;
             contentClass?: string;
         }> & Readonly<{
+            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             onShow?: (() => any) | undefined;
             onHide?: (() => any) | undefined;
-            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             "onAfter-hide"?: (() => any) | undefined;
         }>, {
             close: () => void;
             panel: import("vue").Ref<HTMLElement | null, HTMLElement | null>;
         }, {}, {}, {}, {
             transition: import("./types").OverlayTransitionName;
-            position: import(".").DialogPosition;
+            closeOnEscape: boolean;
             zIndex: number;
+            position: import(".").DialogPosition;
             modal: boolean;
             closable: boolean;
-            closeOnEscape: boolean;
         }>;
         __isFragment?: never;
         __isTeleport?: never;
@@ -10396,9 +10441,9 @@ export declare const components: {
         zIndex?: number;
         contentClass?: string;
     }> & Readonly<{
+        "onUpdate:visible"?: ((v: boolean) => any) | undefined;
         onShow?: (() => any) | undefined;
         onHide?: (() => any) | undefined;
-        "onUpdate:visible"?: ((v: boolean) => any) | undefined;
         "onAfter-hide"?: (() => any) | undefined;
     }>, {
         close: () => void;
@@ -10410,11 +10455,11 @@ export declare const components: {
         "after-hide": () => void;
     }, string, {
         transition: import("./types").OverlayTransitionName;
-        position: import(".").DialogPosition;
+        closeOnEscape: boolean;
         zIndex: number;
+        position: import(".").DialogPosition;
         modal: boolean;
         closable: boolean;
-        closeOnEscape: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
             header?: (props: {}) => any;
@@ -10526,12 +10571,12 @@ export declare const components: {
             zIndex?: number;
         }> & Readonly<{}>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, import("vue").PublicProps, {
             side: import(".").AnchorSide;
-            zIndex: number;
             align: "start" | "center" | "end";
             gap: number;
+            showArrow: boolean;
+            zIndex: number;
             acceptLabel: string;
             rejectLabel: string;
-            showArrow: boolean;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
             P: {};
             B: {};
@@ -10554,12 +10599,12 @@ export declare const components: {
             zIndex?: number;
         }> & Readonly<{}>, {}, {}, {}, {}, {
             side: import(".").AnchorSide;
-            zIndex: number;
             align: "start" | "center" | "end";
             gap: number;
+            showArrow: boolean;
+            zIndex: number;
             acceptLabel: string;
             rejectLabel: string;
-            showArrow: boolean;
         }>;
         __isFragment?: never;
         __isTeleport?: never;
@@ -10579,12 +10624,12 @@ export declare const components: {
         zIndex?: number;
     }> & Readonly<{}>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, {
         side: import(".").AnchorSide;
-        zIndex: number;
         align: "start" | "center" | "end";
         gap: number;
+        showArrow: boolean;
+        zIndex: number;
         acceptLabel: string;
         rejectLabel: string;
-        showArrow: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
             container?: (props: {
@@ -10624,9 +10669,9 @@ export declare const components: {
             zIndex?: number;
             contentClass?: string;
         }> & Readonly<{
+            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             onShow?: (() => any) | undefined;
             onHide?: (() => any) | undefined;
-            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             "onAfter-hide"?: (() => any) | undefined;
         }>, {
             close: () => void;
@@ -10637,11 +10682,11 @@ export declare const components: {
             hide: () => void;
             "after-hide": () => void;
         }, import("vue").PublicProps, {
-            position: import("./components/ApexDrawer.vue").DrawerPosition;
+            closeOnEscape: boolean;
             zIndex: number;
+            position: import("./components/ApexDrawer.vue").DrawerPosition;
             modal: boolean;
             closable: boolean;
-            closeOnEscape: boolean;
             breakpoint: string;
             showHeader: boolean;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
@@ -10675,19 +10720,19 @@ export declare const components: {
             zIndex?: number;
             contentClass?: string;
         }> & Readonly<{
+            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             onShow?: (() => any) | undefined;
             onHide?: (() => any) | undefined;
-            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             "onAfter-hide"?: (() => any) | undefined;
         }>, {
             close: () => void;
             panel: import("vue").Ref<HTMLElement | null, HTMLElement | null>;
         }, {}, {}, {}, {
-            position: import("./components/ApexDrawer.vue").DrawerPosition;
+            closeOnEscape: boolean;
             zIndex: number;
+            position: import("./components/ApexDrawer.vue").DrawerPosition;
             modal: boolean;
             closable: boolean;
-            closeOnEscape: boolean;
             breakpoint: string;
             showHeader: boolean;
         }>;
@@ -10718,9 +10763,9 @@ export declare const components: {
         zIndex?: number;
         contentClass?: string;
     }> & Readonly<{
+        "onUpdate:visible"?: ((v: boolean) => any) | undefined;
         onShow?: (() => any) | undefined;
         onHide?: (() => any) | undefined;
-        "onUpdate:visible"?: ((v: boolean) => any) | undefined;
         "onAfter-hide"?: (() => any) | undefined;
     }>, {
         close: () => void;
@@ -10731,11 +10776,11 @@ export declare const components: {
         hide: () => void;
         "after-hide": () => void;
     }, string, {
-        position: import("./components/ApexDrawer.vue").DrawerPosition;
+        closeOnEscape: boolean;
         zIndex: number;
+        position: import("./components/ApexDrawer.vue").DrawerPosition;
         modal: boolean;
         closable: boolean;
-        closeOnEscape: boolean;
         breakpoint: string;
         showHeader: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
@@ -10773,9 +10818,9 @@ export declare const components: {
             zIndex?: number;
             contentClass?: string;
         }> & Readonly<{
+            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             onShow?: (() => any) | undefined;
             onHide?: (() => any) | undefined;
-            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
         }>, {
             show: (event?: unknown, target?: unknown) => void;
             hide: () => void;
@@ -10789,13 +10834,13 @@ export declare const components: {
             hide: () => void;
         }, import("vue").PublicProps, {
             side: import(".").AnchorSide;
-            zIndex: number;
             align: import(".").AnchorAlign;
             gap: number;
-            closeOnEscape: boolean;
-            dismissable: boolean;
-            autoFocus: boolean;
             showArrow: boolean;
+            dismissable: boolean;
+            closeOnEscape: boolean;
+            autoFocus: boolean;
+            zIndex: number;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
             P: {};
             B: {};
@@ -10823,9 +10868,9 @@ export declare const components: {
             zIndex?: number;
             contentClass?: string;
         }> & Readonly<{
+            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
             onShow?: (() => any) | undefined;
             onHide?: (() => any) | undefined;
-            "onUpdate:visible"?: ((v: boolean) => any) | undefined;
         }>, {
             show: (event?: unknown, target?: unknown) => void;
             hide: () => void;
@@ -10835,13 +10880,13 @@ export declare const components: {
             panel: import("vue").Ref<HTMLElement | null, HTMLElement | null>;
         }, {}, {}, {}, {
             side: import(".").AnchorSide;
-            zIndex: number;
             align: import(".").AnchorAlign;
             gap: number;
-            closeOnEscape: boolean;
-            dismissable: boolean;
-            autoFocus: boolean;
             showArrow: boolean;
+            dismissable: boolean;
+            closeOnEscape: boolean;
+            autoFocus: boolean;
+            zIndex: number;
         }>;
         __isFragment?: never;
         __isTeleport?: never;
@@ -10866,9 +10911,9 @@ export declare const components: {
         zIndex?: number;
         contentClass?: string;
     }> & Readonly<{
+        "onUpdate:visible"?: ((v: boolean) => any) | undefined;
         onShow?: (() => any) | undefined;
         onHide?: (() => any) | undefined;
-        "onUpdate:visible"?: ((v: boolean) => any) | undefined;
     }>, {
         show: (event?: unknown, target?: unknown) => void;
         hide: () => void;
@@ -10882,13 +10927,13 @@ export declare const components: {
         hide: () => void;
     }, string, {
         side: import(".").AnchorSide;
-        zIndex: number;
         align: import(".").AnchorAlign;
         gap: number;
-        closeOnEscape: boolean;
-        dismissable: boolean;
-        autoFocus: boolean;
         showArrow: boolean;
+        dismissable: boolean;
+        closeOnEscape: boolean;
+        autoFocus: boolean;
+        zIndex: number;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
             default?: (props: {
@@ -11760,9 +11805,9 @@ export declare const components: {
             width: number;
             height: number;
         } | null;
-        src: File | Blob | string | null;
         maxHeight: number;
         mode: "auto" | "manual";
+        src: File | Blob | string | null;
         showControls: boolean;
         lockRatio: boolean;
         quality: number;
@@ -11830,11 +11875,11 @@ export declare const components: {
         "onUpdate:removed"?: ((v: boolean) => any) | undefined;
     }>, {
         type: string;
-        modelValue: File | null;
         target: {
             width: number;
             height: number;
         } | null;
+        modelValue: File | null;
         accept: string;
         maxFileSize: number;
         chooseLabel: string;
@@ -11989,12 +12034,12 @@ export declare const components: {
             rowRadius?: string;
             zIndex?: number;
         }> & Readonly<{
+            onShow?: (() => any) | undefined;
+            onHide?: (() => any) | undefined;
             "onItem-click"?: ((payload: {
                 item: import(".").MenuItem;
                 originalEvent: MouseEvent;
             }) => any) | undefined;
-            onShow?: (() => any) | undefined;
-            onHide?: (() => any) | undefined;
         }>, {
             show: (e: MouseEvent) => void;
             hide: () => void;
@@ -12009,8 +12054,8 @@ export declare const components: {
                 originalEvent: MouseEvent;
             }) => void;
         }, import("vue").PublicProps, {
-            zIndex: number;
             padding: number;
+            zIndex: number;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
             P: {};
             B: {};
@@ -12038,12 +12083,12 @@ export declare const components: {
             rowRadius?: string;
             zIndex?: number;
         }> & Readonly<{
+            onShow?: (() => any) | undefined;
+            onHide?: (() => any) | undefined;
             "onItem-click"?: ((payload: {
                 item: import(".").MenuItem;
                 originalEvent: MouseEvent;
             }) => any) | undefined;
-            onShow?: (() => any) | undefined;
-            onHide?: (() => any) | undefined;
         }>, {
             show: (e: MouseEvent) => void;
             hide: () => void;
@@ -12051,8 +12096,8 @@ export declare const components: {
             visible: import("vue").Ref<boolean, boolean>;
             target: import("vue").Ref<HTMLElement | null, HTMLElement | null>;
         }, {}, {}, {}, {
-            zIndex: number;
             padding: number;
+            zIndex: number;
         }>;
         __isFragment?: never;
         __isTeleport?: never;
@@ -12077,12 +12122,12 @@ export declare const components: {
         rowRadius?: string;
         zIndex?: number;
     }> & Readonly<{
+        onShow?: (() => any) | undefined;
+        onHide?: (() => any) | undefined;
         "onItem-click"?: ((payload: {
             item: import(".").MenuItem;
             originalEvent: MouseEvent;
         }) => any) | undefined;
-        onShow?: (() => any) | undefined;
-        onHide?: (() => any) | undefined;
     }>, {
         show: (e: MouseEvent) => void;
         hide: () => void;
@@ -12097,8 +12142,8 @@ export declare const components: {
             originalEvent: MouseEvent;
         }) => void;
     }, string, {
-        zIndex: number;
         padding: number;
+        zIndex: number;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
             item?: (props: {
@@ -12366,12 +12411,12 @@ export declare const components: {
             activeBackground?: string;
             zIndex?: number;
         }> & Readonly<{
+            onShow?: (() => any) | undefined;
+            onHide?: (() => any) | undefined;
             "onItem-click"?: ((payload: {
                 item: import(".").MenuItem;
                 originalEvent: MouseEvent;
             }) => any) | undefined;
-            onShow?: (() => any) | undefined;
-            onHide?: (() => any) | undefined;
             "onUpdate:expandedKeys"?: ((v: Record<string, boolean>) => any) | undefined;
         }>, {
             show: (event?: unknown, target?: unknown) => void;
@@ -12390,9 +12435,9 @@ export declare const components: {
             hide: () => void;
         }, import("vue").PublicProps, {
             side: import(".").AnchorSide;
-            zIndex: number;
             align: import(".").AnchorAlign;
             gap: number;
+            zIndex: number;
             labelCaps: boolean;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
             P: {};
@@ -12424,12 +12469,12 @@ export declare const components: {
             activeBackground?: string;
             zIndex?: number;
         }> & Readonly<{
+            onShow?: (() => any) | undefined;
+            onHide?: (() => any) | undefined;
             "onItem-click"?: ((payload: {
                 item: import(".").MenuItem;
                 originalEvent: MouseEvent;
             }) => any) | undefined;
-            onShow?: (() => any) | undefined;
-            onHide?: (() => any) | undefined;
             "onUpdate:expandedKeys"?: ((v: Record<string, boolean>) => any) | undefined;
         }>, {
             show: (event?: unknown, target?: unknown) => void;
@@ -12440,9 +12485,9 @@ export declare const components: {
             visible: import("vue").Ref<boolean, boolean>;
         }, {}, {}, {}, {
             side: import(".").AnchorSide;
-            zIndex: number;
             align: import(".").AnchorAlign;
             gap: number;
+            zIndex: number;
             labelCaps: boolean;
         }>;
         __isFragment?: never;
@@ -12471,12 +12516,12 @@ export declare const components: {
         activeBackground?: string;
         zIndex?: number;
     }> & Readonly<{
+        onShow?: (() => any) | undefined;
+        onHide?: (() => any) | undefined;
         "onItem-click"?: ((payload: {
             item: import(".").MenuItem;
             originalEvent: MouseEvent;
         }) => any) | undefined;
-        onShow?: (() => any) | undefined;
-        onHide?: (() => any) | undefined;
         "onUpdate:expandedKeys"?: ((v: Record<string, boolean>) => any) | undefined;
     }>, {
         show: (event?: unknown, target?: unknown) => void;
@@ -12495,9 +12540,9 @@ export declare const components: {
         hide: () => void;
     }, string, {
         side: import(".").AnchorSide;
-        zIndex: number;
         align: import(".").AnchorAlign;
         gap: number;
+        zIndex: number;
         labelCaps: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
@@ -12654,12 +12699,12 @@ export declare const components: {
             rowRadius?: string;
             zIndex?: number;
         }> & Readonly<{
+            onShow?: (() => any) | undefined;
+            onHide?: (() => any) | undefined;
             "onItem-click"?: ((payload: {
                 item: import(".").MenuItem;
                 originalEvent: MouseEvent;
             }) => any) | undefined;
-            onShow?: (() => any) | undefined;
-            onHide?: (() => any) | undefined;
         }>, {
             show: (event?: unknown, target?: unknown) => void;
             hide: () => void;
@@ -12674,10 +12719,10 @@ export declare const components: {
             hide: () => void;
         }, import("vue").PublicProps, {
             side: import(".").AnchorSide;
-            zIndex: number;
             align: import(".").AnchorAlign;
             gap: number;
             width: string;
+            zIndex: number;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
             P: {};
             B: {};
@@ -12706,12 +12751,12 @@ export declare const components: {
             rowRadius?: string;
             zIndex?: number;
         }> & Readonly<{
+            onShow?: (() => any) | undefined;
+            onHide?: (() => any) | undefined;
             "onItem-click"?: ((payload: {
                 item: import(".").MenuItem;
                 originalEvent: MouseEvent;
             }) => any) | undefined;
-            onShow?: (() => any) | undefined;
-            onHide?: (() => any) | undefined;
         }>, {
             show: (event?: unknown, target?: unknown) => void;
             hide: () => void;
@@ -12719,10 +12764,10 @@ export declare const components: {
             visible: import("vue").Ref<boolean, boolean>;
         }, {}, {}, {}, {
             side: import(".").AnchorSide;
-            zIndex: number;
             align: import(".").AnchorAlign;
             gap: number;
             width: string;
+            zIndex: number;
         }>;
         __isFragment?: never;
         __isTeleport?: never;
@@ -12748,12 +12793,12 @@ export declare const components: {
         rowRadius?: string;
         zIndex?: number;
     }> & Readonly<{
+        onShow?: (() => any) | undefined;
+        onHide?: (() => any) | undefined;
         "onItem-click"?: ((payload: {
             item: import(".").MenuItem;
             originalEvent: MouseEvent;
         }) => any) | undefined;
-        onShow?: (() => any) | undefined;
-        onHide?: (() => any) | undefined;
     }>, {
         show: (event?: unknown, target?: unknown) => void;
         hide: () => void;
@@ -12768,10 +12813,10 @@ export declare const components: {
         hide: () => void;
     }, string, {
         side: import(".").AnchorSide;
-        zIndex: number;
         align: import(".").AnchorAlign;
         gap: number;
         width: string;
+        zIndex: number;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
         $slots: {
             item?: (props: {
@@ -12801,8 +12846,8 @@ export declare const components: {
             padding?: string;
             block?: boolean;
         }> & Readonly<{
-            onClose?: (() => any) | undefined;
             "onUpdate:visible"?: ((v: boolean) => any) | undefined;
+            onClose?: (() => any) | undefined;
             "onLife-end"?: (() => any) | undefined;
         }>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
             "update:visible": (v: boolean) => void;
@@ -12841,8 +12886,8 @@ export declare const components: {
             padding?: string;
             block?: boolean;
         }> & Readonly<{
-            onClose?: (() => any) | undefined;
             "onUpdate:visible"?: ((v: boolean) => any) | undefined;
+            onClose?: (() => any) | undefined;
             "onLife-end"?: (() => any) | undefined;
         }>, {}, {}, {}, {}, {
             size: "sm" | "md" | "lg";
@@ -12874,8 +12919,8 @@ export declare const components: {
         padding?: string;
         block?: boolean;
     }> & Readonly<{
-        onClose?: (() => any) | undefined;
         "onUpdate:visible"?: ((v: boolean) => any) | undefined;
+        onClose?: (() => any) | undefined;
         "onLife-end"?: (() => any) | undefined;
     }>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {
         "update:visible": (v: boolean) => void;
@@ -12919,12 +12964,12 @@ export declare const components: {
             "life-end": (message: import(".").ToastMessage) => void;
         }, import("vue").PublicProps, {
             size: "sm" | "md" | "lg";
-            position: import(".").ToastPosition;
+            width: string;
             zIndex: number;
+            mode: "stacked" | "expanded";
+            position: import(".").ToastPosition;
             max: number;
             variant: "filled" | "outlined" | "simple";
-            width: string;
-            mode: "stacked" | "expanded";
             offset: string;
             newestOnTop: boolean;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
@@ -12952,12 +12997,12 @@ export declare const components: {
             "onLife-end"?: ((message: import(".").ToastMessage) => any) | undefined;
         }>, {}, {}, {}, {}, {
             size: "sm" | "md" | "lg";
-            position: import(".").ToastPosition;
+            width: string;
             zIndex: number;
+            mode: "stacked" | "expanded";
+            position: import(".").ToastPosition;
             max: number;
             variant: "filled" | "outlined" | "simple";
-            width: string;
-            mode: "stacked" | "expanded";
             offset: string;
             newestOnTop: boolean;
         }>;
@@ -12985,12 +13030,12 @@ export declare const components: {
         "life-end": (message: import(".").ToastMessage) => void;
     }, string, {
         size: "sm" | "md" | "lg";
-        position: import(".").ToastPosition;
+        width: string;
         zIndex: number;
+        mode: "stacked" | "expanded";
+        position: import(".").ToastPosition;
         max: number;
         variant: "filled" | "outlined" | "simple";
-        width: string;
-        mode: "stacked" | "expanded";
         offset: string;
         newestOnTop: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
@@ -13025,8 +13070,8 @@ export declare const components: {
         }, import("vue").PublicProps, {
             slide: number;
             align: "start" | "center" | "end";
-            orientation: "horizontal" | "vertical";
             gap: string;
+            orientation: "horizontal" | "vertical";
             slidesPerPage: number;
             indicators: boolean;
             indicatorPosition: "left" | "center" | "right";
@@ -13054,8 +13099,8 @@ export declare const components: {
         }>, {}, {}, {}, {}, {
             slide: number;
             align: "start" | "center" | "end";
-            orientation: "horizontal" | "vertical";
             gap: string;
+            orientation: "horizontal" | "vertical";
             slidesPerPage: number;
             indicators: boolean;
             indicatorPosition: "left" | "center" | "right";
@@ -13082,8 +13127,8 @@ export declare const components: {
     }, string, {
         slide: number;
         align: "start" | "center" | "end";
-        orientation: "horizontal" | "vertical";
         gap: string;
+        orientation: "horizontal" | "vertical";
         slidesPerPage: number;
         indicators: boolean;
         indicatorPosition: "left" | "center" | "right";
@@ -13215,8 +13260,8 @@ export declare const components: {
             modelValue: number;
             step: number;
             orientation: "horizontal" | "vertical";
-            handleSize: string;
             handle: boolean;
+            handleSize: string;
             pageStep: number;
             dividerWidth: string;
             handleRadius: string;
@@ -13258,8 +13303,8 @@ export declare const components: {
             modelValue: number;
             step: number;
             orientation: "horizontal" | "vertical";
-            handleSize: string;
             handle: boolean;
+            handleSize: string;
             pageStep: number;
             dividerWidth: string;
             handleRadius: string;
@@ -13302,8 +13347,8 @@ export declare const components: {
         modelValue: number;
         step: number;
         orientation: "horizontal" | "vertical";
-        handleSize: string;
         handle: boolean;
+        handleSize: string;
         pageStep: number;
         dividerWidth: string;
         handleRadius: string;
@@ -13378,8 +13423,8 @@ export declare const components: {
             "update:open": (v: boolean) => any;
         }, import("vue").PublicProps, {
             radius: string;
-            modelValue: number;
             open: boolean;
+            modelValue: number;
             fullscreen: boolean;
             actions: import(".").GalleryAction[];
             closable: boolean;
@@ -13465,8 +13510,8 @@ export declare const components: {
             fullscreen: import("vue").Ref<boolean, boolean>;
         }, {}, {}, {}, {
             radius: string;
-            modelValue: number;
             open: boolean;
+            modelValue: number;
             fullscreen: boolean;
             actions: import(".").GalleryAction[];
             closable: boolean;
@@ -13553,8 +13598,8 @@ export declare const components: {
         "update:open": (v: boolean) => any;
     }, string, {
         radius: string;
-        modelValue: number;
         open: boolean;
+        modelValue: number;
         fullscreen: boolean;
         actions: import(".").GalleryAction[];
         closable: boolean;
@@ -13643,10 +13688,10 @@ export declare const components: {
         }, import("vue").PublicProps, {
             id: string;
             side: "left" | "right";
+            width: string;
             zIndex: number;
             open: boolean;
             variant: "sidebar" | "floating" | "inset";
-            width: string;
             collapsible: "icon" | "offcanvas" | "none";
             iconWidth: string;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
@@ -13676,10 +13721,10 @@ export declare const components: {
         }>, {}, {}, {}, {}, {
             id: string;
             side: "left" | "right";
+            width: string;
             zIndex: number;
             open: boolean;
             variant: "sidebar" | "floating" | "inset";
-            width: string;
             collapsible: "icon" | "offcanvas" | "none";
             iconWidth: string;
         }>;
@@ -13708,10 +13753,10 @@ export declare const components: {
     }, string, {
         id: string;
         side: "left" | "right";
+        width: string;
         zIndex: number;
         open: boolean;
         variant: "sidebar" | "floating" | "inset";
-        width: string;
         collapsible: "icon" | "offcanvas" | "none";
         iconWidth: string;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
@@ -13983,11 +14028,11 @@ export declare const components: {
             label?: string;
         }> & Readonly<{}>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, import("vue").PublicProps, {
             size: number | string;
+            duration: string;
             max: number;
             strokeWidth: number;
             arc: number;
             severity: "primary" | "success" | "warning" | "danger" | "auto";
-            duration: string;
             showTrack: boolean;
             linecap: "round" | "butt";
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
@@ -14016,11 +14061,11 @@ export declare const components: {
             label?: string;
         }> & Readonly<{}>, {}, {}, {}, {}, {
             size: number | string;
+            duration: string;
             max: number;
             strokeWidth: number;
             arc: number;
             severity: "primary" | "success" | "warning" | "danger" | "auto";
-            duration: string;
             showTrack: boolean;
             linecap: "round" | "butt";
         }>;
@@ -14046,11 +14091,11 @@ export declare const components: {
         label?: string;
     }> & Readonly<{}>, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, {
         size: number | string;
+        duration: string;
         max: number;
         strokeWidth: number;
         arc: number;
         severity: "primary" | "success" | "warning" | "danger" | "auto";
-        duration: string;
         showTrack: boolean;
         linecap: "round" | "butt";
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
@@ -14090,9 +14135,9 @@ export declare const components: {
             click: () => any;
         }, import("vue").PublicProps, {
             size: string;
-            position: "bottom-end" | "bottom-start" | "bottom-center";
-            zIndex: number;
             target: "window" | "parent" | string;
+            zIndex: number;
+            position: "bottom-end" | "bottom-start" | "bottom-center";
             icon: string;
             offset: string;
             behavior: "smooth" | "auto";
@@ -14130,9 +14175,9 @@ export declare const components: {
             onClick?: (() => any) | undefined;
         }>, {}, {}, {}, {}, {
             size: string;
-            position: "bottom-end" | "bottom-start" | "bottom-center";
-            zIndex: number;
             target: "window" | "parent" | string;
+            zIndex: number;
+            position: "bottom-end" | "bottom-start" | "bottom-center";
             icon: string;
             offset: string;
             behavior: "smooth" | "auto";
@@ -14169,9 +14214,9 @@ export declare const components: {
         click: () => any;
     }, string, {
         size: string;
-        position: "bottom-end" | "bottom-start" | "bottom-center";
-        zIndex: number;
         target: "window" | "parent" | string;
+        zIndex: number;
+        position: "bottom-end" | "bottom-start" | "bottom-center";
         icon: string;
         offset: string;
         behavior: "smooth" | "auto";
@@ -14211,9 +14256,9 @@ export declare const components: {
         lineGap?: string;
         lastLineWidth?: string;
     }> & Readonly<{}>, {
-        shape: "rectangle" | "rounded" | "square" | "circle" | "text";
         duration: string;
         animation: "wave" | "pulse" | "none";
+        shape: "rectangle" | "rounded" | "square" | "circle" | "text";
         lines: number;
         lastLineWidth: string;
     }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
@@ -14360,6 +14405,7 @@ export declare const components: {
                 full: boolean;
             }) => any;
         }, import("vue").PublicProps, {
+            animation: boolean;
             orientation: "vertical" | "horizontal";
             barRadius: number | {
                 tl?: number;
@@ -14370,7 +14416,6 @@ export declare const components: {
             height: string | number;
             direction: "ltr" | "rtl" | "auto";
             markerSize: number;
-            animation: boolean;
             animationDuration: number;
             curve: import(".").CurveType;
             tension: number;
@@ -14533,6 +14578,7 @@ export declare const components: {
             resetZoom: () => void;
             zoomRange: () => import(".").ZoomRange | null;
         }, {}, {}, {}, {
+            animation: boolean;
             orientation: "vertical" | "horizontal";
             barRadius: number | {
                 tl?: number;
@@ -14543,7 +14589,6 @@ export declare const components: {
             height: string | number;
             direction: "ltr" | "rtl" | "auto";
             markerSize: number;
-            animation: boolean;
             animationDuration: number;
             curve: import(".").CurveType;
             tension: number;
@@ -14719,6 +14764,7 @@ export declare const components: {
             full: boolean;
         }) => any;
     }, string, {
+        animation: boolean;
         orientation: "vertical" | "horizontal";
         barRadius: number | {
             tl?: number;
@@ -14729,7 +14775,6 @@ export declare const components: {
         height: string | number;
         direction: "ltr" | "rtl" | "auto";
         markerSize: number;
-        animation: boolean;
         animationDuration: number;
         curve: import(".").CurveType;
         tension: number;
@@ -15025,9 +15070,9 @@ export declare const components: {
                 columnId: string;
             }) => any;
         }, import("vue").PublicProps, {
+            gap: string;
             selectionMode: "none" | "single" | "multiple";
             draggable: boolean;
-            gap: string;
             columnWidth: string;
             virtualScrollItemHeight: number;
             virtualScrollBuffer: number;
@@ -15135,9 +15180,9 @@ export declare const components: {
                 due: {};
             }[];
         }, {}, {}, {}, {
+            gap: string;
             selectionMode: "none" | "single" | "multiple";
             draggable: boolean;
-            gap: string;
             columnWidth: string;
             virtualScrollItemHeight: number;
             virtualScrollBuffer: number;
@@ -15274,9 +15319,9 @@ export declare const components: {
             columnId: string;
         }) => any;
     }, string, {
+        gap: string;
         selectionMode: "none" | "single" | "multiple";
         draggable: boolean;
-        gap: string;
         columnWidth: string;
         virtualScrollItemHeight: number;
         virtualScrollBuffer: number;

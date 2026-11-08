@@ -40,12 +40,12 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
     "onLife-end"?: ((message: ToastMessage) => any) | undefined;
 }>, {
     size: "sm" | "md" | "lg";
-    position: ToastPosition;
+    width: string;
     zIndex: number;
+    mode: "stacked" | "expanded";
+    position: ToastPosition;
     max: number;
     variant: "filled" | "outlined" | "simple";
-    width: string;
-    mode: "stacked" | "expanded";
     offset: string;
     newestOnTop: boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;

@@ -726,6 +726,8 @@ export interface ApexDataTableClasses {
   rowButton?: string;
   /** The label beside a column footer's aggregate. */
   footLabel?: string;
+  /** The explicit-values footer row, for a lazy table's server-side totals. */
+  footRow?: string;
   /** The pinned rows drawn above the scrolling body. */
   frozenRows?: string;
   /* ── column layout (AF2-262a) ─────────────────────────────── */
@@ -761,6 +763,9 @@ export interface ApexDataTableClasses {
   filterControl?: string;
   /** The two-value row a `between` operator needs. */
   filterPair?: string;
+  /** The tick-list an "Any of" rule uses, and one option in it. */
+  filterAnyOf?: string;
+  filterAnyOfOption?: string;
   /** The footer, its add-a-rule button, and the remove control on a rule. */
   filterActions?: string;
   filterAdd?: string;
@@ -1320,6 +1325,12 @@ export interface ApexContainerProps {
 export interface ApexFieldProps {
   label?: string;
   labelIcon?: string;
+  /**
+   * An ⓘ after the label that opens this explanation — Moodle's help icon. Opened by click or Enter,
+   * closed by Escape or a click elsewhere; for what a setting MEANS, where `help` under the box is for
+   * what to type. TBX CB/025.
+   */
+  info?: string;
   labelPlacement?: ApexLabelPlacement;
   labelWidth?: string;
   help?: string;

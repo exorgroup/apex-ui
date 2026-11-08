@@ -31,7 +31,7 @@ export const TONE_ICON: Record<string, string> = {
 };
 
 export const APEX_FIELD_KEYS = [
-  'label', 'labelIcon', 'labelPlacement', 'labelWidth', 'help', 'error', 'warning', 'success',
+  'label', 'labelIcon', 'info', 'labelPlacement', 'labelWidth', 'help', 'error', 'warning', 'success',
   'tone', 'rules', 'context', 'required', 'disabled', 'readonly', 'size', 'statusIcon', 'id', 'name',
   // Appearance. Anything left out here silently never reaches ApexField.
   'background', 'borderColor', 'borderWidth', 'radius', 'hoverBorderColor', 'focusBorderColor',

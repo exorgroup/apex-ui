@@ -6,6 +6,7 @@ import { mount } from '@vue/test-utils';
 import ApexUI from '../src/index';
 import ApexAlert from '../src/components/ApexAlert.vue';
 import ApexForm from '../src/components/ApexForm.vue';
+import ApexDialog from '../src/components/ApexDialog.vue';
 import ApexToast from '../src/components/ApexToast.vue';
 import { useApexToast } from '../src/core/toast';
 import { useApexAlert, __alertSettle } from '../src/core/alert';
@@ -233,6 +234,59 @@ describe('ApexForm animates its modal panel and not its scrim', () => {
     expect(panel.parentElement, 'the scrim is inside the transition with the panel')
       .not.toBe(scrim.parentElement);
     w.unmount();
+  });
+});
+
+describe('ApexDialog with custom classes animates its panel, not its mask', () => {
+  /* Reported from TBX (2026-10-15): with animate.css classes the dim mask slid
+     in and out WITH the dialog, because the classes were bound to the mask —
+     the element the Transition wrapped. ApexForm (AF2-331) had it right: the
+     panel animates, the scrim does not. The presets keep their own
+     choreography (mask fades, panel scales), so only the class path changed. */
+  const CLASSES = { enterClass: 'animate__animated animate__backInDown', leaveClass: 'animate__animated animate__backOutDown' };
+  const dialog = (props: Record<string, unknown> = {}) => mount(ApexDialog, {
+    props: { visible: true, header: 'Plan', modal: true, ...props },
+    global: { stubs: { teleport: true } },
+  });
+  /** The Transition whose bound props carry the given key — which element it wraps is the claim. */
+  const transitionWith = (w: ReturnType<typeof dialog>, key: string) =>
+    w.findAllComponents({ name: 'Transition' }).find((t) => (t.vm.$.vnode.props ?? {})[key] !== undefined);
+
+  it('puts the classes on the Transition around the PANEL', async () => {
+    const w = dialog(CLASSES);
+    await w.vm.$nextTick();
+    const t = transitionWith(w, 'enterActiveClass');
+    expect(t, 'no transition carries the classes').toBeTruthy();
+    expect(t!.find('.apex-dlg__panel').exists()).toBe(true);
+    expect(t!.find('.apex-dlg').exists(), 'the mask is inside the animated transition').toBe(false);
+    /* The panel mounts with the mask, so it must `appear` or it would not animate in. */
+    expect((t!.vm.$.vnode.props ?? {}).appear).toBe(true);
+  });
+
+  it('keeps the mask mounted while the panel leaves, without its colour', async () => {
+    const w = dialog(CLASSES);
+    await w.vm.$nextTick();
+    expect(w.find('.apex-dlg').attributes('data-closing')).toBeUndefined();
+
+    await w.setProps({ visible: false });
+    await w.vm.$nextTick();
+
+    /* Vue Test Utils stubs <Transition>, so the panel's after-leave never fires
+       and the mask is still here — which is the moment worth checking: closing,
+       transparent, not swallowing clicks (CSS `[data-closing="true"]`). */
+    expect(w.find('.apex-dlg').exists()).toBe(true);
+    expect(w.find('.apex-dlg').attributes('data-closing')).toBe('true');
+  });
+
+  it('leaves the presets as they were — the mask transition carries the name', async () => {
+    const w = dialog({ transition: 'scale' });
+    await w.vm.$nextTick();
+    const t = transitionWith(w, 'name');
+    expect((t!.vm.$.vnode.props ?? {}).name).toBe('apex-dlg-scale');
+    expect(t!.find('.apex-dlg').exists()).toBe(true);
+    await w.setProps({ visible: false });
+    await w.vm.$nextTick();
+    expect(w.find('.apex-dlg').exists() ? w.find('.apex-dlg').attributes('data-closing') : undefined).toBeUndefined();
   });
 });
 

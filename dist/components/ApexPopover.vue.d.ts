@@ -49,18 +49,18 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     show: () => void;
     hide: () => void;
 }, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
+    "onUpdate:visible"?: ((v: boolean) => any) | undefined;
     onShow?: (() => any) | undefined;
     onHide?: (() => any) | undefined;
-    "onUpdate:visible"?: ((v: boolean) => any) | undefined;
 }>, {
     side: AnchorSide;
-    zIndex: number;
     align: AnchorAlign;
     gap: number;
-    closeOnEscape: boolean;
-    dismissable: boolean;
-    autoFocus: boolean;
     showArrow: boolean;
+    dismissable: boolean;
+    closeOnEscape: boolean;
+    autoFocus: boolean;
+    zIndex: number;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithSlots<typeof __VLS_component, __VLS_Slots>;
 export default _default;

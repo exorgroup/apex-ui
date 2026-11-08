@@ -68,7 +68,11 @@ declare var __VLS_1: {}, __VLS_10: `header:${string}`, __VLS_11: {
     column: TreeColumn;
     value: unknown;
     index: number;
-}, __VLS_50: {}, __VLS_55: {}, __VLS_67: {};
+}, __VLS_50: {}, __VLS_56: `footer:${string}`, __VLS_57: {
+    column: TreeColumn;
+    nodes: TreeNode[];
+    value: number | null;
+}, __VLS_59: {}, __VLS_71: {};
 type __VLS_Slots = {} & {
     [K in NonNullable<typeof __VLS_10>]?: (props: typeof __VLS_11) => any;
 } & {
@@ -80,13 +84,15 @@ type __VLS_Slots = {} & {
 } & {
     [K in NonNullable<typeof __VLS_44>]?: (props: typeof __VLS_45) => any;
 } & {
+    [K in NonNullable<typeof __VLS_56>]?: (props: typeof __VLS_57) => any;
+} & {
     header?: (props: typeof __VLS_1) => any;
 } & {
     empty?: (props: typeof __VLS_50) => any;
 } & {
-    loading?: (props: typeof __VLS_55) => any;
+    loading?: (props: typeof __VLS_59) => any;
 } & {
-    footer?: (props: typeof __VLS_67) => any;
+    footer?: (props: typeof __VLS_71) => any;
 };
 declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     focusRow: typeof focusRow;

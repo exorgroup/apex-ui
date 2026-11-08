@@ -6,6 +6,18 @@ type __VLS_Props = ApexFieldProps & {
     rows?: number;
     maxlength?: number;
     counter?: boolean;
+    /**
+     * Draw a bar beside the counter that says whether the length is GOOD — short
+     * (under half the target), good, or over. AC/003.
+     */
+    meter?: boolean;
+    /**
+     * The length to aim for. Advice, not a wall: past it the meter turns red and the
+     * text is still accepted up to `maxlength`. A share description aims at 160 and is
+     * valid to 300, and collapsing the two would either block allowed text or stop
+     * warning exactly where the warning helps. Falls back to `maxlength`.
+     */
+    target?: number;
     autogrow?: boolean;
     mono?: boolean;
     /**

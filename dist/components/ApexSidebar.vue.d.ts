@@ -42,10 +42,10 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
 }>, {
     id: string;
     side: "left" | "right";
+    width: string;
     zIndex: number;
     open: boolean;
     variant: "sidebar" | "floating" | "inset";
-    width: string;
     collapsible: "icon" | "offcanvas" | "none";
     iconWidth: string;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;

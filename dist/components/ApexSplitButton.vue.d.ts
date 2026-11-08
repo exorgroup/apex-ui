@@ -49,13 +49,13 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
     show: () => void;
     hide: () => void;
 }, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
+    onShow?: (() => any) | undefined;
+    onHide?: (() => any) | undefined;
     onClick?: ((event: MouseEvent) => any) | undefined;
     "onItem-click"?: ((payload: {
         item: MenuItem;
         event: MouseEvent;
     }) => any) | undefined;
-    onShow?: (() => any) | undefined;
-    onHide?: (() => any) | undefined;
 }>, {
     size: ApexSize;
     variant: ApexButtonVariant;

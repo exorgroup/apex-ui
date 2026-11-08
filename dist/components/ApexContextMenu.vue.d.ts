@@ -45,15 +45,15 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
         originalEvent: MouseEvent;
     }) => void;
 }, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
+    onShow?: (() => any) | undefined;
+    onHide?: (() => any) | undefined;
     "onItem-click"?: ((payload: {
         item: MenuItem;
         originalEvent: MouseEvent;
     }) => any) | undefined;
-    onShow?: (() => any) | undefined;
-    onHide?: (() => any) | undefined;
 }>, {
-    zIndex: number;
     padding: number;
+    zIndex: number;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithSlots<typeof __VLS_component, __VLS_Slots>;
 export default _default;

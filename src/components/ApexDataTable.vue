@@ -164,6 +164,20 @@ const props = withDefaults(defineProps<{
   showFooter?: boolean;
   /** Whether footer aggregates cover everything, the selection, or both. */
   footerMode?: 'all' | 'selected' | 'both';
+  /**
+   * Explicit footer values, keyed by column field — for a LAZY table.
+   *
+   * The aggregating footer sums the rows this table HAS, which on a lazy table is one page.
+   * A "Total" under page two of a paginated report is the total of page two, silently, and
+   * it disagrees with whatever the server said the total was. There is no fix inside the
+   * table: the numbers are not here. So the host, which asked the server for them, passes
+   * them in.
+   *
+   * Values are rendered as given — format them before passing. Set `footerLabel` to change
+   * the word in the first column.
+   */
+  footerValues?: Record<string, unknown> | null;
+  footerLabel?: string;
 
   /* states */
   loading?: boolean;
@@ -214,7 +228,7 @@ const props = withDefaults(defineProps<{
   columnResizeMode: 'fit', columnToggleLabel: 'Columns', stateStorage: 'local',
   size: 'normal', gridLines: 'horizontal', gridLineSize: 1, striped: false,
   selectionMode: null, metaKeySelection: true, sortMode: 'single', removableSort: true,
-  rows: 10, first: 0, footerMode: 'all', loadingMode: 'overlay', skeletonRows: 5,
+  rows: 10, first: 0, footerMode: 'all', footerValues: null, showFooter: undefined, loadingMode: 'overlay', skeletonRows: 5,
   hoverable: true, bordered: true, paginatorTemplate: 'Showing {first}–{last} of {total}',
   freezeIcon: 'lock_open', unfreezeIcon: 'lock',
   expandIcon: 'chevron_right', collapseIcon: 'keyboard_arrow_down',
@@ -632,6 +646,8 @@ watch(() => props.rows, (v) => { pageRows.value = v; });
 
 const windowed = computed(() => {
   if (!props.paginator || props.lazy) return sorted.value;
+  /* `rows: 0` is "All" — see ApexPaginator. */
+  if (pageRows.value <= 0) return sorted.value;
   return sorted.value.slice(pageFirst.value, pageFirst.value + pageRows.value);
 });
 
@@ -694,6 +710,7 @@ function onPage(payload: { first: number; rows: number; page: number }) {
 // a narrowed dataset shouldn't leave the viewer on a page that no longer exists
 watch(total, (t) => {
   if (!props.paginator || props.lazy) return;
+  if (pageRows.value <= 0) { if (pageFirst.value !== 0) { pageFirst.value = 0; emit('update:first', 0); } return; }
   if (pageFirst.value >= t) {
     const first = Math.max(0, (Math.ceil(t / pageRows.value) - 1) * pageRows.value);
     pageFirst.value = first;
@@ -951,13 +968,25 @@ watch([cols, frozen, windowed, () => props.size, () => props.gridLines], schedul
 /* ── footers ────────────────────────────────────────────── */
 const footerRows = computed(() => {
   const out: Array<{ label: string; rows: Row[] }> = [];
+  /* Explicit values win outright and suppress the aggregate: a table given both would show
+     two footers disagreeing with each other, and the one computed here would be the wrong
+     one. */
+  if (props.footerValues) return out;
   if (props.footerMode === 'all' || props.footerMode === 'both') out.push({ label: 'Total', rows: sorted.value });
   if ((props.footerMode === 'selected' || props.footerMode === 'both') && selected.value.length) {
     out.push({ label: `Selected (${selected.value.length})`, rows: selected.value });
   }
   return out;
 });
-const wantsFooter = computed(() => props.showFooter ?? cols.value.some((c) => c.aggregate));
+/* `footerValues` FIRST, and deliberately outside the `??`.
+ 
+   `showFooter` is a boolean prop, so Vue's boolean casting gives it an implicit default of
+   `false` rather than `undefined` — which means `props.showFooter ?? x` never reaches `x`, and
+   the documented "declare `aggregate` on a column and the footer turns itself on" has never
+   once worked. Both consumers in TBX pass `show-footer` explicitly, so nobody has noticed.
+   `showFooter: undefined` in the defaults below restores the intended behaviour; this line is
+   written so that a host passing `footerValues` gets its footer either way. */
+const wantsFooter = computed(() => !!props.footerValues || (props.showFooter ?? cols.value.some((c) => c.aggregate)));
 
 /* ── presentation helpers ───────────────────────────────── */
 const rootStyle = computed(() => {
@@ -1336,6 +1365,20 @@ defineExpose({ focusRow, selectRow, toggleAllOnPage, setFilter, clearFilter, cle
         </tbody>
 
         <tfoot v-if="wantsFooter && renderItems.length">
+          <!-- Given, not computed. See `footerValues`. -->
+          <tr v-if="footerValues" class="apex-dt__footrow" :class="ui?.footRow">
+            <td v-if="editorGutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
+            <td v-if="expandGutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
+            <td v-if="lockGutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
+            <td v-if="gutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
+            <td v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col, ci)"
+                :data-frozen="col.frozen ? (col.alignFrozen === 'right' ? 'end' : 'start') : undefined">
+              <span v-if="ci === 0 && col.field && footerValues[col.field] === undefined"
+                    class="apex-dt__footlabel" :class="ui?.footLabel">{{ footerLabel ?? 'Total' }}</span>
+              <template v-else-if="col.field">{{ footerValues[col.field] ?? '' }}</template>
+            </td>
+          </tr>
+
           <tr v-for="f in footerRows" :key="f.label">
             <td v-if="editorGutter" class="apex-dt__gutter" :class="ui?.gutter"></td>
             <td v-if="expandGutter" class="apex-dt__gutter" :class="ui?.gutter"></td>

@@ -253,12 +253,21 @@ const linkContext = computed<{ href: string | null; target: string | null }>(() 
   return { href: mark.attrs.href as string, target: (mark.attrs.target as string) || null };
 });
 
+/* Whether the placeholder shows. Its own function because a LOAD must update it
+   too: `setHtml` skips `emitDoc` (a load is not an edit), and when this lived only
+   in there, a reopened post kept `empty` true and drew "Write the post…" over its
+   own text. */
+function syncEmpty() {
+  if (!view) return;
+  empty.value = view.state.doc.textContent.length === 0
+    && view.state.doc.childCount <= 1;
+}
+
 function emitDoc() {
   if (!view) return;
   const json = view.state.doc.toJSON() as EditorDoc;
   lastEmitted = json;
-  empty.value = view.state.doc.textContent.length === 0
-    && view.state.doc.childCount <= 1;
+  syncEmpty();
   emit('update:doc', json);
   emit('change', { doc: json, text: view.state.doc.textContent });
 }
@@ -604,6 +613,13 @@ function setHtml(html: string) {
   const tr = view.state.tr.replaceWith(0, view.state.doc.content.size, doc.content);
   tr.setMeta('addToHistory', false);
   tr.setMeta('apexSuggestionApply', true);
+  /* And not a reportable one: `change` means "the user edited this". Loading a
+     record used to fire it, so a host wiring @change to its form had a dialog
+     saying "Unsaved changes" before anyone touched it. Worse with legacy HTML,
+     where the cleaner genuinely rewrites the markup on the way in, so even a
+     value-comparing host saw a difference. The caller already holds what it
+     passed here; it does not need telling. */
+  tr.setMeta('apexLoad', true);
   view.dispatch(tr);
   return true;
 }
@@ -947,8 +963,10 @@ async function mount() {
       }
       view.updateState(view.state.apply(next));
       /* docChanged separates a text edit from a caret move: emitting the document
-         on every arrow key would make the caller's model churn for nothing. */
-      if (next.docChanged) emitDoc();
+         on every arrow key would make the caller's model churn for nothing. And
+         `apexLoad` separates an edit from a record arriving — see `setHtml`. */
+      if (next.docChanged && !next.getMeta('apexLoad')) emitDoc();
+      else if (next.docChanged) syncEmpty();
       reportSelection();
       reportSuggestions();
       /* Anchors move when the document changes AND when it reflows, so the

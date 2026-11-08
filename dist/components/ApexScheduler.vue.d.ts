@@ -125,7 +125,7 @@ declare var __VLS_32: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: SchedulerMode;
     time: string;
 }, __VLS_47: {
@@ -136,7 +136,7 @@ declare var __VLS_32: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: SchedulerMode;
     time: string;
 }, __VLS_59: {
@@ -173,7 +173,7 @@ declare var __VLS_32: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: SchedulerMode;
     time: string;
 };
@@ -246,9 +246,9 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     }) => any) | undefined;
 }>, {
     anchor: Date;
+    mode: SchedulerMode;
     draggable: boolean;
     height: string;
-    mode: SchedulerMode;
     resizable: boolean;
     events: SchedulerEvent[];
     resources: SchedulerResource[];

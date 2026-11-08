@@ -171,7 +171,7 @@ declare var __VLS_1: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: CalendarView;
     time: string;
 }, __VLS_20: {
@@ -181,7 +181,7 @@ declare var __VLS_1: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: CalendarView;
     time: string;
 }, __VLS_22: {
@@ -191,7 +191,7 @@ declare var __VLS_1: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: CalendarView;
     time: string;
 }, __VLS_27: {
@@ -201,7 +201,7 @@ declare var __VLS_1: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: CalendarView;
     time: string;
 }, __VLS_29: {
@@ -211,7 +211,7 @@ declare var __VLS_1: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: CalendarView;
     time: string;
 }, __VLS_31: {
@@ -222,7 +222,7 @@ declare var __VLS_1: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: CalendarView;
     time: string;
 }, __VLS_36: {
@@ -245,7 +245,7 @@ declare var __VLS_1: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: CalendarView;
     time: string;
 }, __VLS_46: {
@@ -359,7 +359,7 @@ declare var __VLS_1: {
         start: boolean;
         end: boolean;
     };
-    tone: "danger" | "success" | "help" | "info" | "neutral" | "warn";
+    tone: "danger" | "success" | "info" | "help" | "neutral" | "warn";
     view: CalendarView;
     time: string;
 };

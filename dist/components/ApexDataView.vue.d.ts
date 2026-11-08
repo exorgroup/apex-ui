@@ -100,8 +100,8 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
     "onUpdate:sortOrder"?: ((v: SortOrder) => any) | undefined;
     "onUpdate:layout"?: ((v: "list" | "grid") => any) | undefined;
 }>, {
-    rows: number;
     gap: string;
+    rows: number;
     first: number;
     bordered: boolean;
     paginatorTemplate: string;

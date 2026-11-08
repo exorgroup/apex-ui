@@ -25,8 +25,8 @@ declare const _default: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {
     "onUpdate:modelValue"?: ((v: number) => any) | undefined;
 }>, {
     statusIcon: boolean;
-    step: number;
     align: "start" | "center" | "end";
+    step: number;
     decrementIcon: string;
     incrementIcon: string;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;

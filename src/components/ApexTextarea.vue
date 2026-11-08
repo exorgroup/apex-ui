@@ -14,6 +14,18 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   rows?: number;
   maxlength?: number;
   counter?: boolean;
+  /**
+   * Draw a bar beside the counter that says whether the length is GOOD — short
+   * (under half the target), good, or over. AC/003.
+   */
+  meter?: boolean;
+  /**
+   * The length to aim for. Advice, not a wall: past it the meter turns red and the
+   * text is still accepted up to `maxlength`. A share description aims at 160 and is
+   * valid to 300, and collapsing the two would either block allowed text or stop
+   * warning exactly where the warning helps. Falls back to `maxlength`.
+   */
+  target?: number;
   autogrow?: boolean;
   mono?: boolean;
   /**
@@ -28,6 +40,17 @@ const focused = ref(false);
 const el = ref<HTMLTextAreaElement | null>(null);
 const filled = computed(() => !!props.modelValue);
 const count = computed(() => String(props.modelValue ?? '').length);
+
+/* The scale the meter reads against, and what the counter shows as its denominator.
+   With no target and no maxlength there is nothing to measure against, so no bar. */
+const scale = computed(() => props.target ?? props.maxlength ?? 0);
+const showMeter = computed(() => !!props.meter && scale.value > 0);
+const meterState = computed(() => {
+  if (count.value > scale.value) return 'over';
+  if (count.value > scale.value / 2) return 'good';
+  return 'short';
+});
+const meterWidth = computed(() => `${Math.min(100, (count.value / (scale.value || 1)) * 100)}%`);
 
 function grow() {
   if (!props.autogrow || !el.value) return;
@@ -60,8 +83,13 @@ function onPaste(e: ClipboardEvent) {
                 @focus="focused = true; emit('focus')" @blur="focused = false; emit('blur')"></textarea>
       <ApexIcon v-if="statusGlyph" :name="statusGlyph" class="apex-ctl__status" :size="18" />
     </div>
-    <p v-if="counter" class="apex-field__msg apex-ctl__counter" :class="ui?.counter">
-      {{ count }}<template v-if="maxlength"> / {{ maxlength }}</template>
+    <p v-if="counter" class="apex-field__msg apex-ctl__counter" :class="[ui?.counter, { 'apex-ctl__counter--meter': showMeter }]">
+      <span v-if="showMeter" class="apex-ctl__meter" role="meter" :data-state="meterState"
+            :aria-valuenow="count" aria-valuemin="0" :aria-valuemax="scale"
+            :aria-label="(label || 'Length') + ' ' + count + ' of ' + scale">
+        <span :style="{ width: meterWidth }"></span>
+      </span>
+      <span class="apex-ctl__count">{{ count }}<template v-if="showMeter"> / {{ scale }}</template><template v-else-if="maxlength"> / {{ maxlength }}</template></span>
     </p>
   </ApexField>
 </template>

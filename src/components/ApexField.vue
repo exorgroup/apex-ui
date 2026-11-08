@@ -8,10 +8,11 @@
  *     <input :id="id" :aria-describedby="describedBy" :aria-invalid="invalid" v-model="port" />
  *   </ApexField>
  */
-import { computed, toRef } from 'vue';
+import { computed, ref, toRef } from 'vue';
 import { useFieldState } from '../core/useFieldState';
 import { TONE_ICON } from '../core/utils';
 import ApexIcon from './ApexIcon.vue';
+import ApexPopover from './ApexPopover.vue';
 import type { ApexFieldClasses, ApexFieldProps } from '../types';
 
 const props = withDefaults(defineProps<ApexFieldProps & {
@@ -89,6 +90,12 @@ const rootStyle = computed(() => {
 });
 const statusGlyph = computed(() => (props.statusIcon ? TONE_ICON[st.tone.value] : ''));
 
+/* `info` — the ⓘ and its popover. The button sits INSIDE the label: a click on interactive content in
+   a label does not activate the label, and the floating label's `pointer-events: none` is undone on
+   the button alone. */
+const infoBtn = ref<HTMLElement | null>(null);
+const infoOpen = ref(false);
+
 defineExpose({ state: st });
 </script>
 
@@ -102,7 +109,14 @@ defineExpose({ state: st });
       <ApexIcon v-if="labelIcon" :name="labelIcon" :size="16" />
       <span>{{ label }}</span>
       <span v-if="required" class="apex-field__req" aria-hidden="true">*</span>
+      <button v-if="info" ref="infoBtn" type="button" class="apex-field__info"
+              :aria-label="`About ${label}`" :aria-expanded="infoOpen ? 'true' : 'false'"
+              @click.prevent.stop="infoOpen = !infoOpen">
+        <ApexIcon name="info" :size="14" />
+      </button>
     </label>
+    <ApexPopover v-if="info" v-model:visible="infoOpen" :target="infoBtn" side="top" width="18rem"
+                 :auto-focus="false" content-class="apex-field__info-pop">{{ info }}</ApexPopover>
     <div class="apex-field__body" :class="ui.body">
       <slot v-bind="{
         id: st.id.value,

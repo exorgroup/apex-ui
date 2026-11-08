@@ -22,7 +22,7 @@ declare const _default: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {
     "onUpdate:modelValue"?: ((v: number | null) => any) | undefined;
 }>, {
     statusIcon: boolean;
-    clamp: boolean;
     align: "start" | "center" | "end";
+    clamp: boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 export default _default;

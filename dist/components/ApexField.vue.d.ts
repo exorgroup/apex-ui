@@ -15,7 +15,7 @@ type __VLS_Props = ApexFieldProps & {
     filled?: boolean;
     focused?: boolean;
 };
-declare var __VLS_4: {
+declare var __VLS_10: {
     id: string;
     describedBy: string | undefined;
     tone: import("..").ApexTone;
@@ -27,7 +27,7 @@ declare var __VLS_4: {
     ui: ApexFieldClasses;
 };
 type __VLS_Slots = {} & {
-    default?: (props: typeof __VLS_4) => any;
+    default?: (props: typeof __VLS_10) => any;
 };
 declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     state: {

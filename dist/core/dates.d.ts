@@ -23,6 +23,7 @@ export declare const dayOfYear: (d: Date) => number;
  */
 export declare function formatDate(date: Date | null | undefined, fmt: string, locale?: ApexDateLocale): string;
 export declare function formatTime(date: Date, hourFormat?: '12' | '24', showSeconds?: boolean, locale?: ApexDateLocale): string;
+export declare function parseIso(text: string): Date | null;
 /** Best-effort parser for the same tokens. Returns null when the text does not fit. */
 export declare function parseDate(text: string, fmt: string, locale?: ApexDateLocale): Date | null;
 /** Six-week grid for a month, including the leading/trailing days of the neighbours. */

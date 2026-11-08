@@ -5,7 +5,7 @@ type __VLS_Props = {
     first?: number;
     rows?: number;
     totalRecords?: number;
-    /** Page-size choices; omit to hide the selector. */
+    /** Page-size choices; omit to hide the selector. `0` is "All" — every row on one page. */
     rowsPerPageOptions?: number[];
     /** Page buttons either side of the current one. */
     pageLinks?: number;

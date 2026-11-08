@@ -125,6 +125,20 @@ export function useAnchoredOverlay(opts: AnchoredOverlayOptions) {
     }
   });
 
+  /* A panel that MOUNTS while already open is placed too. A component may
+     render its panel behind a further condition — ApexInput's list waits
+     for items or for `loading` to clear — so at the moment `open` turned
+     true there was no panel to measure, `place()` returned early, and the
+     list later appeared at `visibility: hidden` with nothing left to place
+     it: "nothing on the first search, results on the second" (Apex Till
+     TL3/012). */
+  watch(opts.panel, (el) => {
+    if (el && opts.open.value) {
+      ready.value = false;
+      nextTick(place);
+    }
+  });
+
   onBeforeUnmount(() => listen(false));
 
   const style = computed<Record<string, string>>(() => {

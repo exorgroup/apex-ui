@@ -7,7 +7,7 @@
  * multi-select alongside the reordering. `filter` adds a search box — dragging
  * is suspended while a query is active, since the visible order is partial.
  */
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, onBeforeUnmount } from 'vue';
 import ApexField from './ApexField.vue';
 import ApexIcon from './ApexIcon.vue';
 import { normaliseOptions, pickFieldProps } from '../core/utils';
@@ -37,6 +37,14 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   extremes?: boolean;
   /** Turn off drag-and-drop, leaving only the buttons. */
   noDrag?: boolean;
+  /**
+   * Only the grip starts a drag — AC/002c. Needed as soon as a row holds something
+   * you can TYPE in: with the whole row draggable, pressing the mouse in an input
+   * and moving drags the row instead of selecting the text.
+   */
+  handle?: boolean;
+  /** Show each row's position number. On by default, as it always was. */
+  numbers?: boolean;
   emptyMessage?: string;
 
   /**
@@ -77,6 +85,7 @@ const props = withDefaults(defineProps<ApexFieldProps & {
   /* Tri-state: yes, no, or "ask the resolver". Vue casts an absent boolean
      prop to false, which would read as a denial and silence the resolver. */
   canAddNew: undefined,
+  numbers: true,
 });
 
 const emit = defineEmits<{
@@ -146,7 +155,31 @@ const canDown = computed(() => {
   return idx.length > 0 && idx[idx.length - 1] < items.value.length - 1;
 });
 
+/**
+ * Did this event start in something the user interacts with INSIDE the row — an
+ * input, a button, a link? Then it belongs to that control and the row must leave it
+ * alone. AC/002c: a click into a URL box was selecting the row, and a Space typed
+ * into it was preventDefault()ed and swallowed.
+ */
+const CONTROL = 'input, textarea, select, button, a[href], [contenteditable="true"], [role="textbox"]';
+function fromControl(e: Event): boolean {
+  const t = e.target as HTMLElement | null;
+  const hit = t?.closest?.(CONTROL);
+  return !!hit && hit !== e.currentTarget && (e.currentTarget as HTMLElement)?.contains(hit);
+}
+
+/* `handle` mode: the row a grip was pressed on, and only while it is held. */
+const armed = ref<number | null>(null);
+const disarm = () => { armed.value = null; };
+if (typeof window !== 'undefined') {
+  window.addEventListener('pointerup', disarm);
+  onBeforeUnmount(() => window.removeEventListener('pointerup', disarm));
+}
+const rowDraggable = (i: number, o: ApexOption) =>
+  canDrag.value && !o.disabled && (!props.handle || armed.value === i);
+
 function toggle(o: ApexOption, event: MouseEvent) {
+  if (fromControl(event)) return;
   if (props.disabled || props.readonly || o.disabled) return;
   if (!many.value) {
     emit('update:selection', isChosen(o) ? [] : [o.value]);
@@ -226,10 +259,13 @@ function onDrop(i: number) {
   order.splice(i, 0, ...order.splice(from, 1));
   apply(order, from, i);
 }
-function onDragEnd() { dragFrom.value = null; dragOver.value = null; }
+function onDragEnd() { dragFrom.value = null; dragOver.value = null; disarm(); }
 
 /** Keyboard reordering: alt+arrows move the focused row. */
 function onRowKey(i: number, o: ApexOption, e: KeyboardEvent) {
+  /* A key typed into a control inside the row is that control's key — Space in a
+     URL box, Alt+Arrow to move the caret by word. */
+  if (fromControl(e)) return;
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(o, e as unknown as MouseEvent); return; }
   if (!e.altKey || props.disabled || filtering.value) return;
   const delta = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
@@ -281,14 +317,16 @@ function onRowKey(i: number, o: ApexOption, e: KeyboardEvent) {
               :data-disabled="o.disabled ? 'true' : 'false'"
               :data-dragging="dragFrom === items.indexOf(o) ? 'true' : 'false'"
               :data-dragover="dragOver === items.indexOf(o) ? 'true' : 'false'"
-              :draggable="canDrag && !o.disabled"
+              :draggable="rowDraggable(items.indexOf(o), o) ? 'true' : 'false'"
               @click="toggle(o, $event)"
               @keydown="onRowKey(items.indexOf(o), o, $event)"
               @dragstart="onDragStart(items.indexOf(o), $event)"
               @dragover="onDragOver(items.indexOf(o), $event)"
               @drop.prevent="onDrop(items.indexOf(o))"
               @dragend="onDragEnd">
-            <ApexIcon v-if="canDrag" name="drag_indicator" class="apex-order__grip" :class="ui.grip" :size="18" />
+            <ApexIcon v-if="canDrag" name="drag_indicator" class="apex-order__grip" :class="ui.grip" :size="18"
+                      :data-handle="handle ? 'true' : undefined"
+                      @pointerdown="armed = items.indexOf(o)" />
             <span v-if="checkbox" class="apex-cb__box" :class="ui.checkbox" :data-on="isChosen(o)" aria-hidden="true">
               <ApexIcon v-if="isChosen(o)" name="check" :size="14" />
             </span>
@@ -298,7 +336,7 @@ function onRowKey(i: number, o: ApexOption, e: KeyboardEvent) {
               <slot name="item" :item="o" :index="items.indexOf(o)">{{ o.label }}</slot>
               <span v-if="o.help" class="apex-pop__help" :class="ui.optionHelp">{{ o.help }}</span>
             </span>
-            <span class="apex-order__num" :class="ui.index">{{ items.indexOf(o) + 1 }}</span>
+            <span v-if="numbers" class="apex-order__num" :class="ui.index">{{ items.indexOf(o) + 1 }}</span>
           </li>
           <li v-if="!visible.length" class="apex-pop__empty" :class="ui.empty" role="presentation">
             {{ emptyMessage || t('apexui.noResults') }}

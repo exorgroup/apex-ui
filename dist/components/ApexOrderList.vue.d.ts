@@ -21,6 +21,14 @@ type __VLS_Props = ApexFieldProps & {
     extremes?: boolean;
     /** Turn off drag-and-drop, leaving only the buttons. */
     noDrag?: boolean;
+    /**
+     * Only the grip starts a drag — AC/002c. Needed as soon as a row holds something
+     * you can TYPE in: with the whole row draggable, pressing the mouse in an input
+     * and moving drags the row instead of selecting the text.
+     */
+    handle?: boolean;
+    /** Show each row's position number. On by default, as it always was. */
+    numbers?: boolean;
     emptyMessage?: string;
     /**
      * Offer an "Add new" row at the foot of the list, for when the record the
@@ -50,12 +58,12 @@ type __VLS_Props = ApexFieldProps & {
     moveButtonSize?: string;
     gripColor?: string;
 };
-declare var __VLS_32: {
+declare var __VLS_36: {
     item: ApexOption<unknown>;
     index: number;
 };
 type __VLS_Slots = {} & {
-    item?: (props: typeof __VLS_32) => any;
+    item?: (props: typeof __VLS_36) => any;
 };
 declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {} & {
     change: () => any;
@@ -86,6 +94,7 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
     controls: "start" | "end" | "top" | "none";
     controlsAlign: "start" | "center" | "end";
     extremes: boolean;
+    numbers: boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithSlots<typeof __VLS_component, __VLS_Slots>;
 export default _default;

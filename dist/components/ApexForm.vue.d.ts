@@ -1,5 +1,5 @@
 import type { ApexOverlayTransition } from '../types';
-import { type FormField, type FormSchema } from '../core/form';
+import { type FormField, type FormSchema, type FormSection } from '../core/form';
 import type { ApexFormClasses } from '../types';
 type __VLS_Props = ApexOverlayTransition & {
     schema: FormSchema;
@@ -51,28 +51,57 @@ type __VLS_Props = ApexOverlayTransition & {
  * help: nothing was exposed to clear it.
  */
 declare function reset(): void;
+/**
+ * Edit a field from OUTSIDE the field grid — the `head-end` slot's `update`.
+ *
+ * A control in the header that stands for a field (the design's Draft / Published switch
+ * beside a page title) must go through the same path as the field itself, or the form
+ * does not know it changed: the value would be saved, but "Unsaved changes" would never
+ * show, a stale server error would stay, and `field-change` would not fire. So the field
+ * is found by key and handed to `onInput`, exactly as if its own control had changed.
+ *
+ * A key with no field in the schema still sets the value and marks the form dirty — the
+ * host asked for a change, and the footer must not claim there is nothing to save.
+ *
+ * TBX AG/013.
+ */
+declare function updateFromOutside(key: string, v: unknown): void;
 declare function focusField(key?: string): void;
 /** Uncontrolled falls back to the component's own flag. */
 declare function isOpen(): boolean;
 declare function cancel(): void;
 declare function submit(): void;
-declare var __VLS_12: {}, __VLS_47: string, __VLS_48: {
+declare var __VLS_12: {
+    update: typeof updateFromOutside;
+}, __VLS_23: {}, __VLS_29: string, __VLS_30: {
+    section: FormSection;
+}, __VLS_56: string, __VLS_57: {
     field: FormField;
     value: unknown;
     error: string[];
     update: (v: unknown) => void;
     blur: () => void;
-}, __VLS_64: {
+}, __VLS_68: string, __VLS_69: {
+    section: FormSection;
+}, __VLS_71: {}, __VLS_79: {
     submit: typeof submit;
     cancel: typeof cancel;
     processing: boolean;
 };
 type __VLS_Slots = {} & {
-    [K in NonNullable<typeof __VLS_47>]?: (props: typeof __VLS_48) => any;
+    [K in NonNullable<typeof __VLS_29>]?: (props: typeof __VLS_30) => any;
+} & {
+    [K in NonNullable<typeof __VLS_56>]?: (props: typeof __VLS_57) => any;
+} & {
+    [K in NonNullable<typeof __VLS_68>]?: (props: typeof __VLS_69) => any;
 } & {
     'head-end'?: (props: typeof __VLS_12) => any;
 } & {
-    actions?: (props: typeof __VLS_64) => any;
+    'rail-end'?: (props: typeof __VLS_23) => any;
+} & {
+    aside?: (props: typeof __VLS_71) => any;
+} & {
+    actions?: (props: typeof __VLS_79) => any;
 };
 declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     submit: typeof submit;
@@ -103,8 +132,8 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
 }>, {
     form: Record<string, unknown> | null;
     readonly: boolean;
-    modelValue: Record<string, unknown>;
     open: boolean | null;
+    modelValue: Record<string, unknown>;
     actions: boolean;
     ripple: boolean;
     eager: boolean;

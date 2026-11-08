@@ -465,11 +465,23 @@ defineExpose({ focusRow, toggle, select, selectAllVisible });
           <tfoot v-if="wantsFooter && flat.length">
             <tr>
               <td v-if="gutter" class="apex-dt__gutter"></td>
-              <td v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col)">
-                <span v-if="ci === 0 && !col.aggregate" class="apex-dt__footlabel">Total</span>
-                <template v-else-if="col.aggregate">
-                  {{ formatCell(aggregateTree(sorted, col, col.aggregate), col) }}
-                </template>
+              <td v-for="(col, ci) in cols" :key="ci" :style="cellStyle(col)" :data-numeric="isNumeric(col)">
+                <!-- A footer cell can be written by the caller, because not every total
+                     is an aggregate of the column above it. A RATIO is the case that
+                     proves it: the total of an attendance column is
+                     `sum(attended) / sum(issued)`, and every mode this component offers
+                     computes something else. `avg` — the one that looks right — averages
+                     the rows' own percentages, which is a different number as soon as
+                     there is more than one row and the SAME number when there is exactly
+                     one. That is a wrong answer that hides in the case somebody would
+                     check it by hand. -->
+                <slot :name="`footer:${col.field}`" :column="col" :nodes="sorted"
+                      :value="col.aggregate ? aggregateTree(sorted, col, col.aggregate) : null">
+                  <span v-if="ci === 0 && !col.aggregate" class="apex-dt__footlabel">Total</span>
+                  <template v-else-if="col.aggregate">
+                    {{ formatCell(aggregateTree(sorted, col, col.aggregate), col) }}
+                  </template>
+                </slot>
               </td>
             </tr>
           </tfoot>

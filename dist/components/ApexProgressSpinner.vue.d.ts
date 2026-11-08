@@ -35,11 +35,11 @@ type __VLS_Slots = {} & {
 };
 declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
     size: number | string;
+    duration: string;
     max: number;
     strokeWidth: number;
     arc: number;
     severity: "primary" | "success" | "warning" | "danger" | "auto";
-    duration: string;
     showTrack: boolean;
     linecap: "round" | "butt";
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;

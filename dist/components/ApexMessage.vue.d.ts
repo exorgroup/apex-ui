@@ -38,8 +38,8 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
     close: () => void;
     "life-end": () => void;
 }, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
-    onClose?: (() => any) | undefined;
     "onUpdate:visible"?: ((v: boolean) => any) | undefined;
+    onClose?: (() => any) | undefined;
     "onLife-end"?: (() => any) | undefined;
 }>, {
     size: "sm" | "md" | "lg";

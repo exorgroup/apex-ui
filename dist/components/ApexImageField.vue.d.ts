@@ -49,11 +49,11 @@ declare const _default: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {
     "onUpdate:removed"?: ((v: boolean) => any) | undefined;
 }>, {
     type: string;
-    modelValue: File | null;
     target: {
         width: number;
         height: number;
     } | null;
+    modelValue: File | null;
     accept: string;
     maxFileSize: number;
     chooseLabel: string;

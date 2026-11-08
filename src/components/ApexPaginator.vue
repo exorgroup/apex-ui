@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<{
   first?: number;
   rows?: number;
   totalRecords?: number;
-  /** Page-size choices; omit to hide the selector. */
+  /** Page-size choices; omit to hide the selector. `0` is "All" — every row on one page. */
   rowsPerPageOptions?: number[];
   /** Page buttons either side of the current one. */
   pageLinks?: number;
@@ -29,10 +29,13 @@ const emit = defineEmits<{
   (e: 'page', payload: { first: number; rows: number; page: number }): void;
 }>();
 
-const pageCount = computed(() => Math.max(1, Math.ceil(props.totalRecords / Math.max(1, props.rows))));
-const page = computed(() => Math.floor(props.first / Math.max(1, props.rows)));
+/* `rows: 0` is "All" (AQ, TBX's Sales report): one page holding every row. `size` is the
+   page size the arithmetic uses, so 0 never reaches a division. */
+const size = computed(() => (props.rows > 0 ? props.rows : Math.max(1, props.totalRecords)));
+const pageCount = computed(() => Math.max(1, Math.ceil(props.totalRecords / size.value)));
+const page = computed(() => Math.floor(props.first / size.value));
 const from = computed(() => (props.totalRecords ? props.first + 1 : 0));
-const to = computed(() => Math.min(props.first + props.rows, props.totalRecords));
+const to = computed(() => Math.min(props.first + size.value, props.totalRecords));
 
 const links = computed(() => {
   const span = props.pageLinks;
@@ -51,7 +54,7 @@ const summary = computed(() => props.template
 function goTo(p: number) {
   if (props.disabled) return;
   const next = Math.min(Math.max(0, p), pageCount.value - 1);
-  const first = next * props.rows;
+  const first = next * size.value;
   emit('update:first', first);
   emit('page', { first, rows: props.rows, page: next });
 }
@@ -85,7 +88,7 @@ function setRows(n: number) {
       <span>Rows</span>
       <select :value="rows" :disabled="disabled" aria-label="Rows per page"
               @change="setRows(Number(($event.target as HTMLSelectElement).value))">
-        <option v-for="n in rowsPerPageOptions" :key="n" :value="n">{{ n }}</option>
+        <option v-for="n in rowsPerPageOptions" :key="n" :value="n">{{ n === 0 ? 'All' : n }}</option>
       </select>
     </label>
   </div>

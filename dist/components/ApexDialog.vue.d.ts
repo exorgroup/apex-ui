@@ -34,13 +34,13 @@ type __VLS_Props = ApexOverlayTransition & {
     contentClass?: string;
 };
 declare function close(): void;
-declare var __VLS_13: {}, __VLS_21: {}, __VLS_23: {};
+declare var __VLS_21: {}, __VLS_29: {}, __VLS_31: {};
 type __VLS_Slots = {} & {
-    header?: (props: typeof __VLS_13) => any;
+    header?: (props: typeof __VLS_21) => any;
 } & {
-    default?: (props: typeof __VLS_21) => any;
+    default?: (props: typeof __VLS_29) => any;
 } & {
-    footer?: (props: typeof __VLS_23) => any;
+    footer?: (props: typeof __VLS_31) => any;
 };
 declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     close: typeof close;
@@ -51,17 +51,17 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     hide: () => void;
     "after-hide": () => void;
 }, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
+    "onUpdate:visible"?: ((v: boolean) => any) | undefined;
     onShow?: (() => any) | undefined;
     onHide?: (() => any) | undefined;
-    "onUpdate:visible"?: ((v: boolean) => any) | undefined;
     "onAfter-hide"?: (() => any) | undefined;
 }>, {
     transition: import("..").OverlayTransitionName;
-    position: DialogPosition;
+    closeOnEscape: boolean;
     zIndex: number;
+    position: DialogPosition;
     modal: boolean;
     closable: boolean;
-    closeOnEscape: boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 declare const _default: __VLS_WithSlots<typeof __VLS_component, __VLS_Slots>;
 export default _default;

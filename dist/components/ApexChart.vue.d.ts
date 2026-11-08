@@ -355,6 +355,7 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
         full: boolean;
     }) => any) | undefined;
 }>, {
+    animation: boolean;
     orientation: "vertical" | "horizontal";
     barRadius: number | {
         tl?: number;
@@ -365,7 +366,6 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     height: string | number;
     direction: "ltr" | "rtl" | "auto";
     markerSize: number;
-    animation: boolean;
     animationDuration: number;
     curve: CurveType;
     tension: number;

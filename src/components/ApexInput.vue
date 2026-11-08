@@ -195,10 +195,14 @@ onBeforeUnmount(() => {
 
 defineExpose({ focus: () => el.value?.focus() });
 const isFloat = useFloatLabel(props);
+/* A float label and a placeholder share one space, so a floating input drops the placeholder —
+   but only when there IS a label to collide with. A search box has none (it is named by
+   aria-label), and dropping the hint there left an empty box with a magnifier. Phase AI. */
+const floatsOverHint = computed(() => isFloat.value && !!props.label);
 </script>
 
 <template>
-  <ApexField v-bind="fieldProps" :value="modelValue" :filled="filled || (isFloat && !!placeholder)" :focused="focused"
+  <ApexField v-bind="fieldProps" :value="modelValue" :filled="filled || (floatsOverHint && !!placeholder)" :focused="focused"
              v-slot="{ id, describedBy, invalid, statusGlyph, ui }">
     <div ref="root" :style="typeahead ? 'position:relative' : undefined">
       <div ref="box" class="apex-ctl" :class="[{ 'apex-ctl--mono': mono }, ui.control]"
@@ -208,7 +212,7 @@ const isFloat = useFloatLabel(props);
         </slot>
         <span v-if="prefix" class="apex-ctl__affix" :class="ui.affix">{{ prefix }}</span>
         <input ref="el" class="apex-ctl__input" :class="ui.input" :id="id" :name="name || id" :type="inputType"
-               :value="modelValue ?? ''" :placeholder="isFloat ? undefined : placeholder"
+               :value="modelValue ?? ''" :placeholder="floatsOverHint ? undefined : placeholder"
                :disabled="disabled" :readonly="readonly" :required="required" :maxlength="maxlength"
                :autocomplete="typeahead ? 'off' : autocomplete" :aria-describedby="describedBy"
                :aria-invalid="invalid || undefined"

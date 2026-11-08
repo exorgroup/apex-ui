@@ -405,8 +405,8 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     onReady?: (() => any) | undefined;
 }>, {
     size: "sm" | "md" | "lg";
-    paste: boolean | PasteOptions;
     placeholder: string;
+    paste: boolean | PasteOptions;
     suggestions: boolean;
     spellcheck: boolean;
     bordered: boolean;

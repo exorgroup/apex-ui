@@ -122,6 +122,30 @@ function removeRule(i: number) {
   draft.value.constraints.splice(i, 1);
   if (!draft.value.constraints.length) addRule();
 }
+/* `in` takes a LIST; every other mode takes one value. `matches()` returns FALSE for an
+   `in` whose filter is not an array, so a mode change has to carry the value across rather
+   than leave the previous shape behind — otherwise picking "Any of" on a filled rule matches
+   nothing at all, which is indistinguishable from a filter that simply found no rows. */
+function setMode(c: { value: unknown; matchMode: FilterMatchMode }, mode: FilterMatchMode) {
+  c.matchMode = mode;
+  if (mode === 'in') {
+    c.value = Array.isArray(c.value) ? c.value : (c.value === null || c.value === undefined || c.value === '' ? [] : [c.value]);
+  } else if (Array.isArray(c.value)) {
+    c.value = c.value.length ? c.value[0] : null;
+  }
+}
+
+function toggleAnyOf(c: { value: unknown }, option: unknown, on: boolean) {
+  const list = Array.isArray(c.value) ? [...c.value] : [];
+  const i = list.findIndex((v) => String(v) === String(option));
+  if (on && i === -1) list.push(option);
+  if (!on && i !== -1) list.splice(i, 1);
+  c.value = list;
+}
+
+const isChosen = (c: { value: unknown }, option: unknown) =>
+  Array.isArray(c.value) && c.value.some((v) => String(v) === String(option));
+
 function apply() {
   emit('update', {
     operator: draft.value.operator,
@@ -133,13 +157,18 @@ function clear() {
   emit('clear');
   open.value = false;
 }
+/* An EMPTY list is not a filter. `[]` is neither null nor '', so an "Any of" rule with
+   nothing ticked used to read as active — a lit filter icon over unfiltered rows, and a
+   Clear button that appeared to do nothing when pressed. */
+const filled = (v: unknown) => (Array.isArray(v) ? v.length > 0 : v != null && v !== '');
+
 const active = computed(() => {
   const m = props.meta;
   if (!m) return false;
-  if (m.constraints) return m.constraints.some((c) => c.value != null && c.value !== '');
-  return m.value != null && m.value !== '' && !(Array.isArray(m.value) && !m.value.length);
+  if (m.constraints) return m.constraints.some((c) => filled(c.value));
+  return filled(m.value);
 });
-const ruleCount = computed(() => props.meta?.constraints?.filter((c) => c.value != null && c.value !== '').length || 0);
+const ruleCount = computed(() => props.meta?.constraints?.filter((c) => filled(c.value)).length || 0);
 const inputType = computed(() => (type.value === 'number' ? 'number' : type.value === 'date' ? 'date' : 'text'));
 
 /* Which shape the row draws. The MODE decides, not the type: a date column defaults to a single
@@ -281,11 +310,23 @@ function pushRange(value: unknown) {
 
         <div class="apex-dtf__rule" :class="ui?.filterRule">
           <select class="apex-dtf__ctl" :class="ui?.filterControl" :value="c.matchMode" aria-label="Match mode"
-                  @change="c.matchMode = ($event.target as HTMLSelectElement).value as FilterMatchMode">
+                  @change="setMode(c, ($event.target as HTMLSelectElement).value as FilterMatchMode)">
             <option v-for="m in modes" :key="m" :value="m">{{ LABELS[m] }}</option>
           </select>
 
-          <select v-if="type === 'select' || type === 'multiselect'" class="apex-dtf__ctl" :class="ui?.filterControl"
+          <!-- "Any of" is a LIST, so it gets checkboxes rather than a dropdown: a native
+               `multiple` select needs ctrl-click to add a second option and shows no sign that
+               it can hold more than one, which is why this read as "Any of behaves like
+               Equals". Ticking is discoverable and says plainly that several are allowed. -->
+          <div v-if="(type === 'select' || type === 'multiselect') && c.matchMode === 'in'"
+               class="apex-dtf__anyof" :class="ui?.filterAnyOf" role="group" :aria-label="`Filter ${column.header}`">
+            <label v-for="o in column.filterOptions" :key="String(o.value)" class="apex-dtf__anyof-opt" :class="ui?.filterAnyOfOption">
+              <input type="checkbox" :checked="isChosen(c, o.value)"
+                     @change="toggleAnyOf(c, o.value, ($event.target as HTMLInputElement).checked)" />
+              <span>{{ o.label }}</span>
+            </label>
+          </div>
+          <select v-else-if="type === 'select' || type === 'multiselect'" class="apex-dtf__ctl" :class="ui?.filterControl"
                   :value="c.value as string" aria-label="Value"
                   @change="c.value = ($event.target as HTMLSelectElement).value">
             <option value="">—</option>

@@ -20,9 +20,9 @@ type __VLS_Props = {
     lastLineWidth?: string;
 };
 declare const _default: import("vue").DefineComponent<__VLS_Props, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {}, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{}>, {
-    shape: "rectangle" | "rounded" | "square" | "circle" | "text";
     duration: string;
     animation: "wave" | "pulse" | "none";
+    shape: "rectangle" | "rounded" | "square" | "circle" | "text";
     lines: number;
     lastLineWidth: string;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;

@@ -35,9 +35,9 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
     onClick?: (() => any) | undefined;
 }>, {
     size: string;
-    position: "bottom-end" | "bottom-start" | "bottom-center";
-    zIndex: number;
     target: "window" | "parent" | string;
+    zIndex: number;
+    position: "bottom-end" | "bottom-start" | "bottom-center";
     icon: string;
     offset: string;
     behavior: "smooth" | "auto";

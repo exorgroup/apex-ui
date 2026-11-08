@@ -59,16 +59,16 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     hide: () => void;
     "after-hide": () => void;
 }, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
+    "onUpdate:visible"?: ((v: boolean) => any) | undefined;
     onShow?: (() => any) | undefined;
     onHide?: (() => any) | undefined;
-    "onUpdate:visible"?: ((v: boolean) => any) | undefined;
     "onAfter-hide"?: (() => any) | undefined;
 }>, {
-    position: DrawerPosition;
+    closeOnEscape: boolean;
     zIndex: number;
+    position: DrawerPosition;
     modal: boolean;
     closable: boolean;
-    closeOnEscape: boolean;
     breakpoint: string;
     showHeader: boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;

@@ -100,9 +100,9 @@ declare const _default: import("vue").DefineComponent<__VLS_Props, {
         width: number;
         height: number;
     } | null;
-    src: File | Blob | string | null;
     maxHeight: number;
     mode: "auto" | "manual";
+    src: File | Blob | string | null;
     showControls: boolean;
     lockRatio: boolean;
     quality: number;

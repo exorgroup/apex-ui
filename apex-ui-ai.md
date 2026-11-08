@@ -197,6 +197,24 @@ check:
 origin: [Phase AY](https://github.com/exorgroup/apex-tbx/blob/4922025e94dd836083cadb557ac0a9926cce9bc7/.claude/apexframework/phase-ay-tasks.md)
 Pass a screen-reader-only slot for the label; catch Enter / Esc on a wrapper (native events bubble). Kit candidates both.
 
+### An anchored panel that mounts AFTER its overlay opened must still be placed (fixed in 0.1.1)
+kind: hard
+check: `tests/anchored-late-panel.spec.ts`
+origin: [TL3/012](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL3/reports/TL3-012.md)
+`useAnchoredOverlay` placed the panel only when `open` turned true. `ApexInput` mounts its list only with items or without `:loading`, so on a server search there was no panel then; the answer drew at `visibility: hidden` — nothing on the first search, results on the second. 0.1.1 also places when the panel element appears while open. A component that renders its panel behind a further `v-if` relies on that watch; keep it. Hosts still on 0.1.0: leave `:loading` off and say "Searching…" through `empty-message` (Apex Till's screens do, `ScreenSourceRulesTest`).
+
+### `ApexForm`'s modal shell is NOT teleported and stands at z-index 900
+kind: hard
+check: `apex-till/tests/Feature/ScreenSourceRulesTest.php` (every drawer below 900)
+origin: [TL3/012](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL3/reports/TL3-012.md)
+`ApexDrawer` and `ApexDialog` teleport to `<body>` at 1000. A drawer at 900 opened the item form UNDER itself; a drawer that opens a form modal needs `:z-index` below 900.
+
+### `currency` is printed as given, and the floating label clears one glyph
+kind: hard
+check: `apex-till/tests/Feature/ScreenSourceRulesTest.php` (no `currency="EUR"`)
+origin: [TL3/012](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL3/reports/TL3-012.md)
+`currency="EUR"` showed the letters and ran into "Cost per outer" (`--apex-float-x` makes room for 26px). Pass the sign: `currency="€"`.
+
 ### `ApexCalendar`'s default chip styles reach into your slot markup
 kind: hard
 check:

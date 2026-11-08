@@ -56,21 +56,21 @@ declare const _default: import("vue").DefineComponent<__VLS_Props, {
     show: () => void;
     hide: () => void;
 }, string, import("vue").PublicProps, Readonly<__VLS_Props> & Readonly<{
+    onShow?: (() => any) | undefined;
+    onHide?: (() => any) | undefined;
     "onUpdate:open"?: ((v: boolean) => any) | undefined;
     "onItem-click"?: ((payload: {
         item: SpeedDialItem;
         index: number;
         event: MouseEvent;
     }) => any) | undefined;
-    onShow?: (() => any) | undefined;
-    onHide?: (() => any) | undefined;
 }>, {
     size: ApexSize;
     type: SpeedDialType;
     radius: number;
+    gap: number;
     position: "inline" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
     icon: string;
-    gap: number;
     severity: string;
     direction: SpeedDialDirection;
     transitionDelay: number;

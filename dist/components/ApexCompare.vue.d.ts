@@ -46,8 +46,8 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
     modelValue: number;
     step: number;
     orientation: "horizontal" | "vertical";
-    handleSize: string;
     handle: boolean;
+    handleSize: string;
     pageStep: number;
     dividerWidth: string;
     handleRadius: string;

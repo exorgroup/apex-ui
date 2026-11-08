@@ -569,6 +569,13 @@ export interface FormSection {
    * do this job — it is form-wide, so `ui.cell` is every cell in the form.
    */
   class?: string;
+  /**
+   * Short state on this section's rail button — `off`, `test`, `live`. AD/002.
+   * A string, or `{ text, tone }` where tone is neutral | success | warn | danger |
+   * accent. Rail layout only; an error count on the section takes its place.
+   */
+  railBadge?: string | { text: string; tone?: 'neutral' | 'success' | 'warn' | 'danger' | 'accent' };
+  /* AF/012: also shown on the `sidebar` layout's nav, with the same rule. */
   [key: string]: unknown;
 }
 
@@ -577,7 +584,7 @@ export interface NormalisedSchema {
   subtitle?: string;
   icon?: string;
   shell: 'page' | 'modal';
-  layout: 'long' | 'tabs' | 'sidebar';
+  layout: 'long' | 'tabs' | 'sidebar' | 'rail';
   submitLabel: string;
   cancelLabel: string;
   sections: FormSection[];
@@ -721,7 +728,10 @@ export function normalise(schema?: FormSchema): NormalisedSchema {
     subtitle: s.subtitle,
     icon: s.icon,
     shell: s.shell === 'page' ? 'page' : 'modal',
-    layout: (['long', 'tabs', 'sidebar'].indexOf(s.layout as string) > -1 ? s.layout : 'long') as NormalisedSchema['layout'],
+    /* An unknown layout falls back to `long` rather than throwing — and that is why
+       adding one is TWO edits. `rail` rendered as `long` with no rail at all until it
+       joined this list, which looks like a broken component and is a missing string. */
+    layout: (['long', 'tabs', 'sidebar', 'rail'].indexOf(s.layout as string) > -1 ? s.layout : 'long') as NormalisedSchema['layout'],
     submitLabel: s.submitLabel || 'Save changes',
     cancelLabel: s.cancelLabel || 'Cancel',
     sections,

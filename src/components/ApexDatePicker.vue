@@ -18,7 +18,7 @@ import ApexIcon from './ApexIcon.vue';
 import { pickFieldProps } from '../core/utils';
 import {
   EN_LOCALE, addMonths, formatDate, formatTime, isSameDay, monthGrid,
-  parseDate, startOfDay, weekdayLabels, type ApexDateLocale,
+  parseDate, parseIso, startOfDay, weekdayLabels, type ApexDateLocale,
 } from '../core/dates';
 import type { ApexFieldProps } from '../types';
 
@@ -149,6 +149,12 @@ const calStyle = computed(() => {
 const toDate = (v: DateValue): Date | null => {
   if (!v) return null;
   if (v instanceof Date) return v;
+  /* ISO FIRST. `dateFormat` says what the input SHOWS; it is not what a model value
+     holds, and a JSON server sends ISO-8601. Read through `dd/mm/yy`, an ISO stamp
+     comes back as 20/06/1905 — and is then emitted straight back out, so a form the
+     user has not touched reports unsaved changes. */
+  const iso = parseIso(String(v));
+  if (iso) return iso;
   return parseDate(String(v), props.dateFormat, loc.value);
 };
 const out = (d: Date | null): DateValue => {

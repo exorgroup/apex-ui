@@ -33,8 +33,8 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
 }>, {
     slide: number;
     align: "start" | "center" | "end";
-    orientation: "horizontal" | "vertical";
     gap: string;
+    orientation: "horizontal" | "vertical";
     slidesPerPage: number;
     indicators: boolean;
     indicatorPosition: "left" | "center" | "right";

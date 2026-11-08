@@ -87,6 +87,40 @@ export function formatTime(date: Date, hourFormat: '12' | '24' = '24', showSecon
   return hourFormat === '12' ? `${base} ${h24 < 12 ? locale.am : locale.pm}` : base;
 }
 
+/**
+ * ISO-8601, which is what every JSON server sends.
+ *
+ * `parseDate` below reads a string through a DISPLAY format, so it cannot be given
+ * `2026-05-22T17:10:33Z` — with the default `dd/mm/yy` it reads day 20, month 6 and
+ * year 05, and hands back 20/06/1905. Callers holding a model value must try this
+ * first; a display format can never legitimately produce a leading `yyyy-mm-dd`, so
+ * the two shapes do not overlap.
+ *
+ * A string carrying a zone (`Z` or `+02:00`) names an absolute instant, so `Date`
+ * parses it and the local rendering follows. A string WITHOUT one is a wall-clock
+ * reading and is built field by field — `new Date('2026-09-03')` is UTC midnight,
+ * which is the previous day anywhere west of Greenwich.
+ */
+const ISO_RE =
+  /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?)?(Z|[+-]\d{2}:?\d{2})?$/;
+
+export function parseIso(text: string): Date | null {
+  const m = ISO_RE.exec(text.trim());
+  if (!m) return null;
+
+  if (m[7]) {
+    const abs = new Date(text.trim());
+    return Number.isNaN(abs.getTime()) ? null : abs;
+  }
+
+  const d = new Date(
+    Number(m[1]), Number(m[2]) - 1, Number(m[3]),
+    Number(m[4] ?? 0), Number(m[5] ?? 0), Number(m[6] ?? 0), 0,
+  );
+  // A real date, not a rolled-over one: 2026-02-31 must fail rather than become March.
+  return d.getMonth() === Number(m[2]) - 1 && d.getDate() === Number(m[3]) ? d : null;
+}
+
 /** Best-effort parser for the same tokens. Returns null when the text does not fit. */
 export function parseDate(text: string, fmt: string, locale: ApexDateLocale = EN_LOCALE): Date | null {
   if (!text) return null;

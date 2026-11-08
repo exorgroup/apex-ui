@@ -170,6 +170,15 @@ export interface FormSection {
      * do this job — it is form-wide, so `ui.cell` is every cell in the form.
      */
     class?: string;
+    /**
+     * Short state on this section's rail button — `off`, `test`, `live`. AD/002.
+     * A string, or `{ text, tone }` where tone is neutral | success | warn | danger |
+     * accent. Rail layout only; an error count on the section takes its place.
+     */
+    railBadge?: string | {
+        text: string;
+        tone?: 'neutral' | 'success' | 'warn' | 'danger' | 'accent';
+    };
     [key: string]: unknown;
 }
 export interface NormalisedSchema {
@@ -177,7 +186,7 @@ export interface NormalisedSchema {
     subtitle?: string;
     icon?: string;
     shell: 'page' | 'modal';
-    layout: 'long' | 'tabs' | 'sidebar';
+    layout: 'long' | 'tabs' | 'sidebar' | 'rail';
     submitLabel: string;
     cancelLabel: string;
     sections: FormSection[];

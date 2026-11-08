@@ -100,8 +100,8 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     "onUpdate:open"?: ((v: boolean) => any) | undefined;
 }>, {
     radius: string;
-    modelValue: number;
     open: boolean;
+    modelValue: number;
     fullscreen: boolean;
     actions: GalleryAction[];
     closable: boolean;

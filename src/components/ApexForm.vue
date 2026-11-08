@@ -11,7 +11,8 @@
  *
  * Ported from the browser mirror's web/apex-form.js — keep the two in step.
  */
-import { computed, nextTick, reactive, ref, watch, type Component, inject } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, useSlots, watch,
+  type Component, inject } from 'vue';
 import { APEX_UI_OPTIONS } from '../core/symbols';
 import type { ApexUiOptions, ApexOverlayTransition } from '../types';
 import { useOverlayTransition } from '../core/overlayTransition';
@@ -260,14 +261,78 @@ const menuItems = (f: FormField) => (f.items || []) as MenuItem[];
 const dialItems = (f: FormField) => (f.items || []) as SpeedDialItem[];
 
 const sections = computed<FormSection[]>(() => sch.value.sections);
-/** Long shows every section; tabs and sidebar show one. Paired with its index,
-    because a tab panel has to reference the tab that selected it. */
+/** Long and RAIL show every section; tabs and sidebar show one. Paired with its
+    index, because a tab panel has to reference the tab that selected it. */
+const stacked = computed(() => sch.value.layout === 'long' || sch.value.layout === 'rail');
 const visibleSections = computed(() => {
-  if (sch.value.layout === 'long') return sections.value.map((s, i) => ({ s, i }));
+  if (stacked.value) return sections.value.map((s, i) => ({ s, i }));
   const i = sections.value[active.value] ? active.value : 0;
   return [{ s: sections.value[i], i }];
 });
-const tabbed = computed(() => sch.value.layout !== 'long' && sections.value.length > 1);
+/**
+ * `tabbed` is what drives the TABPANEL contract, so a rail must not be in it.
+ *
+ * A tablist owns what is visible and its buttons are `role="tab"` with
+ * `aria-selected`. A rail owns nothing — every pane is already on the page — so it
+ * is a `<nav>` with `aria-current`, and the panes are ordinary sections. Calling it
+ * a tablist would promise a keyboard user that arrow keys change what is shown.
+ */
+const tabbed = computed(() => !stacked.value && sections.value.length > 1);
+const railed = computed(() => sch.value.layout === 'rail' && sections.value.length > 1);
+
+/* AC/002b. Whether the host filled a section's aside or head-end. Read from the
+   slots object rather than a prop, so a section that does not use them has no
+   extra markup at all — every form in the product renders through this template. */
+const slots = useSlots();
+const hasAside = (s: FormSection) => !!slots['section-aside-' + s.id];
+const hasHeadEnd = (s: FormSection) => !!slots['section-head-' + s.id];
+
+/* AD/002. A section's rail badge, as text and tone, whichever shape it was given. */
+const railBadgeText = (s: FormSection) =>
+  typeof s.railBadge === 'string' ? s.railBadge : s.railBadge?.text || '';
+const railBadgeTone = (s: FormSection) =>
+  typeof s.railBadge === 'object' && s.railBadge?.tone ? s.railBadge.tone : 'neutral';
+
+/* One element per section, for the rail to scroll to and to watch. */
+const paneEls = ref<Record<string, HTMLElement | null>>({});
+const setPaneEl = (id: string) => (el: unknown) => { paneEls.value[id] = (el as HTMLElement) || null; };
+
+/**
+ * Clicking the rail SCROLLS; it does not switch. `active` still moves, so the mark
+ * is right immediately rather than waiting for the observer to catch up on a slow
+ * smooth scroll.
+ */
+function goRail(i: number) {
+  active.value = i;
+  const el = paneEls.value[sections.value[i]?.id as string];
+  el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
+ * Scroll spy. `rootMargin` biases the reading towards the top of the viewport, so
+ * the section you are READING is marked rather than the one that has just appeared
+ * at the bottom.
+ *
+ * Guarded, because jsdom and SSR have no IntersectionObserver. Without one the rail
+ * still renders and still navigates; only the marking-as-you-scroll is lost, which
+ * is the right thing to lose.
+ */
+let spy: IntersectionObserver | null = null;
+function watchPanes() {
+  spy?.disconnect();
+  if (!railed.value || typeof IntersectionObserver === 'undefined') return;
+  spy = new IntersectionObserver((entries) => {
+    const seen = entries.filter((e) => e.isIntersecting)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+    if (!seen) return;
+    const i = sections.value.findIndex((s) => s.id === (seen.target as HTMLElement).dataset.section);
+    if (i > -1) active.value = i;
+  }, { rootMargin: '-80px 0px -60% 0px' });
+  Object.values(paneEls.value).forEach((el) => el && spy?.observe(el));
+}
+onMounted(() => nextTick(watchPanes));
+onBeforeUnmount(() => spy?.disconnect());
+watch(() => sections.value.map((s) => s.id).join('|'), () => nextTick(watchPanes));
 const processing = computed(() => { void tick.value; return driver.value.processing(); });
 /**
  * A server validation round trip is in flight -- AF2-347.
@@ -366,6 +431,31 @@ function valueProp(field: FormField) { return control(field).valueProp || 'model
 function checkField(field: FormField) {
   const msgs = validateOneField(field, driver.value.get(field.key || ''), model.value);
   localErrors.value = Object.assign({}, localErrors.value, { [field.key || '']: msgs });
+}
+
+/**
+ * Edit a field from OUTSIDE the field grid — the `head-end` slot's `update`.
+ *
+ * A control in the header that stands for a field (the design's Draft / Published switch
+ * beside a page title) must go through the same path as the field itself, or the form
+ * does not know it changed: the value would be saved, but "Unsaved changes" would never
+ * show, a stale server error would stay, and `field-change` would not fire. So the field
+ * is found by key and handed to `onInput`, exactly as if its own control had changed.
+ *
+ * A key with no field in the schema still sets the value and marks the form dirty — the
+ * host asked for a change, and the footer must not claim there is nothing to save.
+ *
+ * TBX AG/013.
+ */
+function updateFromOutside(key: string, v: unknown) {
+  const field = sections.value.flatMap((s) => s.fields).find((f) => f.key === key);
+  if (field) {
+    onInput(field, v);
+    return;
+  }
+  driver.value.set(key, v);
+  dirty.value = true;
+  tick.value += 1;
 }
 
 function onInput(field: FormField, v: unknown) {
@@ -673,7 +763,7 @@ defineExpose({ submit, cancel, focusField, isOpen, reset });
           <h2>{{ sch.title }}</h2>
           <p v-if="sch.subtitle">{{ sch.subtitle }}</p>
         </div>
-        <slot name="head-end" />
+        <slot name="head-end" :update="updateFromOutside" />
       </header>
 
       <!-- Tabs and sidebar are the SAME section list in two orientations, so a
@@ -708,9 +798,35 @@ defineExpose({ submit, cancel, focusField, isOpen, reset });
                   @mouseenter="showTip($event, i, s)" @mouseleave="hideTip"
                   @focus="showTip($event, i, s)" @blur="hideTip">
             <ApexIcon v-if="s.icon" :name="s.icon" :size="19" />
-            <span>{{ s.title || 'Section ' + (i + 1) }}</span>
+            <span class="apex-form__navlabel">{{ s.title || 'Section ' + (i + 1) }}</span>
             <em v-if="sectionErrorCount(s)">{{ sectionErrorCount(s) }}</em>
+            <!-- AF/012 — the rail's badge, on the sidebar too. Same rule: an error
+                 count outranks it. -->
+            <small v-else-if="railBadgeText(s)" class="apex-form__railbadge"
+                   :data-tone="railBadgeTone(s)">{{ railBadgeText(s) }}</small>
           </button>
+        </nav>
+
+        <!-- A rail, not a tablist. See `tabbed` above for why that distinction is
+             load-bearing rather than pedantic. -->
+        <nav v-if="railed" class="apex-form__rail" :class="ui?.rail" aria-label="Sections">
+          <button v-for="(s, i) in sections" :key="s.id" type="button"
+                  :aria-current="active === i ? 'true' : undefined"
+                  :data-invalid="sectionErrorCount(s) ? 'true' : 'false'"
+                  @click="goRail(i)">
+            <ApexIcon v-if="s.icon" :name="s.icon" :size="17" />
+            <span class="apex-form__navlabel">{{ s.title || 'Section ' + (i + 1) }}</span>
+            <!-- An error count outranks a badge: "this has a problem" is worth
+                 more than "this is in test mode", and there is room for one. -->
+            <em v-if="sectionErrorCount(s)">{{ sectionErrorCount(s) }}</em>
+            <small v-else-if="railBadgeText(s)" class="apex-form__railbadge"
+                   :data-tone="railBadgeTone(s)">{{ railBadgeText(s) }}</small>
+          </button>
+          <!-- AD/003. Under the buttons and inside the sticky rail, so a note put
+               here stays in view while the form scrolls. -->
+          <div v-if="slots['rail-end']" class="apex-form__railend">
+            <slot name="rail-end" />
+          </div>
         </nav>
 
         <div class="apex-form__main" :class="ui?.main">
@@ -720,6 +836,7 @@ defineExpose({ submit, cancel, focusField, isOpen, reset });
                that wants narrower boxes in one pane only had nothing to say
                it with short of an id selector on a generated id. AF2-374. -->
           <section v-for="pane in visibleSections" :key="pane.s.id" class="apex-form__section"
+                   :ref="setPaneEl(pane.s.id)" :data-section="pane.s.id"
                    :class="[ui?.section, pane.s.class]"
                    :role="tabbed ? 'tabpanel' : undefined" :id="tabbed ? panelId(pane.i) : undefined"
                    :aria-labelledby="tabbed ? tabId(pane.i) : undefined" :tabindex="tabbed ? 0 : undefined">
@@ -732,12 +849,17 @@ defineExpose({ submit, cancel, focusField, isOpen, reset });
                  It used to appear only in long, which meant switching a
                  form to tabs silently deleted its section descriptions.
                  AF2-374, the same loss the fieldset branch below had. -->
-            <div v-if="!pane.s.fieldset && ((pane.s.title && sch.layout === 'long') || pane.s.subtitle)"
+            <div v-if="!pane.s.fieldset && ((pane.s.title && stacked) || pane.s.subtitle)"
                  class="apex-form__sectionhead" :class="ui?.sectionHead">
-              <h3 v-if="pane.s.title && sch.layout === 'long'">
+              <h3 v-if="pane.s.title && stacked">
                 <ApexIcon v-if="pane.s.icon" :name="pane.s.icon" :size="18" />{{ pane.s.title }}
               </h3>
               <p v-if="pane.s.subtitle">{{ pane.s.subtitle }}</p>
+              <!-- AC/002b. Last in the head, so a section with nothing here is
+                   untouched; the stylesheet moves it to the right-hand column. -->
+              <span v-if="hasHeadEnd(pane.s)" class="apex-form__sectionend">
+                <slot :name="'section-head-' + pane.s.id" :section="pane.s" />
+              </span>
             </div>
             <!-- The grid ALWAYS renders; only its wrapper changes. A fieldset
                  needs the grid inside its body slot, and an ordinary section
@@ -755,6 +877,7 @@ defineExpose({ submit, cancel, focusField, isOpen, reset });
             <div v-if="pane.s.fieldset && pane.s.subtitle" class="apex-form__sectionhead" :class="ui?.sectionHead">
               <p>{{ pane.s.subtitle }}</p>
             </div>
+            <div :class="hasAside(pane.s) ? 'apex-form__withaside' : 'apex-form__pass'">
             <div class="apex-form__grid" :class="ui?.grid" :style="gridStyle(pane.s)">
               <div v-for="f in shown(pane.s)" :key="f.key || f.label" class="apex-form__cell" :class="ui?.cell"
                    :style="cellStyle(f, pane.s)" :data-type="f.type || 'text'">
@@ -814,9 +937,21 @@ defineExpose({ submit, cancel, focusField, isOpen, reset });
                 </slot>
               </div>
             </div>
+            <!-- Beside the grid, never inside it: a preview is not a field, has no
+                 value and must not take a grid track from one. -->
+            <aside v-if="hasAside(pane.s)" class="apex-form__aside">
+              <slot :name="'section-aside-' + pane.s.id" :section="pane.s" />
+            </aside>
+            </div>
             </component>
           </section>
         </div>
+
+        <!-- AF/011. One column beside the WHOLE body, the same on every tab — where
+             `#section-aside-<id>` lives inside one pane and scrolls with its fields. -->
+        <aside v-if="slots.aside" class="apex-form__formaside" :class="ui?.formAside">
+          <slot name="aside" />
+        </aside>
       </div>
 
       <footer v-if="actions" class="apex-form__foot" :class="ui?.foot">

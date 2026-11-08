@@ -179,9 +179,9 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
         columnId: string;
     }) => any) | undefined;
 }>, {
+    gap: string;
     selectionMode: "none" | "single" | "multiple";
     draggable: boolean;
-    gap: string;
     columnWidth: string;
     virtualScrollItemHeight: number;
     virtualScrollBuffer: number;

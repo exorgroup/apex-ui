@@ -116,6 +116,20 @@ type __VLS_Props = {
     showFooter?: boolean;
     /** Whether footer aggregates cover everything, the selection, or both. */
     footerMode?: 'all' | 'selected' | 'both';
+    /**
+     * Explicit footer values, keyed by column field — for a LAZY table.
+     *
+     * The aggregating footer sums the rows this table HAS, which on a lazy table is one page.
+     * A "Total" under page two of a paginated report is the total of page two, silently, and
+     * it disagrees with whatever the server said the total was. There is no fix inside the
+     * table: the numbers are not here. So the host, which asked the server for them, passes
+     * them in.
+     *
+     * Values are rendered as given — format them before passing. Set `footerLabel` to change
+     * the word in the first column.
+     */
+    footerValues?: Record<string, unknown> | null;
+    footerLabel?: string;
     loading?: boolean;
     loadingMode?: 'overlay' | 'skeleton';
     skeletonRows?: number;
@@ -448,7 +462,9 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     collapseIcon: string;
     freezeIcon: string;
     unfreezeIcon: string;
+    showFooter: boolean;
     footerMode: "all" | "selected" | "both";
+    footerValues: Record<string, unknown> | null;
     loadingMode: "overlay" | "skeleton";
     skeletonRows: number;
     hoverable: boolean;

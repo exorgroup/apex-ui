@@ -14,6 +14,10 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-field[data-size="sm"]{--apex-ctl-h:34px;--apex-ctl-fs:13px;--apex-ctl-pad:10px;--apex-label-fs:12px;--apex-icon-size:18px}
 .apex-field[data-size="lg"]{--apex-ctl-h:50px;--apex-ctl-fs:16px;--apex-ctl-pad:14px;--apex-label-fs:14px;--apex-icon-size:22px}
 .apex-field__body{display:flex;flex-direction:column;gap:5px;min-width:0}
+.apex-field__info{pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;flex:none;border:0;padding:0;margin:0;background:transparent;color:var(--fg-subtle);cursor:pointer;border-radius:50%;line-height:0;font:inherit}
+.apex-field__info:hover{color:var(--accent-primary)}
+.apex-field__info:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.apex-field__info-pop{font-size:12.5px;line-height:1.5;color:var(--fg-default);white-space:normal}
 .apex-field__label{font-size:var(--apex-label-fs);font-weight:600;letter-spacing:-.003em;color:var(--apex-label-fg);display:inline-flex;align-items:center;gap:6px;min-width:0}
 .apex-field__req{color:var(--apex-field-required);font-weight:700}
 .apex-field__msg{margin:0;font-size:var(--apex-msg-fs);line-height:1.45;color:var(--apex-msg-fg);display:flex;align-items:flex-start;gap:5px}
@@ -482,6 +486,8 @@ position:fixed;inset:0;display:flex;padding:24px;font-family:var(--font-sans)}
 .apex-dlg[data-modal="false"]{pointer-events:none;background:transparent}
 .apex-dlg[data-modal="false"] .apex-dlg__panel{pointer-events:auto}
 .apex-dlg[data-blur="true"]{backdrop-filter:blur(3px)}
+/* Closing with custom classes: the mask goes at once, the panel animates out alone (ApexForm's behaviour). */
+.apex-dlg[data-closing="true"]{background:transparent;backdrop-filter:none;pointer-events:none}
 
 /* nine positions from one flex box */
 .apex-dlg[data-position="center"]{align-items:center;justify-content:center}
@@ -3043,6 +3049,12 @@ display:flex;flex-direction:column;gap:0;font-family:var(--font-sans);color:var(
    means filling the cell rather than sizing to its own placeholder. */
 .apex-dtf__range{flex:1 1 auto;min-inline-size:0}
 .apex-dtf__pair{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+/* "Any of" holds a list, so it ticks rather than picks. Capped and scrollable: the options
+   come from the data and a column with thirty of them would otherwise push the footer — and
+   its Apply button — off the bottom of the popup. */
+.apex-dtf__anyof{display:flex;flex-direction:column;gap:3px;max-block-size:168px;overflow-y:auto;padding:5px 7px;border:1px solid var(--border-default);border-radius:var(--r-sm);background:var(--bg-subtle)}
+.apex-dtf__anyof-opt{display:flex;align-items:center;gap:7px;font-size:12.5px;line-height:1.35;cursor:pointer}
+.apex-dtf__anyof-opt input{inline-size:14px;block-size:14px;margin:0;accent-color:var(--accent-primary);cursor:pointer}
 .apex-dtf__op{align-self:flex-start;font-family:var(--font-sans);font-size:11px;font-weight:700;letter-spacing:.05em;padding:3px 7px;border:1px solid var(--border-default);border-radius:var(--r-sm);background:var(--bg-subtle);color:var(--fg-muted);outline:none}
 .apex-dtf__add{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--accent-primary);cursor:pointer;padding:2px 0}
 .apex-dtf__actions{display:flex;justify-content:flex-end;gap:6px;padding-block-start:4px;border-block-start:1px solid var(--border-subtle)}
@@ -3292,6 +3304,15 @@ position:absolute;z-index:50;inset-block-start:calc(100% + 6px);list-style:none;
 .apex-summary ul{margin:0;padding-inline-start:18px;font-size:13px;color:var(--fg-muted);display:flex;flex-direction:column;gap:3px}
 .apex-summary a{color:var(--apex-red-600);text-decoration:underline;text-underline-offset:2px}
 .apex-ctl__counter{justify-content:flex-end;color:var(--apex-counter-fg,var(--fg-subtle))}
+/* AC/003. The bar takes the room and the count keeps its width, so the number does
+   not shuffle sideways as the bar fills. */
+.apex-ctl__counter--meter{gap:8px;align-items:center}
+.apex-ctl__meter{flex:1;block-size:4px;border-radius:2px;background:var(--bg-muted);overflow:hidden}
+.apex-ctl__meter>span{display:block;block-size:100%;background:var(--accent-primary);transition:width var(--dur-fast,.15s) ease}
+.apex-ctl__meter[data-state="good"]>span{background:var(--accent-success)}
+.apex-ctl__meter[data-state="over"]>span{background:var(--accent-danger)}
+.apex-ctl__counter--meter .apex-ctl__count{flex:none;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.apex-ctl__counter--meter:has(.apex-ctl__meter[data-state="over"]) .apex-ctl__count{color:var(--accent-danger)}
 /* A literal character on a stepper button, sized to sit like the icon it replaces. */
 .apex-stepper__glyph{font-size:var(--apex-stepper-glyph-fs,17px);font-weight:600;line-height:1}
 /* Button group help. Was .apex-field__msg, which coupled it to a component it has nothing to do with. */
@@ -4955,9 +4976,11 @@ color:var(--fg-muted);font-family:var(--font-sans);font-size:12px;cursor:pointer
   position: relative; inline-size: var(--apex-form-w, min(980px, 100%)); max-block-size: min(880px, 100%);
   border-radius: var(--r-xl); box-shadow: var(--shadow-lg);
 }
-/* Fixed, not max: the panel is the same height in every section. */
+/* Fixed, not max: the panel is the same height in every section. `--apex-form-h`
+   is READ, never declared, like `--apex-form-w` — the blog editor asks for the
+   Claude Design's 820px (AF). */
 .apex-form[data-shell="modal"][data-layout="tabs"] .apex-form__panel,
-.apex-form[data-shell="modal"][data-layout="sidebar"] .apex-form__panel { block-size: min(660px, 100%); }
+.apex-form[data-shell="modal"][data-layout="sidebar"] .apex-form__panel { block-size: var(--apex-form-h, min(660px, 100%)); }
 /* And in a page, a tabbed form gets a floor so short sections do not shrink it
    to a strip while tall ones scroll. */
 .apex-form[data-shell="page"][data-layout="tabs"] .apex-form__main,
@@ -5015,7 +5038,11 @@ color:var(--fg-muted);font-family:var(--font-sans);font-size:12px;cursor:pointer
 .apex-form__side button:hover { background: var(--bg-muted); color: var(--fg-default); }
 .apex-form__side button[aria-selected="true"] { background: color-mix(in srgb, var(--accent-primary) 10%, transparent); color: var(--accent-primary); }
 .apex-form__side button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
-.apex-form__side span { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+/* The LABEL, by class. This was `.apex-form__side span`, and `ApexIcon` renders a
+   <span> too — so the icon took `flex: 1` alongside the label, the two split the
+   button between them, and every label sat in the middle of its button instead of
+   beside its icon. */
+.apex-form__side .apex-form__navlabel { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
 
 /* An error count on a section is only meaningful where the section can be
    OFF-SCREEN, so it never appears in the long layout. */
@@ -5023,6 +5050,117 @@ color:var(--fg-muted);font-family:var(--font-sans);font-size:12px;cursor:pointer
   display: grid; place-items: center; min-inline-size: 18px; block-size: 18px; padding: 0 5px;
   border-radius: 9px; background: var(--accent-danger); color: #fff;
   font-size: 10px; font-weight: 700; font-style: normal;
+}
+
+/* ─── the rail (layout: 'rail') ────────────────────────────────
+   Shaped like `__side` and behaving nothing like it: `__side` CHOOSES the pane,
+   the rail only says where you are in a page that shows them all. Hence
+   `aria-current` here and `aria-selected` there — see `tabbed` in the component.
+
+   Sticky rather than fixed, so it holds its column and cannot overlap the form.
+   `align-self: start` is what lets sticky work at all inside a flex row: a
+   stretched flex item is already as tall as its container and has nothing to
+   stick within. */
+.apex-form__rail {
+  flex: 0 0 216px; align-self: start; position: sticky;
+  /* A host with a sticky top bar sets this, or the rail slides under it. */
+  inset-block-start: var(--apex-form-rail-top, 0);
+  display: flex; flex-direction: column; gap: 2px; padding: 16px 12px;
+  background: var(--bg-surface); border-inline-end: 1px solid var(--border-subtle);
+}
+.apex-form__rail button {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 0;
+  border-radius: var(--r-md); background: none; color: var(--fg-muted);
+  font: inherit; font-size: var(--t-sm); font-weight: 600; text-align: start; cursor: pointer;
+}
+.apex-form__rail button:hover { background: var(--bg-muted); color: var(--fg-default); }
+.apex-form__rail button[aria-current="true"] { background: color-mix(in srgb, var(--accent-primary) 10%, transparent); color: var(--accent-primary); }
+.apex-form__rail button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.apex-form__rail .apex-form__navlabel { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+/* AD/002. Quiet by default — mono, small, no fill — so a rail full of `off` does
+   not shout; a tone colours only the text. */
+.apex-form__railbadge {
+  flex: none; font: 600 10.5px var(--font-mono); letter-spacing: .04em; color: var(--fg-subtle);
+}
+.apex-form__rail button[aria-current="true"] .apex-form__railbadge { color: inherit; opacity: .8; }
+.apex-form__railbadge[data-tone="success"] { color: var(--accent-success); }
+.apex-form__railbadge[data-tone="warn"] { color: var(--accent-warning); }
+.apex-form__railbadge[data-tone="danger"] { color: var(--accent-danger); }
+.apex-form__railbadge[data-tone="accent"] { color: var(--accent-primary); }
+.apex-form__railend { margin-block-start: 12px; }
+/* AF/012. The same badge on the sidebar nav. */
+.apex-form__side .apex-form__railbadge { margin-inline-start: auto; }
+
+/* ─── AF/011: the form-level aside ─────────────────────────────
+   A column beside the whole body, as the blog editor's preview panel is. Its own
+   scroll, like the fields beside it.
+
+   NOT `flex-wrap`, which it first shipped with: in a wrapping flex row each line is
+   as tall as its CONTENT, so a long form grew past the body and ran under the
+   footer instead of scrolling. On a narrow dialog the aside is hidden instead, as
+   the design's own breakpoint does — it is a preview, and the fields come first. */
+.apex-form__body:has(> .apex-form__formaside) > .apex-form__main { flex: 1 1 0; }
+.apex-form__formaside {
+  flex: 0 0 var(--apex-form-formaside-w, 340px); min-inline-size: 0;
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 20px; background: var(--bg-subtle); border-inline-start: 1px solid var(--border-subtle);
+  overflow-y: auto;
+}
+@media (max-width: 1000px) { .apex-form__formaside { display: none; } }
+@container apexform (max-width: 720px) { .apex-form__railend { display: none; } }
+
+.apex-form__rail button em {
+  display: grid; place-items: center; min-inline-size: 18px; block-size: 18px; padding: 0 5px;
+  border-radius: 9px; background: var(--accent-danger); color: #fff;
+  font-size: 10px; font-weight: 700; font-style: normal;
+}
+
+/* ─── the rail layout's page ───────────────────────────────────
+   AC/002d. Two things the other layouts get away with that this one cannot.
+
+   `.apex-form__panel` clips with `overflow: hidden` (for its rounded corners), and
+   a clipping ancestor stops `position: sticky` dead — the rail would scroll away
+   with the page and look like it had no sticky rule at all. And the page panel is
+   capped at 980px, which leaves a 216px rail plus a 340px aside almost nothing for
+   the fields between them.
+
+   So the rail layout is not drawn as one bordered panel. It is what the Claude
+   Design's settings screens draw: the rail on the page background, and each
+   section its own card. Scoped to `[data-layout="rail"]`, so no other form moves. */
+.apex-form[data-layout="rail"] .apex-form__panel {
+  overflow: visible; max-inline-size: none; background: none; border: 0; box-shadow: none; border-radius: 0;
+}
+.apex-form[data-layout="rail"] .apex-form__body {
+  background: none; gap: var(--apex-form-rail-gap, 20px);
+}
+.apex-form[data-layout="rail"] .apex-form__rail {
+  background: none; border-inline-end: 0; padding: 0;
+}
+.apex-form[data-layout="rail"] .apex-form__main {
+  overflow: visible; padding: 0; display: flex; flex-direction: column; gap: var(--apex-form-rail-gap, 20px);
+}
+.apex-form[data-layout="rail"] .apex-form__section {
+  background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: var(--r-lg);
+  padding: var(--apex-form-card-pad, 24px); box-shadow: var(--shadow-xs);
+  /* Lands BELOW a sticky top bar when the rail scrolls to it. */
+  scroll-margin-block-start: var(--apex-form-rail-top, 0);
+}
+/* The long layout's rule between sections is the card edge here. */
+.apex-form[data-layout="rail"] .apex-form__section + .apex-form__section {
+  margin-block-start: 0; padding-block-start: var(--apex-form-card-pad, 24px); border-block-start: 1px solid var(--border-default);
+}
+
+/* Narrow: a 216px column beside a form leaves neither enough room. The rail
+   becomes a scrolling strip across the top — still navigation, still marking
+   the current section, and it keeps its shape rather than collapsing into a
+   dropdown, which is the same rule the patron side follows. */
+@container apexform (max-width: 720px) {
+  .apex-form__body:has(> .apex-form__rail) { flex-direction: column; }
+  .apex-form__rail {
+    flex: 0 0 auto; position: static; flex-direction: row; overflow-x: auto;
+    border-inline-end: 0; border-block-end: 1px solid var(--border-subtle);
+  }
+  .apex-form__rail button { white-space: nowrap; }
 }
 
 .apex-form__main { flex: 1 1 auto; min-inline-size: 0; overflow-y: auto; padding: 20px 24px 24px; container-type: inline-size; container-name: apexform; }
@@ -5062,7 +5200,9 @@ color:var(--fg-muted);font-family:var(--font-sans);font-size:12px;cursor:pointer
   .apex-form__grid { grid-template-columns: minmax(0, 1fr); }
   .apex-form__grid > .apex-form__cell { grid-column: 1 / -1; }
   .apex-form__side { flex-basis: 64px; }
-  .apex-form__side span, .apex-form__side em { display: none; }
+  /* Collapse to icons: hide the LABEL. `.apex-form__side span` hid the icon as well,
+     since the icon is a span, and left a column of empty buttons. */
+  .apex-form__side .apex-form__navlabel, .apex-form__side em { display: none; }
   .apex-form__side button { justify-content: center; }
 }
 
@@ -5129,3 +5269,22 @@ color:var(--fg-muted);font-family:var(--font-sans);font-size:12px;cursor:pointer
 /* A pass-through wrapper: an ordinary section needs no extra box, and the grid
    must stay the section's own child for spacing to read the same. */
 .apex-form__pass { display: contents; }
+
+/* AC/002b — a section with an aside beside its fields. The fields take what is left
+   and the aside a fixed column, which is the Claude Design's `gs-sec` (340px). On a
+   narrow form it drops below the fields rather than squeezing them; the container
+   query is on the form's own width, so a form in a drawer behaves as it should. */
+.apex-form__withaside {
+  display: grid; grid-template-columns: minmax(0, 1fr) var(--apex-form-aside-w, 340px);
+  gap: var(--apex-form-aside-gap, 24px); align-items: start;
+}
+.apex-form__aside { display: flex; flex-direction: column; gap: 10px; min-inline-size: 0; }
+@container apexform (max-width: 900px) {
+  .apex-form__withaside { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* The head-end sits in its own column to the right of the title and subtitle. */
+.apex-form__sectionhead:has(> .apex-form__sectionend) {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px;
+}
+.apex-form__sectionend { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
