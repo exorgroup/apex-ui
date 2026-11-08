@@ -3,7 +3,9 @@
 All notable changes to `@exorgroup/apex-ui` and `@exorgroup/apex-form`.
 Semantic versioning; the two packages release in lockstep until 1.0.
 
-## [Unreleased]
+## [0.2.0] — 2026-11-08
+
+The work TBX had used from the local checkout since 0.1.0, released at last, plus 0.1.1's fix.
 
 ### Added — apex-ui
 - `ApexForm`: the `head-end` slot receives `update(key, value)`. A header control that
@@ -18,12 +20,30 @@ Semantic versioning; the two packages release in lockstep until 1.0.
   button inside the label with an accessible name; forwarded through `APEX_FIELD_KEYS`.
   (`tests/field-info.spec.ts`; TBX CB/025.)
 
+- Also, each with its spec in `tests/`: `ApexForm` section slots, rail layout, rail badge at the end,
+  nav label, aside / sidebar badge; `ApexColumnFilter` any-of and its shape; footer values on
+  `ApexDataTable` and `ApexTreeTable`; filter-row modes; `ApexDatePicker` ISO model; `ApexEditor`
+  loading content is not an edit; `ApexInput` keeps the placeholder when floating with no label;
+  `ApexOrderList` editable rows; `ApexPaginator` all rows; `ApexTextarea` meter; chart weekly bars.
+- The anchored-overlay fix of 0.1.1 (below).
+
 ### Fixed — apex-ui
 - `ApexDialog` with `enter-class` / `leave-class`: the classes animated the MASK, so the dim
   page slid in and out with the dialog. They now go on the panel alone, as ApexForm's modal
   (AF2-331); the mask stays still, keeps mounted while the panel leaves and loses its colour the
   moment closing starts (`[data-closing="true"]`). The presets (scale / slide / fade) are
   unchanged. (`tests/overlay-transition.spec.ts`; TBX CB, 2026-10-15.)
+
+## [0.1.1] — 2026-11-08
+
+A patch on 0.1.0 alone, cut from `release/0.1.x`; the work below in 0.2.0 was not in it.
+
+### Fixed — apex-ui
+- An anchored panel that mounts AFTER its overlay opened is now placed. A server-backed
+  `ApexInput` with `:loading` showed nothing on its first search — its list mounted once the
+  answer came, hidden, with nothing left to place it — and results on the second. Same
+  composable under `ApexSelect`, `ApexMultiselect`, `ApexTags`, `ApexDatePicker`,
+  `ApexColumnFilter`. Found in Apex Till (TL3/012); `tests/anchored-late-panel.spec.ts`.
 
 ## [0.1.0] — 2026-08-28
 
