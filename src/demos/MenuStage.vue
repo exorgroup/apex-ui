@@ -9,14 +9,14 @@
         <ApexTieredMenu ref="tmenu" :items="MENU_ITEMS" v-bind="bind" @item-click="onPick" />
       </template>
       <ApexTieredMenu v-else :items="MENU_ITEMS" v-bind="bind" @item-click="onPick" />
-      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+      <p class="cfm-log">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
 
     <!-- The bar renders inline; its dropdowns open from the root items, so it
          needs no trigger of its own. -->
     <template v-else-if="id === 'menubar'">
       <ApexMenubar :items="BAR_ITEMS" v-bind="bind" @item-click="onPick" />
-      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+      <p class="cfm-log">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
 
     <!-- Inline by default; in popup mode it renders nothing until toggle(), so
@@ -29,7 +29,7 @@
       </template>
       <ApexMenu v-else :items="LIST_ITEMS" v-model:expandedKeys="stageKeys"
                 v-bind="bind" @item-click="onPick" />
-      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+      <p class="cfm-log">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
 
     <!-- The bar renders inline and its panels open from the root items. The
@@ -37,7 +37,7 @@
          what the stage has to provide. -->
     <template v-else-if="id === 'megamenu'">
       <ApexMegaMenu :items="MEGA_ITEMS" v-bind="bind" @item-click="onPick" />
-      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+      <p class="cfm-log">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
 
     <!-- A dock is a desktop launcher, and the gallery stages it as one: a
@@ -55,16 +55,16 @@
          the stage has to supply a target to right-click ON. Without it the
          playground would look inert however the rail is set. -->
     <template v-else-if="id === 'contextmenu'">
-      <div ref="ctxZone" class="menu-stage__ctx" data-stage-target>Right-click anywhere in this box</div>
+      <div ref="ctxZone" class="ctx-zone" data-stage-target>Right-click anywhere in this box</div>
       <ApexContextMenu :items="MENU_ITEMS" :target="ctxZone" v-bind="bind" @item-click="onPick" />
-      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+      <p class="cfm-log">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
 
     <!-- A trail long enough that the rail's maxItems has something to collapse. -->
     <template v-else-if="id === 'breadcrumb'">
       <ApexBreadcrumb :home="CRUMB_HOME" :items="CRUMB_ITEMS" v-bind="bind"
                       @item-click="onPick" />
-      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+      <p class="cfm-log">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
 
     <!-- A sidebar only means anything inside its layout shell: the panel and
@@ -88,7 +88,7 @@
           </ApexSidebarInset>
         </ApexSidebarLayout>
       </div>
-      <p class="menu-stage__out">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
+      <p class="cfm-log">Last picked: <code>{{ picked || 'nothing yet' }}</code></p>
     </template>
   </div>
 </template>

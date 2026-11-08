@@ -50,6 +50,41 @@ const ALIAS = {
 };
 
 /**
+ * Rows the gallery documents on a control that does not have them.
+ *
+ * The gallery's ApexOrgChart entry carries fourteen prop rows belonging to
+ * ApexChart — heatmap, candlestick, treemap, donut, radar and dataLabels —
+ * which appear identically in the chart's own table. ApexOrgChart declares
+ * none of them. Copying them verbatim would satisfy the parity rule and make
+ * zz-docs-api fail, because our docs would promise a TBX developer an API the
+ * component has not got.
+ *
+ * Confirmed against the HTML gallery by the user (AF2-254): the documentation
+ * is the chart's, and OrgChart's table was rebuilt from what OrgChart actually
+ * supports. This list is the record of that, so the same thirty names do not
+ * have to be re-judged every time the pack is reconciled.
+ */
+const GALLERY_DEFECTS = {
+  /* AF2-285. The gallery's ApexHTMLEditor props table documents
+     `placeholder`; the component declares it in the MIRROR only, references
+     it nowhere in either implementation, and our SFC does not have it. A row
+     for a prop that does nothing is worse than a missing row. */
+  htmleditor: { props: ['placeholder'] },
+  orgchart: {
+    props: [
+      'heatmap: groupKey', 'colorStops', 'cellRadius', 'cellGap', 'showCellLabels',
+      'candlestick: openKey', 'highKey', 'lowKey', 'closeKey', 'candleVariant',
+      'upColor', 'downColor', 'treemap: nodes', 'depth', 'tilePadding',
+      'innerRadius', 'padAngle', 'startAngle', 'endAngle', 'series.min', 'max',
+      'outerRadius', 'dataLabels.position', 'dataLabels.display',
+      'dataLabels.labelKey', 'dataLabels.minPercentage', 'dataLabels.lineStyle',
+      'radarRings', 'centerLabel', 'centerValue',
+    ],
+  },
+};
+
+
+/**
  * Gallery controls we deliberately do not have, so the coverage check below
  * does not report them for ever.
  *
@@ -222,6 +257,26 @@ export function headings(src, id) {
   const found = [];
   for (const m of src.matchAll(gate)) {
     const tag = m[1];
+
+    /* A gate on a COMPONENT, not an element: the data controls' sections live
+       in their own files under demos/data/ and App.vue only names them.
+       Walking for a closing tag here finds none — they are self-closing — and
+       the old code then treated the whole rest of App.vue as the block, which
+       would hand back every heading on every other page. Follow the component
+       to its file instead. Without this the sections read as MISSING for ever
+       and the split would look like a regression. */
+    if (/^[A-Z]/.test(tag)) {
+      const file = path.join(SRC, 'demos', 'data', tag + '.vue');
+      if (fs.existsSync(file)) {
+        const sub = fs.readFileSync(file, 'utf8');
+        for (const h of sub.matchAll(/<h2[^>]*>([^<]+)<\/h2>/g)) {
+          const text = h[1].trim();
+          if (text && !text.includes('{{')) found.push(text);
+        }
+      }
+      continue;
+    }
+
     let depth = 0;
     let i = m.index;
     let end = -1;
@@ -350,19 +405,34 @@ function main() {
       sections: diffList(headings(ourApp, id), headings(galleryHtml, theirId)),
     };
 
+    /* Rows the gallery documents on the WRONG control.
+       Subtracted from `missing` so the pack can close, and listed by name so
+       the deviation is visible rather than remembered. Everything here was
+       checked against the component before being added: if the control really
+       declares it, it belongs in our table, not in this list. */
+    const defects = GALLERY_DEFECTS[id];
+    if (defects) {
+      for (const [area, names] of Object.entries(defects)) {
+        if (!areas[area]) continue;
+        areas[area].waived = areas[area].missing.filter((n) => names.includes(n));
+        areas[area].missing = areas[area].missing.filter((n) => !names.includes(n));
+      }
+    }
+
     const bad = Object.values(areas).some((a) => a.missing.length);
-    const noteworthy = Object.values(areas).some((a) => a.missing.length || a.changed.length);
+    const noteworthy = Object.values(areas).some((a) => a.missing.length || a.changed.length || a.waived?.length);
     if (bad) failures++;
 
     const name = (ourBlock.match(/name:\s*'([^']+)'/) || [])[1] || id;
     console.log(`\n${bad ? 'FAIL' : noteworthy ? 'note' : ' ok '}  ${name}`);
 
     for (const [area, a] of Object.entries(areas)) {
-      if (!a.missing.length && !a.changed.length && !a.extra.length) continue;
+      if (!a.missing.length && !a.changed.length && !a.extra.length && !a.waived?.length) continue;
       const bits = [];
       if (a.missing.length) bits.push(`MISSING ${a.missing.length}`);
       if (a.changed.length) bits.push(`changed ${a.changed.length}`);
       if (a.extra.length) bits.push(`+${a.extra.length} ours`);
+      if (a.waived?.length) bits.push(`${a.waived.length} waived (gallery documents another control's API)`);
       console.log(`        ${area.padEnd(9)} ${bits.join(', ')}`);
       if (a.missing.length) console.log(`          missing: ${a.missing.join(', ')}`);
       for (const c of a.changed) {

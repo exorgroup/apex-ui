@@ -88,6 +88,7 @@ for (const m of tokens.matchAll(/(--apex-[a-z0-9-]+)\s*:/g)) palette.add(m[1]);
 const COMPONENT_OWNED = new Set([
   '--apex-tabs-pos', '--apex-tabs-size',     // indicator offset and width
   '--apex-meter-pct', '--apex-meter-fill',   // a segment's extent and colour
+  '--apex-ed-grid-cols',                     // the size grid's column count
 ]);
 
 const dead = [];

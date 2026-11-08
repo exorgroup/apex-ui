@@ -1065,3 +1065,124 @@ background:var(--bg-surface);padding:12px}
 background:var(--fg-default);color:var(--bg-surface);box-shadow:var(--shadow-lg)}
 .tb-mine{display:flex;flex-direction:column;gap:8px}
 .tb-mine__row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+
+/* ── The nine data controls' stage and section slots ──────────────
+   Copied from the gallery's own stylesheet. Three of these controls render
+   through slots, and the markup is meaningless without the rules that lay it
+   out — a DataView card with no CSS is an unstyled column of text, which is
+   the defect zz-docs-classes was written for. */
+.tl-card{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border:1px solid var(--border-subtle);border-radius:var(--r-md);background:var(--bg-surface);box-shadow:var(--shadow-xs)}
+.tl-card strong{font-size:13.5px;letter-spacing:-.01em}
+.tl-card span{font-size:12.5px;color:var(--fg-muted);line-height:1.5}
+.tl-when{display:flex;flex-direction:column;gap:1px;line-height:1.35}
+.tl-when strong{font-size:12.5px;font-weight:600;color:var(--fg-default)}
+.tl-when em{font-style:normal;font-family:var(--font-mono);font-size:11.5px;color:var(--fg-subtle)}
+.pl-row{display:flex;align-items:center;gap:9px;min-width:0}
+.pl-row__text{display:flex;flex-direction:column;gap:1px;min-width:0}
+.pl-row__text strong{font-size:13px;font-weight:600}
+.pl-row__text em{font-style:normal;font-size:11px;color:var(--fg-subtle)}
+.dv-list{display:flex;align-items:center;gap:18px}
+.dv-list img{inline-size:84px;block-size:84px;border-radius:var(--r-sm);object-fit:cover;flex:0 0 auto;border:1px solid var(--border-subtle)}
+.dv-list__body{display:flex;flex-direction:column;align-items:flex-start;gap:7px;flex:1 1 auto;min-width:0}
+.dv-list__end{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:0 0 auto}
+.dv-list__end strong,.dv-card__foot strong{font-size:19px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.dv-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-subtle)}
+.dv-list h4,.dv-card h4{margin:0;font-size:15.5px;letter-spacing:-.015em}
+.dv-card{display:flex;flex-direction:column;align-items:flex-start;gap:9px;height:100%}
+.dv-card img{inline-size:100%;aspect-ratio:4/3;border-radius:var(--r-sm);object-fit:cover;border:1px solid var(--border-subtle);margin-block-end:3px}
+.dv-card__foot{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-block-start:auto;padding-block-start:6px}
+
+/* The dynamic-dialog demo's picker. Copied from the gallery, where these are
+   defined; ours used the class names without ever carrying the rules, so the
+   list rendered as default bullets and buttons. Found by AF2-250 when
+   zz-docs-classes was widened to read the demo files. */
+.dyn-demo{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.dyn-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;width:100%}
+.dyn-list button{display:flex;align-items:baseline;gap:8px;width:100%;padding:8px 10px;border:0;border-radius:var(--r-sm);background:transparent;color:var(--fg-default);font:inherit;text-align:left;cursor:pointer}
+.dyn-list button:hover{background:var(--bg-muted)}
+.dyn-list em{font-style:normal;font-size:12px;color:var(--fg-subtle)}
+
+/* Stage roots that named a class and never carried a rule. Found by AF2-250
+   when zz-docs-classes was widened to read the demo files — the same widening
+   that showed the ContextMenu box had been renamed off .ctx-zone and had been
+   rendering as bare text since the stage was extracted. Layout only. */
+.menu-stage{display:flex;flex-direction:column;gap:12px;width:100%}
+.menu-stage__shell{width:100%}
+.media-stage{display:flex;flex-direction:column;align-items:center;gap:12px;width:100%}
+.ovl-stage{display:flex;flex-direction:column;gap:12px;width:100%}
+
+/* ── Example-section classes for the data controls ────────────────
+   Copied from the gallery, where these are defined. The .product* names in
+   the DataView "Building an item template" section are deliberately absent:
+   they exist only inside an escaped code sample the reader copies, and are
+   never applied to a rendered element. */
+.tl-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.tl-step{display:grid;place-items:center;inline-size:30px;block-size:30px;border:0;border-radius:var(--r-full);background:var(--bg-muted);color:var(--fg-subtle);cursor:pointer;padding:0;transition:background var(--dur-fast),color var(--dur-fast)}
+.tl-step:hover{background:var(--border-default);color:var(--fg-default)}
+.tl-step[data-done="true"]{background:var(--accent-success);color:#fff}
+.tl-step:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.tl-stepbody{display:flex;flex-direction:column;gap:2px;padding:7px 12px;border-radius:var(--r-md);background:var(--bg-subtle)}
+.tl-stepbody strong{font-size:13.5px}
+.tl-stepbody em{font-style:normal;font-size:11.5px;color:var(--fg-subtle)}
+.tl-stepbody[data-done="true"]{background:color-mix(in srgb,var(--accent-success) 10%,transparent)}
+.tl-stepbody[data-done="true"] strong{color:var(--accent-success)}
+.pl-head{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.oc-card{display:flex;align-items:center;gap:10px}
+.oc-card__text{display:flex;flex-direction:column;gap:1px;text-align:start}
+.oc-card__text strong{font-size:13.5px;letter-spacing:-.005em}
+.oc-card__text em{font-style:normal;font-size:11.5px;color:var(--fg-subtle)}
+.dv-split{display:grid;gap:24px;align-items:start}
+.dv-split .doc-pre{font-size:11.5px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+@media (min-width:1320px){.dv-split{grid-template-columns:minmax(0,512px) minmax(0,1fr)}}
+
+/* Tree and TreeTable example sections. Copied from the gallery. */
+.tr-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
+.tr-row em{font-style:normal;font-family:var(--font-mono);font-size:11px;color:var(--fg-subtle);flex:0 0 auto}
+.tr-pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:8px}
+.tt-owner{display:inline-flex;align-items:center;gap:6px;color:var(--fg-muted)}
+
+/* ── The data controls' stage ─────────────────────────────────────
+   A table is not a form field. The default inner column is capped at 420px so
+   a field reads at a realistic width; a DataTable at 420px is unusable, and
+   because .stage has overflow:visible it did not merely look cramped — it
+   overflowed and painted across the playground rail, clipping the rail's own
+   labels. Found from a screenshot at AF2-261.
+
+   Two parts: the Data pages get the whole demo column, and the stage stretches
+   its child instead of centring it, so the table's own viewport (which is
+   overflow:auto already) does the scrolling. */
+.stage__inner--wide { max-width: none; }
+.data-stage {
+  display: flex; flex-direction: column; align-items: stretch; gap: 12px;
+  inline-size: 100%; min-inline-size: 0;
+}
+
+/* DataTable example sections. Copied from the gallery. `dt-flagged` and
+   `dt-low` are applied through rowClass/cellClass rather than a class
+   attribute, so zz-docs-classes never sees them — they are here because the
+   Conditional styling section is meaningless without them. */
+.dt-gh{display:inline-flex;align-items:center;gap:9px;vertical-align:middle}
+.dt-gh strong{font-size:13.5px}
+.dt-gh em{font-style:normal;font-size:12px;font-weight:500;color:var(--fg-subtle)}
+.dt-detail{display:grid;grid-template-columns:minmax(200px,260px) minmax(0,1fr);gap:26px;align-items:start}
+.dt-detail h4{margin:0 0 4px;font-size:16px;letter-spacing:-.015em}
+.dt-detail__sku{margin:0 0 10px;font-family:var(--font-mono);font-size:11.5px;color:var(--fg-subtle)}
+.dt-detail dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px 20px;margin:0}
+.dt-detail dt{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-subtle);margin-block-end:3px}
+.dt-detail dd{margin:0;font-size:13.5px;font-weight:500}
+.dt-low{color:var(--apex-red-600);font-weight:700}
+.dt-flagged td{background:color-mix(in srgb,var(--accent-danger) 7%,transparent)!important}
+
+/* The calendar's host-template example. Copied from the gallery. `--tone-ink`
+   there is `--apex-cal-tone-ink` here: the calendar exposes it on the event
+   wrapper so a custom #event template paints in the design system's colour
+   rather than a hardcoded hex. */
+.galtpl{box-sizing:border-box;display:flex;gap:5px;inline-size:100%;block-size:100%;padding:2px 4px;font-size:11px;line-height:1.2;overflow:hidden;background:var(--bg-sidebar);color:var(--fg-on-dark);border-radius:3px}
+.galtpl *{box-sizing:border-box}
+.galtpl[data-compact="true"]{align-items:center}
+.galtpl__bar{inline-size:3px;flex:none;border-radius:2px;background:var(--apex-cal-tone-ink)}
+.galtpl__body{min-inline-size:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}
+.galtpl__title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.galtpl b{font-variant-numeric:tabular-nums;opacity:.7;font-weight:500}
+.galtpl__cont{font-style:normal;color:var(--accent-warning);font-size:9px}
+.galtpl__view{font-size:9px;opacity:.6}

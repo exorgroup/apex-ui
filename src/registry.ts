@@ -58,7 +58,39 @@ export interface DocEntry {
    */
   demo?: 'plain' | 'chip' | 'meter' | 'inplace' | 'block' | 'scrolltop'
     | 'button' | 'split' | 'dial' | 'group' | 'field' | 'order' | 'container'
-    | 'overlay' | 'menu' | 'media' | 'board' | 'chart';
+    | 'overlay' | 'menu' | 'media' | 'board' | 'chart'
+    /**
+     * The nine data controls, split by what their stage has to supply.
+     *
+     * `data-tabular` is DataTable, TreeTable, Tree and OrgChart: each needs a
+     * column or node definition AND a seed, and each holds selection and
+     * expansion state the rail's controls act on. `data-simple` is Paginator,
+     * ProgressBar, Timeline, DataView and PickList: a seed, and in three cases
+     * the slot markup without which the control renders as bare rows.
+     *
+     * Two stages rather than one because a single component covering both
+     * DataTable and ProgressBar is mostly branches, and rather than nine
+     * because the state each group needs is the same shape.
+     */
+    | 'data-tabular' | 'data-simple'
+    /**
+     * ApexScheduler and ApexCalendar — Phase B. One stage each rather than a
+     * shared one: a resource timeline and a five-view calendar have no seed,
+     * no state and no toolbar in common.
+     */
+    | 'sched' | 'cal'
+    /**
+     * ApexEditor and ApexHTMLEditor — Phase C. The gallery marks these with
+     * two bare boolean flags of their own, `editorDemo` and
+     * `htmlEditorDemo`; ours name their stage the way every other entry
+     * does, so the switch in the stage host stays one shape.
+     */
+    | 'editor' | 'htmleditor'
+    /**
+     * ApexForm — Phase D. Its own stage: the form IS the demo, and the rail's
+     * props drive the shell around it rather than a control inside it.
+     */
+    | 'form';
   model?: unknown;
   /** Props the demo starts with, and the baseline every section renders from. */
   base?: Record<string, unknown>;
@@ -135,6 +167,15 @@ export interface DocEntry {
    */
   serviceTitle?: string;
   serviceRows?: string[][];
+  /**
+   * The module those rows come from, e.g. `core/scheduler`.
+   *
+   * Shown as the caption above the companion table, so a reader knows the
+   * functions are importable from the package rather than methods on the
+   * component. Present on the gallery's entries; added to this shape at
+   * AF2-271 when ApexScheduler and ApexCalendar brought it across.
+   */
+  serviceFn?: string;
 }
 
 /**
@@ -667,6 +708,7 @@ export const PG_COLORS = ['#0B5FFF', '#137C4A', '#C24A06', '#C41E1E', '#7C3AED',
 export const COMMON_CONTROLS: DocControl[] = [
   { key: 'labelPlacement', type: 'select', options: [...LABEL_PLACEMENTS] },
   { key: 'labelIcon', type: 'text' },
+  { key: 'info', type: 'text' },
   { key: 'labelWidth', type: 'text' },
   { key: 'size', type: 'select', options: [...SIZES] },
   { key: 'tone', type: 'select', options: ['default', 'danger', 'warning', 'success'] },
@@ -685,7 +727,7 @@ export const PLAYGROUND_DEFAULTS: Record<string, unknown> = { size: 'md', labelP
 
 /** Named under the props table, since none of them appear in a control's own rows. */
 export const SHARED_FIELD_PROPS = [
-  'label', 'labelIcon', 'labelPlacement', 'labelWidth', 'help', 'error', 'warning',
+  'label', 'labelIcon', 'info', 'labelPlacement', 'labelWidth', 'help', 'error', 'warning',
   'success', 'tone', 'rules', 'context', 'required', 'disabled', 'readonly', 'size',
   'statusIcon', 'name',
 ];
@@ -756,6 +798,7 @@ export const ICON_SLOT_CASES: DocCase[] = [
   { tag: 'leadingIcon', value: 'ada.lovelace', bind: { label: 'Username', leadingIcon: 'person' } },
   { tag: 'trailingIcon', value: 'EUR', bind: { label: 'Currency', trailingIcon: 'euro' } },
   { tag: 'labelIcon', value: 'lobby-north', bind: { label: 'Screen', labelIcon: 'tv' } },
+  { tag: 'info', value: '0', bind: { label: 'Max applications', info: '0 = unlimited. 20 = the first 20 tickets sold get it.' } },
   {
     tag: 'trailingAction', value: 'tok_9F2K1AZQ',
     bind: { label: 'API token', mono: true, trailingAction: { icon: 'refresh', label: 'Regenerate token' } },
@@ -933,6 +976,68 @@ export const PAGES: DocPage[] = [
       plugin-wide default. All spacing uses logical properties, so <code>dir="rtl"</code>
       mirrors the whole library with no overrides. The RTL switch in the top bar flips this
       page.</p>`,
+  },
+  {
+    id: 'motion', name: 'Motion & transitions', group: 'Foundations',
+    body: `
+      <h2>Four props, every overlay</h2>
+      <p>A form's modal, an alert, a dialog, a drawer, a popover, a confirm popup and a
+      toast all take the same four: <code>enterClass</code>, <code>leaveClass</code>,
+      <code>enterDuration</code>, <code>leaveDuration</code>. The three with a built-in
+      choice — form, alert, dialog — also take <code>transition</code>
+      (<code>scale</code> | <code>slide</code> | <code>fade</code> | <code>none</code>).
+      A drawer animates by its position and a popover has one animation, so neither
+      offers a preset to choose rather than offering one that does nothing.</p>
+
+      <h2>animate.css is NOT bundled</h2>
+      <p>The classes are plain strings and this library never references any animation
+      package, which is what keeps it free of runtime CSS dependencies. To use
+      <a href="https://animate.style" target="_blank" rel="noopener">animate.css</a>,
+      install it yourself and import it once:</p>
+      <pre class="doc-pre"><code>npm i animate.css</code></pre>
+      <pre class="doc-pre"><code>import 'animate.css';</code></pre>
+      <p>Then pass its class names. Note that animate.css needs <em>both</em> its base
+      class and the animation:</p>
+      <pre class="doc-pre"><code>&lt;ApexDialog
+  enter-class="animate__animated animate__fadeInDown"
+  leave-class="animate__animated animate__fadeOutUp"
+  enter-duration="400ms"
+  leave-duration="250ms"
+/&gt;</code></pre>
+      <p>Anything else works the same way — your own keyframes, another library, a house
+      set. The library only applies the class you name.</p>
+
+      <h2>One default for the whole app</h2>
+      <p>Set it once on the plugin and every overlay follows; any component's own prop
+      still wins.</p>
+      <pre class="doc-pre"><code>app.use(ApexUI, {
+  overlayTransition: {
+    enterClass: 'animate__animated animate__fadeInDown',
+    leaveClass: 'animate__animated animate__fadeOutUp',
+    enterDuration: '350ms',
+    leaveDuration: '200ms',
+  },
+})</code></pre>
+
+      <h2>Durations</h2>
+      <p>Each phase is written onto the element as it begins and removed as it ends — as
+      <code>--animate-duration</code>, which animate.css reads, and as
+      <code>animation-duration</code>, so the props work for hand-written classes too.
+      They have to be cleared: animate.css has one duration variable shared by both
+      phases, so a value left behind would make a reopened dialog enter at the leave
+      speed.</p>
+
+      <h2>Reduced motion</h2>
+      <p>Every built-in preset stops under <code>prefers-reduced-motion: reduce</code>.
+      Custom classes are yours to handle — animate.css carries its own
+      <code>!important</code> block, so the duration props cannot override a reader who
+      asked for less motion.</p>
+
+      <h2>What does not animate</h2>
+      <p>The scrim behind a modal appears at once, deliberately: a panel flying in over a
+      fading backdrop reads as two things happening. A toast's <code>move-class</code>
+      likewise stays on the built-in — how the pile rearranges when one closes is a
+      different question from how a toast arrives.</p>`,
   },
   {
     id: 'anatomy', name: 'Field anatomy', group: 'Foundations',
@@ -1113,19 +1218,19 @@ export const FIELD_VARS: string[][] = [
   ['--apex-cb-card-on-border', 'var(--accent-primary)', 'Card border when checked'],
   ['--apex-cb-card-on-bg', 'color-mix(— 5%)', 'Card background when checked'],
 
-  ['--apex-tree-row-fg', 'var(--fg-default)', 'ApexTreeSelect — a node at rest'],
-  ['--apex-tree-row-radius', 'var(--r-sm)', 'Node corner'],
-  ['--apex-tree-row-pad', '8px', 'Node vertical padding'],
-  ['--apex-tree-row-fs', '14px', 'Node text size'],
-  ['--apex-tree-row-hover-bg', 'var(--bg-muted)', 'Node under the pointer'],
-  ['--apex-tree-row-selected-bg', 'color-mix(— 12%)', 'Selected node'],
-  ['--apex-tree-row-selected-fg', 'var(--accent-primary)', 'Selected node text'],
-  ['--apex-tree-twisty-fg', 'var(--fg-subtle)', 'The expand/collapse chevron'],
-  ['--apex-tree-twisty-size', '20px', 'Chevron box — the leaf spacer reads this too, so rows stay in line'],
-  ['--apex-tree-twisty-radius', 'var(--r-xs)', 'Chevron corner'],
-  ['--apex-tree-twisty-hover-bg', 'var(--bg-subtle)', 'Chevron under the pointer'],
-  ['--apex-tree-twisty-hover-fg', 'var(--fg-default)', 'Chevron glyph on hover'],
-  ['--apex-tree-indent', '18px', 'How far each level steps in'],
+  ['--apex-treesel-row-fg', 'var(--fg-default)', 'ApexTreeSelect — a node at rest'],
+  ['--apex-treesel-row-radius', 'var(--r-sm)', 'Node corner'],
+  ['--apex-treesel-row-pad', '8px', 'Node vertical padding'],
+  ['--apex-treesel-row-fs', '14px', 'Node text size'],
+  ['--apex-treesel-row-hover-bg', 'var(--bg-muted)', 'Node under the pointer'],
+  ['--apex-treesel-row-selected-bg', 'color-mix(— 12%)', 'Selected node'],
+  ['--apex-treesel-row-selected-fg', 'var(--accent-primary)', 'Selected node text'],
+  ['--apex-treesel-twisty-fg', 'var(--fg-subtle)', 'The expand/collapse chevron'],
+  ['--apex-treesel-twisty-size', '20px', 'Chevron box — the leaf spacer reads this too, so rows stay in line'],
+  ['--apex-treesel-twisty-radius', 'var(--r-xs)', 'Chevron corner'],
+  ['--apex-treesel-twisty-hover-bg', 'var(--bg-subtle)', 'Chevron under the pointer'],
+  ['--apex-treesel-twisty-hover-fg', 'var(--fg-default)', 'Chevron glyph on hover'],
+  ['--apex-treesel-indent', '18px', 'How far each level steps in'],
 
   ['--apex-order-panel-bg', 'var(--bg-surface)', 'ApexOrderList — the framed panel'],
   ['--apex-order-panel-border', 'var(--border-default)', 'Panel edge'],
@@ -1624,9 +1729,9 @@ export const OWN_PARTS: Record<string, string[][]> = {
   ],
   treeselect: [
     ['branch', '.apex-tree__branch', 'a node and everything under it — layout only'],
-    ['option', '.apex-tree__row', '--apex-tree-row-fg, --apex-tree-row-radius, --apex-tree-row-pad, --apex-tree-row-fs, --apex-tree-row-hover-bg, --apex-tree-row-selected-bg, --apex-tree-row-selected-fg'],
-    ['twisty', '.apex-tree__twisty', '--apex-tree-twisty-fg, --apex-tree-twisty-size, --apex-tree-twisty-radius, --apex-tree-twisty-hover-bg, --apex-tree-twisty-hover-fg'],
-    ['— (indent)', '.apex-tree__row padding', '--apex-tree-indent — how far each level steps in. The leaf spacer reads the same --apex-tree-twisty-size, so rows stay in line'],
+    ['option', '.apex-tree__row', '--apex-treesel-row-fg, --apex-treesel-row-radius, --apex-treesel-row-pad, --apex-treesel-row-fs, --apex-treesel-row-hover-bg, --apex-treesel-row-selected-bg, --apex-treesel-row-selected-fg'],
+    ['twisty', '.apex-tree__twisty', '--apex-treesel-twisty-fg, --apex-treesel-twisty-size, --apex-treesel-twisty-radius, --apex-treesel-twisty-hover-bg, --apex-treesel-twisty-hover-fg'],
+    ['— (indent)', '.apex-tree__row padding', '--apex-treesel-indent — how far each level steps in. The leaf spacer reads the same --apex-treesel-twisty-size, so rows stay in line'],
     ['addNew', '.apex-pop__add', '--apex-pop-add-bg, --apex-pop-add-border, --apex-pop-add-fg, --apex-pop-add-hover-bg, --apex-pop-add-icon — one per open branch, plus one for the root'],
     ['popover / filter / checkbox / tick / empty', '.apex-pop, .apex-pop__filter, .apex-cb__box, .apex-pop__tick, .apex-pop__empty', 'shared — all on ApexField'],
     ['chip', '.apex-chip', 'the chips in the box under multiple/checkbox; --apex-token-* as on Multiselect'],
@@ -1678,20 +1783,20 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['swatch', '.apex-swatch', '--apex-swatch-size, --apex-swatch-border, --apex-swatch-radius, --apex-swatch-hover-border, --apex-swatch-check, --apex-swatch-on-gap, --apex-swatch-on-ring'],
   ],
   datepicker: [
-    ['calendar', '.apex-cal', '--apex-cal-bg, --apex-cal-border, --apex-cal-radius, --apex-cal-shadow'],
+    ['calendar', '.apex-cal', '--apex-dp-bg, --apex-dp-border, --apex-dp-radius, --apex-dp-shadow'],
     ['nav', '.apex-cal__nav', 'the prev/next buttons are .apex-ctl__btn inside it'],
-    ['title', '.apex-cal__title', '--apex-cal-nav-fg, --apex-cal-nav-hover-bg, --apex-cal-nav-hover-fg'],
+    ['title', '.apex-cal__title', '--apex-dp-nav-fg, --apex-dp-nav-hover-bg, --apex-dp-nav-hover-fg'],
     ['months', '.apex-cal__months', 'the row of columns — layout only'],
     ['month', '.apex-cal__month', 'one column — layout only'],
-    ['monthLabel', '.apex-cal__mlabel', '--apex-cal-month-fg (shown once numberOfMonths is above one)'],
+    ['monthLabel', '.apex-cal__mlabel', '--apex-dp-month-fg (shown once numberOfMonths is above one)'],
     ['grid', '.apex-cal__grid', 'the seven columns — layout only'],
-    ['weekday', '.apex-cal__wd', '--apex-cal-wd-fg'],
-    ['day', '.apex-cal__day', '--apex-cal-day-fg, --apex-cal-day-radius, --apex-cal-day-hover-bg, --apex-cal-day-selected-bg, --apex-cal-day-selected-fg, --apex-cal-day-today-ring, --apex-cal-day-outside-fg, --apex-cal-day-range-bg'],
-    ['pick', '.apex-cal__pick', '--apex-cal-pick-fg, --apex-cal-pick-hover-bg, --apex-cal-pick-selected-bg, --apex-cal-pick-selected-fg (month and year grids)'],
-    ['time', '.apex-cal__time', '--apex-cal-time-border, --apex-cal-time-fg, --apex-cal-time-font'],
-    ['spin', '.apex-cal__spin', '--apex-cal-spin-fg, --apex-cal-spin-hover-bg, --apex-cal-spin-hover-fg'],
-    ['meridiem', '.apex-cal__mer', '--apex-cal-mer-bg, --apex-cal-mer-fg, --apex-cal-mer-border, --apex-cal-mer-hover'],
-    ['bar', '.apex-cal__bar', '--apex-cal-bar-border, --apex-cal-bar-fg, --apex-cal-bar-hover-bg'],
+    ['weekday', '.apex-cal__wd', '--apex-dp-wd-fg'],
+    ['day', '.apex-cal__day', '--apex-dp-day-fg, --apex-dp-day-radius, --apex-dp-day-hover-bg, --apex-dp-day-selected-bg, --apex-dp-day-selected-fg, --apex-dp-day-today-ring, --apex-dp-day-outside-fg, --apex-dp-day-range-bg'],
+    ['pick', '.apex-cal__pick', '--apex-dp-pick-fg, --apex-dp-pick-hover-bg, --apex-dp-pick-selected-bg, --apex-dp-pick-selected-fg (month and year grids)'],
+    ['time', '.apex-cal__time', '--apex-dp-time-border, --apex-dp-time-fg, --apex-dp-time-font'],
+    ['spin', '.apex-cal__spin', '--apex-dp-spin-fg, --apex-dp-spin-hover-bg, --apex-dp-spin-hover-fg'],
+    ['meridiem', '.apex-cal__mer', '--apex-dp-mer-bg, --apex-dp-mer-fg, --apex-dp-mer-border, --apex-dp-mer-hover'],
+    ['bar', '.apex-cal__bar', '--apex-dp-bar-border, --apex-dp-bar-fg, --apex-dp-bar-hover-bg'],
   ],
   textarea: [
     ['counter', '.apex-ctl__counter', '--apex-counter-fg'],
@@ -2092,15 +2197,15 @@ area.value.measure();   // after content the ResizeObserver cannot see`,
   treeselect: `<!-- The overlay is a plain .apex-pop, so the shared variables dress it.
      Only the rows, the chevron and the indent are this control's own. -->
 .locality-tree {
-  --apex-tree-row-fg: #E8EEF7;
-  --apex-tree-row-hover-bg: #1D2735;
-  --apex-tree-row-selected-bg: #16202C;
-  --apex-tree-row-selected-fg: #7AA2F7;
-  --apex-tree-twisty-fg: #6B7789;
-  --apex-tree-twisty-hover-bg: #1D2735;
+  --apex-treesel-row-fg: #E8EEF7;
+  --apex-treesel-row-hover-bg: #1D2735;
+  --apex-treesel-row-selected-bg: #16202C;
+  --apex-treesel-row-selected-fg: #7AA2F7;
+  --apex-treesel-twisty-fg: #6B7789;
+  --apex-treesel-twisty-hover-bg: #1D2735;
   /* One step per level. The leaf spacer reads the twisty size, so a leaf
      still lines up with its siblings when you change either. */
-  --apex-tree-indent: 22px;
+  --apex-treesel-indent: 22px;
   /* Shared, but this is where you would set them. */
   --apex-pop-bg: #101820;
   --apex-pop-border: #243040;
@@ -2305,7 +2410,7 @@ function createRegion({ path }) {
    beside the output, and each preset. Scope by ancestor to reach one
    kind — .apex-picker__presets .brand-swatch, and so on. */`,
   datepicker: `<!-- Twelve props cover the popover and every state a day can be in.
-     They are sugar over --apex-cal-*, so this and the CSS below do the
+     They are sugar over --apex-dp-*, so this and the CSS below do the
      same thing. -->
 <ApexDatePicker v-model="when" label="Campaign start" show-icon
   calendar-background="#101820" calendar-border-color="#243040"
@@ -2325,14 +2430,14 @@ function createRegion({ path }) {
    follow the theme rather than be set per instance. Reach them by
    scoping a class of your own. */
 .booking-cal {
-  --apex-cal-nav-hover-fg: #7AA2F7;
-  --apex-cal-wd-fg: #6B7789;
-  --apex-cal-pick-selected-bg: #7AA2F7;
-  --apex-cal-pick-selected-fg: #0B0F14;
-  --apex-cal-time-border: #243040;
-  --apex-cal-spin-hover-fg: #7AA2F7;
-  --apex-cal-mer-bg: #16202C;
-  --apex-cal-bar-fg: #7AA2F7;
+  --apex-dp-nav-hover-fg: #7AA2F7;
+  --apex-dp-wd-fg: #6B7789;
+  --apex-dp-pick-selected-bg: #7AA2F7;
+  --apex-dp-pick-selected-fg: #0B0F14;
+  --apex-dp-time-border: #243040;
+  --apex-dp-spin-hover-fg: #7AA2F7;
+  --apex-dp-mer-bg: #16202C;
+  --apex-dp-bar-fg: #7AA2F7;
 }
 
 <!-- ui puts your class on any part. The keys below are the calendar's own;
@@ -2489,6 +2594,189 @@ function createRegion({ path }) {
 }`,
 };
 
+/* ------------------------------------------------------------------ *
+ * Seed data for the nine data controls.
+ *
+ * Copied from the gallery's own registry (web/apex-ui-docs.js) and shell
+ * (web/apex-ui-shell.js), for the reason the header of this file gives:
+ * hand-writing demo data from the components' props produced a page that
+ * looked plausible and rendered different demos, which is worse than useless
+ * when the point is comparing the two side by side.
+ *
+ * The one deliberate change is the thumbnail path. The gallery is buildless
+ * and serves them from `web/thumbs/`; a Vite app serves `public/` at the
+ * root, so the same six files are `/thumbs/`.
+ * ------------------------------------------------------------------ */
+
+/** Sales rows for the DataTable demos. Enough to page and sort meaningfully. */
+export const SALES = (function () {
+  const countries = ['Malta', 'Italy', 'Germany', 'France', 'Spain', 'Netherlands'];
+  const reps = ['A. Borg', 'L. Rossi', 'K. Weber', 'M. Dubois', 'C. Ruiz', 'S. de Vries'];
+  const statuses = ['qualified', 'negotiation', 'renewal', 'new', 'unqualified'];
+  const products = ['Totem 43"', 'Wall 55"', 'Menu board', 'Ticker strip', 'Window 32"', 'Kiosk 27"'];
+  const out: Record<string, unknown>[] = [];
+  for (let i = 0; i < 84; i++) {
+    const qty = 1 + ((i * 7) % 24);
+    const price = 180 + ((i * 53) % 1400);
+    out.push({
+      id: 'ORD-' + String(1001 + i),
+      thumb: '/thumbs/' + products[i % products.length].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.png',
+      sku: 'SKU-' + String(4200 + i * 3),
+      product: products[i % products.length],
+      country: countries[i % countries.length],
+      rep: reps[(i * 5) % reps.length],
+      status: statuses[(i * 3) % statuses.length],
+      qty,
+      price,
+      margin: 0.08 + ((i % 9) * 0.035),
+      signed: new Date(2025, i % 12, 1 + (i % 27)),
+      verified: i % 3 !== 0,
+    });
+  }
+  return out;
+})();
+
+/** The two option lists the filter and edit examples share. */
+export const STATUS_OPTIONS = [
+  { value: 'qualified', label: 'Qualified' }, { value: 'negotiation', label: 'Negotiation' },
+  { value: 'renewal', label: 'Renewal' }, { value: 'new', label: 'New' },
+  { value: 'unqualified', label: 'Unqualified' },
+];
+export const COUNTRY_OPTIONS = ['Malta', 'Italy', 'Germany', 'France', 'Spain', 'Netherlands']
+  .map((c) => ({ value: c, label: c }));
+
+export const SALES_COLUMNS = [
+  { field: 'id', header: 'Order', sortable: true, width: '110px' },
+  { field: 'product', header: 'Product', sortable: true, minWidth: '150px' },
+  { field: 'country', header: 'Country', sortable: true, minWidth: '130px' },
+  { field: 'rep', header: 'Representative', sortable: true, minWidth: '150px' },
+  { field: 'status', header: 'Status', sortable: true, format: 'badge', minWidth: '130px',
+    badgeTones: { qualified: 'success', negotiation: 'warning', renewal: 'info', 'new': 'primary', unqualified: 'danger' } },
+  { field: 'qty', header: 'Qty', sortable: true, format: 'number', align: 'end', width: '80px', aggregate: 'sum' },
+  { field: 'price', header: 'Unit price', sortable: true, format: 'currency', align: 'end', width: '130px', aggregate: 'avg' },
+  { header: 'Net total', formula: '=qty*price/1.5', format: 'currency', align: 'end', width: '140px', aggregate: 'sum' },
+  { field: 'margin', header: 'Margin', sortable: true, format: 'percent', precision: 1, align: 'end', width: '100px', aggregate: 'avg' },
+  { field: 'signed', header: 'Signed', sortable: true, format: 'date', width: '120px' },
+  { field: 'verified', header: 'Verified', format: 'boolean', align: 'center', width: '100px' },
+];
+
+/* TEAM — the people PickList moves between its two lists — is already
+   declared above for the OrderList and Listbox demos, and is byte-identical to
+   the gallery's. Reused rather than declared a second time. */
+
+export const ORG_TREE = {
+  key: 'ceo', label: 'A. Borg', subtitle: 'Founder & CEO', icon: 'person',
+  children: [
+    { key: 'product', label: 'L. Rossi', subtitle: 'Product Lead', icon: 'lightbulb', children: [
+      { key: 'ux', label: 'S. de Vries', subtitle: 'UX Designer', icon: 'draw' },
+      { key: 'pm', label: 'M. Dubois', subtitle: 'Product Manager', icon: 'assignment' },
+    ] },
+    { key: 'eng', label: 'K. Weber', subtitle: 'Engineering Lead', icon: 'terminal', children: [
+      { key: 'fe', label: 'C. Ruiz', subtitle: 'Frontend Engineer', icon: 'code' },
+      { key: 'be', label: 'J. Camilleri', subtitle: 'Backend Engineer', icon: 'dns' },
+      { key: 'qa', label: 'N. Farrugia', subtitle: 'QA Engineer', icon: 'bug_report' },
+    ] },
+    { key: 'ops', label: 'P. Zammit', subtitle: 'Operations', icon: 'inventory_2',
+      background: '#FFF1E5', borderColor: '#C24A06', color: '#6F2A03', children: [
+      { key: 'field', label: 'D. Micallef', subtitle: 'Field Technician', icon: 'handyman' },
+    ] },
+  ],
+};
+
+export const SHIPMENT = [
+  { status: 'Ordered', date: 'Oct 15, 2026', time: '10:30', icon: 'shopping_cart', color: '#0B5FFF',
+    note: 'Order #12345 confirmed and queued for picking.' },
+  { status: 'Payment confirmed', date: 'Oct 15, 2026', time: '10:32', icon: 'credit_card', color: '#137C4A',
+    note: '€149.99 captured on card ending 4242.' },
+  { status: 'Shipped', date: 'Oct 16, 2026', time: '14:15', icon: 'local_shipping', color: '#C24A06',
+    note: 'Handed to the carrier. Tracking TRK-892374651.' },
+  { status: 'Out for delivery', date: 'Oct 18, 2026', time: '08:05', icon: 'directions_car', color: '#7C3AED',
+    note: 'On the van, 6 stops away.' },
+  { status: 'Delivered', date: 'Oct 18, 2026', time: '11:20', icon: 'check_circle', color: '#137C4A',
+    note: 'Signed for at the front door.' },
+];
+
+/** The file tree ApexTree renders, and the source ApexTreeTable's rows mirror. */
+export const FILES = [
+  { key: 'docs', label: 'Documents', icon: 'folder', children: [
+    { key: 'work', label: 'Work', icon: 'folder', children: [
+      { key: 'expenses', label: 'Expenses.xlsx', icon: 'description', data: { size: '18 KB' } },
+      { key: 'contract', label: 'Contract.pdf', icon: 'picture_as_pdf', data: { size: '240 KB' } },
+    ] },
+    { key: 'home', label: 'Home', icon: 'folder', children: [
+      { key: 'invoices', label: 'Invoices.zip', icon: 'folder_zip', data: { size: '1.2 MB' } },
+    ] },
+  ] },
+  { key: 'media', label: 'Media', icon: 'folder', children: [
+    { key: 'signage', label: 'Signage', icon: 'folder', children: [
+      { key: 'lobby-loop', label: 'lobby-loop.mp4', icon: 'movie', data: { size: '84 MB' } },
+      { key: 'menu-board', label: 'menu-board.png', icon: 'image', data: { size: '2.1 MB' } },
+    ] },
+    { key: 'audio', label: 'ambient.mp3', icon: 'audiotrack', data: { size: '6 MB' } },
+  ] },
+  { key: 'reports', label: 'Reports', icon: 'folder', children: [
+    { key: 'play', label: 'proof-of-play.csv', icon: 'table_view', data: { size: '512 KB' } },
+    { key: 'uptime', label: 'uptime.csv', icon: 'table_view', data: { size: '96 KB' } },
+  ] },
+  { key: 'readme', label: 'README.md', icon: 'article', data: { size: '3 KB' } },
+];
+
+export const TT_NODES = (function () {
+  const mk = (
+    key: string, name: string, type: string, size: number,
+    owner: string, modified: string, icon: string, children?: unknown[],
+  ) => ({ key, icon, data: { name, type, size, owner, modified }, children });
+  return [
+    mk('d', 'Documents', 'Folder', 75, 'A. Borg', '2026-08-02', 'folder', [
+      mk('d-w', 'Work', 'Folder', 55, 'A. Borg', '2026-08-04', 'folder', [
+        mk('d-w-1', 'Expenses.xlsx', 'Spreadsheet', 30, 'L. Rossi', '2026-08-04', 'description'),
+        mk('d-w-2', 'Contract.pdf', 'Document', 25, 'A. Borg', '2026-07-28', 'picture_as_pdf'),
+      ]),
+      mk('d-h', 'Home', 'Folder', 20, 'A. Borg', '2026-06-11', 'folder', [
+        mk('d-h-1', 'Invoices.zip', 'Archive', 20, 'A. Borg', '2026-06-11', 'folder_zip'),
+      ]),
+    ]),
+    mk('m', 'Media', 'Folder', 1650, 'K. Weber', '2026-08-18', 'folder', [
+      mk('m-s', 'Signage', 'Folder', 1560, 'K. Weber', '2026-08-18', 'folder', [
+        mk('m-s-1', 'lobby-loop.mp4', 'Video', 1500, 'K. Weber', '2026-08-18', 'movie'),
+        mk('m-s-2', 'menu-board.png', 'Image', 60, 'S. de Vries', '2026-08-12', 'image'),
+      ]),
+      mk('m-a', 'ambient.mp3', 'Audio', 90, 'C. Ruiz', '2026-05-30', 'audiotrack'),
+    ]),
+    mk('r', 'Reports', 'Folder', 608, 'M. Dubois', '2026-08-20', 'folder', [
+      mk('r-1', 'proof-of-play.csv', 'Spreadsheet', 512, 'M. Dubois', '2026-08-20', 'table_view'),
+      mk('r-2', 'uptime.csv', 'Spreadsheet', 96, 'M. Dubois', '2026-08-19', 'table_view'),
+    ]),
+    mk('x', 'README.md', 'Document', 3, 'A. Borg', '2026-04-02', 'article'),
+  ];
+})();
+
+export const TT_COLUMNS: Record<string, unknown>[] = [
+  { field: 'name', header: 'Name', expander: true, sortable: true, minWidth: '240px' },
+  { field: 'size', header: 'Size', sortable: true, format: 'number', align: 'end', width: '110px',
+    aggregate: 'sum' },
+  { field: 'type', header: 'Type', sortable: true, format: 'badge', width: '150px',
+    badgeTones: { Folder: 'warning', Document: 'info', Spreadsheet: 'success', Video: 'primary', Image: 'primary', Audio: 'neutral', Archive: 'neutral' } },
+  { field: 'owner', header: 'Owner', sortable: true, minWidth: '140px' },
+  { field: 'modified', header: 'Modified', sortable: true, format: 'date', width: '130px' },
+];
+
+/**
+ * The stage's columns, with filters switched on.
+ *
+ * The gallery derives these from TT_COLUMNS rather than writing a second
+ * array, so a change to a column's header or format cannot apply to one table
+ * and not the other. Kept as a derivation for the same reason.
+ */
+export const TT_FILTER_COLUMNS = TT_COLUMNS.map((c) => {
+  if (c.field === 'name') return { ...c, filter: true, filterType: 'text' };
+  if (c.field === 'type') return { ...c, filter: true, filterType: 'select',
+    filterOptions: ['Folder', 'Document', 'Spreadsheet', 'Video', 'Image', 'Audio', 'Archive']
+      .map((v) => ({ value: v, label: v })) };
+  if (c.field === 'size') return { ...c, filter: true, filterType: 'number', filterMatchMode: 'gte' };
+  return c;
+});
+
 export const ENTRIES: DocEntry[] = [
   {
     id: 'icon', name: 'ApexIcon', group: 'Foundations',
@@ -2519,6 +2807,7 @@ export const ENTRIES: DocEntry[] = [
     controls: [],
     props: [
       ['label / labelIcon', 'string', '\u2014', 'The label and an optional glyph beside it'],
+      ['info', 'string', '\u2014', 'An \u24d8 after the label that opens this explanation \u2014 click or Enter, Escape closes. For what a setting means; help is for what to type'],
       ['labelPlacement', 'ApexLabelPlacement', "'top'", 'Nine placements \u2014 see the section below'],
       ['labelWidth', 'string', "'160px'", 'Label column width for before and after'],
       ['help / error / warning / success', 'string', '\u2014', 'The message line, in precedence order'],
@@ -2529,6 +2818,7 @@ export const ENTRIES: DocEntry[] = [
       ['statusIcon', 'boolean', 'true', 'The tone glyph inside the box'],
       ['value', 'unknown', '\u2014', 'What the rules evaluate, and what marks the field filled'],
       ['ui', 'ApexFieldClasses', '\u2014', 'Your own class on any part \u2014 see Class hooks'],
+      ['labelFor', 'boolean', 'true', 'Off for a COMPOSITE control, whose resolved id lands on a div. `for` may only point at a labelable element, so on a group it names nothing at all — such a control takes the `labelId` the slot hands out and uses `aria-labelledby` instead. ApexEditor is the first of ours to need it (AF2-280).'],
     ],
     events: [],
     slots: [['default', 'The control. Receives { id, describedBy, invalid, tone, size, disabled, statusGlyph, ui }']],
@@ -4261,6 +4551,8 @@ export const ENTRIES: DocEntry[] = [
       { key: 'width', type: 'text' }, { key: 'offset', type: 'text' },
     ],
     props: [
+      ['enterClass / leaveClass', 'string', '—', 'Your own transition classes, e.g. animate.css. Not bundled — install it yourself. A pair given here replaces the built-in animation. See <a href="#/motion">Motion &amp; transitions</a>'],
+      ['enterDuration / leaveDuration', 'string', '—', 'Any CSS time, per phase. Written as <code>--animate-duration</code> and <code>animation-duration</code> while that phase runs, then removed'],
       ['position', "'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center'", "'top-right'", 'Bottom stacks grow upward, so the newest is always nearest the edge'],
       ['mode', "'stacked' | 'expanded'", "'expanded'", 'stacked keeps the newest on top with the rest peeking behind, and fans them out on hover'],
       ['group', 'string', '—', 'Only renders messages carrying this group, so one app can have several containers'],
@@ -4325,6 +4617,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'width', type: 'text' },
     ],
     props: [
+      ['enterDuration / leaveDuration', 'string', '—', 'Any CSS time, per phase. See <a href="#/motion">Motion &amp; transitions</a>'],
       ['tone', "'success' | 'danger' | 'warn' | 'info'", 'warn asking, success reporting', 'Chooses the drawn figure and the ring colour'],
       ['title / header', 'string', '—', 'header is the name ApexConfirmDialog used, kept for its callers'],
       ['message', 'string', '—', ''],
@@ -4340,6 +4633,7 @@ export const ENTRIES: DocEntry[] = [
       ['acceptLabel / rejectLabel', 'string', 'translated', ''],
       ['acceptIcon / rejectIcon', 'string', '—', ''],
       ['acceptSeverity / rejectSeverity', 'AlertSeverity', 'primary / secondary', 'A danger tone makes the accepting button danger unless you say otherwise'],
+      ['ripple', 'boolean', '—', 'Ripple the answer buttons, so the ones the alert draws for itself match those the app writes with <code>v-apex-ripple</code>. Unset falls through to the plugin’s <code>ripple</code> option; OFF by default'],
       ['footnote', 'string', '—', 'A note or link under the buttons'],
       ['width / padding / background / radius', 'string', 'tokens', 'The panel'],
       ['maskColor / maskBlur', 'string / boolean', 'tokens', 'The backdrop'],
@@ -4347,7 +4641,7 @@ export const ENTRIES: DocEntry[] = [
       ['dismissableMask', 'boolean', 'true', 'Whether clicking the backdrop dismisses'],
       ['autoClose', 'number', '—', 'Milliseconds. Never counts down over the work — dismissing a progress stage on a timer would abandon an action in flight'],
       ['showTimer', 'boolean', 'false', 'Draws the countdown as a bar'],
-      ['transition', "'scale' | 'slide' | 'fade' | 'none'", 'scale', ''],
+      ['transition', "'scale' | 'slide' | 'fade' | 'none'", 'scale', 'A built-in preset, used when no classes are given'],
       ['enterClass / leaveClass', 'string', '—', 'Your own animation classes'],
       ['target / side / align', 'unknown / string', '—', 'Anchors a confirm() to an element, which routes it to ApexConfirmPopup instead. run() ignores it: a staged flow cannot follow a popup anchored to the button just pressed'],
       ['group', 'string', '—', 'Only a host carrying the same group answers, for a per-kind alert'],
@@ -4365,7 +4659,9 @@ export const ENTRIES: DocEntry[] = [
     serviceRows: [
       ['confirm(options)', 'Promise<boolean>', 'Asks. Resolves true only if the accepting button was pressed'],
       ['notify(options)', 'Promise<void>', 'Reports an outcome with a single button, and waits for acknowledgement'],
-      ['run({ confirm, progressTitle, action, interpret })', 'Promise<boolean>', 'Confirms, runs and reports — in one alert that never closes in between'],
+      ['run({ confirm, progress, result, action, interpret })', 'Promise<boolean>', 'Confirms, runs and reports — in one alert that never closes in between'],
+      [' progress', 'AlertOptions', 'The working stage. An <code>icon</code> replaces the ring and spins — gears for a save. Buttons are dropped: there is nothing to decide. <code>progressTitle</code> is the shorthand for its title'],
+      [' result', 'AlertOptions', 'The reporting stage, UNDERNEATH the outcome — for what the action cannot know: <code>autoClose</code>, <code>showTimer</code>, the button label. Tone, title and message stay the outcome’s'],
       ['press(button, index)', 'Promise<void>', 'Runs a button’s action and honours its role. What both hosts call'],
       ['close()', 'void', 'Closes, settling anyone still waiting as cancel'],
       ['state', 'readonly', 'The live request, if you want to render your own'],
@@ -5118,6 +5414,8 @@ export const ENTRIES: DocEntry[] = [
       { key: 'background', type: 'color' }, { key: 'borderColor', type: 'color' },
     ],
     props: [
+      ['enterClass / leaveClass', 'string', '—', 'Your own transition classes, e.g. animate.css. Not bundled — install it yourself. A pair given here replaces the built-in animation. See <a href="#/motion">Motion &amp; transitions</a>'],
+      ['enterDuration / leaveDuration', 'string', '—', 'Any CSS time, per phase. Written as <code>--animate-duration</code> and <code>animation-duration</code> while that phase runs, then removed'],
       ['visible', 'boolean', 'false', 'v-model:visible — optional; the ref methods are the usual route'],
       ['target', 'Element | string | ref', '—', 'A default anchor, when no event is passed to show()'],
       ['side', "'top' | 'bottom' | 'left' | 'right'", "'bottom'", 'Preferred side; flips when it will not fit'],
@@ -5161,6 +5459,8 @@ export const ENTRIES: DocEntry[] = [
       { key: 'background', type: 'color' }, { key: 'maskColor', type: 'color' },
     ],
     props: [
+      ['enterClass / leaveClass', 'string', '—', 'Your own transition classes, e.g. animate.css. Not bundled — install it yourself. A pair given here replaces the built-in animation. See <a href="#/motion">Motion &amp; transitions</a>'],
+      ['enterDuration / leaveDuration', 'string', '—', 'Any CSS time, per phase. Written as <code>--animate-duration</code> and <code>animation-duration</code> while that phase runs, then removed'],
       ['visible', 'boolean', 'false', 'v-model:visible'],
       ['header / subtitle / icon', 'string', '—', 'Header content; the header slot replaces all three'],
       ['position', "'left' | 'right' | 'top' | 'bottom' | 'full'", "'left'", 'Which edge it slides from; full covers the viewport'],
@@ -5202,6 +5502,8 @@ export const ENTRIES: DocEntry[] = [
       { key: 'background', type: 'color' }, { key: 'maskColor', type: 'color' },
     ],
     props: [
+      ['enterClass / leaveClass', 'string', '—', 'Your own transition classes, e.g. animate.css. Not bundled — install it yourself. A pair given here replaces the built-in animation. See <a href="#/motion">Motion &amp; transitions</a>'],
+      ['enterDuration / leaveDuration', 'string', '—', 'Any CSS time, per phase. Written as <code>--animate-duration</code> and <code>animation-duration</code> while that phase runs, then removed'],
       ['visible', 'boolean', 'false', 'v-model:visible'],
       ['header / subtitle / icon', 'string', '—', 'Header content; the header slot replaces all three'],
       ['position', '9 values', "'center'", 'center, top, bottom, left, right and the four corners'],
@@ -5209,8 +5511,7 @@ export const ENTRIES: DocEntry[] = [
       ['draggable', 'boolean', 'false', 'Drag by the header'],
       ['closable / closeOnEscape / dismissableMask', 'boolean', 'true / true / false', 'Dismissal routes'],
       ['autoClose / showTimer', 'number / boolean', '—', 'Close after n ms, with an optional countdown bar'],
-      ['transition', "'scale' | 'slide' | 'fade' | 'none'", "'scale'", ''],
-      ['enterClass / leaveClass', 'string', '—', 'Your own transition classes'],
+      ['transition', "'scale' | 'slide' | 'fade' | 'none'", 'scale', 'A built-in preset, used when no classes are given'],
       ['width / maxWidth / padding / radius / background / borderColor', 'string', 'tokens', 'Sizing and chrome'],
       ['maskColor / maskBlur', 'string / boolean', 'tokens / false', 'The overlay behind'],
       ['zIndex', 'number', '1000', 'Stack order for a dialog opened over another'],
@@ -5388,6 +5689,8 @@ export const ENTRIES: DocEntry[] = [
       { key: 'acceptLabel', type: 'text' }, { key: 'rejectLabel', type: 'text' },
     ],
     props: [
+      ['enterClass / leaveClass', 'string', '—', 'Your own transition classes, e.g. animate.css. Not bundled — install it yourself. A pair given here replaces the built-in animation. See <a href="#/motion">Motion &amp; transitions</a>'],
+      ['enterDuration / leaveDuration', 'string', '—', 'Any CSS time, per phase. Written as <code>--animate-duration</code> and <code>animation-duration</code> while that phase runs, then removed'],
       ['group', 'string', '—', 'Only respond to require() calls carrying this group'],
       ['message / icon / iconColor', 'string', '—', 'Declarative defaults; a require() value overrides them'],
       ['side', "'top' | 'bottom' | 'left' | 'right'", "'bottom'", 'Preferred side; flips when it will not fit'],
@@ -5417,4 +5720,953 @@ export const ENTRIES: DocEntry[] = [
       ['accept / reject / onCustom', 'callback', 'Resolved the same way as the dialog'],
     ],
   },
+
+  /* ── Data ──────────────────────────────────────────────────────
+     Entries copied from the gallery's registry (web/apex-ui-docs.js), extracted
+     rather than retyped — the header of this file records what happened the
+     last time demo data was written out by hand. The one change per entry is
+     the stage: the gallery's bespoke `xxxDemo: true` flag becomes our `demo`
+     discriminator. Paginator landed early, in AF2-250, as the harness's proof.
+     The pack is complete. */
+
+  {
+    id: 'datatable', name: 'ApexDataTable', group: 'Data',
+    blurb: 'Tabular data with sorting, selection, paging, frozen columns and rows, formula columns and footer aggregates. Columns are a props array, so the whole pipeline runs in computeds and only visible rows render.',
+    noField: true, 
+    demo: 'data-tabular',
+    base: { size: 'normal', gridLines: 'horizontal', striped: true, paginator: true, rows: 8,
+            selectionMode: 'checkbox', showSelectionCount: true, footerMode: 'both',
+            dataKey: 'id', scrollable: false, sortMode: 'multiple' },
+    controls: [
+      { key: 'size', type: 'select', options: ['small', 'normal', 'large'] },
+      { key: 'gridLines', type: 'select', options: ['none', 'horizontal', 'vertical', 'both'] },
+      { key: 'gridLineSize', type: 'number' }, { key: 'gridLineColor', type: 'color' },
+      { key: 'striped', type: 'bool' }, { key: 'stripeColor', type: 'color' },
+      { key: 'headerBackground', type: 'color' }, { key: 'borderColor', type: 'color' },
+      { key: 'selectionMode', type: 'select', options: ['', 'single', 'multiple', 'checkbox', 'radio'] },
+      { key: 'selectionColor', type: 'color' }, { key: 'showSelectionCount', type: 'bool' },
+      { key: 'sortMode', type: 'select', options: ['single', 'multiple'] },
+      { key: 'removableSort', type: 'bool' },
+      { key: 'paginator', type: 'bool' }, { key: 'rows', type: 'number' },
+      { key: 'footerMode', type: 'select', options: ['all', 'selected', 'both'] },
+      { key: 'scrollable', type: 'bool' }, { key: 'scrollHeight', type: 'text' },
+      { key: 'rowFreeze', type: 'bool' },
+      { key: 'editMode', type: 'select', options: ['', 'cell', 'row'] },
+      { key: 'filterDisplay', type: 'select', options: ['', 'row', 'menu'] },
+      { key: 'showGlobalFilter', type: 'bool' },
+      { key: 'groupRowsBy', type: 'select', options: ['', 'country', 'status', 'rep'] },
+      { key: 'rowGroupMode', type: 'select', options: ['subheader', 'rowspan'] },
+      { key: 'expandableRowGroups', type: 'bool' }, { key: 'showGroupFooter', type: 'bool' },
+      { key: 'rowExpansion', type: 'bool' },
+      { key: 'expandOnRowClick', type: 'bool' }, { key: 'singleExpand', type: 'bool' },
+      { key: 'loading', type: 'bool' },
+      { key: 'loadingMode', type: 'select', options: ['overlay', 'skeleton'] },
+      { key: 'bordered', type: 'bool' }, { key: 'hoverable', type: 'bool' },
+    ],
+    props: [
+      ['value', 'Row[]', '[]', 'The rows'],
+      ['columns', 'ColumnDef[]', '[]', 'See the column reference below'],
+      ['dataKey', 'string', '—', 'Uniquely identifies a row; needed for selection and editing'],
+      ['size', "'small' | 'normal' | 'large'", "'normal'", 'Cell padding'],
+      ['gridLines', "'none' | 'horizontal' | 'vertical' | 'both'", "'horizontal'", 'Which borders to draw'],
+      ['gridLineSize / gridLineColor', 'number / string', '1 / token', 'Border thickness and colour'],
+      ['striped / stripeColor', 'boolean / string', 'false / token', 'Zebra rows'],
+      ['headerBackground / borderColor', 'string', 'token', 'Chrome colours'],
+      ['selection', 'Row | Row[] | null', '—', 'v-model:selection'],
+      ['selectionMode', "'single' | 'multiple' | 'checkbox' | 'radio' | null", 'null', ''],
+      ['selectionColor', 'string', 'accent', 'Selected-row tint'],
+      ['showSelectionCount', 'boolean', 'false', 'Count chip in the metabar'],
+      ['metaKeySelection', 'boolean', 'true', 'Cmd/Ctrl needed to add in multiple mode'],
+      ['sortMode', "'single' | 'multiple'", "'single'", 'Cmd/Ctrl-click headers to sort by several fields'],
+      ['sortField / sortOrder', 'string / 1 | -1 | 0', '—', 'Initial single sort; headers stay interactive'],
+      ['multiSortMeta', 'SortMeta[]', '—', 'Initial multi-sort; each header keeps a rank badge'],
+      ['removableSort', 'boolean', 'true', 'A third click clears the column'],
+      ['paginator / rows / first', 'boolean / number / number', 'false / 10 / 0', 'Paging; `first` is bindable'],
+      ['rowsPerPageOptions', 'number[]', '—', 'Page-size selector'],
+      ['lazy / totalRecords', 'boolean / number', 'false', 'Server-side paging and sorting'],
+      ['resizableColumns / columnResizeMode', "boolean / 'fit' | 'expand'", "false / 'fit'", 'Drag a boundary to resize. fit takes the difference from the next column so the table\u2019s total width never changes and no scrollbar appears mid-drag; expand lets the table grow instead. The last column has no grip \u2014 there is nothing on its right to take width from'],
+      ['reorderableColumns', 'boolean', 'false', 'Drag a header to reorder. The order is written out in full rather than as a diff, since a partial order would leave later columns unranked and drifting'],
+      ['columnToggle / columnToggleLabel', 'boolean / string', "false / 'Columns'", 'A picker in the toolbar. It lists every declared column including the hidden ones \u2014 a list of what is showing cannot bring back what is not'],
+      ['columnGroups', '{ header, columns, align? }[]', '\u2014', 'A header row above the columns. Each group spans the run of its own columns in their CURRENT order, and a column in no group gets a blank cell, so reordering can never make a group header span columns it does not own'],
+      ['columnState', '{ order, widths, hidden }', '\u2014', 'v-model:columnState. The table owns width, order and visibility by default \u2014 unlike the board\u2019s cards, a column layout is a view preference rather than the application\u2019s data \u2014 and this binds it when you want to persist or drive it'],
+      ['stateKey / stateStorage', "string / 'local' | 'session'", "\u2014 / 'local'", 'Persist the column layout without bookkeeping. A blocked or malformed store is swallowed: a lost preference is not an error'],
+      ['scrollable / scrollHeight', 'boolean / string', 'false', 'Vertical scroll with a sticky header'],
+      ['flexible', 'boolean', 'false', 'Grow and shrink with a flex parent'],
+      ['tableMinWidth', 'string', '—', 'Forces horizontal scroll below this width'],
+      ['expandedRows', 'Row[]', '—', 'v-model:expandedRows — rows whose detail panel is open'],
+      ['rowExpansion', 'boolean', 'false', 'Chevron column that opens a detail row; needs dataKey'],
+      ['expandOnRowClick', 'boolean', 'false', 'Clicking anywhere on the row toggles it'],
+      ['singleExpand', 'boolean', 'false', 'Only one row open at a time'],
+      ['expandIcon / collapseIcon', 'string', "'chevron_right' / 'keyboard_arrow_down'", ''],
+      ['frozenValue', 'Row[]', '—', 'v-model:frozenValue — rows pinned above the scrolling body'],
+      ['rowFreeze', 'boolean', 'false', 'Padlock column that freezes and unfreezes a row on click; needs dataKey'],
+      ['freezeIcon / unfreezeIcon', 'string', "'lock_open' / 'lock'", 'Padlock glyphs'],
+      ['editMode', "'cell' | 'row' | null", 'null', 'Click a cell to edit it, or an editor column per row'],
+      ['editingRows', 'Row[]', '—', 'v-model:editingRows — rows in row-edit mode'],
+      ['commitEdits', 'boolean', 'true', 'Also write the edit into the row object; turn off when the server owns the value'],
+      ['filters', 'FilterModel', '{}', 'v-model:filters — keyed by field, plus an optional global entry'],
+      ['filterDisplay', "'row' | 'menu' | null", 'null', 'Inline editors under the headers, or a popover per column'],
+      ['globalFilterFields', 'string[]', 'all non-formula fields', 'Fields the global filter searches'],
+      ['showGlobalFilter', 'boolean', 'false', 'Search box in the metabar, bound to filters.global'],
+      ['maxConstraints', 'number', '3', 'Rules a menu filter may stack, joined by AND/OR'],
+      ['groupRowsBy', 'string', '—', 'Field to group contiguous rows by; it leads the sort automatically'],
+      ['rowGroupMode', "'subheader' | 'rowspan'", "'subheader'", 'A header row per group, or the group column spanning its rows'],
+      ['expandableRowGroups', 'boolean', 'false', 'Groups can be collapsed'],
+      ['expandedRowGroups', 'string[]', '—', 'v-model:expandedRowGroups — group keys currently open'],
+      ['showGroupFooter', 'boolean', 'false', 'Aggregate row under each group, from groupAggregate ?? aggregate'],
+      ['showFooter / footerMode', 'boolean / all|selected|both', 'auto / all', 'Aggregate rows'],
+      ['loading / loadingMode', 'boolean / overlay|skeleton', 'false / overlay', ''],
+      ['rowClass / rowStyle', '(row, i) => …', '—', 'Conditional row styling'],
+      ['caption', 'string', '—', 'A line in the toolbar above the table'],
+      ['bordered', 'boolean', 'true', 'The frame around the table'],
+      ['hoverable', 'boolean', 'true', 'Highlights the row under the pointer'],
+      ['rowRipple', 'boolean', 'false', 'Ripple a row from the point of contact. NOT wired to the plugin’s app-wide <code>ripple</code> option — that one is about the buttons the kit draws for itself, and a rippling row is a far larger visual statement, so opting into one must not give you the other'],
+      ['globalFilterPlaceholder', 'string', "'Search all columns'", 'Placeholder for the toolbar search'],
+      ['paginatorTemplate', 'string', "'Showing {first}–{last} of {total}'", 'Summary line — the same tokens ApexPaginator takes'],
+      ['skeletonRows', 'number', '5', 'Placeholder rows drawn while loading in skeleton mode'],
+      ['emptyMessage', 'string', '—', 'Shown when there is nothing to list, or a filter matches nothing'],
+      ['locale', 'string', '—', 'Passed to the date and number formatters'],
+    ],
+    events: [
+      ['update:selection', 'Row | Row[] | null'],
+      ['row-select / row-unselect', '{ data, index }'],
+      ['row-click', '{ data, index, event }'],
+      ['sort', '{ sortField, sortOrder, multiSortMeta }'],
+      ['page', '{ first, rows, page }'],
+      ['update:frozenValue', 'Row[]'],
+      ['row-freeze / row-unfreeze', '{ data }'],
+      ['update:expandedRows', 'Row[]'],
+      ['row-expand / row-collapse', '{ data }'],
+      ['update:editingRows', 'Row[]'],
+      ['cell-edit-init', '{ data, field, value }'],
+      ['cell-edit-complete', '{ data, field, value, newValue }'],
+      ['cell-edit-cancel', '{ data, field }'],
+      ['row-edit-init / row-edit-cancel', '{ data, index }'],
+      ['row-edit-save', '{ data, newData, index }'],
+      ['update:filters', 'FilterModel'],
+      ['filter', '{ filters, filteredValue }'],
+      ['update:expandedRowGroups', 'string[]'],
+      ['rowgroup-expand / rowgroup-collapse', '{ key }'],
+    ],
+    slots: [
+      ['cell:<field>', 'Cell content; receives { row, column, value, index }'],
+      ['editor:<field>', 'Custom editor; receives { row, column, value, update }'],
+      ['expansion', 'Detail panel for an expanded row; receives { row, index }'],
+      ['groupheader', 'Group header content; receives { value, rows }'],
+      ['groupfooter', 'Group footer cell; receives { value, rows, column }'],
+      ['header:<field>', 'Header content'],
+      ['empty', 'Empty state'],
+      ['loading', 'Overlay content'],
+      ['header / footer', 'Metabar above and content below the table'],
+    ],
+  },
+
+  {
+    id: 'treetable', name: 'ApexTreeTable', group: 'Data',
+    blurb: 'Hierarchical data in tabular form — the data table\'s column model over the tree\'s row model. Sorting reorders siblings at every level rather than flattening the hierarchy, paging applies to root nodes so a page carries whole branches, and filtering keeps a matching branch or only what matched.',
+    noField: true, 
+    demo: 'data-tabular',
+    lead: ['v-model:expandedKeys="expanded"', 'v-model:selectionKeys="selected"', ':value="nodes"', ':columns="columns"'],
+    tail: '\n/>',
+    base: { size: 'normal', gridLines: 'horizontal', selectionMode: 'checkbox', showGlobalFilter: true, scrollable: false },
+    controls: [
+      { key: 'size', type: 'select', options: ['small', 'normal', 'large'] },
+      { key: 'gridLines', type: 'select', options: ['none', 'horizontal', 'vertical', 'both'] },
+      { key: 'striped', type: 'bool' }, { key: 'bordered', type: 'bool' },
+      { key: 'indent', type: 'number' },
+      { key: 'selectionMode', type: 'select', options: ['', 'single', 'multiple', 'checkbox'] },
+      { key: 'metaKeySelection', type: 'bool' },
+      { key: 'sortMode', type: 'select', options: ['single', 'multiple'] },
+      { key: 'removableSort', type: 'bool' },
+      { key: 'filterDisplay', type: 'select', options: ['', 'row'] },
+      { key: 'filterMode', type: 'select', options: ['lenient', 'strict'] },
+      { key: 'showGlobalFilter', type: 'bool' },
+      { key: 'paginator', type: 'bool' }, { key: 'rows', type: 'number' },
+      { key: 'scrollable', type: 'bool' }, { key: 'scrollHeight', type: 'text' },
+      { key: 'loading', type: 'bool' },
+      { key: 'loadingMode', type: 'select', options: ['overlay', 'skeleton'] },
+      { key: 'showFooter', type: 'bool' }, { key: 'caption', type: 'text' },
+    ],
+    props: [
+      ['value', 'TreeNode[]', '[]', 'Each node carries its row fields on `data`, plus key, icon and children'],
+      ['columns', 'TreeColumn[]', '[]', 'The ColumnDef shape, plus `expander: true` on the column that hosts the toggle'],
+      ['expandedKeys', 'Record<string, boolean>', '{}', 'v-model:expandedKeys'],
+      ['selectionMode', "'single' | 'multiple' | 'checkbox' | null", 'null', ''],
+      ['selectionKeys', 'Record<string, boolean | { checked, partialChecked }>', '{}', 'v-model:selectionKeys — an object per key in checkbox mode'],
+      ['metaKeySelection', 'boolean', 'false', 'Require Cmd/Ctrl to add in multiple mode'],
+      ['size / gridLines / striped / bordered', 'see DataTable', 'normal / horizontal', 'Same chrome as ApexDataTable'],
+      ['indent', 'number', '18', 'Pixels per level in the expander column'],
+      ['sortMode / sortField / sortOrder / multiSortMeta / removableSort', 'see DataTable', 'single', 'Sorting reorders siblings at every level'],
+      ['filters / filterDisplay / filterMode', "model / 'row' | null / 'lenient' | 'strict'", "{} / null / 'lenient'", 'lenient keeps a matching branch whole; strict keeps only matches and their ancestors'],
+      ['showGlobalFilter', 'boolean', 'false', 'One search across every column'],
+      ['paginator / rows / first', 'boolean / number / number', 'false / 10 / 0', 'Paging applies to root nodes'],
+      ['lazy / totalRecords', 'boolean / number', 'false', 'Load roots only, children on nodeExpand'],
+      ['scrollable / scrollHeight / tableMinWidth', 'boolean / string / string', 'false', 'Sticky header, horizontal scroll'],
+      ['loading / loadingMode / skeletonRows', 'boolean / overlay|skeleton / number', 'false / overlay / 5', ''],
+      ['showFooter', 'boolean', 'auto', 'Aggregate row; each column\'s `aggregate` runs over the leaves'],
+      ['caption', 'string', '—', 'A line in the toolbar above the table'],
+      ['rowsPerPageOptions', 'number[]', '—', 'Page-size choices; omit to hide the selector'],
+      ['emptyMessage', 'string', '—', 'Shown when there is nothing to list, or a filter matches nothing'],
+    ],
+    events: [
+      ['update:expandedKeys / update:selectionKeys / update:filters', 'key map'],
+      ['node-expand / node-collapse', 'TreeNode'],
+      ['node-select / node-unselect', 'TreeNode'],
+      ['sort', '{ sortField, sortOrder, multiSortMeta }'],
+      ['page', '{ first, rows, page }'],
+      ['filter', '{ filters }'],
+    ],
+    slots: [
+      ['cell:<field>', 'Cell content; receives { node, column, value, index }'],
+      ['header:<field>', 'Header content'],
+      ['filter:<field>', 'Custom filter editor for a column'],
+      ['header / footer', 'The metabar and content below the table'],
+      ['empty / loading', 'State content'],
+    ],
+  },
+
+  {
+    id: 'tree', name: 'ApexTree', group: 'Data',
+    blurb: 'Hierarchical data as an inline tree. Rows render from a flattened list rather than a recursive component, so keyboard navigation is index-based and only visible rows exist in the DOM. Expansion and selection are both controlled through bindable key maps.',
+    noField: true, 
+    demo: 'data-tabular',
+    lead: ['v-model:value="nodes"', 'v-model:expandedKeys="expanded"', 'v-model:selectionKeys="selected"'],
+    tail: [
+      '\n>',
+      '\n  <template #node="{ node }">',
+      '\n    {{ node.label }}',
+      '\n  </template>',
+      '\n</ApexTree>',
+    ].join(''),
+    base: { selectionMode: 'checkbox', filter: true, showSelectAll: true, scrollHeight: 300 },
+    controls: [
+      { key: 'selectionMode', type: 'select', options: ['', 'single', 'multiple', 'checkbox'] },
+      { key: 'metaKeySelection', type: 'bool' }, { key: 'showSelectAll', type: 'bool' },
+      { key: 'filter', type: 'bool' },
+      { key: 'filterMode', type: 'select', options: ['lenient', 'strict'] },
+      { key: 'filterBy', type: 'text' },
+      { key: 'draggableNodes', type: 'bool' }, { key: 'droppableNodes', type: 'bool' },
+      { key: 'loading', type: 'bool' },
+      { key: 'loadingMode', type: 'select', options: ['overlay', 'skeleton'] },
+      { key: 'indent', type: 'number' }, { key: 'scrollHeight', type: 'number' },
+      { key: 'bordered', type: 'bool' },
+      { key: 'hoverBackground', type: 'color' }, { key: 'selectedBackground', type: 'color' },
+      { key: 'selectedColor', type: 'color' }, { key: 'iconColor', type: 'color' },
+      { key: 'rowRadius', type: 'text' },
+    ],
+    props: [
+      ['value', 'TreeNode[]', '[]', '{ key, label, icon?, data?, leaf?, loading?, selectable?, styleClass?, children? } — bindable, so drag-and-drop can rewrite it'],
+      ['expandedKeys', 'Record<string, boolean>', '{}', 'v-model:expandedKeys — a key set to true is expanded'],
+      ['selectionMode', "'single' | 'multiple' | 'checkbox' | null", 'null', ''],
+      ['selectionKeys', 'Record<string, boolean | { checked, partialChecked }>', '{}', 'v-model:selectionKeys — booleans for single and multiple, an object per key in checkbox mode'],
+      ['metaKeySelection', 'boolean', 'false', 'Require Cmd/Ctrl to add to a multiple selection'],
+      ['showSelectAll', 'boolean', 'false', 'Header checkbox; its checked and indeterminate states derive from selectionKeys'],
+      ['filter / filterBy / filterMode', "boolean / string / 'lenient' | 'strict'", "false / 'label' / 'lenient'", 'lenient keeps a matching branch whole; strict keeps only matches and the ancestors needed to reach them'],
+      ['lazy', 'boolean', 'false', 'Load children on expand — set node.leaf to stop the toggle appearing, node.loading for the spinner'],
+      ['loading / loadingMode', 'boolean / overlay|skeleton', 'false / overlay', ''],
+      ['draggableNodes / droppableNodes', 'boolean', 'false', 'Reorder within a tree, or move between trees'],
+      ['draggableScope / droppableScope', 'string', '—', 'Restrict which trees can exchange nodes'],
+      ['indent / scrollHeight / rowRadius', 'number / number / string', '20 / — / token', 'Geometry'],
+      ['hoverBackground / selectedBackground / selectedColor / iconColor', 'string', 'tokens', 'Colours'],
+      ['filterPlaceholder', 'string', '—', 'Placeholder for the filter box'],
+      ['skeletonRows', 'number', '5', 'How many placeholder rows to draw while loading in skeleton mode'],
+      ['bordered', 'boolean', 'true', 'The frame around the tree'],
+      ['emptyMessage', 'string', '—', 'Shown when there is nothing to list, or a filter matches nothing'],
+    ],
+    events: [
+      ['update:value', 'TreeNode[] — after a drop'],
+      ['update:expandedKeys / update:selectionKeys', 'key map'],
+      ['node-expand / node-collapse', 'TreeNode'],
+      ['node-select / node-unselect', 'TreeNode'],
+      ['node-drop', '{ dragNode, dropNode, position, value }'],
+      ['filter', '{ value }'],
+    ],
+    slots: [
+      ['node', 'The label; receives { node, expanded, index }. The default slot works too'],
+      ['nodeicon', 'Icon per node; receives { node, expanded, hasChildren }'],
+      ['nodetoggleicon', 'Toggle indicator; receives { node, expanded }'],
+      ['header / footer', 'Above the list and below it'],
+      ['empty / loading', 'State content'],
+    ],
+  },
+
+  {
+    id: 'timeline', name: 'ApexTimeline', group: 'Data',
+    blurb: 'A series of chained events. Each event is an arbitrary object rendered by the content slot, with an optional opposite slot for the other side of the line. Line thickness, style and colour, marker size, shape and colour, and the spacing are all props.',
+    noField: true, 
+    demo: 'data-simple',
+    base: { align: 'start', layout: 'vertical', lineWidth: 2, markerSize: 14, iconField: 'icon', colorField: 'color' },
+    controls: [
+      { key: 'align', type: 'select', options: ['start', 'end', 'alternate'] },
+      { key: 'layout', type: 'select', options: ['vertical', 'horizontal'] },
+      { key: 'lineWidth', type: 'number' },
+      { key: 'lineStyle', type: 'select', options: ['solid', 'dashed', 'dotted'] },
+      { key: 'lineColor', type: 'color' },
+      { key: 'markerSize', type: 'number' }, { key: 'markerBorderWidth', type: 'number' },
+      { key: 'markerColor', type: 'color' }, { key: 'markerBorderColor', type: 'color' },
+      { key: 'markerRadius', type: 'text' },
+      { key: 'gap', type: 'text' }, { key: 'eventGap', type: 'text' },
+      { key: 'iconField', type: 'text' }, { key: 'colorField', type: 'text' },
+    ],
+    props: [
+      ['value', 'object[]', '[]', 'The events — any shape; the content slot decides how they read'],
+      ['align', "'start' | 'end' | 'alternate'", "'start'", 'Which side of the line the content sits on'],
+      ['layout', "'vertical' | 'horizontal'", "'vertical'", ''],
+      ['lineWidth / lineStyle / lineColor', 'number / solid|dashed|dotted / string', '2 / solid / token', 'The connector'],
+      ['markerSize / markerBorderWidth', 'number', '14 / 2', 'Marker geometry in pixels'],
+      ['markerColor / markerBorderColor', 'string', 'tokens', 'Marker fill and ring'],
+      ['markerRadius', 'string', 'full', 'Marker corner radius — a length makes squares'],
+      ['iconField', 'string', '—', 'Field holding an icon name, drawn inside the marker'],
+      ['colorField', 'string', '—', 'Field holding a colour, so an event can tint its own marker'],
+      ['gap / eventGap', 'string', "'16px' / '6px'", 'Space across the line, and between events'],
+      ['dataKey', 'string', '—', 'Stable key per event'],
+    ],
+    events: [],
+    slots: [
+      ['content', 'The event; receives { item, index }. The default slot works too'],
+      ['opposite', 'Content on the other side of the line — dates, times, metadata'],
+      ['marker', 'Replaces the marker contents'],
+      ['connector', 'Replaces the drawn connector'],
+    ],
+  },
+
+  {
+    id: 'progressbar', name: 'ApexProgressBar', group: 'Data',
+    blurb: 'Determinate progress, an indeterminate sweep, or a run of named steps. The sweep animates a margin rather than a transform, so it always travels the track\u2019s own width \u2014 a translate would have to know the container\u2019s width, and gets it wrong the moment the bar is resized.',
+    noField: true, 
+    demo: 'data-simple',
+    base: { value: 62, showValue: true, height: 8, mode: 'determinate' },
+    controls: [
+      { key: 'value', type: 'number' }, { key: 'max', type: 'number' },
+      { key: 'mode', type: 'select', options: ['determinate', 'indeterminate'] },
+      { key: 'showValue', type: 'bool' },
+      { key: 'valuePosition', type: 'select', options: ['inside', 'end'] },
+      { key: 'insideThreshold', type: 'number' },
+      { key: 'height', type: 'number' },
+      { key: 'striped', type: 'bool' }, { key: 'animatedStripes', type: 'bool' },
+      { key: 'sweepDuration', type: 'text' },
+      { key: 'severity', type: 'select', options: ['primary', 'success', 'warning', 'danger', 'auto'] },
+      { key: 'color', type: 'color' }, { key: 'trackColor', type: 'color' },
+      { key: 'radius', type: 'text' }, { key: 'fillRadius', type: 'text' },
+      { key: 'valueColor', type: 'color' }, { key: 'valueSize', type: 'text' },
+      { key: 'label', type: 'text' },
+    ],
+    props: [
+      ['value / max', 'number', '0 / 100', 'Progress and its scale'],
+      ['mode', "'determinate' | 'indeterminate'", "'determinate'", 'The sweep for work of unknown length; value is ignored. indeterminate as a boolean still works'],
+      ['steps / step / showStepLabel', 'string[] / number / boolean', '\u2014 / 0 / true', 'Named stages: the percentage comes from the current step, so the caller states where it is in a sequence instead of converting that to a number itself, and the step\u2019s name shows above the bar'],
+      ['showValue / valuePosition', "boolean / 'inside' | 'end'", "false / 'inside'", 'Percentage readout'],
+      ['insideThreshold', 'number', '12', 'Below this percentage the inside readout moves out, where it stays legible against the track'],
+      ['height', 'number | string', '8', 'Bar thickness \u2014 a number is pixels'],
+      ['severity', "'primary' | 'success' | 'warning' | 'danger' | 'auto'", "'primary'", 'auto tints by threshold \u2014 danger under 34%, warning under 67%'],
+      ['color / trackColor / radius / fillRadius', 'string', 'tokens', 'Fill, track, the track\u2019s corners, and the fill\u2019s own'],
+      ['valueColor / valueSize', 'string', 'white / 10px', 'The inside readout'],
+      ['striped / animatedStripes', 'boolean', 'false', 'Diagonal stripes over the fill, optionally travelling'],
+      ['sweepDuration', 'string', "'1.4s'", 'How long one indeterminate sweep takes'],
+      ['label', 'string', '\u2014', 'Accessible name; a step\u2019s name is used when none is given'],
+      ['indeterminate', 'boolean', 'false', 'Kept for existing callers — the same as mode="indeterminate"'],
+    ],
+    events: [],
+    slots: [
+      ['label', 'A row above the bar; receives { value, percent, formatted, step } \u2014 for a caption and a formatted figure on the same line'],
+      ['value', 'Replaces the readout, inside or beside; receives { value, percent, formatted } \u2014 for bytes, time remaining, or a status word'],
+    ],
+  },
+
+  {
+    id: 'picklist', name: 'ApexPickList', group: 'Data',
+    blurb: 'Move items between two lists. Controlled with a two-element model — [source, target] — with drag-and-drop across both lists, optional checkboxes with a select-all header, per-list filtering, optional reorder controls, and full control over borders, colours and control placement.',
+    noField: true, 
+    demo: 'data-simple',
+    base: { sourceHeader: 'Available members', targetHeader: 'Team', checkbox: true, filter: true, scrollHeight: 260 },
+    controls: [
+      { key: 'sourceHeader', type: 'text' }, { key: 'targetHeader', type: 'text' },
+      { key: 'checkbox', type: 'bool' }, { key: 'filter', type: 'bool' },
+      { key: 'showSourceControls', type: 'bool' }, { key: 'showTargetControls', type: 'bool' },
+      { key: 'controlsPosition', type: 'select', options: ['outside', 'start', 'end'] },
+      { key: 'transferPosition', type: 'select', options: ['middle', 'end'] },
+      { key: 'stacked', type: 'bool' }, { key: 'noDrag', type: 'bool' },
+      { key: 'scrollHeight', type: 'number' }, { key: 'gap', type: 'text' },
+      { key: 'borderColor', type: 'color' }, { key: 'borderWidth', type: 'number' }, { key: 'radius', type: 'text' },
+      { key: 'headerBackground', type: 'color' }, { key: 'headerColor', type: 'color' },
+      { key: 'listBackground', type: 'color' }, { key: 'itemColor', type: 'color' },
+      { key: 'selectedBackground', type: 'color' }, { key: 'selectedColor', type: 'color' },
+      { key: 'selectedBorderColor', type: 'color' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', '[Item[], Item[]]', '[[], []]', 'v-model — first element is the source list, second is the target'],
+      ['dataKey', 'string', '—', 'Stable key per item'],
+      ['sourceHeader / targetHeader', 'string', "'Available' / 'Selected'", 'Header text'],
+      ['checkbox', 'boolean', 'false', 'A box per row plus a select-all in each header; works with drag-and-drop'],
+      ['filter / filterPlaceholder', 'boolean / string', 'false', 'Search box under each header'],
+      ['showSourceControls / showTargetControls', 'boolean', 'false', 'Reorder controls for a list — off by default, since most pick lists only move items'],
+      ['controlsPosition', "'outside' | 'start' | 'end'", "'outside'", 'Where each reorder stack sits. outside keeps them clear of the centre — source left, target right'],
+      ['transferPosition', "'middle' | 'end'", "'middle'", 'Between the lists, or after both'],
+      ['stacked', 'boolean', 'false', 'Stack the lists vertically; the transfer arrows rotate'],
+      ['noDrag', 'boolean', 'false', 'Disable drag-and-drop'],
+      ['scrollHeight', 'number', '300', 'Max list height in pixels'],
+      ['borderColor / borderWidth / radius', 'string / number / string', 'tokens', 'Panel border'],
+      ['headerBackground / headerColor', 'string', 'tokens', 'Header colours'],
+      ['listBackground / itemColor', 'string', 'tokens', 'List colours'],
+      ['selectedBackground / selectedColor / selectedBorderColor', 'string', 'accent-derived', 'Selected row'],
+      ['gap', 'string', "'12px'", 'Space between the panels and the control stacks'],
+      ['emptyMessage', 'string', '—', 'Note shown in a list with nothing in it'],
+      ['disabled', 'boolean', 'false', 'Blocks moving, reordering and filtering'],
+    ],
+    events: [
+      ['update:modelValue', '[Item[], Item[]]'],
+      ['reorder', '{ side, from, to }'],
+      ['move-to-target / move-to-source', '{ items }'],
+      ['move-all-to-target / move-all-to-source', '{ items }'],
+      ['selection-change', '{ side, items }'],
+    ],
+    slots: [
+      ['option', 'Item markup; receives { item, index, side }'],
+      ['sourceheader / targetheader', 'Header content for either list'],
+    ],
+  },
+
+  {
+    id: 'orgchart', name: 'ApexOrgChart', group: 'Data',
+    blurb: 'A hierarchy drawn top-down or left-to-right with CSS connectors. Collapsing and selection are both controlled through bindable key maps, so the chart never owns state the app might need.',
+    noField: true, 
+    demo: 'data-tabular',
+    base: { collapsible: true, selectionMode: 'single', orientation: 'vertical' },
+    controls: [
+      { key: 'collapsible', type: 'bool' },
+      { key: 'selectionMode', type: 'select', options: ['', 'single', 'multiple', 'checkbox'] },
+      { key: 'orientation', type: 'select', options: ['vertical', 'horizontal'] },
+      { key: 'nodeGap', type: 'text' }, { key: 'levelGap', type: 'text' },
+      { key: 'lineColor', type: 'color' }, { key: 'lineWidth', type: 'number' },
+      { key: 'nodeBackground', type: 'color' }, { key: 'nodeColor', type: 'color' },
+      { key: 'nodeBorderColor', type: 'color' }, { key: 'nodeBorderWidth', type: 'number' },
+      { key: 'nodeRadius', type: 'text' },
+      { key: 'selectedBackground', type: 'color' }, { key: 'selectedColor', type: 'color' },
+      { key: 'selectedBorderColor', type: 'color' },
+    ],
+    props: [
+      ['value', 'OrgNode | OrgNode[]', '—', '{ key, label, subtitle?, icon?, image?, type?, styleClass?, selectable?, data?, children? } plus per-node background / color / borderColor'],
+      ['collapsible', 'boolean', 'false', 'Collapse control on every node with children'],
+      ['collapsedKeys', 'Record<string, boolean>', '{}', 'v-model:collapsedKeys — a key set to true is collapsed; absent keys stay open'],
+      ['selectionMode', "'single' | 'multiple' | 'checkbox' | null", 'null', 'Checkbox cascades to descendants'],
+      ['selectionKeys', 'Record<string, boolean>', '{}', 'v-model:selectionKeys — keys set to true are selected'],
+      ['orientation', "'vertical' | 'horizontal'", "'vertical'", 'Top-down or left-to-right'],
+      ['lineColor / lineWidth', 'string / number', 'token / 1', 'Connector colour and thickness'],
+      ['nodeBackground / nodeColor', 'string', 'tokens', 'Node fill and text colour'],
+      ['nodeBorderColor / nodeBorderWidth', 'string / number', 'token / 1', 'Node border'],
+      ['nodeRadius', 'string', 'var(--r-md)', 'Node corner radius'],
+      ['selectedBackground / selectedColor / selectedBorderColor', 'string', 'accent-derived', 'The selected state'],
+      ['partialBorderColor', 'string', 'accent 45%', 'Checkbox partial state on an ancestor'],
+      ['nodeGap / levelGap', 'string', 'per orientation', 'Space between siblings and between levels. Unset, each orientation uses its own default — horizontal needs a wider level gap, since that gap carries the connector corner and the collapse control side by side'],
+    ],
+    events: [
+      ['update:collapsedKeys', 'Record<string, boolean>'],
+      ['update:selectionKeys', 'Record<string, boolean>'],
+      ['node-expand / node-collapse', 'OrgNode'],
+      ['node-select / node-unselect', 'OrgNode'],
+    ],
+    slots: [
+      ['default', 'Node content; receives { node, selected, partialSelected, collapsed }. The chart still draws the card and the collapse control around it'],
+      ['toggleicon', 'Collapse indicator; receives { collapsed }'],
+    ],
+  },
+
+  {
+    id: 'dataview', name: 'ApexDataView', group: 'Data',
+    blurb: 'The same dataset as a list or a grid of cards, on the paginator and sort pipeline the table uses. Both layouts are built in — the grid is CSS grid driven by gridMinWidth, so no utility framework is needed.',
+    noField: true, 
+    demo: 'data-simple',
+    base: { layout: 'list', paginator: true, rows: 4, showLayoutSwitcher: true, gridMinWidth: '240px' },
+    controls: [
+      { key: 'layout', type: 'select', options: ['list', 'grid'] },
+      { key: 'showLayoutSwitcher', type: 'bool' },
+      { key: 'paginator', type: 'bool' }, { key: 'rows', type: 'number' },
+      { key: 'gridMinWidth', type: 'text' }, { key: 'gap', type: 'text' },
+      { key: 'caption', type: 'text' }, { key: 'bordered', type: 'bool' },
+      { key: 'loading', type: 'bool' },
+      { key: 'loadingMode', type: 'select', options: ['skeleton', 'overlay'] },
+      { key: 'skeletonCount', type: 'number' },
+    ],
+    props: [
+      ['value', 'Row[]', '[]', 'The records'],
+      ['layout', "'list' | 'grid'", "'list'", 'v-model:layout when paired with the switcher'],
+      ['showLayoutSwitcher', 'boolean', 'false', 'Segmented list/grid control in the bar'],
+      ['sortField / sortOrder', 'string / 1 | -1', '—', 'Bind these from your own UI'],
+      ['sortOptions', '{ label, field, order }[]', '—', 'Renders a built-in sort select'],
+      ['paginator / rows / first', 'boolean / number / number', 'false / 12 / 0', 'first is bindable'],
+      ['rowsPerPageOptions', 'number[]', '—', 'Page-size selector'],
+      ['lazy / totalRecords', 'boolean / number', 'false', 'Server-side paging and sorting'],
+      ['gridMinWidth', 'string', "'240px'", 'Minimum card width; the grid fits as many as will go'],
+      ['gap', 'string', "'0px'", 'Grid gap — 0 keeps the cards on a shared hairline'],
+      ['dataKey', 'string', '—', 'Stable key per record'],
+      ['loading / loadingMode', 'boolean / skeleton|overlay', 'false / skeleton', ''],
+      ['skeletonCount', 'number', '6', 'Placeholder items while loading'],
+      ['emptyMessage', 'string', "'No records found'", ''],
+      ['sortPlaceholder', 'string', "'Sort by'", 'Placeholder in the sort selector'],
+      ['paginatorTemplate', 'string', "'Showing {first}–{last} of {total}'", 'Summary line — the same tokens ApexPaginator takes'],
+      ['bordered', 'boolean', 'true', 'The frame around the view'],
+      ['caption', 'string', '—', 'A line in the toolbar above the items'],
+    ],
+    events: [
+      ['update:layout', "'list' | 'grid'"],
+      ['update:first / update:rows', 'number'],
+      ['update:sortField / update:sortOrder', 'value'],
+      ['page', '{ first, rows, page }'],
+      ['sort', '{ sortField, sortOrder }'],
+    ],
+    slots: [
+      ['list', 'Item markup in list layout; receives { item, index, layout }'],
+      ['grid', 'Item markup in grid layout'],
+      ['item', 'Used for both layouts when they are the same'],
+      ['header / footer', 'Bar content and content below the paginator'],
+      ['skeleton / empty / loading', 'State content'],
+    ],
+  },
+
+  {
+    id: 'paginator', name: 'ApexPaginator', group: 'Data',
+    demo: 'data-simple',
+    blurb: 'Page controls, usable on their own. `first` is the zero-based index of the first visible row, so it maps straight onto a server offset.',
+    noField: true,
+    base: { rows: 10, totalRecords: 84, rowsPerPageOptions: [10, 20, 50] },
+    controls: [
+      { key: 'rows', type: 'number' }, { key: 'totalRecords', type: 'number' },
+      { key: 'pageLinks', type: 'number' }, { key: 'template', type: 'text' },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['first', 'number', '0', 'v-model:first — index of the first visible row'],
+      ['rows', 'number', '10', 'v-model:rows — page size'],
+      ['totalRecords', 'number', '0', ''],
+      ['rowsPerPageOptions', 'number[]', '—', 'Page-size choices; omit to hide the selector'],
+      ['pageLinks', 'number', '2', 'Page buttons either side of the current one'],
+      ['template', 'string', "'Showing {first}–{last} of {total}'", 'Tokens: {first} {last} {total} {page} {pageCount}'],
+      ['disabled', 'boolean', 'false', 'Blocks every page control'],
+    ],
+    events: [['update:first', 'number'], ['update:rows', 'number'], ['page', '{ first, rows, page }']],
+  },
+
+  /* ── Scheduler and Calendar ────────────────────────────────
+     Extracted from the gallery like the nine before them. The handover's
+     §2 says these two 'have no gallery entries to copy from' and must be
+     authored — they do, and the payload matches its own §5.6 table
+     exactly (13/44 and 19/58). Verified from the file, not the note. */
+  {
+    id: 'scheduler', name: 'ApexScheduler', group: 'Scheduler',
+    blurb: 'A resource timeline: rooms, vehicles or people down one axis and time across the other, from a full year to 15-minute slots. Nothing here mutates events — every interaction emits a payload, the same rule ApexTaskBoard follows. The axis, the lane packing and the recurrence are pure functions in core/scheduler, shared by both implementations, because a lane index or a week boundary that differed between them is exactly the bug no browser probe would catch.',
+    noField: true, 
+    demo: 'sched',
+    lead: [':resources="rooms"', ':events="events"', ':group-fields="groupFields"'],
+    tail: '\n  @event-save="onSave"\n  @event-move="onMove"\n/>',
+    base: {
+      mode: 'day', leafLabel: 'Room', leafIcon: 'meeting_room', height: '420px',
+      resourceWidth: '280px', draggable: true, creatable: true, inlineEditor: true,
+      showToolbar: true, showGrouping: true, showLegend: true, chipsPerCell: 2, scrollToHour: 7,
+    },
+    controls: [
+      { key: 'mode', type: 'select', options: ['year', 'month', 'day', 'quarter'] },
+      { key: 'draggable', type: 'bool' }, { key: 'creatable', type: 'bool' },
+      { key: 'inlineEditor', type: 'bool' },
+      { key: 'showToolbar', type: 'bool' }, { key: 'showGrouping', type: 'bool' },
+      { key: 'showLegend', type: 'bool' },
+      { key: 'chipsPerCell', type: 'number' }, { key: 'scrollToHour', type: 'number' },
+      { key: 'leafLabel', type: 'text' }, { key: 'leafIcon', type: 'text' },
+      { key: 'height', type: 'text' }, { key: 'resourceWidth', type: 'text' },
+    ],
+    props: [
+      ['resources', 'SchedulerResource[]', '[]', '{ id, room, …your own fields }. Any field can be grouped by; `room` is only the default leaf label'],
+      ['events', 'SchedulerEvent[]', '[]', '{ id, roomId, type, title, start, end, rrule? } with times as epoch milliseconds. Never mutated — the component reads it and emits changes'],
+      ['mode', "'year' | 'month' | 'day' | 'quarter'", "'day'", 'Two SHAPES, not four: year and month are DISCRETE (a column is a unit and an event belongs to one), day and quarter are CONTINUOUS (position is a fraction of the span). The axis carries the flag so every consumer branches once'],
+      ['anchor', 'Date', 'today', 'The date the axis is built around. v-model:anchor — or leave it and let the toolbar navigate'],
+      ['groupKeys', 'string[]', '[]', 'v-model:groupKeys — which resource fields to nest by, outermost first. “Building then floor” is configuration, not a code path'],
+      ['groupFields', 'SchedulerGroupField[]', '[]', '{ key, label, icon? } — what the grouping bar offers, in MASTER order. Toggling reorders by that order rather than by click order, since a hierarchy decided by the order of clicks produces a tree nobody asked for. Empty hides the bar'],
+      ['types', 'Record<string, SchedulerTypeMeta>', 'four demo types', "{ label, icon?, tone?, createLabel? } per event type. The app names its own types and maps each to a design-system tone — info, success, warn, danger, help, neutral — so the stylesheet never learns a consumer's vocabulary"],
+      ['leafLabel / leafIcon', 'string', "'Resource' / 'meeting_room'", 'What one row is called, for the corner, the grouping bar and the editor'],
+      ['resourceName / resourceSub', '(r) => string', "r.room / —", 'The row label and the line under it. Functions, because capacity, building or occupancy is the app’s knowledge'],
+      ['draggable', 'boolean', 'true', 'Continuous views only — a month or year cell has no time to drop into. A RECURRING occurrence is draggable now: the shared recurrence core can express "this occurrence / this and following / all", so the gesture pauses on that question instead of being refused. The old refusal was honest with no exception model; with one it would have been a limitation'],
+      ['resizable', 'boolean', 'true', 'Drag the trailing edge — the INLINE-end one, so the left in RTL — to change a booking’s length. The start is untouched and the end floors at 15 minutes, because a gesture meant to shorten a booking must not delete it. A zone of the block rather than a handle element'],
+      ['newId', '(inst) => string', "id + '-' + base36 time", '"This and following" splits ONE record into TWO, and the new series needs an id — only the app knows what its ids look like'],
+      ['creatable', 'boolean', 'true', 'Right-click a track for a create menu, one item per event type, at the quarter-hour under the pointer. A discrete cell has no time, so it offers midday — a better guess than 00:00'],
+      ['inlineEditor', 'boolean', 'true', 'Renders the built-in popover and create/edit dialog. Off, the same gestures emit event-click and create-request and draw nothing, for a host with its own booking form'],
+      ['chipsPerCell', 'number', '2', 'Events drawn in a month or year cell before it reads “+N more”'],
+      ['scrollToHour', 'number', '7', 'Where a continuous view starts scrolled to — nobody opens a day view to look at 03:00'],
+      ['showToolbar / showGrouping / showLegend', 'boolean', 'true', 'Each chrome strip off independently. The grouping bar also needs groupFields to be non-empty — a bar offering nothing to group by is worse than no bar — so it is the one that can be absent with its prop still true'],
+      ['height / resourceWidth', 'string', "'70vh' / '300px'", 'The scroll viewport and the sticky row-head column'],
+    ],
+    events: [
+      ['event-save', '{ id?, resourceId, type, title, start, end, rrule } — one payload for create and edit; `id` absent means create'],
+      ['event-move', '{ id, resourceId, start, end, scope, occurrenceStart, update, create? } — a drag landed, snapped to the quarter hour and clamped inside the axis. `update` (and `create`, when the scope split the series) are the records to PERSIST: the split arithmetic is the core’s job. The original four fields are kept alongside, so a host written before scoped edits keeps working — but one that only patches by id silently loses the split'],
+      ['event-resize', 'The same payload. Separate from event-move because an app routinely permits one and refuses the other — "you may reschedule a booking but not extend it past its paid duration"'],
+      ['event-delete', '{ id }'],
+      ['event-click', '{ instance, originalEvent } — the INSTANCE, so a recurring occurrence carries its own start and end'],
+      ['create-request', '{ resourceId, start, type } — only with inlineEditor off'],
+      ['range-change', '{ from, to, mode } — the visible window, for fetching a page of bookings'],
+      ['update:mode / update:anchor / update:groupKeys', 'The toolbar and grouping bar report every navigation'],
+    ],
+    slots: [
+      ['event', 'A timeline bar’s body. The SAME context ApexCalendar binds — `{ event, compact, clipped, tone, view, time }` — so a host using both learns one shape, not two. Geometry, drag and resize stay on the wrapper'],
+      ['resource', 'A row head. Bound `{ resource, row, name, sub, group, open }`; supersedes `resourceName` / `resourceSub` for anything richer than two strings, and both keep working as the default'],
+      ['column-header', 'One axis column. Bound `{ column, label, sub, today }`. The tier-1 band above it is the axis’s own summary and stays ours'],
+      ['chip', 'A discrete-cell chip — its own slot rather than `#event`, because a chip is a different SHAPE from a timeline bar (icon thumb, title row, date line). Same context plus `icon`'],
+      ['popover', 'The whole popover body, heading and meta included. Bound `{ ...event context, resource, close, edit, remove }` — the three actions, so a host’s own chrome can drive them'],
+      ['scope-prompt', 'The "this / this and following / all" dialog. Bound `{ event, title, choose, cancel, options }`; `options` is the three scopes as DATA so a template renders them without knowing the scope strings. ApexCalendar exposes the SAME slot with the same bindings — one question asked in two places'],
+    ],
+    serviceTitle: 'Core and ref methods', serviceFn: 'core/scheduler',
+    serviceRows: [
+      ['buildAxis(mode, anchor)', 'SchedulerAxis', 'Columns, two header tiers, pixel width and the `continuous` flag'],
+      ['applyScope(event, occurrenceStart, scope, patch)', '{ update, create? }', 'The SAME core function ApexCalendar uses, and the same three-choice prompt — one implementation of a question both components ask. "This occurrence" writes an override keyed by the occurrence’s original start; "this and following" closes the original series the day before and starts a new one, which is why it returns two records; "all" patches the series in place'],
+      ['checkConstraints(rules, candidate)', 'ConstraintResult', 'Allows must CONTAIN the candidate, denies must not OVERLAP it, and the result names the constraint that refused so the message can be its own. Checked DURING a drag as well as on drop — seeing a position refuse before letting go is the difference between a rule and a surprise'],
+      ['inlineOffset(el, clientX)', 'core/i18n', 'Every mapping of x to TIME measures from the INLINE-start edge, and the direction is read from the RENDERED element rather than a locale prop — `dir` is inherited, so a host can flip a component from any ancestor without it being told. `clientX - rect.left` is only correct in LTR: in RTL the timeline’s origin is on the right, so a left-based measurement returns a MIRRORED time while the logical-property layout looks perfectly correct'],
+      ['axisOffset / axisWindow / snapToAxis', 'number / range / number', 'Where a timestamp sits, what is visible, and the quarter-hour snap the drag uses'],
+      ['expandSeries(event, from, to)', 'occurrences', 'A deliberate RRULE subset — FREQ, INTERVAL, BYDAY, COUNT, UNTIL. A non-recurring event returns one occurrence rather than taking a separate path, which is where an off-by-one lives'],
+      ['ruleText / ruleToRepeat / repeatToRule', 'string / preset / rule', 'The rule in words, and the presets in both directions so the editor and the stored rule share one vocabulary'],
+      ['groupRooms / flattenNodes / allGroupIds', 'tree / rows / ids', 'Grouping honours the caller’s resource order, not the alphabet — floors run bottom to top'],
+      ['lanesFor / rowHeight', '{ placed, laneCount } / number', 'Overlapping bookings STACK rather than paint over each other: a double booking is information, and hiding it behind whichever drew last is the one thing a scheduler must not do'],
+      ['instancesByResource(events, axis)', 'Record<id, instances>', 'Bucketed once per change rather than each row filtering every event, which is O(rooms × events)'],
+      ['openCreate(resourceId, start, type?)', 'ref method', 'Opens the editor from your own “New booking” button'],
+      ['expandAll() / collapseAll() / goToday() / step(±1)', 'ref methods', 'Drive the tree and the axis from a host toolbar'],
+      ['state attributes', 'data-tone, data-compact, data-recurring, data-draggable, data-resizable, data-today, data-group, data-apex-custom', 'Stable hooks on the rendered parts, so a stylesheet or a test never inspects internals'],
+    ],
+  },
+
+  {
+    id: 'calendar', name: 'ApexCalendar', group: 'Calendar',
+    blurb: 'Month, week, day and agenda views over one zone-aware core. Every date question — which day an instant belongs to, how long a day is, where a bar starts — is answered in the selected time zone, because "which day is this?" has no answer without one. All-day events are DATES and timed events are INSTANTS: two shapes in the public type, collapsed once at the boundary, so the distinction cannot be forgotten halfway through. Nothing here mutates events; every interaction emits a payload.',
+    noField: true, 
+    demo: 'cal',
+    lead: [':events="events"', 'view="month"', ':locale="locale"'],
+    tail: '\n  @event-click="onEventClick"\n  @date-click="onDateClick"\n/>',
+    base: {
+      view: 'month', locale: 'en-GB', timeZone: 'Europe/Malta', maxEventsPerDay: 3,
+      showWeekNumbers: true, fixedWeeks: false, slotDuration: 30, slotMinTime: 360,
+      slotMaxTime: 1320, slotHeight: 24, listDays: 7, height: '520px',
+    },
+    controls: [
+      { key: 'view', type: 'select', options: ['month', 'week', 'day', 'list', 'year'] },
+      { key: 'yearLayout', type: 'select', options: ['grid', 'stack', 'continuous'] },
+      { key: 'eventVariant', type: 'select', options: ['solid', 'soft', 'outline'] },
+      { key: 'editable', type: 'bool' }, { key: 'resizable', type: 'bool' },
+      { key: 'inlineEditor', type: 'bool' },
+      { key: 'locale', type: 'select', options: ['en', 'en-GB', 'de-DE', 'it-IT', 'ar-EG'] },
+      { key: 'timeZone', type: 'select', options: ['Europe/Malta', 'America/New_York', 'Pacific/Auckland'] },
+      { key: 'maxEventsPerDay', type: 'number' }, { key: 'listDays', type: 'number' },
+      { key: 'showWeekNumbers', type: 'bool' }, { key: 'fixedWeeks', type: 'bool' },
+      { key: 'showToolbar', type: 'bool' },
+      { key: 'slotDuration', type: 'number' }, { key: 'slotMinTime', type: 'number' },
+      { key: 'slotMaxTime', type: 'number' }, { key: 'slotHeight', type: 'number' },
+      { key: 'height', type: 'text' }, { key: 'rowHeight', type: 'text' },
+    ],
+    props: [
+      ['events', 'CalendarEvent[]', '[]', 'A UNION, not a flag: a timed event is { start, end } in epoch milliseconds, an all-day one is { allDay: true, startDate, endDate } as YYYY-MM-DD with endDate INCLUSIVE. An all-day event is a DATE — push it through the timed conversion and a booking made in Auckland shows a day early in Europe. Never mutated'],
+      ['backgroundEvents', 'CalendarEvent[]', '[]', 'Tinted regions. A background event is a RENDERING; a constraint is a RULE. Pass the same object to both props when you want a visible rule — that is the whole reason they are two props'],
+      ['constraints', 'CalendarConstraint[]', '[]', 'Where an event MAY be. `{ mode: "allow" }` names a window bookings must fall INSIDE, `{ mode: "deny" }` one they must not touch; allows are OR-ed, so "weekdays 9–5 or Saturday mornings" is one rule rather than two competing ones. `minTime`/`maxTime` plus `weekdays` express business hours without a rule per day, and `resourceIds`/`eventTypes` scope a rule to some rooms or kinds. An ALL-DAY candidate ignores clock-based rules: "nothing before 09:00" says nothing about an event that has no time, and refusing it would be answering a question the rule never asked'],
+      ['validate', '(candidate) => boolean | string', '—', 'The last word, for rules the declarative form cannot express — "not within two hours of another booking in this room". Runs AFTER the declarative pass, which is the cheap one and answers most refusals. Return a string to supply the message'],
+      ['resources', 'CalendarResource[]', '[]', '{ id, title? } as COLUMNS — the transpose of ApexScheduler, which puts resources down the side and time across. The DAY view only: a week of seven days × N resources is a nested header this grid does not draw, and pretending otherwise would show one room’s bookings under another’s column. Overlap columns are computed WITHIN a resource, or two bookings in different rooms would divide a width they do not share. Dragging across columns reassigns the booking — "move this to Room B" is one gesture'],
+      ['view', "'month' | 'week' | 'day' | 'list'", "'month'", 'v-model:view. Month and the all-day strip share ONE segment packer — the strip is a one-row month matrix, so multi-day bars cannot disagree between the two'],
+      ['views', 'CalendarView[]', 'all four', 'What the switcher offers; one view hides it'],
+      ['anchor', 'Date | number', 'now', 'v-model:anchor — or leave it and let the toolbar navigate. Each view steps by its own unit, in CALENDAR days rather than 24-hour blocks'],
+      ['timeZone', 'string', "the browser's", 'An IANA name. Day boundaries, the all-day strip, the now-line and the agenda grouping all resolve through it'],
+      ['locale', 'string | ApexLocalePack', 'the system selection', 'A pack code or a pack. Month and weekday names, the clock, digits, first day of week, week-number scheme and direction all come from it — Arabic gives dir="rtl", Arabic-Indic numerals and a Saturday-first header'],
+      ['firstDay', 'number', "the locale's", '0 = Sunday. Overrides the pack'],
+      ['types', 'Record<string, CalendarTypeMeta>', '{}', 'The app names its own event types and maps each to a design-system TONE — info, success, warn, danger, help, neutral — so the stylesheet never learns a consumer’s vocabulary'],
+      ['eventVariant', "'solid' | 'soft' | 'outline'", "'solid'", 'How an event is PAINTED, not how it is structured. `soft` is a tone-tinted wash with a coloured inline-start edge and dark text; `outline` is a bordered card with an accent rule. All three render the same two lines, which is the point: the common case of "we want the softer look" needs no template, and therefore does not re-implement the compact rule, the recurring icon, the clipped dashes or the invalid stripes — four things a hand-written template gets subtly wrong. Slots are for STRUCTURE, variants for PAINT. On a multi-day bar the accent marks a START, so a segment continuing in from the previous row keeps its flat edge'],
+      ['maxEventsPerDay', 'number', '3', 'Lanes drawn before a cell reads "+N more". The overflow is REPORTED, not dropped: the cell carries a count and the events themselves, for the popover'],
+      ['maxAllDay', 'number', '3', 'The same cap for the all-day strip above a week or day grid, which is packed by the SAME segment code as a month row — a multi-day bar has to break across the week boundary identically in both, and a second implementation would drift on exactly that case'],
+      ['slotDuration / slotMinTime / slotMaxTime', 'number', '30 / 0 / 1440', 'Minutes. The window is wall-clock minutes whatever the day’s length, so the spring-forward day shows an empty band where 02:00–03:00 did not happen — compressing the axis would misplace every other event on the day'],
+      ['slotHeight', 'number', '24', 'Pixels per slot. The axis is a fixed height and a block’s top is its wall-clock fraction, so 09:30 lands in the same place either side of a transition'],
+      ['scrollToTime', 'number', '480', 'Minutes from midnight the time grid opens at — nobody opens a week view to look at 03:00'],
+      ['listDays', 'number', '7', 'Days the agenda covers, and the step its nav takes'],
+      ['yearLayout', "'grid' | 'stack' | 'continuous'", "'grid'", 'How the twelve months are arranged — wrapped into a responsive grid, one per row, or a single continuous run. The year view is the MONTH view at a smaller scale: the same segment packer, the same bar markup, only the metrics change. A second implementation of bars-in-a-row would drift on exactly the "+N more" arithmetic and lane order it exists to get right. The grid layout shows one lane per day because a 230px month has room for one'],
+      ['showZoneLabel', 'boolean', 'true', 'The zone’s short offset in the time-grid corner — "GMT+2", from Intl so it is localised and DST-correct. The corner was empty, and a component that answers every date question through an IANA zone should name the one it used: two viewers of the same data in different zones otherwise see different grids with nothing to explain it'],
+      ['showWeekNumbers / fixedWeeks / showToolbar', 'boolean', 'false / false / true', 'Week numbers follow the pack’s scheme, ISO or local. fixedWeeks always draws six rows so the grid does not resize as months change'],
+      ['editable / resizable', 'boolean', 'false / true', 'Drag an event to move it; drag its trailing edge — the bottom on a time grid, the right on a month bar — to change its length. The edge is a ZONE of the block rather than a handle element, since a 7px child on every event is a lot of DOM for something only the pointer ever finds'],
+      ['inlineEditor', 'boolean', 'true', 'The built-in create/edit dialog: title, type, an all-day switch, a start, a duration (minutes when timed, DAYS when all-day) and a repeat preset. Off, the same gestures report and draw nothing — for a host whose booking form already exists, and whose validation and pricing belong to it rather than to a component'],
+      ['durations', 'number[]', '15…240 min', 'What the editor offers. A length in days replaces it for an all-day event, because "90 minutes" is not a length an all-day booking has'],
+      ['newId', '(event) => string', "id + '-' + base36 time", '"This and following" splits ONE record into TWO, and the new series needs an id — only the app knows what its ids look like'],
+      ['height / rowHeight', 'string', "auto / '96px'", 'Row height is a FLOOR — a busy week grows past it rather than clipping'],
+    ],
+    events: [
+      ['event-click', '{ event, originalEvent } — the RESOLVED event, so a recurring occurrence carries its own start, its original start and its override'],
+      ['date-click', '{ date, key, originalEvent } — a month cell'],
+      ['slot-click', '{ start, end, date, originalEvent } — empty time-grid space, snapped down to slotDuration'],
+      ['more-click', '{ key, events } — the hidden events of one cell'],
+      ['event-move', '{ event, start, end, scope, occurrenceStart, update, create? } — a drag finished. update (and create, when the scope split the series) are the records to PERSIST: the split arithmetic is the core’s job, not the host’s'],
+      ['event-resize', 'The same payload. Separate from event-move because an app routinely permits one and refuses the other — "you may reschedule a booking but not extend it past its paid duration"'],
+      ['edit-refused', '{ event?, start, end, resourceId?, reason, constraint? } — a gesture a constraint would not allow. Emitted rather than swallowed: the host owns the telling, and a component that only reverts leaves the author guessing whether the drag is broken or disallowed'],
+      ['event-save', '{ record } for a NEW event, or { id, scope, occurrenceStart, update, create? } for an edit. A repeat change never goes through the per-occurrence scopes — an override cannot hold a rule, so changing the repeat is a change to the series by definition'],
+      ['event-delete', '{ id, scope, occurrenceStart, update? , remove? } — either the record to persist (an EXDATE, or a series closed the day before) or the instruction to drop it entirely'],
+      ['range-change', '{ from, to, view } — the visible window, for fetching a page of events'],
+      ['update:anchor / update:view', 'Every navigation reports'],
+    ],
+    slots: [
+      ['event', 'The event body, in every view. Bound `{ event, compact, clipped, tone, view, time }` — the facts a host cannot derive. The WRAPPER keeps geometry and state: position, size, `data-tone`, `data-compact`, `data-invalid`, the tooltip and the pointer handlers all stay ours, so drag, resize, the scope prompt and the constraint stripes work inside a custom template with the host doing nothing. `--tone-ink` is in scope, so `background: var(--tone-ink)` stays inside the design system rather than hardcoding hex. One slot serves all views and branches on `view`; its padding is dropped when supplied, so the template owns its box'],
+      ['day-cell', 'A month or year cell’s day number area — where a badge or a daily total goes. Bound `{ day, number, today, outside, hidden, events, view }`: `hidden` is the "+N more" count and `events` those starting that day, so a host does not re-derive what the segment packer already knows'],
+      ['day-header', 'One weekday heading. Bound `{ label, weekday, index, view }` — `weekday` is the real 0–6 weekday, not the column position, so "highlight the weekend" survives any `firstDay`'],
+      ['list-item', 'An agenda row. Bound the SAME context as `#event` plus `day`, so one template can serve both'],
+      ['more-popover', 'The whole "+N more" body, heading included — a bare event list under our own title is not a customisation. Bound `{ events, day, title, close }`; call `close()` to dismiss'],
+      ['scope-prompt', 'The "this / this and following / all" dialog. Bound `{ event, title, choose, cancel, options }` — identical to ApexScheduler’s, because it is one question asked in two places'],
+      ['toolbar-start', 'Before the navigation. Bound `{ view, anchor }`'],
+      ['toolbar-end', 'Extra controls after the view switcher'],
+    ],
+    serviceTitle: 'Core, zones and recurrence', serviceFn: 'core/calendar',
+    serviceRows: [
+      ['zonedParts / fromZonedParts', 'parts ↔ instant', 'Over Intl.DateTimeFormat.formatToParts, the only zone database a browser has. The inverse guesses, measures the offset there, corrects and measures again — one refinement, because the first guess can land on the wrong side of a transition and read the wrong offset'],
+      ['dayKey / parseDayKey', 'YYYY-MM-DD', 'A day’s identity, and what everything joins on. A string because a DATE has no instant: 23:30 in Malta is already tomorrow in Auckland'],
+      ['addZonedDays / dayLengthHours', 'calendar arithmetic', 'A day is 23 or 25 hours twice a year. Adding a fixed 24 drifts across a transition — the bug that lost an occurrence in core/recurrence before it was measured'],
+      ['monthMatrix / dayRange', 'weeks / days', 'The grid a month draws, and the day list a week or agenda uses. daysPerRow makes the all-day strip the same function'],
+      ['segmentWeeks', 'row segments', 'One bar per row, longest first so lanes never cross, open-ended at row edges, overflow reported per cell'],
+      ['layoutDayColumn', 'positioned events', 'Overlaps DIVIDE the column — collision clusters, a column each within a cluster, so a chain A|B, B|C agrees about B’s width. Stacking would hide a double booking, the one thing a calendar must not do'],
+      ['groupByDay', 'agenda groups', 'A multi-day event appears under EVERY day it covers, because a list answers "what is happening on this day". Empty days are omitted'],
+      ['expandCalendar', 'resolved instances', 'Recurrence through core/recurrence — the same expansion ApexScheduler uses, EXDATEs and overrides included'],
+      ['applyScope(event, occurrenceStart, scope, patch)', '{ update, create? }', 'The three write scopes. "This occurrence" writes an override keyed by the occurrence’s ORIGINAL start; "this and following" closes the original the day before and starts a new series, which is why it returns two records; "all" patches the series in place'],
+      ['the scope prompt', 'built in', 'Dragging a RECURRING occurrence pauses on the question rather than guessing, with the preview left on screen while the author decides. Cancel restores it'],
+      ['checkConstraints(rules, candidate)', 'ConstraintResult', 'Allows must CONTAIN the candidate, denies must not OVERLAP it, and the result names the constraint that refused so the message can be its own. Checked DURING a drag as well as on drop — seeing a position refuse before letting go is the difference between a rule and a surprise'],
+      ['inlineOffset(el, clientX)', 'core/i18n', 'Every mapping of x to TIME measures from the INLINE-start edge, and the direction is read from the RENDERED element rather than a locale prop — `dir` is inherited, so a host can flip a component from any ancestor without it being told. `clientX - rect.left` is only correct in LTR: in RTL the timeline’s origin is on the right, so a left-based measurement returns a MIRRORED time while the logical-property layout looks perfectly correct'],
+      ['resource timelines', 'ApexScheduler', 'Resources as ROWS with time across is the scheduler, not this component. This one puts DATES across and time down'],
+    ],
+  },
+  {
+    id: 'editor', name: 'ApexEditor', group: 'Editor',
+    blurb: 'A rich text editor over ProseMirror. The document is JSON and JSON is the source of truth \u2014 HTML is an export rather than the storage format, because a tree can be queried, validated and migrated where an HTML string can only be re-parsed and hoped over. Carries paragraphs and headings, bullet, ordered and task lists, blockquotes, code blocks and dividers; bold, italic, underline, strike, code, highlight, sub, sup and links; block alignment, markdown input rules, history, and a command registry of about thirty actions that a keyboard shortcut, a toolbar button and a slash menu all invoke identically. The writing area declares its own typography rather than inheriting the host page\u2019s, so a document looks like the document wherever it is embedded.',
+    noField: true,
+    demo: 'editor',
+    lead: ['v-model:doc="doc"'],
+    tail: '\n/>',
+    base: { placeholder: 'Write something\u2026', minHeight: 180, bordered: true, size: 'md' },
+    controls: [
+      { key: 'placeholder', type: 'text' },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'minHeight', type: 'number' }, { key: 'maxHeight', type: 'number' },
+      { key: 'bordered', type: 'bool' }, { key: 'readonly', type: 'bool' },
+      { key: 'disabled', type: 'bool' }, { key: 'spellcheck', type: 'bool' },
+      { key: 'inputRules', type: 'bool' }, { key: 'paste', type: 'bool' },
+      { key: 'tables', type: 'bool' }, { key: 'resizableColumns', type: 'bool' },
+      { key: 'media', type: 'bool' }, { key: 'embedOnPaste', type: 'bool' },
+      { key: 'comments', type: 'bool' },
+      { key: 'suggestions', type: 'bool' }, { key: 'suggesting', type: 'bool' },
+      { key: 'assist', type: 'bool' },
+    ],
+    props: [
+      ['doc', 'EditorDoc | null', 'empty', 'v-model:doc \u2014 the document as ProseMirror JSON. The editor remembers what it last emitted and ignores the echo, so only a genuinely different document counts as an external change; without that, every keystroke would round-trip through the caller\u2019s model and reset the selection and undo stack on each character'],
+      ['placeholder', 'string', "'Write something\u2026'", 'Rendered as a sibling of the document, not as text inside it \u2014 placeholder text in the document would make an empty editor non-empty and export itself'],
+      ['readonly / disabled', 'boolean', 'false', 'readonly is still selectable and copyable, since a reader needs to quote it; disabled is the field-level state, neither editable nor focusable'],
+      ['autofocus', 'boolean', 'false', ''],
+      ['minHeight / maxHeight', 'string | number', '180 / none', 'The writing area grows with content past minHeight; maxHeight makes it scroll'],
+      ['bordered', 'boolean', 'true', 'false sits bare inside a caller\u2019s own frame'],
+      ['size', "'sm' | 'md' | 'lg'", "'md'", 'Sizes the whole document\u2019s type scale, so headings stay proportional to body text'],
+      ['spellcheck / ariaLabel', 'boolean / string', 'true / \u2014', 'Both land on the writing area itself, which is the widget the caret reaches \u2014 not on a wrapper'],
+      ['suggestions / suggesting / author', 'boolean / boolean / { id, name }', 'false / false / \u2014', 'Track changes. Both an insertion and a deletion are MARKS, which is the whole design: an insertion could be either, but a deletion has no choice \u2014 the text has to stay in the document and stay VISIBLE until someone accepts it, so \u201cdeleting\u201d while suggesting means marking, never removing. Accepting a deletion is what finally removes the text'],
+      ['accept and reject', 'exact inverses', 'accept insertion drops the mark and keeps the text; reject insertion removes it; accept deletion removes it; reject deletion drops the mark and keeps it. One implementation for both verbs, because they differ only in which side keeps the text \u2014 and a track-changes feature whose two verbs are not exact inverses corrupts documents quietly'],
+      ['the rewrite', 'before apply', 'A transaction is rewritten before it is applied rather than vetoed by a plugin filter: a filter can only refuse, and turning a deletion into a mark means building the replacement \u2014 and once applied, the text is gone and there is nothing left to mark. Accept and reject transactions carry a flag so the rewriter lets them through, or accepting a deletion would be re-marked as a new deletion and never complete'],
+      ['sourceView / toggleSource() / isSourceOpen()', 'boolean / ref methods', 'false', 'An HTML source view, the way TinyMCE\u2019s Code button works. Off by default: a document with tables and figures is far easier to break in source than to build, and most authors never want it. The markup is parsed on EXIT rather than on every keystroke \u2014 half-typed markup is invalid markup, and parsing it would destroy the document mid-edit. Markup that will not parse leaves the view open with the text intact rather than discarding it, since someone who typed it has not asked to lose it. The writing area is hidden with v-show, never v-if: v-if would destroy the element the view is mounted on'],
+      ['setHtml(html)', 'ref method', '\u2014', 'Load from an HTML column. Runs through the SAME cleaner as a paste, because HTML from a database is no more trustworthy than HTML from a clipboard \u2014 it may predate the current schema, come from another editor, or have been written by hand. The schema is still the whitelist, so markup it cannot represent is dropped rather than preserved. Applied with addToHistory false, so loading a record is not an undoable edit'],
+      ['storing HTML rather than JSON', 'a real trade', 'HTML is the right column type for a website: it renders without the editor, any language can read it, and a template can print it directly. What it cannot carry is EDITORIAL state \u2014 comment anchors and tracked changes are stripped on export by default, so a review workflow needs the JSON. The workable answer for a CMS is both: JSON as the record being edited, HTML written alongside it on save as the column the site renders from'],
+      ['assist / onAssist', 'boolean / (request) => void', 'false / \u2014', 'AI seams. No provider is bundled and no prompt is written in the component: the editor emits a request and the APPLICATION answers it, because endpoints, model choice, auth, rate limits, cost control and prompt wording all belong to whoever owns the account. What the editor owns is what an application should not have to solve twice \u2014 where the result lands, and what the document looks like while the request is in flight'],
+      ['the result lands as a suggestion', 'not a replacement', 'An assistant that silently rewrites a paragraph gives the author no way to see what changed or to refuse it. So the original range is marked DELETED and the proposal inserted beside it \u2014 exactly what a human suggesting an edit produces, which means accept and reject work on it with no code of their own and a reviewer cannot tell whether a person or a model proposed it. That reuse is why the AI seam comes after suggestions rather than before. Without suggestions enabled there is nothing to propose with, so the result replaces the range outright'],
+      ['the in-flight marker', 'a decoration', 'Never part of the document, so a save mid-request cannot persist it and an undo cannot resurrect one whose request already finished \u2014 the same reasoning as the upload placeholder. It is also mapped through every transaction, so the range follows edits made elsewhere while the request is out, and the result is landed against the range READ BACK rather than the one captured when the request was sent'],
+      ['comments', 'boolean', 'false', 'Comment anchors. The document stores a thread id on a range and NOTHING else \u2014 the thread, its replies, authors and timestamps live in the application\u2019s database, where they can be queried, paginated, searched and permissioned. Embedding them would make the document grow without bound and mean migrating comment schema every time the comment feature changed'],
+      ['a comment is a mark', 'not a node', 'It applies to a RANGE and has to survive editing inside it: a node wrapper breaks the moment an edit crosses its boundary, where a mark is mapped through every step for free. It is not inclusive, so typing at the end of a commented range does not silently join the new text to someone else\u2019s comment \u2014 and it excludes nothing, since two people can comment on overlapping text and a mark excluding itself would make the second delete the first'],
+      ['activeThread / resolvedThreads', 'string | null / string[]', '\u2014 / []', 'Painted as DECORATIONS rather than written into the mark, because \u201cactive\u201d belongs to the reader\u2019s focus rather than to the document \u2014 two people reading the same document have different active threads. A resolved thread keeps its anchor but stops competing for attention, which is what \u201cshow resolved\u201d is for'],
+      ['media', 'boolean', 'true', 'Images and video embeds. Off keeps them out of the schema, so a paste cannot introduce one'],
+      ['onUpload', '(request) => void', '\u2014', 'The editor never uploads. It emits an intent \u2014 { file, resolve, reject } \u2014 and the application answers with a URL, because endpoints, auth headers, retry policy and progress all belong to whoever owns the storage. What the editor does own is the part an app should not have to solve: holding a placeholder while the upload runs and keeping it attached to the right position as the document is edited around it. With no handler the file becomes a data URL \u2014 a working default rather than a silent failure, but not for production, since a data URL bloats the document'],
+      ['the upload placeholder', 'a decoration', 'Not a node, for two reasons. A node would be part of the document, so a save mid-upload would persist a placeholder and an undo could resurrect one whose upload had finished. And a decoration set is mapped through every transaction for free, so it stays where the file was dropped even as text is typed above it \u2014 exactly the case a stored position gets wrong. If the placeholder is gone when the promise settles, the result is dropped rather than inserted somewhere arbitrary'],
+      ['an image is a figure', 'caption is content', 'A caption is part of what an image means, and expressing it as a following paragraph would let the two drift apart \u2014 a reorder would leave the caption under someone else\u2019s picture. Absent inline content means an UNCAPTIONED image, which is a different thing from an empty caption \u2014 and an empty one shows a prompt, matched by the trailing break ProseMirror puts in every empty textblock rather than by :empty, which can never match because that break is a child'],
+      ['image width', 'a ratio', 'A fraction of the container rather than pixels: a document read at 400px and at 1200px should show the same proportion, where a pixel width would be either tiny or overflowing'],
+      ['embedOnPaste', 'boolean', 'true', 'A video URL on its own line becomes an embed \u2014 only when the selection is empty, since a URL over a selection means \u201clink this\u201d, and that check has to come first or a video URL would never link anything'],
+      ['an embed stores provider and id', 'not an iframe', 'Storing markup would put a third party\u2019s HTML in the document, where it could not be validated, re-themed, or rendered anywhere but a browser. YouTube, Vimeo and Loom are recognised from watch, share or embed URLs \u2014 a closed list rather than \u201cany iframe\u201d, because accepting arbitrary embed HTML would be a way to put third-party script into every document that used the editor'],
+      ['the embed\u2019s editing view', 'a preview card', 'Not a live iframe: an iframe inside contenteditable swallows every pointer event, so the node could not be selected, dragged or deleted \u2014 and in an editor the reader is arranging a document rather than watching a video. toDOM stays the storage shape, so a renderer builds the real iframe from the same two attributes'],
+      ['tables / resizableColumns', 'boolean', 'true', 'Built on prosemirror-tables. A table\u2019s hard part is not the markup \u2014 it is keeping colspan and rowspan consistent through every edit, so deleting a column that a merged cell spans does the right thing; that bookkeeping IS the library. Turning tables off keeps them out of the SCHEMA entirely, so a paste cannot introduce one the document is not meant to hold'],
+      ['table cells', 'colspan, rowspan, colwidth, align', 'colwidth is an ARRAY, because a cell spanning three columns has three widths to remember and collapsing them loses the distribution that was dragged. A width list that no longer matches the span is stale \u2014 a merge happened after the drag \u2014 so it is dropped rather than applied to the wrong cells'],
+      ['table layout', 'fixed', 'What makes resizing work at all: with auto layout the browser redistributes widths on every keystroke, so a dragged column springs back as its content changes'],
+      ['Tab inside a table', 'moves cells', 'Bound ahead of the list keymap, because inside a table cell movement is what Tab means everywhere else \u2014 and it is the one place the list binding would be actively wrong'],
+      ['paste', 'boolean | PasteOptions', 'true', "{ plainTextOnly, parseMarkdown, linkOnPaste, stripTags }. Cleaning runs on the clipboard HTML BEFORE ProseMirror parses it, because the parser faithfully preserves anything the schema can represent \u2014 including a Word document\u2019s worth of empty spacer paragraphs \u2014 and once parsed the damage is indistinguishable from content the author wrote"],
+      ['paste \u2014 Word and Docs', 'repaired', 'Both wrap a whole selection in <b style=\"font-weight:normal\">, where the tag says bold and the style says otherwise: taking the tag at its word makes the entire paste bold. Style-implied formatting is rewritten into real tags first, since a Docs span carrying weight AND italic must become <strong><em> \u2014 a parseDOM style rule per mark would each match the same element and only the last would apply'],
+      ['paste \u2014 markdown', 'plain text only', 'HTML on the clipboard means the source had structure of its own, and reading its text as markdown would parse a code sample or a URL as formatting. Detection is deliberately strict \u2014 a heading, a fence, a table, or two or more list items, because one line starting with a dash is just a sentence'],
+      ['paste \u2014 a URL over a selection', 'links it', 'Rather than replacing it, which is what someone with text selected and a URL copied means'],
+      ['slashMenu / slashItems', 'boolean / SlashItem[]', 'true / defaults', 'The / menu. Built as a plugin rather than a keystroke listener, because it has to know the position the / was typed at \u2014 so choosing a command deletes exactly that text in the same transaction that inserts the block, rather than leaving a document where the query had gone but the block was not yet made. Fires only on a / that begins a word, since mid-sentence a slash is a slash and firing on \u201cand/or\u201d or a URL would interrupt writing constantly; never inside a code block'],
+      ['inputRules', 'boolean | InputRuleOptions', 'true', "{ markdown, inlineMarks, smartQuotes, dashes }. Shorthands run exactly the command the toolbar button runs, so a document is identical whichever route produced it. smartQuotes is OFF by default: a rule that fires when the author did not mean it is worse than one that never fires, and quote conversion rewrites code and measurements typed deliberately"],
+    ],
+    events: [
+      ['update:doc', 'EditorDoc \u2014 fired only when the document actually changed, not on caret moves'],
+      ['change', '{ doc, text }'],
+      ['selection-change', '{ marks, blockType, blockAttrs } \u2014 read from the state on every transaction rather than tracked separately, because a toolbar keeping its own idea of \u201cis bold on\u201d drifts the moment the caret moves'],
+      ['focus / blur / ready', '\u2014 ready fires once the engine has loaded and the view is mounted'],
+      ['paste', "{ kind: 'html' | 'markdown' | 'text' | 'link' | 'embed' | 'file', length }"],
+      ['upload-error', '{ file, reason } \u2014 the handler rejected, and the placeholder was removed'],
+      ['anchors-change', '{ threadId, from, to, text, top, height }[] \u2014 positions MEASURED from the view, because wrapping, images and tables all affect where a range sits and a gutter that guessed would drift further down with every block. Read on the next frame, since coordsAtPos needs the updated DOM'],
+      ['assist-request', '{ action, text, doc, range, options, resolve, reject } \u2014 answer with resolve(text) or refuse with reject(reason). An empty selection scopes to the whole document, but the range is reported either way so a caller can distinguish: \u2018continue\u2019 wants the caret where \u2018summarise\u2019 wants everything'],
+      ['assist-error', '{ action, reason } \u2014 the handler refused, and the marker was removed'],
+      ['suggestions-change', '{ kind, authorId, authorName, at, from, to, text }[] \u2014 merged into contiguous runs, because a reviewer accepts a CHANGE and three adjacent text nodes from one edit are one change'],
+      ['thread-click', '{ threadId } \u2014 read from the position\u2019s marks rather than the DOM, because overlapping comments nest spans and the innermost is not necessarily the one aimed at'],
+    ],
+    slots: [
+      ['empty', 'The placeholder shown for an empty document. Bound `{ placeholder }`. A SIBLING of the document, never text inside it — putting it in the document would make an "empty" editor non-empty and export it'],
+      ['loading', 'Shown while the engine loads. The engine is an ES module tree, so first load is a real wait, and an editor showing only its placeholder reads as broken rather than busy'],
+      ['error', 'A load or command failure. Bound `{ message }`'],
+      ['slash-item', 'One row of the slash menu, FORWARDED into ApexEditorSlash’s own `item` slot rather than duplicated. Bound `{ item, selected, group, index }`'],
+      ['toolbar', 'Above the writing area. Receives { active, can, run, link, setLink, unsetLink, view } \u2014 everything a toolbar needs, so the editor never has to know what a toolbar looks like'],
+      ['overlay', 'Inside the frame, for the bubble and slash menus: they position against the writing area\u2019s own coordinates, which is the space the selection was measured in'],
+      ['gutter', 'Beside the writing area; receives { anchors, activeThread }. The tops are MEASURED from the view, because wrapping, images and tables all affect where a range sits. Stacking is still the caller\u2019s: a card\u2019s height depends on its own content, which the editor cannot know, so two comments closer together than a card is tall need a displacement pass in the gutter \u2014 sort by anchor top, push each card clear of the one above. The gallery\u2019s gutter is a working reference for that'],
+      ['footer', 'Below it \u2014 for a word count or a save indicator'],
+    ],
+    serviceTitle: 'Toolbars, methods, schema and keys', serviceFn: 'ref / core/editor',
+    serviceRows: [
+      ['ApexEditorToolbar', "preset 'minimal' | 'standard' | 'full', or items", 'Renders from a declaration rather than fixed markup, because the same declaration drives the fixed bar, the bubble menu and the slash menu \u2014 three hand-written toolbars would drift, and the drift shows up as a button that works in one place and not another. Named presets rather than a boolean per button: twenty booleans is a configuration language nobody wants to learn to answer \u201cgive me a normal toolbar\u201d'],
+      ['ApexEditorBubble', 'view, active, can, run', 'Positioned from the SELECTION\u2019s rectangle rather than the pointer, since a selection can be made by keyboard. Measures both ends, because a selection spanning lines starts and finishes on different rows, and flips below when there is no room above'],
+      ['ApexEditorLink', 'href, target', 'Edits rather than replaces \u2014 it reads the link under the caret. A bare domain gets https://, but anything already carrying a scheme is left alone since prefixing mailto: would corrupt it, and an address that looks like an email becomes a mailto:'],
+      ['ApexEditorSlash', 'state, items, coords', 'Rendered from the plugin\u2019s state. Label matches rank above keyword matches and prefixes above substrings, so typing \u201ch2\u201d reaches Heading 2 first. Coordinates track the TRIGGER, not the caret \u2014 otherwise the menu crawls sideways as the query grows'],
+      ['table commands', '16 in the registry', 'table_insert, add/delete row and column, merge_or_split (one button, both directions \u2014 merge when cells are selected, split when one merged cell is), toggle_header_row / column / cell, align, delete. Each is guarded by prosemirror-tables\u2019 own applicability, so can(\u2018table_delete_row\u2019) outside a table is false because the library says so'],
+      ['active.inTable', 'boolean', 'Rides along with the selection report rather than being asked for separately, so a toolbar sees one consistent snapshot \u2014 and can show sixteen table buttons only when there is a table, rather than a toolbar that is mostly disabled'],
+      ['a disabled button', 'the document decided', 'can[name] === false comes from calling the command with no dispatch, which is ProseMirror\u2019s own applicability check. An absent entry means unknown rather than unavailable, so a registry that has not reported yet does not grey out the whole bar'],
+      ['getJSON() / getText() / isEmpty()', 'ref methods', 'The document, its plain text, and whether anything has been written'],
+      ['focus() / blur()', 'ref methods', ''],
+      ['addComment(id) / removeComment(id) / threadsAtSelection()', 'ref methods', 'The id comes from the CALLER: the thread has to exist in the application\u2019s store before the document points at it, or a saved document would reference a thread that was never created. addComment refuses an empty selection \u2014 a comment on a caret has no text to quote and nowhere to paint'],
+      ['getSuggestions() / resolveSuggestion(range, verb) / resolveAll(verb, authorId?)', 'ref methods', 'Every accessor carries a get or is prefix, without exception: on an Options-API host props and data sit on the instance and WIN over a method of the same name, so an accessor called suggestions, view, active or sourceOpen is reachable in the SFC and unreachable there. Ranges walk back to front when resolved in bulk, so resolving one does not shift those still to be resolved'],
+      ['runAssist(action, options?) / isAssistBusy()', 'ref methods', 'One entry point for every action, so a toolbar button, a slash command and a keyboard shortcut all produce the same request and the same landing'],
+      ['toHtml(o) / toMarkdown(o) / toText(o) / wordCount(o)', 'ref methods', 'Export from the document. HTML goes through ProseMirror\u2019s own DOMSerializer, driven by the schema\u2019s toDOM, rather than a second walker \u2014 toDOM is already the single definition of how each node renders, and a hand-written walker would drift the first time a node gained an attribute. Markdown has no such definition to borrow, so it is written to be the exact inverse of our own PARSER: the two have to round-trip, and a serialiser aimed at a dialect we do not read would produce documents we cannot re-open. Verified against a fixture containing an image and an embed \u2014 a round-trip over a document without them proves nothing about them, which is how two wrong node names once survived. One asymmetry is inherent: markdown has a single text slot per image, so an uncaptioned image with alt text re-opens with that alt as its caption \u2014 the better loss, since dropping the alt would lose the accessibility text where gaining a caption is cosmetic'],
+      ['ExportOptions', "{ suggestions: 'accept' | 'reject' | 'keep', comments, pretty }", "'accept' / false / false", 'Export ACCEPTS suggestions and drops comment anchors by default, because a published document should carry neither <ins>/<del> nor anchor spans \u2014 those are editorial state rather than content. \u2018keep\u2019 is for a diff view or an audit trail. Stripping rebuilds the document THROUGH the schema, so what comes out is valid rather than merely tree-shaped: an empty paragraph left by a deleted line is legal, an empty list item may not be, and the item goes with its content rather than throwing'],
+      ['toText is block-aware', 'not textContent', 'doc.textContent concatenates every block into one run, so a heading and the paragraph under it become \u201cHeadingthe paragraph\u201d'],
+      ['getView() / getSchema()', 'ref methods', 'The live ProseMirror view and schema, for a caller that needs to reach past these props'],
+      ['run(name) / can(name)', 'ref methods', 'Runs a registered command, or asks whether it applies here. can() calls the command with no dispatch, which is ProseMirror\u2019s own applicability check \u2014 so a disabled button is disabled because the document says so rather than because a rule was guessed. The toolbar and footer slots receive both'],
+      ['commands', 'registry', 'strong, em, code, underline, strike, highlight, subscript, superscript \u00b7 paragraph, heading1\u20266, code_block, blockquote, horizontal_rule, hard_break \u00b7 bullet_list, ordered_list, task_list, indent, outdent \u00b7 align_left / center / right / justify \u00b7 clear_marks'],
+      ['setLink({ href, target }) / unsetLink()', 'ref methods', 'With no selection, setLink applies to the WORD under the caret \u2014 otherwise the button would produce a zero-width link nobody can see or click \u2014 and unsetLink removes the whole link the caret sits inside rather than nothing'],
+      ['undo() / redo()', 'ref methods', ''],
+      ['list toggling', 'converts rather than nests', 'Pressing bullets inside an ordered list changes the wrapper in place, keeping the items and their nesting; pressing the list\u2019s own kind lifts out. Item types change too between list_item and task_item, since they are different nodes'],
+      ['task_list', 'own node', 'Not a bullet list with a checkbox mark: the checked state belongs to the item, and a mark would let it apply to half a row. The box is drawn in CSS rather than a real input, which inside contenteditable would take focus from the document and be unreachable by the caret'],
+      ['alignment', 'block attribute', 'Not a mark: half a paragraph cannot be centred, so a mark would allow a document nobody can render. Round-trips as data-align rather than an inline style, so the document carries intent and the stylesheet owns the look \u2014 the style is still read on the way in, because pasted HTML uses it'],
+      ['highlight colour', 'a name', 'yellow, green, blue, pink, orange. A document storing #FFF3A0 cannot follow a theme into dark mode, where a named tone can'],
+      ['code_block', "marks '', whitespace full", 'No marks inside, since code says the text is literal; indentation IS the content, so collapsing whitespace would break every pasted snippet. Shift-Enter exits it, because every other key inside is literal and there would otherwise be no way out'],
+      ['ordered_list order', 'preserved', 'A list starting at 5 continues an earlier one, and losing that renumbers someone\u2019s document'],
+      ['baseNodes / baseMarks', 'exported', 'doc, paragraph, heading, blockquote, horizontal_rule, bullet_list, ordered_list, list_item, task_list, task_item, code_block, text, hard_break; strong, em, code, underline, strike, highlight, subscript, superscript, link. Declared as a schema rather than assembled from toolbar configuration \u2014 what a document may contain has to be decidable without knowing which buttons are shown, since a toolbar can lack a bold button while the document still holds bold text from a paste'],
+      ['heading marks', 'link only', 'Bold inside a heading is invisible, so allowing it would mean round-tripping styling nobody can see'],
+      ['code mark', "excludes '_'", 'Code says the text is literal, so bold or italic inside it would contradict the mark'],
+      ['hard_break', 'inline', 'A line break inside a paragraph is a different thing from a new paragraph, and conflating them loses the author\u2019s intent'],
+      ['keyboard', 'Mod-b / Mod-i / Mod-` \u00b7 Shift-Mod-x / h \u00b7 Mod-, / . \u00b7 Shift-Mod-1\u20266 / 0 / 8 / 9 / c \u00b7 Mod-> \u00b7 Mod-_ \u00b7 Tab / Shift-Tab \u00b7 Shift-Enter \u00b7 Mod-z / Shift-Mod-z', 'Mod- resolves per platform rather than hard-coding Ctrl, which would leave every Mac user without shortcuts. Commands are plain functions, so a shortcut, a toolbar button and a slash menu all invoke the same code'],
+      ['engine', 'ProseMirror', 'Vendored into web/vendor/pm as an offline module tree with one shared copy of each module \u2014 two copies would mean two Node classes and every instanceof across a package boundary silently false. The published package takes prosemirror-* as ordinary peer dependencies'],
+    ],
+    },
+
+  {
+    id: 'htmleditor', name: 'ApexHTMLEditor', group: 'Editor',
+    blurb: 'Edits HTML pages rather than prose documents. A separate component from ApexEditor rather than a mode on it, because the two want opposite things: ApexEditor seals its writing area so a host page\u2019s CSS cannot touch the document, where a page only looks right IN its own stylesheet. Almost everything above the schema is shared \u2014 the engine, history, toolbars, comments, suggestions, the assist seam and the HTML round-trip all work on any schema by construction.',
+    noField: true,
+    demo: 'htmleditor',
+    lead: ['v-model:html="html"', ':styles="styles"'],
+    tail: '\n/>',
+    base: { minHeight: '220px', editable: true, sourceView: true },
+    controls: [
+      { key: 'minHeight', type: 'text' },
+      { key: 'bodyClass', type: 'text' },
+      { key: 'editable', type: 'bool' },
+      { key: 'sourceView', type: 'bool' },
+    ],
+    props: [
+      ['html', 'string', "''", 'v-model:html \u2014 the markup IS the record here. There is no JSON source of truth, because the point of the component is that what you store is what the site renders'],
+      ['the schema is a SUPERSET, not a replacement', 'permissive', 'Everything with affordances keeps a real node, so Enter still splits a paragraph and the list button still makes a list. Everything else is carried by a generic element node holding its tag and attributes, and round-trips byte-for-byte without the editor pretending to understand it. There are TWO generic containers rather than one, because a div holding paragraphs and a div holding bare text are different content models and ProseMirror cannot mix block and inline in one node \u2014 collapsing them would rewrite <div>text</div> as <div><p>text</p></div> and lose the commonest hand-written case'],
+      ['elements permissive, attributes strict', 'the whitelist moves', 'Carrying <div class="grid"> is harmless; carrying onclick would make the editor an injection vector for everyone who can edit a page, which in a CMS is many people. So every on* attribute goes without exception, URL attributes are gated on a safe scheme, and a style attribute keeps its safe declarations while the suspect ones are dropped \u2014 losing every inline style because one looked wrong would break the layout'],
+      ['indent / outdent', 'commands', 'Chained: list nesting is tried first, and a margin-left step is the fallback when it does not apply. The inherited commands are sinkListItem and liftListItem, list-only by construction and inert on a paragraph \u2014 correct for a prose document, wrong for a page where an author indenting a paragraph expects it to move. Outdent reports unavailable at zero rather than silently doing nothing'],
+      ['undo / redo', 'commands', 'Registry entries rather than only keybindings: the toolbar names them as commands and looks them up in the registry, so they were dead buttons until they existed there \u2014 in the prose editor too. history.undo is already a Command, so availability comes free and an empty stack disables the button because the document says so'],
+      ['clear formatting', 'reaches style spans', 'It iterates the schema\u2019s marks, which includes the generic inline element \u2014 so a colour, font or size span is cleared along with bold and italic. With only a caret it reports unavailable and the button disables, since there is no range to clear'],
+      ['styles', 'HtmlStyle[]', '[]', "{ label, className, scope: 'block' | 'character', tag?, preview?, group? } \u2014 the application's own classes, applied the way Word's styles are: select, then click. The block/character distinction is not cosmetic: a character style applies to a run of text so it must be a MARK, where a block style belongs to the whole block so it must be an ATTRIBUTE. One control for both would mean guessing, and guessing wrong either paints half a paragraph or restyles a whole one the author meant to touch a word of"],
+      ['gallery styles are exclusive within the gallery only', 'and nowhere else', 'Applying \u201cLead\u201d retires \u201cQuote\u201d because they are alternatives, but leaves a grid-item the template needs alone. A gallery that stripped every class would silently break layouts'],
+      ['stylesheets / css / bodyClass', 'string[] / string / string', '[] / \u2014 / \u2014', 'Loaded into the editing surface, so the author is looking at the production cascade rather than an approximation'],
+      ['the surface is an iframe', 'deliberately', 'A shadow root scopes styles, but a real site\u2019s CSS leans on :root variables, inherited properties and global resets that do not cross that boundary cleanly \u2014 the page would look NEARLY right, which is worse than looking wrong. An iframe is a real document, so the site\u2019s own stylesheet applies exactly as it will in production'],
+      ['structure(action, arg) / canStructure(action, arg)', 'ref methods', "'wrap' | 'unwrap' | 'retag' | 'insert' | 'remove' | 'attrs' \u2014 one entry point, so a toolbar button and a keyboard shortcut produce the same transaction. canStructure asks the command WITHOUT dispatching, which is ProseMirror\u2019s own applicability test, so a disabled button is disabled because the document said so rather than because a rule guessed"],
+      ['unwrap and delete are different verbs', 'both exist', 'Unwrap keeps the content and drops the wrapper; delete drops both. One verb for the two would mean an author removing a layout div lost the text inside it'],
+      ['retag is where the design pays off', 'one setNodeMarkup', 'Because a container\u2019s tag is an ATTRIBUTE rather than a node type, turning a div into a section touches nothing inside it. A schema with one node type per tag would have to rebuild the subtree and hope the content still validated'],
+      ['an inserted container arrives holding a paragraph', 'not empty', 'An empty container has nowhere to put a caret, so the author would see a box they could not type into and would have to open the source view to fix it'],
+      ['attrs with a null value clears', 'set and clear in one call', 'Otherwise a caller needs two commands to swap an id for nothing'],
+      ['sourceView / toggleSource() / isSourceOpen()', 'boolean / ref methods', 'true', 'ON by default here, unlike ApexEditor: in a prose editor the source view is an escape hatch most authors never want, but in a page editor it is the reliable way to reach anything the visual surface cannot. The markup is indented structurally for reading \u2014 nothing inside a tag is reflowed, since reformatting there risks changing it \u2014 and parsed on EXIT rather than per keystroke, because half-typed markup is invalid markup. Markup that will not parse leaves the view open with the text intact'],
+      ['the iframe hides with v-show, not v-if', 'deliberately', 'v-if would destroy it, and its document, stylesheets and the view mounted inside would be rebuilt from nothing each time the source view closed'],
+      ['the <head> is not editable content', 'by design', 'A page\u2019s title, description and meta tags are metadata, and metadata belongs in fields where it can be validated and indexed \u2014 not in a rich-text surface where an author can delete a tag by pressing Backspace. The component edits the BODY; the application owns the head, and passes stylesheets and css so the preview still renders in the production cascade'],
+      /* `placeholder` dropped from this row — AF2-282. The mirror declares
+         it and references it nowhere else in the file; our component does
+         not have it, and a dead prop is not worth adding to keep a row.
+         Waived in reconcile's GALLERY_DEFECTS. */
+      ['editable / minHeight', 'boolean / string', 'true / 320px', ''],
+      ['resizableColumns / resizableRows', 'boolean', 'true', 'Drag a cell border to size a column, a row border to size a row. The column half is prosemirror-tables’ own; the row half is ours, because the library has no equivalent — a page author sizing a layout table expects both to answer to the same gesture. AF2-285: both declared and documented nowhere.'],
+    ],
+    events: [
+      ['update:html', 'string'],
+      ['selection-change', '{ blockStyle, characterStyle, path } \u2014 path is the element ancestry, which is how an author sees and selects the container they are inside; a structure tree nobody asked for is the alternative'],
+      ['ready / error', '\u2014 / Error'],
+    ],
+    slots: [
+      ['— on ApexEditorImage', 'ADDITIVE slots, not replacements: the dialog is host-mounted, so a host wanting a different one simply does not render ours. `fields` (bound `{ draft, editing }`) adds a caption, credit or licence beside our Source/Alt/dimensions; `footer` (bound `{ draft, editing, save, cancel, canSave }`) replaces the actions — `canSave` is bound because the default’s rule is not obvious from the draft'],
+      ['— on ApexEditorTableGrid', '`readout` only, bound `{ rows, cols, text }`. The grid IS the control, so a slot over it would replace the component rather than customise it'],
+      ['status', 'The status bar. Bound `{ path, words, selectPath, sourceOpen }` — `selectPath` is bound because the default’s crumbs are CLICKABLE, and a host’s own breadcrumb needs the same power rather than a read-only copy'],
+      ['source-view', 'The markup editor AND its parse error, as one slot — a host replacing the surface must be able to place the error against it, and two slots would let them drift apart. Bound `{ text, setText, error }`'],
+      ['loading', 'Shown while the engine loads'],
+      ['error', 'A load failure. Bound `{ message }`'],
+      ['toolbar', 'Receives { styles, blockStyles, characterStyles, active, apply, clear } \u2014 the gallery is yours to render, since only you know how your styles should preview'],
+    ],
+    serviceTitle: 'Methods', serviceFn: 'ref',
+    serviceRows: [
+      ['getHtml() / setHtml(html)', 'string / void', 'setHtml applies with addToHistory false, so loading a record is not an undoable edit'],
+      ['applyStyle(style) / clearStyle(scope)', 'boolean', 'Routed by the style\u2019s own scope, so one call handles both kinds'],
+      ['selectPath(entry) / focus()', 'void', 'Selects a container from the element path'],
+    ],
+    },
+
+  {
+    id: 'form', name: 'ApexForm', group: 'Form',
+    blurb: 'A schema-driven form. ApexForm is a VIEW: it renders a schema through Apex controls, validates locally for immediate feedback, and displays whatever errors it holds. It never submits — the host owns the verb, and the values live in ONE place. Given an Inertia or Precognition form, THAT object holds them and ApexForm reads and writes through it; given nothing, ApexForm makes an internal one. Never both, because two sources of truth for form state is the defect a form library exists to prevent. Three layouts (long, tabs, sidebar) in two shells (page, modal), and nothing else.',
+    noField: true,
+    demo: 'form',
+    lead: [':schema="schema"', ':form="form"', 'layout="sidebar"'],
+    tail: '\n  @submit="onSubmit"\n  @cancel="close"\n/>',
+    /* shell: 'page' deliberately — a modal is position:fixed;inset:0, which in a
+       docs stage would cover the nav and every section of its own page. The
+       "Three layouts, two shells" section demonstrates the modal inline. */
+    base: { layout: 'sidebar', shell: 'page', readonly: false, eager: false },
+    controls: [
+      { key: 'layout', type: 'select', options: ['long', 'tabs', 'sidebar'] },
+      { key: 'shell', type: 'select', options: ['page', 'modal'] },
+      { key: 'readonly', type: 'bool' }, { key: 'eager', type: 'bool' },
+    ],
+    props: [
+      ['transition', "'scale' | 'slide' | 'fade' | 'none'", 'scale', 'A built-in preset, used when no classes are given'],
+      ['enterClass / leaveClass', 'string', '—', 'Your own transition classes, e.g. animate.css. Not bundled — install it yourself. A pair given here replaces the built-in animation. See <a href="#/motion">Motion &amp; transitions</a>'],
+      ['enterDuration / leaveDuration', 'string', '—', 'Any CSS time, per phase. Written as <code>--animate-duration</code> and <code>animation-duration</code> while that phase runs, then removed'],
+      ['schema', 'FormSchema', '—', 'The whole form as DATA: `{ title, subtitle, icon, layout, shell, sections: [{ title, icon, columns, gap, class, fields }] }`. Sections may be omitted for a flat `fields` list, which is what a small form wants. Every part of it survives a JSON round trip, because a schema emitted by PHP cannot carry a function.<br><br><b>Laying a section out.</b> `columns` is how many the section has and a field’s `span` is how many it takes — `span: 2` of two columns is the whole row. Underneath, the grid is twelve tracks and every span is scaled, which renders identically and makes two more keys possible: a field’s <b>`span12`</b> takes N twelfths regardless of the section (a third inside a section of halves, which two tracks cannot express), and <b>`start`</b> places it at a twelfth instead of letting it flow. Both need a section whose `columns` divides 12 — every count a form uses — and are refused with a warning where it does not, rather than laid out against a grid they do not describe.<br><br><b>`gap`</b> on a section is one CSS gap value (`16`, `\'16px\'`, `\'8px 24px\'`) and overrides the app-wide `formGap` option; unset, forms keep `18px 20px`. <b>`class`</b> puts a class on that one section, which the form-wide `ui` map cannot do — `ui.cell` is every cell in the form.<br><br><b>Two CSS variables</b> are read and never declared, so a host can set them from anywhere up the tree (§4.2): `--apex-form-w` is the modal panel’s width (default `min(980px, 100%)` — a screen wanting most of the window sets `80vw`), and `--apex-form-gap` is the grid gap the section key writes for you'],
+      ['form', 'InertiaForm | PrecognitionForm | null', 'null', 'The host’s form object. It is the SOURCE OF TRUTH for the values — ApexForm reads and writes through it and keeps no copy. Capability detection rather than two code paths: a Precognition form has `validate(field)`, so a field is sent to the server WHEN IT LOSES FOCUS — not on every keystroke, which asks the server about a half-typed value and then reports the answer (“that slug is taken”, three letters into a different one) — and the footer says “Checking…” while a round trip is in flight, form-wide, because that is the only scope Precognition reports. An Inertia form has no `validate()`, so the local rules are the only pre-submit feedback and the server speaks on submit. The consequence worth having: adopting Precognition later is a change of WHICH `useForm` you import — no schema and no markup change'],
+      ['modelValue', 'object', '{}', 'Initial values, and the bindable model, when no host form is supplied'],
+      ['layout', "'long' | 'tabs' | 'sidebar'", "schema’s", 'Tabs and sidebar are the SAME section list in two orientations — one ARIA contract, one keyboard model — so a schema switches between them without knowing which is showing. Long renders every section at once and has no tabs'],
+      ['shell', "'page' | 'modal'", "schema’s", 'The same panel, lifted. Nothing about the layouts or the grid changes between them — only where the panel sits and how tall it may grow'],
+      ['open', 'boolean', 'null', 'Modal visibility, and it states WHO owns dismissal. Bind it (`v-model:open`) and the host decides — it may want to hold the panel up while its own save fails. Leave it unbound and ApexForm owns it: nobody else can close it, so cancel dismisses and a submit that passed dismisses. Named `open` rather than `visible` because `visible(field)` already means field visibility here, and one word with two meanings in one component is a defect waiting to happen'],
+      ['actions', 'boolean', 'true', 'The footer with Cancel and Save. Off for an EMBEDDED form whose host owns saving, or a form shown as a demonstration — the panel then ends at its last field'],
+      ['ripple', 'boolean', '—', 'Ripple Save and Cancel, so the buttons the form draws for itself match the ones the app writes with <code>v-apex-ripple</code>. Unset falls through to the plugin’s <code>ripple</code> option; OFF is the default, because a library that started rippling on upgrade would change every existing screen'],
+      ['readonly', 'boolean', 'false', 'Values render as TEXT, not as disabled controls: a greyed-out input reads as something the author failed to fill in. Same schema, so a detail page and an edit page are one definition. For a view dialog that must LOOK like its edit dialog, put <code>readonly: true</code> on the fields instead — real controls that refuse input and stay legible. <code>disabled</code> is the third thing and the wrong one here: it draws in the muted palette, which says “not available” rather than “not yours to change”. Either spelling ENDS THE EDITING SESSION when it takes hold: becoming uneditable — by this prop, or by every visible field carrying its own <code>readonly</code> — clears the local errors, the touched set and the dirty flag, and so does becoming editable again. A modal got that for free from opening; a PAGE never opens, so without it the browser’s complaint about a value the user abandoned outlived the mode it was typed in. Server errors are untouched: a 422 is not this component’s opinion and does not expire because the screen was locked'],
+      ['eager', 'boolean', 'false', 'Validate a field the moment it changes rather than once it has been touched. Off by default because a required-field error on a pristine form is the most common form-UX mistake'],
+    ],
+    events: [
+      ['submit', 'The values, once every VISIBLE field passes its local rules. ApexForm does not post — the host does, with whatever verb it owns'],
+      ['cancel', 'The dismiss action was taken'],
+      ['update:open', 'Paired with `open`, so a host that binds it stays in control of when the panel goes'],
+      ['change', 'The whole value object, on any field change'],
+      ['field-change', '`{ key, value }` — one field, for a host that wants to react to a specific one'],
+      ['update:modelValue', 'Only when there is no host form; with one, that object is already the truth'],
+    ],
+    slots: [
+      ['field-{key}', 'One field, by its key. Bound `{ field, value, error, update, blur }` — `update` is the setter, so a custom control participates in validation and dirty tracking exactly as a mapped one does, and `blur` is the one the default markup wires for you: call it from your control’s `@blur` or the field is touched by nothing, never marked touched, and never sent to the server for per-field validation'],
+      ['actions', 'The action bar. Bound `{ submit, cancel, processing }`'],
+      ['head-end', 'Beside the title — a status chip, a menu'],
+    ],
+    serviceTitle: 'The engine', serviceFn: 'apex-form-core',
+    serviceRows: [
+      ['normalise(schema)', 'FormSchema', 'One shape, so the component never branches on shorthand. Columns live on the SECTION and spans on the field: one number to reason about per group, and collapsing to a single column is a container query rather than a JS breakpoint — so it fires for a narrow modal inside a wide window, which a viewport query cannot see'],
+      ['gridTracks(columns)', 'number', 'TWELVE whenever the section’s column count divides into it, which is every count a form uses (1, 2, 3, 4, 6, 12). Twelve tracks with every span scaled by `12 / columns` lays out identically to `columns` tracks spanning one — and it is what lets a section of halves hold a field that is a third. A count that does not divide 12 keeps its own tracks, because scaling would need a fractional span and a grid cannot have one'],
+      ['cellPlacement(field, section)', '{ span, start? }', 'One field’s placement in those tracks. `span` is scaled, `span12` and `start` are absolute twelfths, and a field placed near the end is CLAMPED — left alone, a grid answers an overrun by inventing tracks and the row silently grows wider than the form. The component writes the result as `--cell-span` / `--cell-start` rather than as `grid-column`, because an inline property cannot be overridden by the narrow-container query, and a form that could not undo its spans grew an implicit column instead of stacking'],
+      ['gridGap(section, option)', 'string | undefined', 'The section’s gap, then the app-wide `formGap`, then undefined — and undefined means the stylesheet’s own value, so a form that says nothing is unchanged and no inline value beats a host’s rule. A bare number is read as pixels. It VALIDATES: the value lands in a custom property, and an invalid one makes the whole `gap` declaration invalid at computed-value time, so a typo would flatten the form rather than fall back'],
+      ['validateField(field, value, all)', 'string[]', 'One field. `required` runs FIRST and stops — a blank field should say it is required, not that it is not a valid email — and every other rule skips a blank value, matching Laravel'],
+      ['validate(schema, model)', '{ errors, ok }', 'The whole form. INVISIBLE fields are skipped: blocking a submit on a field the author cannot see is the worst failure a conditional form has, and it is silent — the message names a control that is not rendered'],
+      ['normaliseRules(rules)', '[{ name, args }]', 'Two authoring surfaces, one internal shape: the Laravel pipe DSL (`\'required|email|maxLength:40\'`), because it can be pasted from a FormRequest and carried inside JSON, and an object form for a typed literal'],
+      ['isServerOnly(rule) / serverOnlyFields(schema)', 'boolean / string[]', 'About fifteen rules run in the browser. Laravel has ninety, and reimplementing them would guarantee drift from the FormRequest that actually decides — so anything unrecognised is retained, never evaluated locally, and REPORTED. "It looked valid and the server refused it" gets an explanation instead of being a mystery'],
+      ['expandCondition(cond)', 'ApexCondition', '`{ custom: true }` means "the field `custom` equals true". The full form has no shorthand, and an object of plain keys falls through core/conditions’ default branch comparing `undefined === undefined` — which is TRUE. So a mis-shaped condition does not error: it shows every conditional field and hides every inverse one. The shorthand is real so the trap is not'],
+      ['controlFor(field)', '{ tag, props }', 'A schema `type` names an intent; this decides the control and its props. It DROPS props the control does not declare and says which — four times in this project a prop name was assumed rather than read (`options` where a tree wants `nodes`, `prefix` where a number wants `currency`), and every one was silent: the control rendered and held nothing'],
+      ['makeDriver(form, initial)', 'Driver', 'The one source of truth. Server errors WIN and keep winning until that field changes — after a 422 there is no revalidation, so the only way to clear an error is to edit the field, and a local rule that happens to pass must not erase what the server said'],
+    ],
+    },
+
 ];

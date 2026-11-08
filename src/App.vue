@@ -50,6 +50,26 @@ import MenuStage from './demos/MenuStage.vue';
 import MediaStage from './demos/MediaStage.vue';
 import BoardStage from './demos/BoardStage.vue';
 import ChartStage from './demos/ChartStage.vue';
+import DataTabularStage from './demos/DataTabularStage.vue';
+import DataSimpleStage from './demos/DataSimpleStage.vue';
+import SchedulerStage from './demos/SchedulerStage.vue';
+import FormStage from './demos/FormStage.vue';
+import EditorStage from './demos/EditorStage.vue';
+import HtmlEditorStage from './demos/HtmlEditorStage.vue';
+import CalendarStage from './demos/CalendarStage.vue';
+import DataTableSections from './demos/data/DataTableSections.vue';
+import SchedulerSections from './demos/data/SchedulerSections.vue';
+import FormSections from './demos/data/FormSections.vue';
+import EditorSections from './demos/data/EditorSections.vue';
+import HtmlEditorSections from './demos/data/HtmlEditorSections.vue';
+import CalendarSections from './demos/data/CalendarSections.vue';
+import TreeSections from './demos/data/TreeSections.vue';
+import TreeTableSections from './demos/data/TreeTableSections.vue';
+import TimelineSections from './demos/data/TimelineSections.vue';
+import ProgressBarSections from './demos/data/ProgressBarSections.vue';
+import PickListSections from './demos/data/PickListSections.vue';
+import OrgChartSections from './demos/data/OrgChartSections.vue';
+import DataViewSections from './demos/data/DataViewSections.vue';
 /* The dynamic-dialog and confirm-popup demos appear in the stage AND in a
    section below it. One module holds their state so both report through the
    same line — see demos/overlayDemos.ts. */
@@ -1809,6 +1829,24 @@ async function alertRefused() {
   alertOutcome.value = `run() resolved ${ok}`;
 }
 
+/**
+ * The shape a CRUD screen wants: gears while it saves, then a report that
+ * closes itself. `progress` says what kind of work is running; `result`
+ * carries the presentation the action cannot know about — the countdown
+ * and the label on the button.
+ */
+async function alertSaved() {
+  await alert.run({
+    progress: { title: 'Saving…', icon: 'settings' },
+    action: async () => {
+      await wait(1400);
+      return { ok: true, title: 'Record saved' };
+    },
+    result: { autoClose: 3000, showTimer: true, confirmText: 'Dismiss' },
+  });
+  alertOutcome.value = 'run() resolved true';
+}
+
 async function alertChanges() {
   await alert.confirm({
     title: 'Save changes?',
@@ -2063,7 +2101,7 @@ function createLocality({ query, path }: { query: string; path?: Node[] }) {
   dialog.open(LocalityForm, {
     props: { header: under ? `New entry under ${under.label}` : 'New locality', width: '430px', modal: true },
     contentProps: { name: query, parent: under?.label },
-    onClose: ({ data }) => {
+    onClose: ({ data }: { data?: unknown }) => {
       const raw = data as { value: string; label: string } | undefined;
       if (!raw) { localityLog.value.unshift('dismissed — nothing added'); return; }
       const rec = node(raw.value, raw.label);
@@ -2381,7 +2419,9 @@ async function copyUsage() {
         <!-- Demo on the left, live prop editors on the right. -->
         <div class="stage">
           <div class="stage__demo">
-            <div class="stage__inner">
+            <!-- A table needs the whole column; a field does not. -->
+            <div class="stage__inner"
+                 :class="{ 'stage__inner--wide': String(entry.demo || '').startsWith('data-') }">
               <!-- A control without a field shell needs its own stage treatment: no
                    v-model, and in some cases slot content or room to fan out. -->
               <!-- "plain" is the whole treatment for a control that renders
@@ -2449,6 +2489,30 @@ async function copyUsage() {
                 :id="entry.id"
                 :bind="live"
               />
+
+              <!-- The nine data controls. Each needs a seed and, for four of
+                   them, a column or node definition — without which the rail
+                   is a row of switches acting on an empty frame. Split by what
+                   the stage has to supply; see the `demo` union in registry.ts. -->
+              <DataTabularStage
+                v-else-if="entry.demo === 'data-tabular'"
+                :id="entry.id"
+                :bind="live"
+              />
+
+              <DataSimpleStage
+                v-else-if="entry.demo === 'data-simple'"
+                :id="entry.id"
+                :bind="live"
+              />
+
+              <!-- Phase B. One stage each: a resource timeline and a five-view
+                   calendar share no seed, no state and no toolbar. -->
+              <SchedulerStage v-else-if="entry.demo === 'sched'" :bind="live" />
+              <FormStage v-else-if="entry.demo === 'form'" :bind="live" />
+              <EditorStage v-else-if="entry.demo === 'editor'" :bind="live" />
+              <HtmlEditorStage v-else-if="entry.demo === 'htmleditor'" :bind="live" />
+              <CalendarStage v-else-if="entry.demo === 'cal'" :bind="live" />
 
               <!-- An Inplace is two states, and only the closed one shows
                    without content to swap to. -->
@@ -10439,6 +10503,19 @@ const items = [
             <ApexButton variant="outlined" @click="alertRefused">An action that completes, and was refused</ApexButton>
           </div>
 
+          <h2>Gears while it works, and a report that closes itself</h2>
+          <p class="doc-note">
+            <code>progress</code> says what kind of work is running — an
+            <code>icon</code> replaces the ring and spins, so a save reads
+            differently from a fetch. <code>result</code> carries what the
+            action cannot know: the countdown, the timer bar, and the label on
+            the button. The outcome still decides the tone, title and message,
+            so a refusal cannot be dressed as a success.
+          </p>
+          <div class="alert-row">
+            <ApexButton variant="outlined" @click="alertSaved">Save a record</ApexButton>
+          </div>
+
           <h2>Showing what changes</h2>
           <p class="doc-note">
             An edit-confirm that lists its own changes can be read rather than
@@ -10512,6 +10589,26 @@ const items = [
             <ApexButton ref="alertAnchorRef" variant="outlined" @click="alertAnchored($event)">Delete this row</ApexButton>
           </div>
         </template>
+
+        <!-- The data controls' worked examples.
+             Each control's sections are their own component under demos/data/.
+             They were never going to fit here: this file passed ten thousand
+             lines before the nine had a single example between them, and the
+             page-render spec mounts the whole app once per test. The gate stays
+             in this file so reconcile can still find which id owns them. -->
+        <DataTableSections v-if="entry.id === 'datatable'" />
+        <SchedulerSections v-if="entry.id === 'scheduler'" />
+        <CalendarSections v-if="entry.id === 'calendar'" />
+        <FormSections v-if="entry.id === 'form'" />
+        <EditorSections v-if="entry.id === 'editor'" />
+        <HtmlEditorSections v-if="entry.id === 'htmleditor'" />
+        <TreeSections v-if="entry.id === 'tree'" />
+        <TreeTableSections v-if="entry.id === 'treetable'" />
+        <TimelineSections v-if="entry.id === 'timeline'" />
+        <ProgressBarSections v-if="entry.id === 'progressbar'" />
+        <PickListSections v-if="entry.id === 'picklist'" />
+        <OrgChartSections v-if="entry.id === 'orgchart'" />
+        <DataViewSections v-if="entry.id === 'dataview'" />
       </div>
     </main>
   </div>
