@@ -3,6 +3,17 @@
 All notable changes to `@exorgroup/apex-ui` and `@exorgroup/apex-form`.
 Semantic versioning; the two packages release in lockstep until 1.0.
 
+## [0.1.1] — 2026-11-08
+
+A patch on 0.1.0 alone, cut from a release branch: the unreleased work on `main` is not in it.
+
+### Fixed — apex-ui
+- An anchored panel that mounts AFTER its overlay opened is now placed. A server-backed
+  `ApexInput` with `:loading` showed nothing on its first search — its list mounted once the
+  answer came, hidden, with nothing left to place it — and results on the second. Same
+  composable under `ApexSelect`, `ApexMultiselect`, `ApexTags`, `ApexDatePicker`,
+  `ApexColumnFilter`. Found in Apex Till (TL3/012); `tests/anchored-late-panel.spec.ts`.
+
 ## [0.1.0] — 2026-08-28
 
 First slice. Not yet stable; the API may change before 0.2.
