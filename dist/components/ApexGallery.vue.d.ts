@@ -102,8 +102,8 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     radius: string;
     open: boolean;
     modelValue: number;
-    fullscreen: boolean;
     actions: GalleryAction[];
+    fullscreen: boolean;
     closable: boolean;
     showNav: boolean;
     zoomIn: boolean;

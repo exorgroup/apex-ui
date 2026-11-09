@@ -125,4 +125,16 @@ describe('the component writes the variables the stylesheet now reads', () => {
   it('the size lands as data-size, which is what selects the rule', () => {
     expect(mount(ApexButton, { props: { label: 'Go', size: 'sm' } }).attributes('data-size')).toBe('sm');
   });
+
+  it('a stacked button (icon above) keeps a height that was asked for, and sizes to content otherwise (TBX TL5/010)', () => {
+    const asked = mount(ApexButton, { props: { label: 'Hold', icon: 'pause', iconPos: 'top', height: '78px' } });
+    expect(asked.attributes('data-fixed-h')).toBe('true');
+    expect(asked.attributes('style')).toContain('--apex-btn-h: 78px');
+    expect(mount(ApexButton, { props: { label: 'Hold', icon: 'pause', iconPos: 'top' } }).attributes('data-fixed-h')).toBeUndefined();
+    // The rule reads the variable, and comes AFTER the stacked rule's block-size:auto (same specificity: the later wins).
+    const stacked = CSS.indexOf('.apex-btn[data-icon-pos="top"],.apex-btn[data-icon-pos="bottom"]{');
+    const fixed = CSS.indexOf('.apex-btn[data-fixed-h="true"]{block-size:var(--apex-btn-h)}');
+    expect(stacked).toBeGreaterThan(-1);
+    expect(fixed).toBeGreaterThan(stacked);
+  });
 });

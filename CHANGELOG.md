@@ -3,6 +3,37 @@
 All notable changes to `@exorgroup/apex-ui` and `@exorgroup/apex-form`.
 Semantic versioning; the two packages release in lockstep until 1.0.
 
+## [Unreleased]
+
+## [0.3.0] — 2026-11-09
+
+TBX TL5's kit work: the till's keypad and keyboard, and a stacked button that keeps its height.
+
+### Added — apex-ui
+- `ApexKeyPad` — a till's keypad and a PIN pad in one control (TBX TL5/001). `v-model` holds the entry
+  as a string. Keys switch on one by one: `operators` (+ − × ÷, or a list), `enter`, `del`, `dot`,
+  `clear`, `double-zero`; `function-keys` adds the screen's own, each emitting `function(id, result)`.
+  A sum is worked out in standard order (× ÷ first) by its own parser, never `eval`; a result needing
+  more places than `decimals`, longer than `max-length`, or dividing by zero shows "Can't work that out"
+  and emits nothing — the next key clears it. `randomise` shuffles the digits (secure random) on mount
+  and — unless `reshuffle` is off — after each entry; `mask`, `max-length` + `auto-submit` for PINs; `layout` calculator / phone;
+  a physical keyboard's keys work while it has focus; keys never below 44px. Without operators and
+  dot it enters a code and keeps leading zeros. `keypadEvaluate`, `keypadPress` and `shuffledDigits`
+  are exported. (`tests/keypad.spec.ts`.)
+- `ApexKeyboard` — an on-screen keyboard for a touch screen with none of its own (TBX TL5/002). `v-model`
+  is the text typed; letters in lower case, `shift` adds a Shift key (the next letter in capitals, a
+  second tap locks); `extra-letters` adds a row beyond A–Z (Maltese ċ ġ ħ ż); `enter`, `del`, `clear`,
+  `space`, `hide`, `digits` switch keys on and off; `max-length`. Pressing a key never takes the focus,
+  so the field it types into keeps its caret; a physical keyboard types while it has focus; keys never
+  below 44px. Laid out like a desktop keyboard on one key unit (TL5 D35): character keys one unit, ⌫ 3,
+  Enter and Shift 2.25, Clear and Hide 2.5, Space 8, staggered letter rows on a 13-unit board centred in
+  its space; the unit follows the width up to `--apex-keyboard-key-max` (72px). (`tests/keyboard.spec.ts`.)
+
+### Fixed — apex-ui
+- `ApexButton`'s `height` now holds for a button with its icon above or below the label (`icon-pos` top / bottom),
+  which sized itself to its content (`block-size: auto`) whatever `height` said. A stacked button with no `height`
+  still sizes to its content (TBX TL5/010, `data-fixed-h`; `tests/button-size.spec.ts`).
+
 ## [0.2.0] — 2026-11-08
 
 The work TBX had used from the local checkout since 0.1.0, released at last, plus 0.1.1's fix.

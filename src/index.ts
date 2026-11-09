@@ -31,6 +31,8 @@ import ApexCascadeSelect from './components/ApexCascadeSelect.vue';
 import ApexDatePicker from './components/ApexDatePicker.vue';
 import ApexColorPicker from './components/ApexColorPicker.vue';
 import ApexOtp from './components/ApexOtp.vue';
+import ApexKeyPad from './components/ApexKeyPad.vue';
+import ApexKeyboard from './components/ApexKeyboard.vue';
 import ApexPassword from './components/ApexPassword.vue';
 import ApexTags from './components/ApexTags.vue';
 import ApexKnob from './components/ApexKnob.vue';
@@ -157,6 +159,8 @@ export const components = {
   DatePicker: ApexDatePicker,
   ColorPicker: ApexColorPicker,
   Otp: ApexOtp,
+  KeyPad: ApexKeyPad,
+  Keyboard: ApexKeyboard,
   Password: ApexPassword,
   Tags: ApexTags,
   Knob: ApexKnob,
@@ -305,13 +309,16 @@ export const ApexUI: Plugin = {
 export default ApexUI;
 export {
   ApexIcon, ApexField, ApexInput, ApexTextarea, ApexNumber, ApexStepper,
-  ApexSelect, ApexMultiselect, ApexCascadeSelect, ApexDatePicker, ApexColorPicker, ApexOtp, ApexPassword, ApexTags, ApexKnob, ApexListbox, ApexOrderList, ApexRating, ApexSelectButton, ApexSlider, ApexToggleButton, ApexTreeSelect, ApexCheckbox, ApexCheckboxGroup, ApexSwitch, ApexSegmented, ApexRadio, ApexRadioGroup,
+  ApexSelect, ApexMultiselect, ApexCascadeSelect, ApexDatePicker, ApexColorPicker, ApexOtp, ApexKeyPad, ApexKeyboard, ApexPassword, ApexTags, ApexKnob, ApexListbox, ApexOrderList, ApexRating, ApexSelectButton, ApexSlider, ApexToggleButton, ApexTreeSelect, ApexCheckbox, ApexCheckboxGroup, ApexSwitch, ApexSegmented, ApexRadio, ApexRadioGroup,
   ApexDrawer, ApexDynamicDialog, ApexPopover, ApexFileUpload, ApexImageCrop, ApexImageField, ApexBreadcrumb, ApexContextMenu, ApexDock, ApexMegaMenu, ApexMenu, ApexMenubar, ApexTieredMenu, ApexMessage, ApexToast, ApexCarousel, ApexCarouselContent, ApexCarouselItem,
   ApexCarouselNav, ApexCarouselControls, ApexCarouselIndicators,
   ApexCompare, ApexCompareItem, ApexGallery, ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger,
   ApexButton, ApexButtonGroup, ApexSpeedDial, ApexSplitButton, ApexDataTable, ApexPaginator, ApexDataView, ApexOrgChart, ApexPickList, ApexTimeline, ApexTree, ApexTreeTable, ApexAccordion, ApexAvatar, ApexBadge, ApexOverlayBadge, ApexBlockUI, ApexChip, ApexInplace, ApexMeterGroup, ApexProgressSpinner, ApexScrollTop, ApexSkeleton, ApexChart, ApexChartGroup, ApexTaskBoard, ApexTaskCard, ApexAvatarGroup, ApexCard, ApexFieldset, ApexPanel, ApexScrollArea, ApexSplitter, ApexSteps, ApexTabs, ApexToolbar, ApexDialog, ApexConfirmPopup, ApexAlert, ApexProgressBar, ApexColumnFilter, ApexErrorSummary, ApexScheduler, ApexCalendar, ApexForm, ApexEditor, ApexHTMLEditor, ApexEditorToolbar, ApexEditorMenubar, ApexEditorBubble, ApexEditorTableGrid, ApexEditorImage, ApexEditorLink, ApexEditorTableTools, ApexEditorObjectBar, ApexEditorImageTools, ApexEditorWordCount, ApexEditorSlash,
 };
 export { useFieldState, nextId } from './core/useFieldState';
+/* ApexKeyPad's arithmetic, for a screen that works a sum out the same way (TBX TL5/001). */
+export { evaluate as keypadEvaluate, press as keypadPress, shuffledDigits } from './core/keypad';
+export type { KeyPadOperator, KeyPadFunctionKey } from './core/keypad';
 /* The form engine — AF2-290. The reference index re-exports `getPath` from
    BOTH core/form and core/conditions; the two are the same function with
    different signatures, and re-exporting both is TS2308. Ours keeps the one

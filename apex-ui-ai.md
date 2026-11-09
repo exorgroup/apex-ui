@@ -221,6 +221,35 @@ check:
 origin: [Phase BE](https://github.com/exorgroup/apex-tbx/blob/4922025e94dd836083cadb557ac0a9926cce9bc7/.claude/apexframework/phase-be-tasks.md)
 `.apex-calendar__block[data-compact] b { display: none }` hid a name written in `<b>`. Use elements the kit does not style; look at a SHORT block.
 
+### A button's height is its `height` prop — never a `min-height` from outside
+kind: hard
+check: `tests/button-size.spec.ts` ("a stacked button (icon above) keeps a height that was asked for…")
+origin: [TL5/009](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL5/reports/TL5-009.md)
+`ApexButton` sets `block-size: var(--apex-btn-h)`, and `height` writes that variable on the button itself, so an ancestor's `min-height` or a variable set on a parent loses. A stacked button (`icon-pos` top / bottom) sizes to its content unless `height` is given — before 0.3.0 it ignored `height` too, and a toolbar of stacked and side-by-side buttons came out at two heights.
+
+### `ApexKeyPad` keeps a PIN's leading zeros only while it has no operators and no dot
+kind: hard
+check: `tests/keypad.spec.ts` ("keeps leading zeros in a code, never in a number")
+origin: [TL5/001](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL5/reports/TL5-001.md)
+With neither, the pad enters a CODE and `0427` stays `0427`; with either, it enters a NUMBER and `05` becomes `5`. A PIN pad turns both off. `enter` and a function key emit the RESULT of the sum as a string; a sum it cannot work out (÷ 0, more decimals than `decimals`, longer than `max-length`) emits nothing.
+
+### `ApexKeyPad`'s Enter key is white on the accent, like a primary button
+kind: hard
+check:
+origin: [TL5/001](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL5/reports/TL5-001.md)
+A host with a light accent (TBX's yellow) sets `--apex-keypad-enter-fg`, as it sets `--apex-btn-label` for buttons; otherwise Enter reads at about 1.5:1.
+
+### `ApexKeyPad` shuffles on mount and (with `reshuffle`, the default) after each entry — a `v-show` pad calls `shuffle()`
+kind: judgment
+origin: [TL5/001](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL5/reports/TL5-001.md)
+`randomise` means "each time the pad appears". A pad kept mounted and hidden never re-mounts; call the exposed `shuffle()` when it is shown.
+
+### `ApexKeyboard` types into its OWN v-model — bind the same ref as the field
+kind: hard
+check: `tests/keyboard.spec.ts` ("never takes the focus from the field being typed into")
+origin: [TL5/002](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL5/reports/TL5-002.md)
+It does not write into whatever has focus: give it the field's `v-model` ref. Its keys cancel `mousedown`, so the field keeps its caret and the device keyboard stays shut. Its Enter key is white on the accent, like `ApexKeyPad`'s — set `--apex-keyboard-enter-fg` on a light accent.
+
 ## Tests and the gallery
 
 ### The gallery runs the mirror (`web/*.js` in apex-ui-docs), not the SFC

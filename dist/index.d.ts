@@ -12,6 +12,8 @@ import ApexCascadeSelect from './components/ApexCascadeSelect.vue';
 import ApexDatePicker from './components/ApexDatePicker.vue';
 import ApexColorPicker from './components/ApexColorPicker.vue';
 import ApexOtp from './components/ApexOtp.vue';
+import ApexKeyPad from './components/ApexKeyPad.vue';
+import ApexKeyboard from './components/ApexKeyboard.vue';
 import ApexPassword from './components/ApexPassword.vue';
 import ApexTags from './components/ApexTags.vue';
 import ApexKnob from './components/ApexKnob.vue';
@@ -936,6 +938,135 @@ export declare const components: {
         length: number;
         statusIcon: boolean;
         variant: "outlined" | "filled";
+    }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+    KeyPad: import("vue").DefineComponent<{
+        modelValue?: string | null;
+        operators?: boolean | import(".").KeyPadOperator[];
+        enter?: boolean;
+        del?: boolean;
+        dot?: boolean;
+        clear?: boolean;
+        doubleZero?: boolean;
+        randomise?: boolean;
+        reshuffle?: boolean;
+        mask?: boolean;
+        maxLength?: number;
+        autoSubmit?: boolean;
+        decimals?: number;
+        layout?: "calculator" | "phone";
+        display?: boolean;
+        functionKeys?: import(".").KeyPadFunctionKey[];
+        enterLabel?: string;
+        placeholder?: string;
+        size?: "sm" | "md" | "lg";
+        disabled?: boolean;
+        label?: string;
+    }, {
+        shuffle: () => void;
+    }, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {} & {
+        function: (id: string, v: string) => any;
+        "update:modelValue": (v: string) => any;
+        enter: (v: string) => any;
+    }, string, import("vue").PublicProps, Readonly<{
+        modelValue?: string | null;
+        operators?: boolean | import(".").KeyPadOperator[];
+        enter?: boolean;
+        del?: boolean;
+        dot?: boolean;
+        clear?: boolean;
+        doubleZero?: boolean;
+        randomise?: boolean;
+        reshuffle?: boolean;
+        mask?: boolean;
+        maxLength?: number;
+        autoSubmit?: boolean;
+        decimals?: number;
+        layout?: "calculator" | "phone";
+        display?: boolean;
+        functionKeys?: import(".").KeyPadFunctionKey[];
+        enterLabel?: string;
+        placeholder?: string;
+        size?: "sm" | "md" | "lg";
+        disabled?: boolean;
+        label?: string;
+    }> & Readonly<{
+        onFunction?: ((id: string, v: string) => any) | undefined;
+        "onUpdate:modelValue"?: ((v: string) => any) | undefined;
+        onEnter?: ((v: string) => any) | undefined;
+    }>, {
+        size: "sm" | "md" | "lg";
+        label: string;
+        del: boolean;
+        mask: boolean;
+        disabled: boolean;
+        placeholder: string;
+        modelValue: string | null;
+        clear: boolean;
+        enter: boolean;
+        display: boolean;
+        operators: boolean | import(".").KeyPadOperator[];
+        dot: boolean;
+        doubleZero: boolean;
+        randomise: boolean;
+        reshuffle: boolean;
+        autoSubmit: boolean;
+        decimals: number;
+        layout: "calculator" | "phone";
+        functionKeys: import(".").KeyPadFunctionKey[];
+        enterLabel: string;
+    }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
+    Keyboard: import("vue").DefineComponent<{
+        modelValue?: string | null;
+        enter?: boolean;
+        del?: boolean;
+        clear?: boolean;
+        space?: boolean;
+        hide?: boolean;
+        digits?: boolean;
+        shift?: boolean;
+        extraLetters?: string[];
+        maxLength?: number;
+        enterLabel?: string;
+        size?: "sm" | "md" | "lg";
+        disabled?: boolean;
+        label?: string;
+    }, {}, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {} & {
+        hide: () => any;
+        "update:modelValue": (v: string) => any;
+        enter: (v: string) => any;
+    }, string, import("vue").PublicProps, Readonly<{
+        modelValue?: string | null;
+        enter?: boolean;
+        del?: boolean;
+        clear?: boolean;
+        space?: boolean;
+        hide?: boolean;
+        digits?: boolean;
+        shift?: boolean;
+        extraLetters?: string[];
+        maxLength?: number;
+        enterLabel?: string;
+        size?: "sm" | "md" | "lg";
+        disabled?: boolean;
+        label?: string;
+    }> & Readonly<{
+        onHide?: (() => any) | undefined;
+        "onUpdate:modelValue"?: ((v: string) => any) | undefined;
+        onEnter?: ((v: string) => any) | undefined;
+    }>, {
+        size: "sm" | "md" | "lg";
+        label: string;
+        shift: boolean;
+        del: boolean;
+        disabled: boolean;
+        hide: boolean;
+        modelValue: string | null;
+        clear: boolean;
+        enter: boolean;
+        enterLabel: string;
+        space: boolean;
+        digits: boolean;
+        extraLetters: string[];
     }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
     Password: import("vue").DefineComponent<import("./types").ApexFieldProps & {
         modelValue?: string | null;
@@ -3775,11 +3906,11 @@ export declare const components: {
         }, import("vue").PublicProps, {
             gap: string;
             rows: number;
+            layout: "list" | "grid";
             first: number;
             bordered: boolean;
             paginatorTemplate: string;
             loadingMode: "overlay" | "skeleton";
-            layout: "list" | "grid";
             sortPlaceholder: string;
             gridMinWidth: string;
             skeletonCount: number;
@@ -3839,11 +3970,11 @@ export declare const components: {
         }>, {}, {}, {}, {}, {
             gap: string;
             rows: number;
+            layout: "list" | "grid";
             first: number;
             bordered: boolean;
             paginatorTemplate: string;
             loadingMode: "overlay" | "skeleton";
-            layout: "list" | "grid";
             sortPlaceholder: string;
             gridMinWidth: string;
             skeletonCount: number;
@@ -3915,11 +4046,11 @@ export declare const components: {
     }, string, {
         gap: string;
         rows: number;
+        layout: "list" | "grid";
         first: number;
         bordered: boolean;
         paginatorTemplate: string;
         loadingMode: "overlay" | "skeleton";
-        layout: "list" | "grid";
         sortPlaceholder: string;
         gridMinWidth: string;
         skeletonCount: number;
@@ -9754,9 +9885,9 @@ export declare const components: {
             }) => void;
         }, import("vue").PublicProps, {
             step: number;
+            layout: "horizontal" | "vertical";
             bordered: boolean;
             stateStorage: "local" | "session";
-            layout: "horizontal" | "vertical";
             gutterSize: number;
             showHandle: boolean;
         }, false, {}, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, {}, any, import("vue").ComponentProvideOptions, {
@@ -9806,9 +9937,9 @@ export declare const components: {
             reset: () => void;
         }, {}, {}, {}, {
             step: number;
+            layout: "horizontal" | "vertical";
             bordered: boolean;
             stateStorage: "local" | "session";
-            layout: "horizontal" | "vertical";
             gutterSize: number;
             showHandle: boolean;
         }>;
@@ -9874,9 +10005,9 @@ export declare const components: {
         }) => void;
     }, string, {
         step: number;
+        layout: "horizontal" | "vertical";
         bordered: boolean;
         stateStorage: "local" | "session";
-        layout: "horizontal" | "vertical";
         gutterSize: number;
         showHandle: boolean;
     }, {}, string, {}, import("vue").GlobalComponents, import("vue").GlobalDirectives, string, import("vue").ComponentProvideOptions> & import("vue").VNodeProps & import("vue").AllowedComponentProps & import("vue").ComponentCustomProps & (new () => {
@@ -13425,8 +13556,8 @@ export declare const components: {
             radius: string;
             open: boolean;
             modelValue: number;
-            fullscreen: boolean;
             actions: import(".").GalleryAction[];
+            fullscreen: boolean;
             closable: boolean;
             showNav: boolean;
             zoomIn: boolean;
@@ -13512,8 +13643,8 @@ export declare const components: {
             radius: string;
             open: boolean;
             modelValue: number;
-            fullscreen: boolean;
             actions: import(".").GalleryAction[];
+            fullscreen: boolean;
             closable: boolean;
             showNav: boolean;
             zoomIn: boolean;
@@ -13600,8 +13731,8 @@ export declare const components: {
         radius: string;
         open: boolean;
         modelValue: number;
-        fullscreen: boolean;
         actions: import(".").GalleryAction[];
+        fullscreen: boolean;
         closable: boolean;
         showNav: boolean;
         zoomIn: boolean;
@@ -15411,8 +15542,10 @@ export declare const components: {
  */
 export declare const ApexUI: Plugin;
 export default ApexUI;
-export { ApexIcon, ApexField, ApexInput, ApexTextarea, ApexNumber, ApexStepper, ApexSelect, ApexMultiselect, ApexCascadeSelect, ApexDatePicker, ApexColorPicker, ApexOtp, ApexPassword, ApexTags, ApexKnob, ApexListbox, ApexOrderList, ApexRating, ApexSelectButton, ApexSlider, ApexToggleButton, ApexTreeSelect, ApexCheckbox, ApexCheckboxGroup, ApexSwitch, ApexSegmented, ApexRadio, ApexRadioGroup, ApexDrawer, ApexDynamicDialog, ApexPopover, ApexFileUpload, ApexImageCrop, ApexImageField, ApexBreadcrumb, ApexContextMenu, ApexDock, ApexMegaMenu, ApexMenu, ApexMenubar, ApexTieredMenu, ApexMessage, ApexToast, ApexCarousel, ApexCarouselContent, ApexCarouselItem, ApexCarouselNav, ApexCarouselControls, ApexCarouselIndicators, ApexCompare, ApexCompareItem, ApexGallery, ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger, ApexButton, ApexButtonGroup, ApexSpeedDial, ApexSplitButton, ApexDataTable, ApexPaginator, ApexDataView, ApexOrgChart, ApexPickList, ApexTimeline, ApexTree, ApexTreeTable, ApexAccordion, ApexAvatar, ApexBadge, ApexOverlayBadge, ApexBlockUI, ApexChip, ApexInplace, ApexMeterGroup, ApexProgressSpinner, ApexScrollTop, ApexSkeleton, ApexChart, ApexChartGroup, ApexTaskBoard, ApexTaskCard, ApexAvatarGroup, ApexCard, ApexFieldset, ApexPanel, ApexScrollArea, ApexSplitter, ApexSteps, ApexTabs, ApexToolbar, ApexDialog, ApexConfirmPopup, ApexAlert, ApexProgressBar, ApexColumnFilter, ApexErrorSummary, ApexScheduler, ApexCalendar, ApexForm, ApexEditor, ApexHTMLEditor, ApexEditorToolbar, ApexEditorMenubar, ApexEditorBubble, ApexEditorTableGrid, ApexEditorImage, ApexEditorLink, ApexEditorTableTools, ApexEditorObjectBar, ApexEditorImageTools, ApexEditorWordCount, ApexEditorSlash, };
+export { ApexIcon, ApexField, ApexInput, ApexTextarea, ApexNumber, ApexStepper, ApexSelect, ApexMultiselect, ApexCascadeSelect, ApexDatePicker, ApexColorPicker, ApexOtp, ApexKeyPad, ApexKeyboard, ApexPassword, ApexTags, ApexKnob, ApexListbox, ApexOrderList, ApexRating, ApexSelectButton, ApexSlider, ApexToggleButton, ApexTreeSelect, ApexCheckbox, ApexCheckboxGroup, ApexSwitch, ApexSegmented, ApexRadio, ApexRadioGroup, ApexDrawer, ApexDynamicDialog, ApexPopover, ApexFileUpload, ApexImageCrop, ApexImageField, ApexBreadcrumb, ApexContextMenu, ApexDock, ApexMegaMenu, ApexMenu, ApexMenubar, ApexTieredMenu, ApexMessage, ApexToast, ApexCarousel, ApexCarouselContent, ApexCarouselItem, ApexCarouselNav, ApexCarouselControls, ApexCarouselIndicators, ApexCompare, ApexCompareItem, ApexGallery, ApexSidebar, ApexSidebarLayout, ApexSidebarInset, ApexSidebarTrigger, ApexButton, ApexButtonGroup, ApexSpeedDial, ApexSplitButton, ApexDataTable, ApexPaginator, ApexDataView, ApexOrgChart, ApexPickList, ApexTimeline, ApexTree, ApexTreeTable, ApexAccordion, ApexAvatar, ApexBadge, ApexOverlayBadge, ApexBlockUI, ApexChip, ApexInplace, ApexMeterGroup, ApexProgressSpinner, ApexScrollTop, ApexSkeleton, ApexChart, ApexChartGroup, ApexTaskBoard, ApexTaskCard, ApexAvatarGroup, ApexCard, ApexFieldset, ApexPanel, ApexScrollArea, ApexSplitter, ApexSteps, ApexTabs, ApexToolbar, ApexDialog, ApexConfirmPopup, ApexAlert, ApexProgressBar, ApexColumnFilter, ApexErrorSummary, ApexScheduler, ApexCalendar, ApexForm, ApexEditor, ApexHTMLEditor, ApexEditorToolbar, ApexEditorMenubar, ApexEditorBubble, ApexEditorTableGrid, ApexEditorImage, ApexEditorLink, ApexEditorTableTools, ApexEditorObjectBar, ApexEditorImageTools, ApexEditorWordCount, ApexEditorSlash, };
 export { useFieldState, nextId } from './core/useFieldState';
+export { evaluate as keypadEvaluate, press as keypadPress, shuffledDigits } from './core/keypad';
+export type { KeyPadOperator, KeyPadFunctionKey } from './core/keypad';
 export { setPath, isBlank, parseRuleString, normaliseRules, isServerOnly, MESSAGES, LOCAL, validateField as validateFormField, validate as validateForm, serverOnlyFields, isVisible as isFieldVisible, isDisabled as isFieldDisabled, expandCondition, CONTROLS as FORM_CONTROLS, controlFor, normalise as normaliseFormSchema, allFields as allFormFields, knownProps as formKnownProps, makeDriver, DISPLAY_TYPES as FORM_DISPLAY_TYPES, isDisplayType, isUnvalidatedType, DIRECT_BIND_TYPES as FORM_DIRECT_BIND_TYPES, isDirectBindType, } from './core/form';
 export type { FormRule, FormRules, FormField, ControlSpec, FormSection, NormalisedSchema, FormSchema, FormDriver, } from './core/form';
 export { evalCondition, getPath } from './core/conditions';

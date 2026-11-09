@@ -93,7 +93,7 @@ const glyph = computed(() => (props.loading ? 'progress_activity' : props.icon))
              :href="href" :target="target"
              :type="href ? undefined : type"
              :data-severity="severity" :data-variant="variant" :data-size="size"
-             :data-icon-pos="iconPos" :data-block="block ? 'true' : 'false'"
+             :data-icon-pos="iconPos" :data-fixed-h="height ? 'true' : undefined" :data-block="block ? 'true' : 'false'"
              :data-raised="raised ? 'true' : 'false'" :data-rounded="rounded ? 'true' : 'false'"
              :data-icon-only="iconOnly ? 'true' : 'false'" :data-loading="loading ? 'true' : 'false'"
              :disabled="href ? undefined : (disabled || loading)" :aria-busy="loading || undefined"

@@ -102,11 +102,11 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {}, {}
 }>, {
     gap: string;
     rows: number;
+    layout: "list" | "grid";
     first: number;
     bordered: boolean;
     paginatorTemplate: string;
     loadingMode: "overlay" | "skeleton";
-    layout: "list" | "grid";
     sortPlaceholder: string;
     gridMinWidth: string;
     skeletonCount: number;

@@ -89,9 +89,9 @@ declare const __VLS_component: import("vue").DefineComponent<__VLS_Props, {
     }) => any) | undefined;
 }>, {
     step: number;
+    layout: "horizontal" | "vertical";
     bordered: boolean;
     stateStorage: "local" | "session";
-    layout: "horizontal" | "vertical";
     gutterSize: number;
     showHandle: boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;

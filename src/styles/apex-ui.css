@@ -234,6 +234,57 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-otp[data-variant="filled"] .apex-otp__box{background:var(--bg-muted);border-color:transparent;font-size:24px}
 .apex-otp[data-variant="filled"] .apex-otp__box[data-filled="true"]{background:color-mix(in srgb,var(--accent-primary) 10%,var(--bg-surface));border-color:color-mix(in srgb,var(--accent-primary) 35%,transparent);color:var(--accent-primary)}
 .apex-otp[data-variant="filled"] .apex-otp__box:focus{background:var(--bg-surface);border-color:var(--accent-primary)}
+/* ApexKeyPad — keys never below 44px (touch); --apex-keypad-key sets their height. */
+.apex-keypad{--apex-keypad-key:56px;--apex-keypad-gap:8px;display:flex;flex-direction:column;gap:var(--apex-keypad-gap);inline-size:100%;max-inline-size:var(--apex-keypad-w,none);outline:none;font-family:var(--font-sans);color:var(--fg-default)}
+.apex-keypad[data-size="sm"]{--apex-keypad-key:44px;--apex-keypad-gap:6px}
+.apex-keypad[data-size="lg"]{--apex-keypad-key:64px;--apex-keypad-gap:10px}
+.apex-keypad:focus-visible{box-shadow:var(--focus-ring);border-radius:var(--r-md)}
+.apex-keypad__display{min-block-size:52px;display:flex;align-items:center;justify-content:flex-end;padding:0 14px;border-radius:var(--apex-keypad-radius,var(--r-md));background:var(--apex-keypad-display-bg,var(--bg-muted));font-family:var(--font-mono);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;overflow:hidden;white-space:nowrap}
+.apex-keypad__display[data-error="true"]{font-family:var(--font-sans);font-size:15px;color:var(--accent-danger)}
+.apex-keypad__placeholder{color:var(--fg-subtle)}
+.apex-keypad__body{display:grid;grid-template-columns:minmax(0,3fr);gap:var(--apex-keypad-gap)}
+.apex-keypad[data-operators="true"] .apex-keypad__body{grid-template-columns:minmax(0,3fr) minmax(0,1fr)}
+.apex-keypad[data-functions="true"] .apex-keypad__body{grid-template-columns:minmax(0,3fr) minmax(0,1.4fr)}
+.apex-keypad[data-operators="true"][data-functions="true"] .apex-keypad__body{grid-template-columns:minmax(0,3fr) minmax(0,1fr) minmax(0,1.4fr)}
+.apex-keypad__digits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--apex-keypad-gap)}
+.apex-keypad__ops,.apex-keypad__fns{display:flex;flex-direction:column;gap:var(--apex-keypad-gap)}
+.apex-keypad__actions{display:flex;gap:var(--apex-keypad-gap)}
+.apex-keypad__actions>.apex-keypad__key{flex:1 1 0}
+.apex-keypad__key{all:unset;box-sizing:border-box;cursor:pointer;min-block-size:max(44px,var(--apex-keypad-key));min-inline-size:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 8px;border-radius:var(--apex-keypad-radius,var(--r-md));border:1px solid var(--apex-keypad-border,var(--border-default));background:var(--apex-keypad-bg,var(--bg-surface));color:var(--apex-keypad-fg,var(--fg-default));font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;text-align:center;line-height:1.1;touch-action:manipulation;-webkit-user-select:none;user-select:none;transition:background var(--dur-fast),border-color var(--dur-fast),transform var(--dur-fast)}
+.apex-keypad__ops>.apex-keypad__key,.apex-keypad__fns>.apex-keypad__key{flex:1 1 0}
+.apex-keypad__key:hover:not(:disabled){border-color:var(--border-strong)}
+.apex-keypad__key:active:not(:disabled){transform:scale(.97);background:var(--bg-muted)}
+.apex-keypad__key:focus-visible{box-shadow:var(--focus-ring)}
+.apex-keypad__key:disabled{opacity:.45;cursor:not-allowed}
+.apex-keypad__key--op{background:var(--apex-keypad-op-bg,var(--bg-muted));font-size:22px}
+.apex-keypad__key--fn{font-size:14px;background:var(--apex-keypad-fn-bg,var(--bg-muted))}
+.apex-keypad__key--clear,.apex-keypad__key--del{font-size:16px}
+.apex-keypad__key--enter{background:var(--apex-keypad-enter-bg,var(--accent-primary));border-color:transparent;color:var(--apex-keypad-enter-fg,var(--fg-on-dark));font-size:16px}
+.apex-keypad__gap{min-block-size:max(44px,var(--apex-keypad-key))}
+/* ApexKeyboard — keys never below 44px (touch); --apex-keyboard-key sets their height. */
+.apex-keyboard{--apex-keyboard-key:52px;--apex-keyboard-gap:6px;container-type:inline-size;display:flex;flex-direction:column;align-items:center;gap:var(--apex-keyboard-gap);inline-size:100%;max-inline-size:var(--apex-keyboard-w,none);padding:var(--apex-keyboard-pad,8px);box-sizing:border-box;border-radius:var(--apex-keyboard-radius,var(--r-lg));background:var(--apex-keyboard-surface,var(--bg-muted));outline:none;font-family:var(--font-sans);color:var(--fg-default)}
+.apex-keyboard[data-size="sm"]{--apex-keyboard-key:44px;--apex-keyboard-gap:5px}
+.apex-keyboard[data-size="lg"]{--apex-keyboard-key:60px;--apex-keyboard-gap:8px}
+.apex-keyboard:focus-visible{box-shadow:var(--focus-ring)}
+/* One unit per character key on a 13-unit board (the board centred); a key of width W units is W units plus the W-1 gaps inside it. */
+.apex-keyboard__row{--u:max(44px,min(var(--apex-keyboard-key-max,72px),calc((100cqi - 12 * var(--apex-keyboard-gap)) / 13)));--s:calc(var(--u) + var(--apex-keyboard-gap));display:flex;gap:var(--apex-keyboard-gap);justify-content:flex-start;box-sizing:border-box;inline-size:calc(var(--s) * 13 - var(--apex-keyboard-gap))}
+.apex-keyboard__row[data-row="0"]{padding-inline-start:calc(var(--s) * .5)}
+.apex-keyboard__row[data-row="1"]{padding-inline-start:calc(var(--s) * .75)}
+.apex-keyboard__row[data-row="2"]:not(:has([data-key="shift"])){padding-inline-start:calc(var(--s) * 1.25)}
+.apex-keyboard__row[data-row="extra"]{justify-content:center}
+.apex-keyboard__key{all:unset;box-sizing:border-box;cursor:pointer;--w:1;flex:0 0 auto;inline-size:calc(var(--s) * var(--w) - var(--apex-keyboard-gap));min-inline-size:44px;min-block-size:max(44px,var(--apex-keyboard-key));display:inline-flex;align-items:center;justify-content:center;padding:0 6px;border-radius:var(--apex-keyboard-key-radius,var(--r-md));border:1px solid var(--apex-keyboard-border,var(--border-default));background:var(--apex-keyboard-bg,var(--bg-surface));color:var(--apex-keyboard-fg,var(--fg-default));font-size:18px;font-weight:600;line-height:1;text-align:center;touch-action:manipulation;-webkit-user-select:none;user-select:none;transition:background var(--dur-fast),transform var(--dur-fast)}
+.apex-keyboard__key:hover:not(:disabled){border-color:var(--border-strong)}
+.apex-keyboard__key:active:not(:disabled){transform:scale(.96);background:var(--bg-muted)}
+.apex-keyboard__key:disabled{opacity:.45;cursor:not-allowed}
+.apex-keyboard__key--wide,.apex-keyboard__key--space{font-size:15px}
+.apex-keyboard__key[data-key="del"]{--w:3}
+.apex-keyboard__row[data-row="0"] .apex-keyboard__key[data-key="del"]{--w:2.5}
+.apex-keyboard__key[data-key="enter"],.apex-keyboard__key[data-key="shift"]{--w:2.25}
+.apex-keyboard__key[data-key="clear"],.apex-keyboard__key[data-key="hide"]{--w:2.5}
+.apex-keyboard__key[data-key="space"]{--w:8}
+.apex-keyboard__key--enter{background:var(--apex-keyboard-enter-bg,var(--accent-primary));border-color:transparent;color:var(--apex-keyboard-enter-fg,#fff)}
+.apex-keyboard__key[data-caps="once"],.apex-keyboard__key[data-caps="lock"]{border-color:var(--accent-primary)}
+.apex-keyboard__key[data-caps="lock"]{background:color-mix(in srgb,var(--accent-primary) 18%,var(--bg-surface))}
 .apex-field[data-tone="danger"] .apex-otp__box{border-color:var(--apex-field-danger)}
 
 /* ─── password ─────────────────────────────────────────── */
@@ -2375,6 +2426,8 @@ display:inline-flex;align-items:center;justify-content:center;gap:7px;position:r
 .apex-btn[data-rounded="true"]{border-radius:var(--r-full)}
 .apex-btn[data-icon-only="true"]{padding-inline:0;inline-size:var(--apex-btn-h);gap:0}
 .apex-btn[data-icon-pos="top"],.apex-btn[data-icon-pos="bottom"]{flex-direction:column;gap:5px;block-size:auto;padding-block:11px;line-height:1.25}
+/* A stacked button sizes to its content — unless `height` was asked for, which then holds like any button's (TBX TL5/010). */
+.apex-btn[data-fixed-h="true"]{block-size:var(--apex-btn-h)}
 .apex-btn[data-icon-pos="top"][data-size="sm"],.apex-btn[data-icon-pos="bottom"][data-size="sm"]{padding-block:8px}
 .apex-btn[data-icon-pos="top"][data-size="lg"],.apex-btn[data-icon-pos="bottom"][data-size="lg"]{padding-block:14px}
 
