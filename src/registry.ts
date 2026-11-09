@@ -1820,6 +1820,20 @@ export const OWN_PARTS: Record<string, string[][]> = {
     ['value', '.apex-stepper__val', 'inherits --apex-ctl-fg and --apex-ctl-fs'],
     ['unit', '.apex-stepper__unit', ''],
   ],
+  keyboard: [
+    ['pad', '.apex-keyboard', '--apex-keyboard-surface, --apex-keyboard-pad, --apex-keyboard-gap, --apex-keyboard-radius, --apex-keyboard-w (max width)'],
+    ['key', '.apex-keyboard__key', '--apex-keyboard-bg, --apex-keyboard-fg, --apex-keyboard-border, --apex-keyboard-key-radius, --apex-keyboard-key-max; height --apex-keyboard-key, never below 44px'],
+    ['enter', '.apex-keyboard__key--enter', '--apex-keyboard-enter-bg, --apex-keyboard-enter-fg (set the fg on a light accent)'],
+    ['shift', '.apex-keyboard__key[data-caps]', 'once / lock — the accent border, and a tint when locked'],
+  ],
+  keypad: [
+    ['display', '.apex-keypad__display', '--apex-keypad-display-bg, --apex-keypad-radius (data-error="true" while a sum cannot be worked out)'],
+    ['key', '.apex-keypad__key', '--apex-keypad-bg, --apex-keypad-fg, --apex-keypad-border, --apex-keypad-radius; height --apex-keypad-key, never below 44px'],
+    ['operator', '.apex-keypad__key--op', '--apex-keypad-op-bg'],
+    ['function', '.apex-keypad__key--fn', '--apex-keypad-fn-bg'],
+    ['enter', '.apex-keypad__key--enter', '--apex-keypad-enter-bg, --apex-keypad-enter-fg (set the fg on a light accent)'],
+    ['pad', '.apex-keypad', '--apex-keypad-gap, --apex-keypad-w (max width)'],
+  ],
   knob: [
     ['range', '.apex-knob__range', '--apex-knob-range; thickness from railWidth'],
     ['valueArc', '.apex-knob__value', '--apex-knob-value; thickness from strokeWidth'],
@@ -2468,6 +2482,31 @@ function createRegion({ path }) {
 }
 .pw-rules.apex-pw__rules { --apex-pw-rule-on: #137C4A; }`,
 
+  keyboard: `<!-- A till's search: the field keeps its caret while the keys are pressed. -->
+<ApexInput v-model="q" leading-icon="search" @focus="kb = true" />
+<ApexKeyboard v-if="kb" v-model="q" hide :extra-letters="['ċ', 'ġ', 'ħ', 'ż']"
+  @enter="search" @hide="kb = false" class="till-kb" />
+
+.till-kb {
+  --apex-keyboard-enter-bg: #FFCC00;
+  --apex-keyboard-enter-fg: #1A1A1A;
+}`,
+
+  keypad: `<!-- A PIN pad: no operators and no dot, so leading zeros are kept. -->
+<ApexKeyPad v-model="pin" layout="phone" mask :max-length="4" auto-submit
+  randomise :enter="false" label="Staff PIN" @enter="signIn" />
+
+<!-- A till keypad: the sum's RESULT reaches the function key. -->
+<ApexKeyPad v-model="entry" operators dot clear double-zero
+  :function-keys="[{ id: 'qty', label: '× Qty' }, { id: 'plu', label: 'PLU' }]"
+  @function="(id, value) => act(id, value)" class="till-pad" />
+
+.till-pad {
+  --apex-keypad-enter-bg: #FFCC00;
+  --apex-keypad-enter-fg: #1A1A1A;
+  --apex-keypad-key: 64px;
+}`,
+
   otp: `<ApexOtp v-model="code" label="Verification code" :length="6"
   :ui="{ box: 'code-box' }" />
 
@@ -3008,6 +3047,73 @@ export const ENTRIES: DocEntry[] = [
       ['align', "'start' | 'center' | 'end'", "'center'", 'Where the value sits between the buttons'],
     ],
     events: [['update:modelValue', 'number']],
+  },
+  {
+    id: 'keyboard', name: 'ApexKeyboard', group: 'Text', noField: true,
+    blurb: "An on-screen keyboard for a touch screen with none of its own. It types into a v-model while the field it serves keeps its caret; Shift capitalises the next letter (twice locks), and a row of extra letters covers what A–Z does not — Maltese ċ ġ ħ ż.",
+    model: '',
+    base: { hide: true, shift: true, extraLetters: ['ċ', 'ġ', 'ħ', 'ż'], label: 'Keyboard' },
+    controls: [
+      { key: 'digits', type: 'bool' }, { key: 'shift', type: 'bool' }, { key: 'enter', type: 'bool' },
+      { key: 'del', type: 'bool' }, { key: 'clear', type: 'bool' }, { key: 'space', type: 'bool' },
+      { key: 'hide', type: 'bool' }, { key: 'maxLength', type: 'number' }, { key: 'enterLabel', type: 'text' },
+      { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] }, { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'string', "''", 'v-model — the text typed; letters in lower case unless Shift'],
+      ['digits', 'boolean', 'true', 'The 1–0 row (⌫ sits at its end; without it, at the end of the first letter row)'],
+      ['enter / del / clear / space', 'boolean', 'true', 'Those keys'],
+      ['hide', 'boolean', 'false', 'A Hide key, emitting hide'],
+      ['shift', 'boolean', 'false', 'A Shift key: the next letter in capitals; a second tap locks, a third unlocks'],
+      ['extraLetters', 'string[]', '[]', "Letters beyond A–Z, as their own row — ['ċ', 'ġ', 'ħ', 'ż']"],
+      ['maxLength', 'number', '—', 'Characters the text may hold'],
+      ['enterLabel / label', 'string', "'Enter' / 'Keyboard'", "The Enter key's text; the keyboard's accessible name"],
+      ['size', "'sm' | 'md' | 'lg'", "'md'", 'Key height 44 / 52 / 60px'],
+      ['disabled', 'boolean', 'false', 'Every key off, the physical keyboard ignored'],
+    ],
+    events: [['update:modelValue', 'string'], ['enter', 'string — the text'], ['hide', '—']],
+  },
+  {
+    id: 'keypad', name: 'ApexKeyPad', group: 'Numbers', noField: true,
+    blurb: 'An on-screen number pad — a till keypad or a PIN pad. Each key switches on by itself; a sum is worked out in standard order (× ÷ first) and Enter or a function key receives the result. A sum it cannot work out says so and emits nothing. Randomise shuffles the digits for PIN entry.',
+    model: '',
+    base: {
+      operators: true, dot: true, clear: true, doubleZero: true, layout: 'calculator',
+      functionKeys: [{ id: 'qty', label: '× Qty' }, { id: 'plu', label: 'PLU' }, { id: 'off', label: '% off' }],
+      label: 'Till keypad',
+    },
+    controls: [
+      { key: 'operators', type: 'bool' }, { key: 'dot', type: 'bool' }, { key: 'clear', type: 'bool' },
+      { key: 'doubleZero', type: 'bool' }, { key: 'enter', type: 'bool' }, { key: 'del', type: 'bool' },
+      { key: 'layout', type: 'select', options: ['calculator', 'phone'] },
+      { key: 'randomise', type: 'bool' }, { key: 'reshuffle', type: 'bool' }, { key: 'mask', type: 'bool' },
+      { key: 'maxLength', type: 'number' }, { key: 'autoSubmit', type: 'bool' }, { key: 'decimals', type: 'number' },
+      { key: 'display', type: 'bool' }, { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
+      { key: 'disabled', type: 'bool' },
+    ],
+    props: [
+      ['modelValue', 'string', "''", 'v-model — the entry as typed: 12.5, 3+2, 0427'],
+      ['operators', "boolean | ('+' | '-' | '*' | '/')[]", 'false', 'The + − × ÷ keys: all four, or a list'],
+      ['enter / del', 'boolean', 'true', 'The Enter and ⌫ keys'],
+      ['dot / clear / doubleZero', 'boolean', 'false', 'The . , CL and 00 keys'],
+      ['functionKeys', '{ id, label, disabled? }[]', '[]', "The screen's own keys; each emits function(id, result)"],
+      ['randomise', 'boolean', 'false', 'Shuffle the ten digits (secure random) when the pad appears; the other keys keep their place'],
+      ['reshuffle', 'boolean', 'true', 'With randomise: shuffle again after each entry, or keep the layout until the pad appears again'],
+      ['mask', 'boolean', 'false', 'Show ● for each digit'],
+      ['maxLength', 'number', '—', 'Digits the entry may hold; a longer result is refused'],
+      ['autoSubmit', 'boolean', 'false', 'Emit enter by itself once maxLength digits are in'],
+      ['decimals', 'number', '2', 'Places a result may carry with dot on — a result needing more is refused, never rounded'],
+      ['layout', "'calculator' | 'phone'", "'calculator'", 'calculator: 7-8-9 on top; phone: 1-2-3 on top'],
+      ['display', 'boolean', 'true', 'Show the entry above the keys'],
+      ['enterLabel / placeholder / label', 'string', "'Enter' / '0' / 'Number pad'", "The Enter key's text, the empty display, the pad's accessible name"],
+      ['size', "'sm' | 'md' | 'lg'", "'md'", 'Key height 44 / 56 / 64px'],
+      ['disabled', 'boolean', 'false', 'Every key off, the keyboard ignored'],
+    ],
+    events: [
+      ['update:modelValue', 'string — after each key'],
+      ['enter', 'string — the result (an entry without operators as typed, so a PIN keeps its zeros)'],
+      ['function', '(id: string, result: string)'],
+    ],
   },
   {
     id: 'knob', name: 'ApexKnob', group: 'Numbers',
