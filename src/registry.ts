@@ -2492,9 +2492,10 @@ function createRegion({ path }) {
   --apex-keyboard-enter-fg: #1A1A1A;
 }`,
 
-  keypad: `<!-- A PIN pad: no operators and no dot, so leading zeros are kept. -->
-<ApexKeyPad v-model="pin" layout="phone" mask :max-length="4" auto-submit
-  randomise :enter="false" label="Staff PIN" @enter="signIn" />
+  keypad: `<!-- A PIN pad: secure shuffles, masks, ignores the keyboard and shows no pressed key;
+     no operators and no dot, so leading zeros are kept. -->
+<ApexKeyPad v-model="pin" layout="phone" secure :max-length="4" auto-submit
+  :enter="false" label="Staff PIN" @enter="signIn" />
 
 <!-- A till keypad: the sum's RESULT reaches the function key. -->
 <ApexKeyPad v-model="entry" operators dot clear double-zero
@@ -3075,7 +3076,7 @@ export const ENTRIES: DocEntry[] = [
   },
   {
     id: 'keypad', name: 'ApexKeyPad', group: 'Numbers', noField: true,
-    blurb: 'An on-screen number pad — a till keypad or a PIN pad. Each key switches on by itself; a sum is worked out in standard order (× ÷ first) and Enter or a function key receives the result. A sum it cannot work out says so and emits nothing. Randomise shuffles the digits for PIN entry.',
+    blurb: 'An on-screen number pad — a till keypad or a PIN pad. Each key switches on by itself; a sum is worked out in standard order (× ÷ first) and Enter or a function key receives the result. A sum it cannot work out says so and emits nothing. Randomise shuffles the digits; secure makes a PIN pad that reveals nothing — shuffled, masked, no keyboard, no pressed-key highlight, digits never spoken.',
     model: '',
     base: {
       operators: true, dot: true, clear: true, doubleZero: true, layout: 'calculator',
@@ -3086,7 +3087,7 @@ export const ENTRIES: DocEntry[] = [
       { key: 'operators', type: 'bool' }, { key: 'dot', type: 'bool' }, { key: 'clear', type: 'bool' },
       { key: 'doubleZero', type: 'bool' }, { key: 'enter', type: 'bool' }, { key: 'del', type: 'bool' },
       { key: 'layout', type: 'select', options: ['calculator', 'phone'] },
-      { key: 'randomise', type: 'bool' }, { key: 'reshuffle', type: 'bool' }, { key: 'mask', type: 'bool' },
+      { key: 'secure', type: 'bool' }, { key: 'randomise', type: 'bool' }, { key: 'reshuffle', type: 'bool' }, { key: 'mask', type: 'bool' },
       { key: 'maxLength', type: 'number' }, { key: 'autoSubmit', type: 'bool' }, { key: 'decimals', type: 'number' },
       { key: 'display', type: 'bool' }, { key: 'size', type: 'select', options: ['sm', 'md', 'lg'] },
       { key: 'disabled', type: 'bool' },
@@ -3108,6 +3109,7 @@ export const ENTRIES: DocEntry[] = [
       ['enterLabel / placeholder / label', 'string', "'Enter' / '0' / 'Number pad'", "The Enter key's text, the empty display, the pad's accessible name"],
       ['size', "'sm' | 'md' | 'lg'", "'md'", 'Key height 44 / 56 / 64px'],
       ['disabled', 'boolean', 'false', 'Every key off, the keyboard ignored'],
+      ['secure', 'boolean', 'false', 'A PIN pad that reveals nothing: shuffled each time it appears and after each entry, masked, a physical keyboard ignored, no hover / press / focus change, focus never moved onto a key, every digit named "PIN key" and the display read as "N digits entered"'],
     ],
     events: [
       ['update:modelValue', 'string — after each key'],
