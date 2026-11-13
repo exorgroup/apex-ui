@@ -961,6 +961,7 @@ export declare const components: {
         size?: "sm" | "md" | "lg";
         disabled?: boolean;
         label?: string;
+        secure?: boolean;
     }, {
         shuffle: () => void;
     }, {}, {}, {}, import("vue").ComponentOptionsMixin, import("vue").ComponentOptionsMixin, {} & {
@@ -989,6 +990,7 @@ export declare const components: {
         size?: "sm" | "md" | "lg";
         disabled?: boolean;
         label?: string;
+        secure?: boolean;
     }> & Readonly<{
         onFunction?: ((id: string, v: string) => any) | undefined;
         "onUpdate:modelValue"?: ((v: string) => any) | undefined;
@@ -1014,6 +1016,7 @@ export declare const components: {
         layout: "calculator" | "phone";
         functionKeys: import(".").KeyPadFunctionKey[];
         enterLabel: string;
+        secure: boolean;
     }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
     Keyboard: import("vue").DefineComponent<{
         modelValue?: string | null;

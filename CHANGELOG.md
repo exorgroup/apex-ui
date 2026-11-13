@@ -5,6 +5,17 @@ Semantic versioning; the two packages release in lockstep until 1.0.
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-11-13
+
+TBX TL6's kit work: the secure PIN pad the till signs in, approves and unlocks with.
+
+### Added — apex-ui
+- `ApexKeyPad` `secure` — a PIN pad that gives nothing away (TBX TL6/001, Till P-D53 / D54): the digits are
+  shuffled each time it appears and after every entry (whatever `randomise` / `reshuffle` say), masked; a
+  physical keyboard is ignored; a hovered, pressed or focused key looks exactly like a resting one, and a tap
+  never moves the focus onto the key; a screen reader hears "PIN key" for every digit and "N digits entered",
+  never the digits. (`tests/keypad.spec.ts`.)
+
 ## [0.3.0] — 2026-11-09
 
 TBX TL5's kit work: the till's keypad and keyboard, and a stacked button that keeps its height.

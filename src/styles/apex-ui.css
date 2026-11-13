@@ -252,10 +252,12 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-keypad__actions>.apex-keypad__key{flex:1 1 0}
 .apex-keypad__key{all:unset;box-sizing:border-box;cursor:pointer;min-block-size:max(44px,var(--apex-keypad-key));min-inline-size:44px;display:inline-flex;align-items:center;justify-content:center;padding:0 8px;border-radius:var(--apex-keypad-radius,var(--r-md));border:1px solid var(--apex-keypad-border,var(--border-default));background:var(--apex-keypad-bg,var(--bg-surface));color:var(--apex-keypad-fg,var(--fg-default));font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;text-align:center;line-height:1.1;touch-action:manipulation;-webkit-user-select:none;user-select:none;transition:background var(--dur-fast),border-color var(--dur-fast),transform var(--dur-fast)}
 .apex-keypad__ops>.apex-keypad__key,.apex-keypad__fns>.apex-keypad__key{flex:1 1 0}
-.apex-keypad__key:hover:not(:disabled){border-color:var(--border-strong)}
-.apex-keypad__key:active:not(:disabled){transform:scale(.97);background:var(--bg-muted)}
-.apex-keypad__key:focus-visible{box-shadow:var(--focus-ring)}
+.apex-keypad:not([data-secure="true"]) .apex-keypad__key:hover:not(:disabled){border-color:var(--border-strong)}
+.apex-keypad:not([data-secure="true"]) .apex-keypad__key:active:not(:disabled){transform:scale(.97);background:var(--bg-muted)}
+.apex-keypad:not([data-secure="true"]) .apex-keypad__key:focus-visible{box-shadow:var(--focus-ring)}
 .apex-keypad__key:disabled{opacity:.45;cursor:not-allowed}
+/* secure (a PIN pad, TBX TL6 D12): hover, press and focus change nothing (their rules above skip it) — nothing marks which digit was used. */
+.apex-keypad[data-secure="true"] .apex-keypad__key{transition:none;-webkit-tap-highlight-color:transparent;outline:none}
 .apex-keypad__key--op{background:var(--apex-keypad-op-bg,var(--bg-muted));font-size:22px}
 .apex-keypad__key--fn{font-size:14px;background:var(--apex-keypad-fn-bg,var(--bg-muted))}
 .apex-keypad__key--clear,.apex-keypad__key--del{font-size:16px}

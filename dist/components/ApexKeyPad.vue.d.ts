@@ -34,6 +34,8 @@ type __VLS_Props = {
     disabled?: boolean;
     /** The pad's accessible name. */
     label?: string;
+    /** A PIN pad that reveals nothing: shuffled, masked, no keyboard input, no pressed-key highlight, digits not spoken. */
+    secure?: boolean;
 };
 declare function shuffle(): void;
 declare const _default: import("vue").DefineComponent<__VLS_Props, {
@@ -67,5 +69,6 @@ declare const _default: import("vue").DefineComponent<__VLS_Props, {
     layout: "calculator" | "phone";
     functionKeys: KeyPadFunctionKey[];
     enterLabel: string;
+    secure: boolean;
 }, {}, {}, {}, string, import("vue").ComponentProvideOptions, false, {}, any>;
 export default _default;

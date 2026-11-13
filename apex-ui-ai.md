@@ -227,6 +227,12 @@ check: `tests/button-size.spec.ts` ("a stacked button (icon above) keeps a heigh
 origin: [TL5/009](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL5/reports/TL5-009.md)
 `ApexButton` sets `block-size: var(--apex-btn-h)`, and `height` writes that variable on the button itself, so an ancestor's `min-height` or a variable set on a parent loses. A stacked button (`icon-pos` top / bottom) sizes to its content unless `height` is given — before 0.3.0 it ignored `height` too, and a toolbar of stacked and side-by-side buttons came out at two heights.
 
+### A PIN pad is `ApexKeyPad secure` — never `randomise` + `mask` alone
+kind: hard
+check: `tests/keypad.spec.ts` ("ApexKeyPad secure — a PIN pad that gives nothing away")
+origin: [TL6/001](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL6/reports/TL6-001.md)
+`randomise` + `mask` still take a physical keyboard, highlight the pressed key and let a screen reader speak each digit — three ways a PIN leaks. `secure` closes all three (and shuffles and masks by itself). Someone who cannot use the pad signs in another way (an NFC card), never by a spoken pad.
+
 ### `ApexKeyPad` keeps a PIN's leading zeros only while it has no operators and no dot
 kind: hard
 check: `tests/keypad.spec.ts` ("keeps leading zeros in a code, never in a number")

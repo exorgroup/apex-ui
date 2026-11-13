@@ -251,6 +251,88 @@ describe('ApexKeyPad', () => {
   });
 });
 
+describe('ApexKeyPad secure — a PIN pad that gives nothing away (TBX TL6 D12, Till P-D53 / D54)', () => {
+  const PHONE = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+
+  it('shuffles and masks by itself, without randomise or mask', async () => {
+    const w = pad({ secure: true, layout: 'phone', enter: false });
+    await w.vm.$nextTick();
+    const first = digitsShown(w);
+    expect([...first].sort()).toEqual([...PHONE].sort());
+    await click(w, first[0]!);
+    await click(w, first[1]!);
+    expect(w.find('.apex-keypad__entry').text()).toBe('●●');
+    expect(w.find('.apex-keypad').attributes('data-secure')).toBe('true');
+  });
+
+  it('reshuffles after an entry even when reshuffle is off', async () => {
+    const draws = [[3, 1, 4, 1, 5, 9, 2, 6, 5], [0, 0, 0, 0, 0, 0, 0, 0, 0]];
+    let set = 0, k = 0;
+    const spy = vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation((buf) => {
+      const seq = draws[Math.min(set, draws.length - 1)];
+      (buf as Uint32Array)[0] = seq[k++ % seq.length];
+      if (k % 9 === 0) set++;
+      return buf;
+    });
+    const w = pad({ secure: true, reshuffle: false, layout: 'phone' });
+    await w.vm.$nextTick();
+    const first = digitsShown(w);
+    await click(w, first[0]!);
+    await click(w, 'enter');
+    await w.vm.$nextTick();
+    expect(w.emitted('enter')).toHaveLength(1);
+    expect(digitsShown(w)).not.toEqual(first);
+    spy.mockRestore();
+  });
+
+  it('ignores a physical keyboard — a PIN is never typed', async () => {
+    const w = pad({ secure: true, maxLength: 4, autoSubmit: true });
+    const root = w.find('.apex-keypad');
+    for (const key of ['1', '2', '3', '4', 'Enter', 'Backspace']) await root.trigger('keydown', { key });
+    expect(w.props('modelValue')).toBe('');
+    expect(w.emitted('enter')).toBeUndefined();
+    expect(w.emitted('update:modelValue')).toBeUndefined();
+  });
+
+  it('never says which digit — every digit key is "PIN key", the display says how many', async () => {
+    const w = pad({ secure: true, enter: false });
+    await w.vm.$nextTick();
+    const digits = w.findAll('.apex-keypad__digits .apex-keypad__key').filter((b) => /^\d$/.test(b.attributes('data-key')!));
+    expect(digits).toHaveLength(10);
+    expect(digits.every((b) => b.attributes('aria-label') === 'PIN key')).toBe(true);
+    await click(w, digitsShown(w)[0]!);
+    expect(w.find('.apex-keypad__display').attributes('aria-label')).toBe('1 digit entered');
+    await click(w, digitsShown(w)[0]!);
+    expect(w.find('.apex-keypad__display').attributes('aria-label')).toBe('2 digits entered');
+  });
+
+  it('keeps the focus off the keys: no tab stops, and a press does not move the focus', async () => {
+    const w = pad({ secure: true, clear: true });
+    expect(w.find('.apex-keypad').attributes('tabindex')).toBe('-1');
+    expect(w.findAll('.apex-keypad__key').every((b) => b.attributes('tabindex') === '-1')).toBe(true);
+    const down = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    w.find('.apex-keypad__key').element.dispatchEvent(down);
+    expect(down.defaultPrevented).toBe(true);
+    const ptr = new Event('pointerdown', { bubbles: true, cancelable: true });
+    w.find('.apex-keypad__key').element.dispatchEvent(ptr);
+    expect(ptr.defaultPrevented).toBe(true);
+  });
+
+  it('changes nothing for an ordinary pad', async () => {
+    const w = pad({ layout: 'phone' });
+    expect(digitsShown(w)).toEqual(PHONE);
+    expect(w.find('.apex-keypad').attributes('data-secure')).toBe('false');
+    expect(w.find('.apex-keypad').attributes('tabindex')).toBe('0');
+    expect(w.find('[data-key="5"]').attributes('aria-label')).toBeUndefined();
+    expect(w.find('.apex-keypad__display').attributes('aria-label')).toBeUndefined();
+    const down = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    w.find('.apex-keypad__key').element.dispatchEvent(down);
+    expect(down.defaultPrevented).toBe(false);
+    await w.find('.apex-keypad').trigger('keydown', { key: '5' });
+    expect(w.props('modelValue')).toBe('5');
+  });
+});
+
 describe('ApexKeyPad CSS', () => {
   const css = readFileSync('src/styles/apex-ui.css', 'utf8');
   it('never draws a key or a gap below 44px (touch)', () => {
@@ -258,5 +340,13 @@ describe('ApexKeyPad CSS', () => {
     expect(key).toContain('min-block-size:max(44px,var(--apex-keypad-key))');
     expect(key).toContain('min-inline-size:44px');
     expect(css).toMatch(/\.apex-keypad__gap\{min-block-size:max\(44px,var\(--apex-keypad-key\)\)\}/);
+  });
+  it('a secure pad shows no hover, press or focus — those rules are for ordinary pads only (TL6 D12)', () => {
+    for (const state of ['hover', 'active', 'focus-visible']) {
+      const rules = css.match(new RegExp(`[^}\n]*\\.apex-keypad__key:${state}[^{]*\\{`, 'g')) ?? [];
+      expect(rules.length).toBeGreaterThan(0);
+      for (const r of rules) expect(r).toContain('.apex-keypad:not([data-secure="true"])');
+    }
+    expect(css).toContain('.apex-keypad[data-secure="true"] .apex-keypad__key{transition:none;-webkit-tap-highlight-color:transparent;outline:none}');
   });
 });

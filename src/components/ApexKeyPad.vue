@@ -12,6 +12,11 @@
  *   after each entry; every other key keeps its place. `mask` shows ● for each digit.
  * - Keys are at least 44 px. Digits, `.`, the operators, Enter, Backspace and Escape typed on a
  *   physical keyboard work while the pad has focus.
+ * - `secure` makes it a PIN pad that gives nothing away (TBX TL6 D12, Till P-D53 / D54): the digits are
+ *   shuffled each time it appears and after each entry, masked; a physical keyboard is IGNORED (a PIN is
+ *   never typed); a pressed key looks exactly like a resting one — no hover, press or focus change, and a
+ *   tap never moves the focus onto the key; a screen reader hears "PIN key" and "N digits entered", never
+ *   the digits. Someone who cannot use it signs in another way (an NFC card).
  */
 import { computed, onMounted, ref } from 'vue';
 import {
@@ -54,11 +59,18 @@ const props = withDefaults(defineProps<{
   disabled?: boolean;
   /** The pad's accessible name. */
   label?: string;
+  /** A PIN pad that reveals nothing: shuffled, masked, no keyboard input, no pressed-key highlight, digits not spoken. */
+  secure?: boolean;
 }>(), {
   modelValue: '', operators: false, enter: true, del: true, dot: false, clear: false, doubleZero: false,
   randomise: false, reshuffle: true, mask: false, autoSubmit: false, decimals: 2, layout: 'calculator', display: true,
   functionKeys: () => [], enterLabel: 'Enter', placeholder: '0', size: 'md', disabled: false, label: 'Number pad',
+  secure: false,
 });
+
+/* `secure` switches on what a PIN pad must have, whatever else was passed. */
+const shuffled = computed(() => props.randomise || props.secure);
+const masked = computed(() => props.mask || props.secure);
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: string): void;
@@ -81,15 +93,15 @@ const ops = computed<KeyPadOperator[]>(() =>
 /* The ten digit slots, top row first; randomise puts a shuffled digit in each slot. */
 const order = ref<string[]>([]);
 const slots = computed(() => {
-  if (props.randomise && order.value.length === 10) return order.value;
+  if (shuffled.value && order.value.length === 10) return order.value;
   return props.layout === 'phone'
     ? ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
     : ['7', '8', '9', '4', '5', '6', '1', '2', '3', '0'];
 });
-function shuffle() { if (props.randomise) order.value = shuffledDigits(); }
+function shuffle() { if (shuffled.value) order.value = shuffledDigits(); }
 onMounted(shuffle);
 /** After an entry: a new layout, unless the pad keeps it. */
-function afterEntry() { if (props.reshuffle) shuffle(); }
+function afterEntry() { if (props.reshuffle || props.secure) shuffle(); }
 
 /* The bottom digit row: [00 or . or blank] [the tenth digit] [. when both, else blank]. */
 const bottomLeft = computed(() => (props.doubleZero ? '00' : props.dot ? '.' : ''));
@@ -104,8 +116,17 @@ const actions = computed(() => [
 const shown = computed(() => {
   if (failed.value) return "Can't work that out";
   if (!entry.value) return '';
-  return props.mask ? '●'.repeat(digitCount(entry.value)) : displayText(entry.value);
+  return masked.value ? '●'.repeat(digitCount(entry.value)) : displayText(entry.value);
 });
+/* What a screen reader hears from a secure pad's display — how many, never which. */
+const spoken = computed(() => {
+  const n = digitCount(entry.value);
+  return n === 1 ? '1 digit entered' : `${n} digits entered`;
+});
+/* A secure pad's digit keys are all named alike, so the layout is never read out. */
+const digitLabel = computed(() => (props.secure ? 'PIN key' : undefined));
+/* A tap on a secure pad must not move the focus (a focus ring would mark the key). */
+function hold(e: Event) { if (props.secure) e.preventDefault(); }
 
 function set(next: string) {
   if (next !== entry.value) emit('update:modelValue', next);
@@ -146,7 +167,8 @@ function fn(f: KeyPadFunctionKey) {
 }
 
 function onKeydown(e: KeyboardEvent) {
-  if (props.disabled || e.ctrlKey || e.metaKey || e.altKey) return;
+  /* A PIN is never typed on a keyboard (P-D53): a secure pad ignores every key. */
+  if (props.secure || props.disabled || e.ctrlKey || e.metaKey || e.altKey) return;
   const k = e.key;
   let mapped: string | null = null;
   if (/^\d$/.test(k)) mapped = k;
@@ -167,19 +189,22 @@ defineExpose({ shuffle });
 <template>
   <div class="apex-keypad" :data-size="size" :data-layout="layout" :data-disabled="disabled ? 'true' : 'false'"
        :data-operators="ops.length ? 'true' : 'false'" :data-functions="functionKeys.length ? 'true' : 'false'"
-       role="group" :aria-label="label" tabindex="0" @keydown="onKeydown">
-    <div v-if="display" class="apex-keypad__display" :data-error="failed ? 'true' : 'false'" aria-live="polite">
+       :data-secure="secure ? 'true' : 'false'" role="group" :aria-label="label" :tabindex="secure ? -1 : 0"
+       @keydown="onKeydown" @mousedown="hold" @pointerdown="hold">
+    <div v-if="display" class="apex-keypad__display" :data-error="failed ? 'true' : 'false'" aria-live="polite"
+         :aria-label="secure ? spoken : undefined">
       <span v-if="shown" class="apex-keypad__entry">{{ shown }}</span>
       <span v-else class="apex-keypad__placeholder">{{ placeholder }}</span>
     </div>
     <div class="apex-keypad__body">
       <div class="apex-keypad__digits">
         <button v-for="(d, i) in slots.slice(0, 9)" :key="'d' + i" type="button" class="apex-keypad__key"
-                :disabled="disabled" :data-key="d" @click="key(d)">{{ d }}</button>
+                :disabled="disabled" :data-key="d" :aria-label="digitLabel" :tabindex="secure ? -1 : undefined" @click="key(d)">{{ d }}</button>
         <button v-if="bottomLeft" type="button" class="apex-keypad__key" :disabled="disabled" :data-key="bottomLeft"
                 :aria-label="bottomLeft === '.' ? 'Decimal point' : 'Double zero'" @click="key(bottomLeft)">{{ bottomLeft }}</button>
         <span v-else class="apex-keypad__gap" aria-hidden="true" />
-        <button type="button" class="apex-keypad__key" :disabled="disabled" :data-key="slots[9]" @click="key(slots[9])">{{ slots[9] }}</button>
+        <button type="button" class="apex-keypad__key" :disabled="disabled" :data-key="slots[9]" :aria-label="digitLabel"
+                :tabindex="secure ? -1 : undefined" @click="key(slots[9])">{{ slots[9] }}</button>
         <button v-if="bottomRight" type="button" class="apex-keypad__key" :disabled="disabled" data-key="." aria-label="Decimal point"
                 @click="key('.')">.</button>
         <span v-else class="apex-keypad__gap" aria-hidden="true" />
@@ -196,7 +221,7 @@ defineExpose({ shuffle });
     <div v-if="actions.length" class="apex-keypad__actions">
       <button v-for="a in actions" :key="a.key" type="button" class="apex-keypad__key"
               :class="`apex-keypad__key--${a.key}`" :disabled="disabled" :data-key="a.key" :aria-label="a.name"
-              @click="key(a.key)">{{ a.label }}</button>
+              :tabindex="secure ? -1 : undefined" @click="key(a.key)">{{ a.label }}</button>
     </div>
   </div>
 </template>
