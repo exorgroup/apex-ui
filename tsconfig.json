@@ -77,6 +77,7 @@
     "tests/zz-hidden-reset.spec.ts",
     "tests/service-stage.spec.ts",
     "tests/alert-ui.spec.ts",
-    "tests/switch-width.spec.ts"
+    "tests/switch-width.spec.ts",
+    "tests/field-after-layout.spec.ts"
   ]
 }

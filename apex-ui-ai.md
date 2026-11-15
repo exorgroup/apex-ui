@@ -256,6 +256,12 @@ check: `tests/keyboard.spec.ts` ("never takes the focus from the field being typ
 origin: [TL5/002](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL5/reports/TL5-002.md)
 It does not write into whatever has focus: give it the field's `v-model` ref. Its keys cancel `mousedown`, so the field keeps its caret and the device keyboard stays shut. Its Enter key is white on the accent, like `ApexKeyPad`'s — set `--apex-keyboard-enter-fg` on a light accent.
 
+### An ApexSelect option whose value is `null` leaves the floating label lying over the chosen text
+kind: hard
+check:
+origin: [TL7/009](https://github.com/exorgroup/apex-tbx/blob/main/.claude/apextill/phases/TL7/reports/TL7-009.md)
+The field counts `null` as empty, so the label stays down inside the box while the select shows the `null` option's label. Give "None" a real value (`'none'`) and map it to `null` through a computed `get` / `set` (apex-till POS Tills' card reader).
+
 ## Tests and the gallery
 
 ### The gallery runs the mirror (`web/*.js` in apex-ui-docs), not the SFC

@@ -5,6 +5,15 @@ Semantic versioning; the two packages release in lockstep until 1.0.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-11-15
+
+TBX TL7's kit work: a switch or checkbox whose help is long.
+
+### Fixed — apex-ui
+- Label placement `after` (a switch, a checkbox) is a grid: the control, its label beside it, and the help or
+  message UNDER the label. A long help used to widen the control's column and push the label away from it
+  (TBX TL7/007, POS Tills' printer switches). (`tests/field-after-layout.spec.ts`.)
+
 ## [0.4.0] — 2026-11-13
 
 TBX TL6's kit work: the secure PIN pad the till signs in, approves and unlocks with.

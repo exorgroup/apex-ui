@@ -32,8 +32,13 @@ font-variation-settings:'FILL' var(--apex-icon-fill,0),'wght' var(--apex-icon-wg
 .apex-field[data-lp="under"]{flex-direction:column-reverse}
 .apex-field[data-lp="before"]{display:grid;grid-template-columns:var(--apex-label-w,160px) minmax(0,1fr);align-items:start;gap:12px}
 .apex-field[data-lp="before"] .apex-field__label{padding-block-start:calc((var(--apex-ctl-h) - 20px) / 2)}
-.apex-field[data-lp="after"]{flex-direction:row-reverse;align-items:center;justify-content:flex-end;gap:10px}
-.apex-field[data-lp="after"] .apex-field__body{flex:0 0 auto}
+/* after (a switch, a checkbox): the control, its label beside it, and the help / message UNDER the label — a long help no
+   longer widens the control's column and pushes the label away (TBX TL7/007). */
+.apex-field[data-lp="after"]{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:10px;row-gap:2px;align-items:center;justify-items:start}
+.apex-field[data-lp="after"] .apex-field__body{display:contents}
+.apex-field[data-lp="after"] > .apex-field__label{grid-column:2;grid-row:1}
+.apex-field[data-lp="after"] .apex-field__body > :not(.apex-field__msg){grid-column:1;grid-row:1}
+.apex-field[data-lp="after"] .apex-field__msg{grid-column:2;grid-row:2;margin-block-start:0}
 .apex-field[data-lp="hidden"] .apex-field__label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* float variants — over (above the field), on (straddling the border), in (inside the box) */
 .apex-field[data-lp^="float"],.apex-field[data-lp="floating"],.apex-field[data-lp="inline"]{position:relative}
