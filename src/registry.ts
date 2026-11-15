@@ -2136,7 +2136,12 @@ area.value.measure();   // after content the ResizeObserver cannot see`,
 /* The off word takes --fg-default rather than white, because the off track is
    --border-strong and the two flip together with the theme. Override both if
    you set a track colour of your own. */
-.live-switch { --apex-switch-off-fg: #0F141C; --apex-switch-on-fg: #fff; }`,
+.live-switch { --apex-switch-off-fg: #0F141C; --apex-switch-on-fg: #fff; }
+
+/* help sits UNDER the label, beside the switch (0.5.0) — however long it is, the
+   switch keeps its own width and the label stays next to it. */
+<ApexSwitch v-model="tips" label="Ask for tips"
+  help="Offer 5 / 10 / 15 % or an amount at payment. Tips are not sales: no VAT." />`,
 
   segmented: `.view-seg {
   --apex-seg-bg: #0B1017;
